@@ -279,7 +279,6 @@ const CharacterEdit = ({ id }: { id: string }) => {
               characterName={characterName}
               image={image}
               characterBio={characterBio}
-              tags={selectedOptions}
             />
           )}
         </div>
