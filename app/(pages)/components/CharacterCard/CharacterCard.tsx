@@ -12,6 +12,7 @@ const CharacterCard = ({
   characterId,
   className,
   tags,
+  selectedTags,
 }: {
   characterName: string;
   image: File | Blob | string | null;
@@ -19,7 +20,8 @@ const CharacterCard = ({
   authorName: string;
   characterId?: string;
   className?: string;
-  tags?: { label: string; value: string }[];
+  tags?: { name: string; id: string }[];
+  selectedTags?: { label: string; value: string }[];
 }) => {
   const [imageUrl, setImageUrl] = useState<string | null>("");
   const router = useRouter();
@@ -74,6 +76,14 @@ const CharacterCard = ({
         <div className="flex gap-1 flex-wrap overflow-hidden">
           {tags?.length! > 0
             ? tags?.map((tag) => (
+                <span className="p-2 border-borders border" key={tag.id}>
+                  {tag.name}
+                </span>
+              ))
+            : null}
+
+          {selectedTags?.length! > 0
+            ? selectedTags?.map((tag) => (
                 <span className="p-2 border-borders border" key={tag.value}>
                   {tag.label}
                 </span>

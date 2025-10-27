@@ -76,7 +76,7 @@ export const POST = async (req: Request) => {
 export const GET = async (req: Request) => {
   try {
     const characters = await db.character.findMany({
-      include: { author: true, photo: true },
+      include: { author: true, photo: true, tags: true },
     });
     return NextResponse.json({ success: true, data: characters });
   } catch (error) {

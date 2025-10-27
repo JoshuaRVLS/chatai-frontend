@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import Reveal from "../Animations/Reveal";
 import CharacterCard from "../CharacterCard/CharacterCard";
@@ -22,6 +22,16 @@ const MyCharacters = () => {
 
   if (isPending) return <p></p>;
   if (error) return <p>{error.message}</p>;
+
+  const deleteChar = async (characterId: string) => {
+    try {
+      await fetch(`/api/characters/${characterId}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 w-full pb-8 pt-34 px-12">
@@ -50,7 +60,10 @@ const MyCharacters = () => {
                 >
                   <FaPencilAlt width={40} height={40} />
                 </Link>
-                <span className="error btn-outline">
+                <span
+                  onClick={() => deleteChar(character.id)}
+                  className="error btn-outline"
+                >
                   <FaTrash width={40} height={40} color="red" />
                 </span>
               </div>

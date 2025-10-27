@@ -22,3 +22,20 @@ export const GET = async (
     console.log(error);
   }
 };
+
+export const DELETE = async (
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const characterId = (await params).id;
+
+  try {
+    await db.character.delete({
+      where: {
+        id: characterId,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

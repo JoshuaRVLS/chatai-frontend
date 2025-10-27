@@ -9,6 +9,7 @@ import {
 export type CharactersData = (Character & {
   author: User;
   photo: { data: Uint8Array; mimetype: string; name: string };
+  tags: CharacterTag[];
 })[];
 
 export type ChatHistroy = (Chat & {

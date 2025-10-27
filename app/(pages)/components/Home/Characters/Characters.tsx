@@ -36,6 +36,7 @@ const Characters = () => {
               characterId={character.id}
               characterBio={character.bio}
               authorName={character.author.username}
+              tags={character.tags}
             />
           </Reveal>
         ))}
