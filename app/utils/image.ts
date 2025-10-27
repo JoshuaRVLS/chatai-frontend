@@ -1,29 +1,38 @@
 import {Image} from '@/@types/type';
-import {createCanvas} from 'node-canvas';
+import sharp from 'sharp';
 
 import {CharacterImage} from '../generated/prisma';
 
 export const generateProfileImage =
     async(alphabet: string): Promise<Buffer> => {
-  const canvas = createCanvas(200, 200);
-  const ctx = canvas.getContext('2d');
+  const width = 200;
+  const height = 200;
 
-  // Background color - using HSL for consistent brightness
-  const hue = Math.floor(Math.random() * 360);
-  ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Generate a consistent hue based on the alphabet
+  const hue = Math.floor(alphabet.charCodeAt(0) * 360 / 26) % 360;
 
-  // Text styling
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 80px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  // Create SVG for the circle background and text
+  const svg = `
+    <svg width="${width}" height="${height}">
+      <defs>
+        <style>
+          .text { 
+            font: bold 80px sans-serif; 
+            fill: #FFFFFF; 
+            text-anchor: middle; 
+            dominant-baseline: central;
+          }
+        </style>
+      </defs>
+      <rect width="100%" height="100%" fill="hsl(${hue}, 70%, 60%)"/>
+      <text x="50%" y="50%" class="text">${alphabet.toUpperCase()}</text>
+    </svg>
+  `;
 
-  // Draw text
-  ctx.fillText(alphabet.toUpperCase(), 100, 100);
+  // Convert SVG to PNG buffer
+  const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
 
-  // Return as Buffer
-  return canvas.toBuffer('image/png');
+  return buffer;
 };
 
 export const bytesToBase64 = (photo: any): string => {
