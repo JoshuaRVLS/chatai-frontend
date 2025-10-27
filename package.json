@@ -38,6 +38,7 @@
     "react-select": "^5.10.2",
     "react-syntax-highlighter": "^5.8.0",
     "remark-gfm": "^4.0.1",
+    "simple-get": "^4.0.1",
     "tailwind-scrollbar-hide": "^4.0.0",
     "uuid": "^11.1.0",
     "zod": "^3.25.76",
