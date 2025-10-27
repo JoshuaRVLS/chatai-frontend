@@ -7,7 +7,7 @@ export const bytesToBase64 = (photo: any): string => {
 };
 
 // Client-side image generation
-export const generateProfileImageClient = (alphabet: string): string => {
+export const generateProfileImage = (alphabet: string): string => {
   // This runs in the browser
   if (typeof window === 'undefined') return '';
 
