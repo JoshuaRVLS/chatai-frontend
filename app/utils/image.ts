@@ -1,41 +1,32 @@
-import {Image} from '@/@types/type';
-import sharp from 'sharp';
-
-import {CharacterImage} from '../generated/prisma';
-
-export const generateProfileImage =
-    async(alphabet: string): Promise<Buffer> => {
-  const width = 200;
-  const height = 200;
-
-  // Generate a consistent hue based on the alphabet
-  const hue = Math.floor(alphabet.charCodeAt(0) * 360 / 26) % 360;
-
-  // Create SVG for the circle background and text
-  const svg = `
-    <svg width="${width}" height="${height}">
-      <defs>
-        <style>
-          .text { 
-            font: bold 80px sans-serif; 
-            fill: #FFFFFF; 
-            text-anchor: middle; 
-            dominant-baseline: central;
-          }
-        </style>
-      </defs>
-      <rect width="100%" height="100%" fill="hsl(${hue}, 70%, 60%)"/>
-      <text x="50%" y="50%" class="text">${alphabet.toUpperCase()}</text>
-    </svg>
-  `;
-
-  // Convert SVG to PNG buffer
-  const buffer = await sharp(Buffer.from(svg)).png().toBuffer();
-
-  return buffer;
-};
+// Remove sharp import and server-side code
+// Keep only client-compatible utilities
 
 export const bytesToBase64 = (photo: any): string => {
   return `data:${photo.mimetype};base64,${
       Buffer.from(Object.values(photo.data)).toString('base64')}`;
+};
+
+// Client-side image generation
+export const generateProfileImageClient = (alphabet: string): string => {
+  // This runs in the browser
+  if (typeof window === 'undefined') return '';
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+
+  canvas.width = 200;
+  canvas.height = 200;
+
+  const hue = Math.floor(alphabet.charCodeAt(0) * 360 / 26) % 360;
+  ctx.fillStyle = `hsl(${hue}, 70%, 60%)`;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 80px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(alphabet.toUpperCase(), 100, 100);
+
+  return canvas.toDataURL('image/png');
 };
