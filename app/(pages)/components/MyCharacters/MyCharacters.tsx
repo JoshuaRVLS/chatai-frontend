@@ -1,3 +1,4 @@
+// MyCharacters Page - Fixed version
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import CharacterCard from "../CharacterCard/CharacterCard";
 import { CharactersData } from "@/@types/type";
 import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const MyCharacters = () => {
   const { user } = useContext(AuthContext);
@@ -25,9 +27,18 @@ const MyCharacters = () => {
 
   const deleteChar = async (characterId: string) => {
     try {
-      await fetch(`/api/characters/${characterId}`, {
+      const response = await fetch(`/api/characters/${characterId}`, {
         method: "DELETE",
       });
+      
+      if (response.ok) {
+        // Refresh the data or remove from cache
+        toast('Character deleted successfully', { icon: '✅' });
+        window.location.reload(); // Simple solution
+        // Or use queryClient.invalidateQueries() for better UX
+      } else {
+        console.error("Failed to delete character");
+      }
     } catch (error) {
       console.log(error);
     }
@@ -62,7 +73,7 @@ const MyCharacters = () => {
                 </Link>
                 <span
                   onClick={() => deleteChar(character.id)}
-                  className="error btn-outline"
+                  className="error btn-outline p-4"
                 >
                   <FaTrash width={40} height={40} color="red" />
                 </span>

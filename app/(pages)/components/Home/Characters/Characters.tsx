@@ -1,8 +1,8 @@
+// Characters.tsx 
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Character, User } from "@/app/generated/prisma";
 import CharacterCard from "../../CharacterCard/CharacterCard";
 import Reveal from "../../Animations/Reveal";
 import { CharactersData } from "@/@types/type";
@@ -15,13 +15,14 @@ const Characters = () => {
         res.json().then((data) => data.data)
       ),
   });
-  if (isPending) return <p></p>;
+
+  if (isPending) return <p>Loading...</p>;
   if (error) return <p>{error.message}</p>;
 
   return (
     <div className="flex flex-col gap-4 w-full pb-8">
       <h1 className="text-3xl">Community Characters</h1>
-      <div className="flex flex-wrap w-full gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
         {data.map((character) => (
           <Reveal key={character.id}>
             <CharacterCard

@@ -7,7 +7,7 @@ import React, {
   useState,
   useRef,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import { FaPaperPlane } from "react-icons/fa";
 import MarkDown from "../MarkDown/MarkDown";
@@ -33,9 +33,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   // Memoize the query key to prevent unnecessary refetches
-  const { data, isLoading, error, refetch } = useQuery<ChatData>({
+  const { data, isLoading, error } = useQuery<ChatData>({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       const res = await fetch(`/api/chats/${chatId}`);
@@ -59,20 +60,45 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   // Auto-scroll to bottom when messages update
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!message.trim() || !user?.id || isSubmitting) return;
 
+    const userMessageContent = message.trim();
+    setMessage("");
     setIsSubmitting(true);
+
+    // Create optimistic message
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      content: userMessageContent,
+      fromUser: true,
+      chatId: chatId,
+    };
+
+    // Update cache optimistically
+    queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
+      if (!oldData) return oldData;
+      
+      return {
+        ...oldData,
+        messages: [...oldData.messages, optimisticMessage],
+      };
+    });
+
+    scrollToBottom();
+
     try {
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId,
-          content: message,
+          content: userMessageContent,
           userId: user.id,
           fromUser: true,
         }),
@@ -80,15 +106,28 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
       if (!response.ok) throw new Error("Failed to send message");
 
-      setMessage("");
-      await refetch();
-      scrollToBottom();
+      // Refetch to get the actual message with proper ID and any AI response
+      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      
     } catch (error) {
       console.error("Message submission error:", error);
+      
+      // Revert optimistic update on error
+      queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
+        if (!oldData) return oldData;
+        
+        return {
+          ...oldData,
+          messages: oldData.messages.filter(msg => msg.id !== optimisticMessage.id),
+        };
+      });
+      
+      // Restore the message if there was an error
+      setMessage(userMessageContent);
     } finally {
       setIsSubmitting(false);
     }
-  }, [message, user?.id, chatId, isSubmitting, refetch, scrollToBottom]);
+  }, [message, user?.id, chatId, isSubmitting, queryClient, scrollToBottom]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -135,6 +174,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 userImage={userImage}
                 characterImage={characterImage}
                 isUserMessage={message.fromUser}
+                isOptimistic={message.id.startsWith('temp-')}
               />
             ))}
 
@@ -179,19 +219,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
   );
 };
 
-// Memoized message bubble component to prevent unnecessary re-renders
-// Update the MessageBubble component to handle null images
+// Updated MessageBubble component with optimistic state
 const MessageBubble = React.memo(
   ({
     message,
     userImage,
     characterImage,
     isUserMessage,
+    isOptimistic = false,
   }: {
     message: Message;
     userImage: string | null;
     characterImage: string | null;
     isUserMessage: boolean;
+    isOptimistic?: boolean;
   }) => {
     // Fallback image source
     const imageSrc = isUserMessage
@@ -204,7 +245,7 @@ const MessageBubble = React.memo(
       <div
         className={`w-full flex items-start gap-4 p-4 border border-borders shadow ${
           isUserMessage ? "flex-row-reverse" : "flex-row"
-        }`}
+        } ${isOptimistic ? 'opacity-70' : ''}`}
       >
         <Image
           src={imageSrc}
@@ -216,6 +257,9 @@ const MessageBubble = React.memo(
         />
         <div className="text-wrap break-words">
           <MarkDown>{message.content}</MarkDown>
+          {isOptimistic && (
+            <div className="text-xs text-gray-500 mt-1">Sending...</div>
+          )}
         </div>
       </div>
     );

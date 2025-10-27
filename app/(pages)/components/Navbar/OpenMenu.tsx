@@ -14,7 +14,6 @@ import Link from "next/link";
 
 const OpenMenu = () => {
   return (
-    <Reveal direction="up">
       <div className="relative -z-10 select-none">
         <div className="nav-menu">
           <div className="nav-item">
@@ -47,7 +46,6 @@ const OpenMenu = () => {
           </div>
         </div>
       </div>
-    </Reveal>
   );
 };
 
