@@ -7,7 +7,7 @@ export const bytesToBase64 = (photo: any): string => {
 };
 
 // Client-side image generation
-export const generateProfileImage = (alphabet: string): string => {
+export const generateProfileImage = (alphabet: string) => {
   // This runs in the browser
   if (typeof window === 'undefined') return '';
 
@@ -28,5 +28,14 @@ export const generateProfileImage = (alphabet: string): string => {
   ctx.textBaseline = 'middle';
   ctx.fillText(alphabet.toUpperCase(), 100, 100);
 
-  return canvas.toDataURL('image/png');
+  // If you have a base64 string (from canvas.toDataURL())
+  const base64String =
+      canvas.toDataURL('image/png')
+          .split(',')[1];  // Remove "data:image/png;base64," prefix
+  const binaryString = atob(base64String);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
 };
