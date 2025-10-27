@@ -46,7 +46,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     staleTime: 1000 * 60 * 5, // 5 minutes stale time
   });
 
-  // Memoize user and character images to prevent recalculations
   const userImage = useMemo(
     () =>
       data?.user?.profileImage ? bytesToBase64(data.user.profileImage) : null,
@@ -58,7 +57,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     [data?.character?.photo]
   );
 
-  // Auto-scroll to bottom when messages update
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -219,7 +217,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
   );
 };
 
-// Updated MessageBubble component with optimistic state
 const MessageBubble = React.memo(
   ({
     message,

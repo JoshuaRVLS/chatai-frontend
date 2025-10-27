@@ -28,6 +28,14 @@ model User {
   comments Comment[]
   personaUsed String?
   personas UserPersona[]
+  userSettings UserSettings?
+}
+
+model UserSettings {
+  id String @id @default(cuid()) @map("_id")
+  user User @relation(fields: [userId], references: [id])
+  userId String @unique
+  chatSettings Json?
 }
 
 model UserPersona {

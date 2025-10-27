@@ -8,8 +8,9 @@ import {
   FaMask,
   FaSignOutAlt,
   FaUserFriends,
-  FaUserPlus,
+  FaUserPlus
 } from "react-icons/fa";
+import { FaGear } from 'react-icons/fa6'
 import Link from "next/link";
 
 const OpenMenu = () => {
@@ -36,6 +37,12 @@ const OpenMenu = () => {
             <FaMask className="icon" />
             <Link href={"/my_personas"} className="nav-link w-full">
               My Personas
+            </Link>
+          </div>
+          <div className="nav-item">
+            <FaGear className="icon" />
+            <Link href={"/settings"} className="nav-link w-full">
+              Settings
             </Link>
           </div>
           <div className="nav-item mt-2 btn-outline">
