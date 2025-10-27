@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar/Navbar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Chat AI",
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`antialiased `}>
+        <Analytics />
         <QueryProvider>
           <ScrollProvider>
             <AuthProvider>
