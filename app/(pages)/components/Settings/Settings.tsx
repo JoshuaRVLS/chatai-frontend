@@ -95,7 +95,7 @@ const Settings = () => {
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-var-color-primary-text">{data?.username}</h2>
               <p className="text-var-color-secondary-text">{data?.email}</p>
-              <p className="text-sm text-var-color-disabled mt-1">Member since {new Date(data.createdAt).getFullYear()}</p>
+              <p className="text-sm text-var-color-disabled mt-1">Member since 2024</p>
             </div>
           </div>
         </div>
