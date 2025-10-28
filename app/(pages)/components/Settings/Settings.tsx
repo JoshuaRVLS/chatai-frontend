@@ -5,12 +5,12 @@ import { useQuery } from '@tanstack/react-query';
 import { AuthContext } from '../../providers/AuthProvider';
 import { User } from '@/app/generated/prisma';
 import { FiEdit, FiLock, FiUser, FiMail, FiTrash2, FiBell, FiShield, FiHelpCircle, FiMoon, FiLink, FiCamera } from 'react-icons/fi';
-
+import { Image } from '@/@types/type';
 const Settings = () => {
   const { user } = useContext(AuthContext);
   const [activeSection, setActiveSection] = useState('profile');
 
-  const { data, isPending, error } = useQuery<User>({
+  const { data, isPending, error } = useQuery<User & {profileImage: Image}>({
     queryKey: ['settingsData'],
     queryFn: () => fetch(`/api/users/${user?.id}`).then(res => res.json().then(data => data.data)),
     enabled: !!user?.id,
