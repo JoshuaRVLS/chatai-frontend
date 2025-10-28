@@ -1,9 +1,9 @@
-// Character Card
 import { CharacterTag, User } from "@/app/generated/prisma";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import defaultJPG from "@/public/default.jpg";
 import { useRouter } from "next/navigation";
+import { FiUser, FiMoreHorizontal } from "react-icons/fi";
 
 const CharacterCard = ({
   characterName,
@@ -46,54 +46,63 @@ const CharacterCard = ({
     };
   }, [image]);
 
+  const displayTags = tags || selectedTags?.map(tag => ({ name: tag.label, id: tag.value }));
+
   return (
     <div
-      onClick={() => router.push(`/character/${characterId}`)}
-      className={`${className ? className : "card"} w-full flex flex-col cursor-pointer hover:scale-105 transition-transform duration-200`}
+      onClick={() => characterId && router.push(`/character/${characterId}`)}
+      className={`${className} group bg-var-color-for-dark-surface border border-var-color-borders rounded-xl overflow-hidden cursor-pointer hover:border-var-color-primary-button transition-all duration-300 hover:shadow-lg`}
     >
-      {/* Image Container with Fixed Aspect Ratio */}
-      <div className="w-full aspect-square overflow-hidden rounded-lg mb-2">
+      <div className="relative aspect-[4/3] overflow-hidden">
         {image ? (
           <Image
             src={imageUrl || defaultJPG}
-            width={200}
-            height={200}
-            className="object-cover w-full h-full"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
             alt={`${characterName} image`}
           />
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center rounded-lg">
-            <span className="text-gray-500 text-sm">No Image</span>
+          <div className="w-full h-full bg-var-color-borders flex items-center justify-center">
+            <FiUser className="text-var-color-disabled w-8 h-8" />
           </div>
         )}
+        <div className="absolute inset-0 bg-gradient-to-t from-var-color-for-dark-surface/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       
-      {/* Content */}
-      <div className="flex flex-col gap-1 flex-1 px-1">
-        <span className="font-semibold text-sm line-clamp-1">{characterName}</span>
-        <span className="font-light text-purple-300 text-xs">@{authorName}</span>
-        <span className="font-light text-xs line-clamp-2 text-gray-600 leading-tight">
-          {characterBio}
-        </span>
-      </div>
-      
-      {/* Tags - Hidden on mobile to save space */}
-      <div className="mt-2 hidden sm:block">
-        <div className="flex gap-1 flex-wrap">
-          {tags?.slice(0, 2).map((tag) => (
-            <span 
-              className="px-1.5 py-0.5 border border-borders text-xs rounded"
-              key={tag.id}
-            >
-              {tag.name}
-            </span>
-          ))}
-          {tags && tags.length > 2 && (
-            <span className="px-1.5 py-0.5 border border-borders text-xs rounded">
-              +{tags.length - 2}
-            </span>
-          )}
+      <div className="p-4">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-semibold text-var-color-primary-text line-clamp-1 flex-1">
+            {characterName}
+          </h3>
+          <FiMoreHorizontal className="text-var-color-disabled w-4 h-4 flex-shrink-0 mt-0.5" />
         </div>
+        
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 bg-var-color-primary-button rounded-full" />
+          <span className="text-var-color-secondary-text text-sm">@{authorName}</span>
+        </div>
+
+        <p className="text-var-color-secondary-text text-sm line-clamp-2 leading-relaxed mb-3">
+          {characterBio}
+        </p>
+
+        {displayTags && displayTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {displayTags.slice(0, 3).map((tag) => (
+              <span 
+                className="px-2 py-1 bg-var-color-primary-background border border-var-color-borders text-var-color-secondary-text text-xs rounded-md"
+                key={tag.id}
+              >
+                {tag.name}
+              </span>
+            ))}
+            {displayTags.length > 3 && (
+              <span className="px-2 py-1 bg-var-color-primary-background border border-var-color-borders text-var-color-disabled text-xs rounded-md">
+                +{displayTags.length - 3}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
