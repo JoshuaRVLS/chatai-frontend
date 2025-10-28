@@ -5,6 +5,7 @@
 :root {
   --background: #121212;
   --foreground: #ffffff;
+  user-select: none;
 }
 
 /* ===== Scrollbar CSS ===== */
