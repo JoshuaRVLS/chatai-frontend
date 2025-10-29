@@ -3,9 +3,42 @@
 @import "tailwind-scrollbar-hide/v4";
 
 :root {
-  --background: #121212;
-  --foreground: #ffffff;
-  user-select: none;
+  --background: radial-gradient(circle at top left, #0b0f0f, #090909 60%, #050505 100%);
+  --foreground: #e9fefc;
+
+  /* Core brand colors */
+  --color-primary: #00ffc8; /* glow cyan */
+  --color-secondary: #a45cff; /* neon violet accent */
+
+  /* UI surfaces */
+  --color-primary-background: #0b0f0f;
+  --color-surface: #131313;
+  --color-for-dark-surface: #1a1a1a;
+
+  /* Text */
+  --color-primary-text: var(--foreground);
+  --color-secondary-text: #a5b5b8;
+  --color-disabled: #666;
+
+  /* Status */
+  --color-success: #25d366;
+  --color-warning: #ffcc00;
+  --color-error: #ff5252;
+  --color-info: #00aaff;
+
+  /* Borders & outlines */
+  --color-borders: rgba(0, 255, 200, 0.15);
+
+  /* Buttons */
+  --color-primary-button: var(--color-primary);
+  --color-primary-hover-state: #00d8b1;
+  --color-primary-active-state: #009a87;
+  --color-secondary-button: var(--color-secondary);
+  --color-secondary-hover-state: #8d39ff;
+
+  /* Fonts */
+  --font-roboto: "Roboto", sans-serif;
+  --font-bitcount: "Bitcount Prop Single", system-ui;
 }
 
 /* ===== Scrollbar CSS ===== */
