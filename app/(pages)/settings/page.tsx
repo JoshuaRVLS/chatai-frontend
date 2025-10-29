@@ -12,7 +12,7 @@ const page = async () => {
     queryFn: () => fetch(`/api/users/${session?.user?.id}`).then(res => res.json())
   })
   return (
-    <div><Settings /></div>
+    <Settings />
   )
 }
 

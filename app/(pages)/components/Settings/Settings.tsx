@@ -6,7 +6,7 @@ import { AuthContext } from '../../providers/AuthProvider';
 import { User } from '@/app/generated/prisma';
 import { FiEdit, FiLock, FiUser, FiMail, FiTrash2, FiCamera } from 'react-icons/fi';
 import { Image } from '@/@types/type';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react'; // Fixed import
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -60,23 +60,6 @@ const Settings = () => {
     </motion.div>
   );
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
   if (isPending) return (
     <motion.div 
       className="min-h-screen bg-var-color-primary-background pt-24 px-4"
@@ -119,15 +102,17 @@ const Settings = () => {
   return (
     <motion.div 
       className="min-h-screen bg-var-color-primary-background pt-24 pb-8 px-4"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <motion.div 
           className="mb-8"
-          variants={itemVariants}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl font-bold text-var-color-primary-text mb-2">Settings</h1>
           <p className="text-var-color-secondary-text">Manage your account settings and preferences</p>
@@ -136,9 +121,10 @@ const Settings = () => {
         {/* Profile Card */}
         <motion.div 
           className="bg-var-color-for-dark-surface rounded-lg border border-var-color-borders p-6 mb-6"
-          variants={itemVariants}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
           whileHover={{ boxShadow: "0 10px 30px rgba(0, 196, 179, 0.2)" }}
-          transition={{ duration: 0.3 }}
         >
           <div className="flex items-center gap-4">
             <div className="relative">
@@ -180,7 +166,9 @@ const Settings = () => {
         {/* Settings Sections */}
         <motion.div 
           className="space-y-4"
-          variants={containerVariants}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
           {/* Profile Information */}
           <SettingsSection 
@@ -276,9 +264,10 @@ const Settings = () => {
           {/* Danger Zone */}
           <motion.div 
             className="bg-var-color-for-dark-surface rounded-lg border border-var-color-error overflow-hidden"
-            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
             whileHover={{ boxShadow: "0 10px 30px rgba(244, 67, 54, 0.2)" }}
-            transition={{ duration: 0.3 }}
           >
             <div className="px-6 py-4">
               <div className="flex items-center gap-3 mb-2">
