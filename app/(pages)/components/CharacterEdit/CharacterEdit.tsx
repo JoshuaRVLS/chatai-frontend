@@ -274,7 +274,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
         <div className="w-1/2 lg:w-full">
           {user && (
             <CharacterCard
-              className=""
+              
               authorName={user!.username}
               characterName={characterName}
               image={image}
