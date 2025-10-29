@@ -338,28 +338,7 @@ const page = () => {
         </motion.div>
       </motion.form>
 
-      {/* Preview Card */}
-      <motion.div 
-        className="w-full md:w-auto flex justify-center"
-        variants={itemVariants}
-      >
-        <motion.div 
-          className="w-1/2 lg:w-full"
-          whileHover={{ scale: 1.05 }}
-          transition={{ type: "spring", stiffness: 300 }}
-        >
-          {user && (
-            <CharacterCard
-              authorName={user!.username}
-              characterName={characterName}
-              image={image}
-              characterBio={characterBio}
-              selectedTags={selectedOptions}
-            />
-          )}
-        </motion.div>
-      </motion.div>
-    </motion.div>
+     </motion.div>
   );
 };
 
