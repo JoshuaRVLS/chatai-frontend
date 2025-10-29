@@ -13,17 +13,19 @@ import {
   FiCamera,
 } from "react-icons/fi";
 import { Image } from "@/@types/type";
-import { motion, AnimatePresence } from "motion/react"; // Fixed import
+import { motion, AnimatePresence } from "motion/react";
 import SettingsSection from "./SettingsSections";
 import Security from "./Security";
 import Profile from "./Profile";
 import toast from "react-hot-toast";
-import router from "next/dist/shared/lib/router/router";
 import { useRouter } from "next/navigation";
+import DeleteConfirmation from "./DeleteConfirmation";
+import AiSettings from "./AiSettings";
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
   const [activeSection, setActiveSection] = useState("profile");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for modal
 
   const { data, isPending, error } = useQuery<User & { profileImage: Image }>({
     queryKey: ["settingsData"],
@@ -51,6 +53,11 @@ const Settings = () => {
     } catch (error) {
       console.error("Error deleting account:", error);
     }
+  };
+
+  const handleDeleteConfirm = () => {
+    setIsDeleteModalOpen(false); // Close modal
+    deleteAccount(); // Proceed with deletion
   };
 
   if (isPending)
@@ -189,6 +196,16 @@ const Settings = () => {
             <Profile data={data} />
           </SettingsSection>
 
+          <SettingsSection
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            title="AI Settings"
+            icon={<FiUser className="w-5 h-5" />}
+            id="ai-settings"
+          >
+            <AiSettings data={data} />
+          </SettingsSection>
+
           {/* Security */}
           <SettingsSection
             activeSection={activeSection}
@@ -226,7 +243,7 @@ const Settings = () => {
                   boxShadow: "0 10px 20px rgba(244, 67, 54, 0.3)",
                 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={deleteAccount}
+                onClick={() => setIsDeleteModalOpen(true)} // Open modal instead of direct delete
               >
                 Delete Account
               </motion.button>
@@ -234,6 +251,13 @@ const Settings = () => {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmation
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+      />
     </motion.div>
   );
 };
