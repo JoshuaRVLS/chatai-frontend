@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useState,
   useRef,
+  useEffect,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -21,6 +22,7 @@ import type {
   User,
   UserProfileImage,
 } from "@/app/generated/prisma";
+import { AnimatePresence, motion } from "motion/react";
 
 type ChatData = ChatModel & {
   character: Character & { photo: CharacterImage };
@@ -71,44 +73,36 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleProfileClick = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setModalPosition({
-      x: rect.left - 100,
-      y: rect.top - 50
-    });
+    setModalPosition({ x: rect.left - 100, y: rect.top - 50 });
     setShowProfileModal(true);
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!modalRef.current) return;
-    
     const rect = modalRef.current.getBoundingClientRect();
-    setDragOffset({
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top
-    });
+    setDragOffset({ x: e.clientX - rect.left, y: e.clientY - rect.top });
     setIsDragging(true);
   }, []);
 
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging) return;
-    
-    setModalPosition({
-      x: e.clientX - dragOffset.x,
-      y: e.clientY - dragOffset.y
-    });
-  }, [isDragging, dragOffset]);
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging) return;
+      setModalPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
+    },
+    [isDragging, dragOffset]
+  );
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  React.useEffect(() => {
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
+  useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
       return () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
@@ -116,23 +110,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const handleSubmit = useCallback(async () => {
     if (!message.trim() || !user?.id || isSubmitting) return;
 
-    const userMessageContent = message.trim();
+    const content = message.trim();
     setMessage("");
     setIsSubmitting(true);
 
     const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
-      content: userMessageContent,
+      content,
       fromUser: true,
-      chatId: chatId,
+      chatId,
     };
 
     queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
       if (!oldData) return oldData;
-      return {
-        ...oldData,
-        messages: [...oldData.messages, optimisticMessage],
-      };
+      return { ...oldData, messages: [...oldData.messages, optimisticMessage] };
     });
 
     scrollToBottom();
@@ -143,282 +134,264 @@ const Chat = ({ chatId }: { chatId: string }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId,
-          content: userMessageContent,
+          content,
           userId: user.id,
           fromUser: true,
         }),
       });
-
       if (!response.ok) throw new Error("Failed to send message");
       await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-      
-    } catch (error) {
-      console.error("Message submission error:", error);
+    } catch {
       queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
-          messages: oldData.messages.filter(msg => msg.id !== optimisticMessage.id),
+          messages: oldData.messages.filter(
+            (m) => m.id !== optimisticMessage.id
+          ),
         };
       });
-      setMessage(userMessageContent);
+      setMessage(content);
     } finally {
       setIsSubmitting(false);
     }
   }, [message, user?.id, chatId, isSubmitting, queryClient, scrollToBottom]);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSubmit();
-      }
-    },
-    [handleSubmit]
-  );
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
 
-  const handleEdit = useCallback((messageId: string, content: string) => {
+  const handleEdit = (messageId: string, content: string) => {
     setEditingMessageId(messageId);
     setEditContent(content);
-  }, []);
+  };
 
-  const handleSaveEdit = useCallback(async (messageId: string) => {
+  const handleSaveEdit = async (messageId: string) => {
     if (!editContent.trim()) return;
-
-    try {
-      const response = await fetch(`/api/messages/${messageId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: editContent,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update message");
-      
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-      setEditingMessageId(null);
-      setEditContent("");
-    } catch (error) {
-      console.error("Edit message error:", error);
-    }
-  }, [editContent, chatId, queryClient]);
-
-  const handleCancelEdit = useCallback(() => {
+    await fetch(`/api/messages/${messageId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: editContent }),
+    });
+    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     setEditingMessageId(null);
     setEditContent("");
-  }, []);
+  };
 
-  const handleDelete = useCallback(async (messageId: string) => {
-    if (!confirm("Are you sure you want to delete this message?")) return;
+  const handleCancelEdit = () => {
+    setEditingMessageId(null);
+    setEditContent("");
+  };
 
-    try {
-      const response = await fetch(`/api/messages/${messageId}`, {
-        method: "DELETE",
-      });
+  const handleDelete = async (messageId: string) => {
+    if (!confirm("Delete this message?")) return;
+    await fetch(`/api/messages/${messageId}`, { method: "DELETE" });
+    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+  };
 
-      if (!response.ok) throw new Error("Failed to delete message");
-      
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-    } catch (error) {
-      console.error("Delete message error:", error);
-    }
-  }, [chatId, queryClient]);
+  const handleRegenerate = async (messageId: string) => {
+    await fetch("/api/messages/regenerate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messageId, chatId }),
+    });
+    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+  };
 
-  const handleRegenerate = useCallback(async (messageId: string) => {
-    try {
-      const response = await fetch("/api/messages/regenerate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messageId,
-          chatId,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Failed to regenerate message");
-      
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-    } catch (error) {
-      console.error("Regenerate message error:", error);
-    }
-  }, [chatId, queryClient]);
+  // ───────────────────────────────
+  // UI
+  // ───────────────────────────────
 
   if (isLoading)
     return (
-      <div className="fixed inset-0 pt-24 p-4 flex justify-center bg-var-color-primary-background">
-        <div className="animate-pulse text-var-color-secondary-text">Loading conversation...</div>
-      </div>
+      <motion.div
+        className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-cyan-900"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <motion.div
+          className="text-cyan-300 font-medium text-lg tracking-wide"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          Loading conversation...
+        </motion.div>
+      </motion.div>
     );
+
   if (error)
     return (
-      <div className="fixed inset-0 pt-24 p-4 flex justify-center bg-var-color-primary-background">
-        <div className="text-var-color-error">Error: {error.message}</div>
+      <div className="fixed inset-0 flex items-center justify-center bg-black text-red-400">
+        Error: {error.message}
       </div>
     );
+
   if (!data)
     return (
-      <div className="fixed inset-0 pt-24 p-4 flex justify-center bg-var-color-primary-background">
-        <div className="text-var-color-secondary-text">No chat data found</div>
+      <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-400">
+        No chat data found.
       </div>
     );
 
   return (
-    <div className="fixed inset-0 pt-24 flex justify-center h-full w-full bg-var-color-primary-background">
+    <div className="fixed inset-0 pt-24 flex justify-center h-full w-full bg-gradient-to-b from-black via-slate-900 to-cyan-900">
+      {/* Neon glow layer */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_top_left,rgba(0,196,179,0.2),transparent_60%)]" />
+
       {/* Profile Modal */}
-      {showProfileModal && characterImage && (
-        <div
-          ref={modalRef}
-          className={`fixed z-50 bg-var-color-for-dark-surface border-2 border-var-color-primary-button rounded-2xl shadow-2xl overflow-hidden ${
-            isDragging ? "cursor-grabbing" : "cursor-grab"
-          }`}
-          style={{
-            left: `${modalPosition.x}px`,
-            top: `${modalPosition.y}px`,
-            width: 'clamp(300px, 40vw, 500px)',
-            height: 'clamp(400px, 50vh, 600px)',
-          }}
-          onMouseDown={handleMouseDown}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-var-color-borders bg-var-color-primary-background">
-            <div>
-              <h3 className="text-lg font-semibold text-var-color-primary-text">
+      <AnimatePresence>
+        {showProfileModal && (
+          <motion.div
+            ref={modalRef}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+            className="fixed z-50 border-2 border-cyan-400/50 backdrop-blur-xl bg-white/10 rounded-3xl overflow-hidden shadow-[0_0_30px_rgba(0,196,179,0.4)]"
+            style={{
+              left: `${modalPosition.x}px`,
+              top: `${modalPosition.y}px`,
+              width: "clamp(300px, 40vw, 500px)",
+              height: "clamp(400px, 50vh, 600px)",
+              cursor: isDragging ? "grabbing" : "grab",
+            }}
+            onMouseDown={handleMouseDown}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-cyan-500/30 bg-cyan-950/40">
+              <h3 className="text-lg font-semibold text-cyan-300">
                 {data.character.name}
               </h3>
-              <p className="text-sm text-var-color-secondary-text">AI Character</p>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="p-2 hover:bg-cyan-500/20 rounded-full"
+              >
+                <FaTimes className="text-cyan-300" />
+              </button>
             </div>
-            <button
-              onClick={() => setShowProfileModal(false)}
-              className="p-2 hover:bg-var-color-borders rounded-lg transition-colors"
-            >
-              <FaTimes className="text-var-color-secondary-text" />
-            </button>
-          </div>
-
-          {/* Image */}
-          <div className="relative w-full h-3/4">
-            <Image
-              src={characterImage}
-              fill
-              className="object-cover"
-              alt={data.character.name}
-              priority
-            />
-          </div>
-
-          {/* Footer */}
-          <div className="p-4 border-t border-var-color-borders">
-            <p className="text-var-color-secondary-text text-sm text-center">
+            <div className="relative w-full h-3/4">
+              <Image
+                src={characterImage || "/default-character.png"}
+                alt={data.character.name}
+                fill
+                className="object-cover"
+              />
+            </div>
+            <p className="text-center text-xs text-cyan-400/70 py-2">
               Drag to move • Click X to close
             </p>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Chat Container */}
-      <div className="w-full lg:w-1/2 xl:w-2/5 flex flex-col h-full max-w-4xl">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative w-full lg:w-1/2 xl:w-2/5 flex flex-col h-full max-w-4xl rounded-3xl border border-cyan-500/30 bg-white/10 backdrop-blur-2xl shadow-[0_0_30px_rgba(0,196,179,0.3)]"
+      >
         {/* Header */}
-        <div className="flex items-center gap-4 p-4 border-b border-var-color-borders bg-var-color-for-dark-surface">
+        <div className="flex items-center gap-4 p-4 border-b border-cyan-500/20 bg-cyan-950/40 rounded-t-3xl">
           <button
             onClick={handleProfileClick}
-            className="relative group hover:scale-105 transition-transform"
+            className="relative active:scale-95 transition-transform"
           >
             <Image
               src={characterImage || "/default-character.png"}
               width={48}
               height={48}
               alt={data.character.name}
-              className="w-12 h-12 rounded-full border-2 border-var-color-borders object-cover"
+              className="w-12 h-12 rounded-full border-2 border-cyan-400/40 object-cover"
             />
-            <div className="absolute inset-0 rounded-full border-2 border-transparent group-hover:border-var-color-primary-button transition-colors" />
           </button>
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold text-var-color-primary-text">
+          <div>
+            <h2 className="text-cyan-200 font-semibold">
               {data.character.name}
             </h2>
-            <p className="text-sm text-var-color-secondary-text">
-              Click profile to view larger image
+            <p className="text-xs text-cyan-400/70">
+              Click to view character profile
             </p>
           </div>
         </div>
 
-        {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Intro Message */}
-          <div className="text-center p-6 bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl mb-4">
-            <p className="text-var-color-primary-text text-lg italic">
-              {data.character.introMessage}
-            </p>
-          </div>
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center text-cyan-300/80 italic py-3 bg-cyan-950/30 border border-cyan-500/20 rounded-2xl"
+          >
+            {data.character.introMessage}
+          </motion.div>
 
-          {/* Messages */}
-          {data.messages.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              userImage={userImage}
-              characterImage={characterImage}
-              isUserMessage={message.fromUser}
-              isOptimistic={message.id.startsWith('temp-')}
-              onProfileClick={handleProfileClick}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onRegenerate={handleRegenerate}
-              isEditing={editingMessageId === message.id}
-              editContent={editContent}
-              onEditContentChange={setEditContent}
-              onSaveEdit={handleSaveEdit}
-              onCancelEdit={handleCancelEdit}
-            />
-          ))}
+          <AnimatePresence initial={false}>
+            {data.messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.3 }}
+              >
+                <MessageBubble
+                  message={msg}
+                  userImage={userImage}
+                  characterImage={characterImage}
+                  isUserMessage={msg.fromUser}
+                  isOptimistic={msg.id.startsWith("temp-")}
+                  onProfileClick={handleProfileClick}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onRegenerate={handleRegenerate}
+                  isEditing={editingMessageId === msg.id}
+                  editContent={editContent}
+                  onEditContentChange={setEditContent}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={handleCancelEdit}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
-          {/* Typing Indicator */}
           {isSubmitting && (
-            <div className="flex items-start gap-3 p-4">
-              <Image
-                src={characterImage || "/default-character.png"}
-                width={40}
-                height={40}
-                alt={data.character.name}
-                className="w-10 h-10 rounded-full border border-var-color-borders object-cover flex-shrink-0"
-              />
-              <div className="flex items-center gap-1 bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl px-4 py-3">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-var-color-primary-button rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-var-color-primary-button rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                  <div className="w-2 h-2 bg-var-color-primary-button rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                </div>
-                <span className="text-var-color-secondary-text text-sm ml-2">AI is thinking...</span>
-              </div>
-            </div>
+            <motion.div
+              className="flex items-center gap-2 text-cyan-400 text-sm pl-2"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              <span className="text-cyan-300">AI is thinking...</span>
+            </motion.div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area */}
-        <div className="p-4 border-t border-var-color-borders bg-var-color-for-dark-surface">
+        {/* Input */}
+        <div className="p-4 border-t border-cyan-500/20 bg-cyan-950/40 rounded-b-3xl">
           <div className="relative">
             <textarea
-              className="w-full bg-var-color-primary-background border border-var-color-borders rounded-2xl p-4 pr-12 text-var-color-primary-text placeholder-var-color-disabled resize-none focus:ring-2 focus:ring-var-color-primary-button focus:border-transparent transition-all"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={isSubmitting}
-              placeholder="Type your message... (Press Enter to send)"
               rows={3}
+              placeholder="Type your message..."
+              disabled={isSubmitting}
+              className="w-full bg-cyan-900/40 border border-cyan-500/30 text-cyan-100 placeholder-cyan-500/50 rounded-2xl p-4 pr-12 resize-none focus:ring-2 focus:ring-cyan-400 outline-none transition-all"
             />
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={handleSubmit}
               disabled={!message.trim() || isSubmitting}
-              className="absolute right-4 bottom-4 p-2 bg-var-color-primary-button text-white rounded-full hover:bg-var-color-primary-hover-state disabled:bg-var-color-disabled disabled:cursor-not-allowed transition-colors shadow-lg"
-              aria-label="Send message"
+              className="absolute right-4 bottom-4 p-3 bg-cyan-500 text-white rounded-full shadow-lg hover:bg-cyan-400 transition-all disabled:bg-cyan-700 disabled:cursor-not-allowed"
             >
               <FaPaperPlane size={16} />
-            </button>
+            </motion.button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -465,7 +438,7 @@ const MessageBubble = React.memo(
       <div
         className={`flex items-start gap-3 ${
           isUserMessage ? "flex-row-reverse" : "flex-row"
-        } ${isOptimistic ? 'opacity-70' : ''}`}
+        } ${isOptimistic ? "opacity-70" : ""}`}
       >
         {!isUserMessage ? (
           <button
@@ -492,10 +465,12 @@ const MessageBubble = React.memo(
             priority
           />
         )}
-        
-        <div className={`flex-1 max-w-[80%] ${
-          isUserMessage ? "text-right" : "text-left"
-        }`}>
+
+        <div
+          className={`flex-1 max-w-[80%] ${
+            isUserMessage ? "text-right" : "text-left"
+          }`}
+        >
           {/* Message Content */}
           <div
             className={`rounded-2xl p-4 ${
@@ -532,9 +507,7 @@ const MessageBubble = React.memo(
               <>
                 <MarkDown>{message.content}</MarkDown>
                 {isOptimistic && (
-                  <div className="text-xs opacity-70 mt-2">
-                    Sending...
-                  </div>
+                  <div className="text-xs opacity-70 mt-2">Sending...</div>
                 )}
               </>
             )}
@@ -542,9 +515,11 @@ const MessageBubble = React.memo(
 
           {/* Message Actions */}
           {!isOptimistic && !isEditing && (
-            <div className={`flex gap-2 mt-2 ${
-              isUserMessage ? 'justify-end' : 'justify-start'
-            }`}>
+            <div
+              className={`flex gap-2 mt-2 ${
+                isUserMessage ? "justify-end" : "justify-start"
+              }`}
+            >
               {/* Edit Button (only for user messages) */}
               {isUserMessage && (
                 <button
@@ -555,7 +530,7 @@ const MessageBubble = React.memo(
                   <FaEdit size={10} />
                 </button>
               )}
-              
+
               {/* Delete Button */}
               <button
                 onClick={() => onDelete(message.id)}
@@ -564,7 +539,7 @@ const MessageBubble = React.memo(
               >
                 <FaTrash size={10} />
               </button>
-              
+
               {/* Regenerate Button (only for AI messages) */}
               {!isUserMessage && (
                 <button
