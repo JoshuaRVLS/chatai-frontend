@@ -337,7 +337,6 @@ const page = () => {
           </motion.button>
         </motion.div>
       </motion.form>
-
      </motion.div>
   );
 };
