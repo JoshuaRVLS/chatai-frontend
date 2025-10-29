@@ -31,7 +31,7 @@ const HomePage = async () => {
   });
 
   return (
-    <div className="mt-32 px-12 flex flex-col w-full h-full scrollbar-hide">
+    <div className="mt-32 flex flex-col w-full h-full scrollbar-hide">
       <HydrationBoundary state={dehydrate(queryClient)}>
         <History />
         <Characters />
