@@ -7,6 +7,7 @@ import { AuthContext } from "../providers/AuthProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import CharacterTags from "../components/CharacterTags/CharacterTags";
+import { motion } from 'motion/react';
 
 const page = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -61,11 +62,47 @@ const page = () => {
     }
   };
 
+  // Animation variants for staggered entrance
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <div className="create-character-container">
-      <form onSubmit={handleSubmit} className="create-character-form">
-        <h1 className="text-3xl text-center w-full">Create a Character</h1>
-        <div className="flex flex-col gap-1 w-full">
+    <motion.div 
+      className="create-character-container"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.form 
+        onSubmit={handleSubmit} 
+        className="create-character-form"
+        variants={containerVariants}
+      >
+        <motion.h1 
+          className="text-3xl text-center w-full"
+          variants={itemVariants}
+        >
+          Create a Character
+        </motion.h1>
+
+        {/* Image Upload */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>
             Foto<sup className="error">*</sup>
           </span>
@@ -77,12 +114,14 @@ const page = () => {
             onChange={(e) => setImage(e.target.files![0])}
             className="hidden"
           />
-          <label
+          <motion.label
             htmlFor="image-upload"
             className="w-full flex transition hover:opacity-70 cursor-pointer items-center justify-center border border-dashed rounded-md h-36"
+            whileHover={{ scale: 1.02, borderColor: "var(--color-primary-button)" }}
+            whileTap={{ scale: 0.98 }}
           >
             {!image ? "Upload Image" : "Change Image"}
-          </label>
+          </motion.label>
           <ul>
             <li>Max size: 1MB</li>
             <li>Supported formats: jpg, jpeg, png</li>
@@ -90,46 +129,67 @@ const page = () => {
               Preview at the bottom for <b>MOBILE</b>
             </li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Character Name */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>
             Nama Karakter<sup className="error">*</sup>
           </span>
-          <input
+          <motion.input
             required
             value={characterName}
             onChange={(e) => setCharacterName(e.target.value)}
             type="text"
             placeholder="Character Name"
             className="input"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
-            <li>Nama karakter masukin sini. </li>
+            <li>Nama karakter masukin sini.</li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Character Alias */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>Panggilan Karakter</span>
-          <input
+          <motion.input
             value={characterAlias}
             onChange={(e) => setCharacterAlias(e.target.value)}
             type="text"
             placeholder="Character Alias"
             className="input scrollbar-hide"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
             <li>Nama panggilan buat karakter. OPTIONAL</li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Character Bio */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>
             Character Bio<sup className="error">*</sup>
           </span>
-          <textarea
+          <motion.textarea
             value={characterBio}
             required
             onChange={(e) => setCharacterBio(e.target.value)}
             placeholder="Deskripsi tentang bot lu"
             className="input resize-none h-52 scrollbar-hide"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
             <li>
@@ -137,17 +197,24 @@ const page = () => {
               lain doang.
             </li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Character Persona */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>
             Character Persona<sup className="error">*</sup>
           </span>
-          <textarea
+          <motion.textarea
             required
             value={characterPersona}
             onChange={(e) => setCharacterPersona(e.target.value)}
-            placeholder="Persona character "
+            placeholder="Persona character"
             className="input resize-none h-52 scrollbar-hide"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
             <li>
@@ -166,21 +233,33 @@ const page = () => {
               huruf )
             </li>
           </ul>
-        </div>
-        <div className="w-full flex flex-col gap-1">
+        </motion.div>
+
+        {/* Character Tags */}
+        <motion.div 
+          className="w-full flex flex-col gap-1"
+          variants={itemVariants}
+        >
           <span>Character Tags</span>
           <CharacterTags
             selectedOptions={selectedOptions}
             setSelectedOptions={setSelectedOptions}
           />
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Scenario */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>Scenario</span>
-          <textarea
+          <motion.textarea
             value={scenario}
             onChange={(e) => setScenario(e.target.value)}
             placeholder="Scenario buat AI"
             className="input resize-none h-52 scrollbar-hide"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
             <li>
@@ -192,17 +271,24 @@ const page = () => {
               {Math.floor(scenario.length / 4)} Token ( 1 token = 4 huruf )
             </li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
+        </motion.div>
+
+        {/* Initial Message */}
+        <motion.div 
+          className="flex flex-col gap-1 w-full"
+          variants={itemVariants}
+        >
           <span>
             Initial Message<sup className="error">*</sup>
           </span>
-          <textarea
+          <motion.textarea
             required
             value={initialMessage}
             onChange={(e) => setInitialMessage(e.target.value)}
             placeholder="Initial Message"
             className="input resize-none h-52 scrollbar-hide"
+            whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
+            transition={{ duration: 0.2 }}
           />
           <ul>
             <li>
@@ -214,8 +300,13 @@ const page = () => {
               )
             </li>
           </ul>
-        </div>
-        <div className="flex flex-col gap-2 justify-center w-full">
+        </motion.div>
+
+        {/* Submit Section */}
+        <motion.div 
+          className="flex flex-col gap-2 justify-center w-full"
+          variants={itemVariants}
+        >
           <span>
             Token:{" "}
             {Math.floor(
@@ -227,13 +318,36 @@ const page = () => {
             , Permenant Token:{" "}
             {Math.floor((characterPersona.length + scenario.length) / 4)}
           </span>
-          <button className="btn">
-            {loading ? "Sedang dibuat..." : "Buat Character"}
-          </button>
-        </div>
-      </form>
-      <div className="w-full md:w-auto flex justify-center">
-        <div className="w-1/2 lg:w-full">
+          <motion.button 
+            className="btn"
+            whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 196, 179, 0.3)" }}
+            whileTap={{ scale: 0.95 }}
+            disabled={loading}
+          >
+            {loading ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1 }}
+              >
+                ⏳
+              </motion.div>
+            ) : (
+              "Buat Character"
+            )}
+          </motion.button>
+        </motion.div>
+      </motion.form>
+
+      {/* Preview Card */}
+      <motion.div 
+        className="w-full md:w-auto flex justify-center"
+        variants={itemVariants}
+      >
+        <motion.div 
+          className="w-1/2 lg:w-full"
+          whileHover={{ scale: 1.05 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
           {user && (
             <CharacterCard
               authorName={user!.username}
@@ -243,9 +357,9 @@ const page = () => {
               selectedTags={selectedOptions}
             />
           )}
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 
