@@ -5,7 +5,8 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar/Navbar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import CursorEffect from "./components/CursorEffect/CursorEffect";
 
 export const metadata: Metadata = {
   title: "Chat AI",
@@ -87,6 +88,7 @@ export default function RootLayout({
                 }}
               />
               <Navbar />
+              <CursorEffect />
               {children}
             </AuthProvider>
           </ScrollProvider>
