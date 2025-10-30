@@ -21,21 +21,19 @@ export const POST = async (req: Request) => {
     },
   });
 
-  // Convert messages to the format needed
+
   const previousMessages =
       chat?.messages.map((message) => ({
                            role: message.fromUser ? 'user' : 'system',
                            content: message.content,
                          }));
 
-  // Function to estimate token count (approximate)
+
   const estimateTokens = (text: string): number => {
-    // Rough estimate: 1 token ≈ 4 characters in English
-    // This may vary based on language and content
     return Math.ceil(text.length / 4);
   };
 
-  // System messages that will always be included
+
   const systemMessages = [
     {
       role: 'system',
@@ -66,34 +64,32 @@ export const POST = async (req: Request) => {
     },
   ];
 
-  // Calculate tokens for system messages
+
   let totalTokens =
       systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
 
-  // Add tokens for the new user message
+
   totalTokens += estimateTokens(content);
 
-  // Select previous messages that fit within the token limit
+
   const limitedMessages: any[] = [];
   if (previousMessages) {
-    // Start from the most recent messages (slice().reverse() creates a copy and
-    // reverses it)
     for (const msg of previousMessages.slice().reverse()) {
       const msgTokens = estimateTokens(msg.content);
 
-      // Check if adding this message would exceed the limit
+
       if (totalTokens + msgTokens > 15000) {
         break;
       }
 
-      // Add to beginning to maintain chronological order
+
       limitedMessages.unshift(msg);
       totalTokens += msgTokens;
     }
   }
 
   const response =
-      await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      await fetch('https:
         method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
@@ -117,8 +113,9 @@ export const POST = async (req: Request) => {
         }),
       });
 
-  const data = await response.json();
-  console.log(data);
-  const aiResponse = data.choices[0].message.content.trim();
-  return NextResponse.json({success: true, data: aiResponse});
-};
+const data = await response.json();
+console.log(data);
+const aiResponse = data.choices[0].message.content.trim();
+return NextResponse.json({success: true, data: aiResponse});
+}
+;
