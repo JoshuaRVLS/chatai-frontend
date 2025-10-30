@@ -1,4 +1,4 @@
-// Delete api page
+
 import {db} from '@/app/utils/prisma';
 import {NextResponse} from 'next/server';
 
@@ -26,7 +26,6 @@ export const DELETE =
   const characterId = (await params).id;
 
   try {
-    // First, find all chats related to this character
     const chats = await db.chat.findMany({
       where: {
         characterId: characterId,
@@ -36,26 +35,26 @@ export const DELETE =
 
     const chatIds = chats.map(chat => chat.id);
 
-    // Delete all messages in those chats
+
     if (chatIds.length > 0) {
       await db.message.deleteMany({where: {chatId: {in : chatIds}}});
     }
 
-    // Delete all chats related to this character
+
     await db.chat.deleteMany({
       where: {
         characterId: characterId,
       }
     });
 
-    // Delete all comments related to this character
+
     await db.comment.deleteMany({
       where: {
         characterId: characterId,
       }
     });
 
-    // Remove this character from all tags
+
     await db.characterTag.updateMany({
       where: {charIds: {has: characterId}},
       data: {
@@ -74,14 +73,14 @@ export const DELETE =
       }
     });
 
-    // Delete character image if exists
+
     await db.characterImage.deleteMany({
       where: {
         charId: characterId,
       }
     });
 
-    // Finally, delete the character
+
     await db.character.delete({
       where: {
         id: characterId,
