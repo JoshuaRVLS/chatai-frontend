@@ -89,7 +89,7 @@ export const POST = async (req: Request) => {
   }
 
   const response =
-      await fetch('https:
+      await fetch('https:https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
@@ -113,9 +113,8 @@ export const POST = async (req: Request) => {
         }),
       });
 
-const data = await response.json();
-console.log(data);
-const aiResponse = data.choices[0].message.content.trim();
-return NextResponse.json({success: true, data: aiResponse});
-}
-;
+  const data = await response.json();
+  console.log(data);
+  const aiResponse = data.choices[0].message.content.trim();
+  return NextResponse.json({success: true, data: aiResponse});
+};
