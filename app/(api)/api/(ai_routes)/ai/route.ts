@@ -2,8 +2,9 @@ import { db } from '@/app/utils/prisma';
 import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
-  const { content, chatId, model } = await req.json();
+  const { content, chatId, model, regenerate } = await req.json();
   const selectedModel = model || 'deepseek/deepseek-chat-v3-0324';
+  const isRegenerate = regenerate === true;
 
   const chat = await db.chat.findFirst({
     where: {
@@ -99,8 +100,13 @@ export const POST = async (req: Request) => {
         model: selectedModel,
         user: chat?.user.username,
         stream: true,
+        temperature: isRegenerate ? 1.1 : 0.9,
         messages: [
           ...systemMessages,
+          ...(isRegenerate ? [{
+            role: 'system',
+            content: '[REGENERATE] User meminta response yang BERBEDA. Hasilkan jawaban dengan sudut pandang, gaya, atau pendekatan yang berbeda dari sebelumnya. Jangan ulangi respon yang mirip.'
+          }] : []),
           ...limitedMessages,
           {
             role: 'user',

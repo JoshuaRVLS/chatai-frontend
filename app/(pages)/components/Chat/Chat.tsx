@@ -131,13 +131,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
     });
   }, [undoStack, chatId, queryClient]);
 
-  const startStreaming = async (content: string) => {
+  const startStreaming = async (content: string, isRegenerate = false) => {
     try {
       setStreamingMessage("");
       const aiRes = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId, content, model: selectedModel }),
+        body: JSON.stringify({ chatId, content, model: selectedModel, regenerate: isRegenerate }),
       });
 
       if (!aiRes.ok || !aiRes.body) throw new Error("AI streaming failed");
@@ -323,7 +323,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         };
       });
 
-      await startStreaming(lastUserMsg.content);
+      await startStreaming(lastUserMsg.content, true);
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
