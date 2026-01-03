@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { FaPlus, FaUser, FaInfo, FaCheck, FaTimes } from "react-icons/fa";
+import { FiCpu } from "react-icons/fi";
 import toast from "react-hot-toast";
 import PersonaCard from "../PersonaCard/PersonaCard";
 import { motion, AnimatePresence } from "motion/react";
@@ -61,115 +62,125 @@ const Persona: React.FC = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
   };
 
-  // 🔹 Loading State
   if (isPending)
     return (
-      <div className="min-h-screen pt-24 px-6 flex flex-col items-center justify-center space-y-6 animate-pulse">
-        <div className="h-10 w-40 bg-var-color-borders rounded-lg" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-5xl">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-40 bg-var-color-borders rounded-2xl" />
-          ))}
+      <div className="min-h-screen pt-32 px-6 bg-[#020617]">
+        <div className="max-w-6xl mx-auto space-y-8 animate-pulse">
+          <div className="h-12 bg-white/5 rounded-2xl w-1/4" />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-48 bg-white/5 rounded-[2rem]" />
+            ))}
+          </div>
         </div>
       </div>
     );
 
-  // 🔹 Error State
   if (error)
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center text-center text-red-500">
-        Error loading personas: {error.message}
+      <div className="min-h-screen pt-24 bg-[#020617] flex items-center justify-center text-center">
+        <p className="text-red-400 font-black uppercase tracking-widest italic">Identity Link Failure: {error.message}</p>
       </div>
     );
 
   return (
-    <motion.div
-      className="min-h-screen bg-var-color-primary-background pt-24 pb-8 px-4 sm:px-8"
-      initial="hidden"
-      animate="visible"
-      variants={container}
-    >
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-[#020617] pt-32 pb-20 px-4 sm:px-8 relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
+      </div>
+
+      <motion.div
+        className="max-w-6xl mx-auto relative z-10"
+        initial="hidden"
+        animate="visible"
+        variants={container}
+      >
         {/* 🔹 Header */}
         <motion.div
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10"
+          className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16"
           variants={item}
         >
-          <div>
-            <h1 className="text-4xl font-bold text-var-color-primary-text mb-2">
-              My Personas
-            </h1>
-            <p className="text-var-color-secondary-text text-sm sm:text-base">
-              Create and manage unique personalities for your AI interactions.
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+              <h1 className="text-5xl sm:text-7xl font-black text-white italic tracking-tighter uppercase leading-none">
+                Personas
+              </h1>
+            </div>
+            <p className="text-white/30 text-xs sm:text-sm font-black uppercase tracking-[0.3em] ml-5 leading-loose">
+              Neural Proxies • Identity Layer • {data?.length || 0} Profiles Synchronized
             </p>
           </div>
-          <motion.button
-            onClick={() => setIsCreating(true)}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-var-color-primary-button hover:bg-var-color-primary-hover-state text-white rounded-xl font-semibold shadow-md"
-          >
-            <FaPlus className="w-4 h-4" />
-            New Persona
-          </motion.button>
+
+          {!isCreating && (
+            <motion.button
+              onClick={() => setIsCreating(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-5 bg-white/5 border border-white/10 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs flex items-center gap-3 hover:bg-white/10 transition-all"
+            >
+              <FaPlus /> Build New Identity
+            </motion.button>
+          )}
         </motion.div>
 
-        {/* 🔹 Create Persona */}
+        {/* 🔹 Create Persona Form */}
         <AnimatePresence>
           {isCreating && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4 }}
-              className="bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl p-6 mb-8 shadow-lg"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="max-w-3xl mx-auto mb-16 relative"
             >
-              <h3 className="text-xl font-semibold text-var-color-primary-text mb-4">
-                Create New Persona
-              </h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm text-var-color-secondary-text mb-2">
-                    Persona Name
-                  </label>
-                  <input
-                    value={personaName}
-                    onChange={(e) => setPersonaName(e.target.value)}
-                    className="w-full px-4 py-3 bg-var-color-primary-background border border-var-color-borders rounded-lg text-var-color-primary-text focus:ring-2 focus:ring-var-color-primary-button outline-none"
-                    placeholder="e.g., Chill GPT"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-var-color-secondary-text mb-2">
-                    Personality Description
-                  </label>
-                  <textarea
-                    value={persona}
-                    onChange={(e) => setPersona(e.target.value)}
-                    className="w-full px-4 py-3 bg-var-color-primary-background border border-var-color-borders rounded-lg text-var-color-primary-text focus:ring-2 focus:ring-var-color-primary-button outline-none resize-none"
-                    rows={5}
-                    placeholder="Describe your persona's tone, style, and behavior..."
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-2">
-                  <motion.button
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-primary/20 rounded-[2.5rem] blur-xl opacity-50" />
+              <div className="relative bg-black/40 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-8 sm:p-12 overflow-hidden shadow-2xl">
+                <div className="flex items-center justify-between mb-10">
+                  <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">
+                    Neural Configuration
+                  </h3>
+                  <button
                     onClick={() => setIsCreating(false)}
-                    whileHover={{ scale: 1.05 }}
-                    className="px-4 py-2 border border-var-color-borders text-var-color-secondary-text rounded-lg hover:bg-var-color-borders flex items-center gap-2"
+                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-white transition-colors"
                   >
-                    <FaTimes className="w-4 h-4" /> Cancel
-                  </motion.button>
+                    <FaTimes />
+                  </button>
+                </div>
 
-                  <motion.button
-                    onClick={save}
-                    whileHover={{ scale: 1.05 }}
-                    className="px-5 py-2 bg-var-color-primary-button text-white rounded-lg hover:bg-var-color-primary-hover-state flex items-center gap-2"
-                  >
-                    <FaCheck className="w-4 h-4" /> Save Persona
-                  </motion.button>
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Identity Designation</label>
+                    <input
+                      value={personaName}
+                      onChange={(e) => setPersonaName(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all font-medium"
+                      placeholder="e.g., Tactical Specialist"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Behavioral Logic</label>
+                    <textarea
+                      value={persona}
+                      onChange={(e) => setPersona(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-purple-500/50 focus:bg-white/10 transition-all font-medium resize-none"
+                      rows={5}
+                      placeholder="Describe the tone, speech patterns, and identity traits..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-4 pt-4">
+                    <motion.button
+                      onClick={save}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-10 py-5 bg-gradient-to-r from-purple-600 to-purple-400 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                    >
+                      <FaCheck className="inline mr-2" /> Sync Identity
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -178,41 +189,38 @@ const Persona: React.FC = () => {
 
         {/* 🔹 Persona List */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
           variants={container}
         >
           {data && data.length > 0 ? (
             data.map((p) => (
-              <motion.div
-                key={p.id}
-                variants={item}
-                whileHover={{ scale: 1.03 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <motion.div key={p.id} variants={item}>
                 <PersonaCard initialPersona={p} />
               </motion.div>
             ))
-          ) : (
+          ) : !isCreating && (
             <motion.div
-              className="col-span-full text-center py-16"
+              className="col-span-full py-20 bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem] text-center"
               variants={item}
             >
-              <div className="flex flex-col items-center">
-                <div className="w-20 h-20 rounded-full bg-var-color-borders flex items-center justify-center mb-6">
-                  <FaUser className="text-var-color-disabled w-10 h-10" />
+              <div className="max-w-xs mx-auto space-y-8">
+                <div className="w-24 h-24 mx-auto bg-white/5 border border-white/10 rounded-[2.5rem] flex items-center justify-center">
+                  <FiCpu className="text-white/10 text-4xl" />
                 </div>
-                <h3 className="text-2xl font-semibold text-var-color-primary-text mb-2">
-                  No personas yet
-                </h3>
-                <p className="text-var-color-secondary-text mb-6">
-                  Create your first persona to personalize your AI experience.
-                </p>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">
+                    Zero Identity Detected
+                  </h3>
+                  <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
+                    Personalized neural proxies allow for specialized interaction flows. Initialize your first identity now.
+                  </p>
+                </div>
                 <motion.button
                   onClick={() => setIsCreating(true)}
                   whileHover={{ scale: 1.05 }}
-                  className="flex items-center gap-2 px-6 py-3 bg-var-color-primary-button text-white rounded-xl hover:bg-var-color-primary-hover-state shadow-md"
+                  className="px-8 py-5 bg-primary text-slate-950 font-black uppercase tracking-widest text-xs rounded-[1.5rem]"
                 >
-                  <FaPlus /> Create Persona
+                  <FaPlus className="inline mr-2" /> Initialize System
                 </motion.button>
               </div>
             </motion.div>
@@ -222,26 +230,29 @@ const Persona: React.FC = () => {
         {/* 🔹 Info Section */}
         {data && data.length > 0 && (
           <motion.div
-            className="mt-10 bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl p-6"
+            className="mt-20 bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10 backdrop-blur-3xl overflow-hidden relative"
             variants={item}
           >
-            <div className="flex items-start gap-3">
-              <FaInfo className="text-var-color-primary-button w-5 h-5 mt-1" />
-              <div>
-                <h4 className="text-lg font-semibold text-var-color-primary-text mb-2">
-                  About Personas
+            <div className="absolute top-0 right-0 p-8 text-white/5 pointer-events-none">
+              <FiCpu size={120} />
+            </div>
+            <div className="flex items-start gap-6 relative z-10">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-2xl flex items-center justify-center text-purple-400 flex-shrink-0">
+                <FaInfo />
+              </div>
+              <div className="space-y-3">
+                <h4 className="text-xl font-black text-white italic tracking-tighter uppercase">
+                  System Architecture
                 </h4>
-                <p className="text-var-color-secondary-text leading-relaxed">
-                  Personas define your communication style and tone when
-                  chatting with AI. Use them to customize your mood, intent, or
-                  personality for different experiences.
+                <p className="text-white/40 text-xs leading-loose font-medium max-w-2xl">
+                  Neural Personas act as a translation layer for your input. They define how the AI perceives your location, status, and emotional state during the transmission. Multi-persona support allows for seamless roleplay transitions.
                 </p>
               </div>
             </div>
           </motion.div>
         )}
-      </div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 };
 

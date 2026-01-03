@@ -99,12 +99,12 @@ const CreateCharacterPage: React.FC = () => {
         onSubmit={handleSubmit}
         className="relative z-10 max-w-4xl w-full flex flex-col lg:grid lg:grid-cols-2 gap-10 backdrop-blur-xl border border-white/10 bg-white/5 p-8 rounded-2xl shadow-[0_0_40px_rgba(0,196,179,0.1)]"
       >
-        <motion.h1
-          className="text-3xl font-bold col-span-2 text-center mb-6"
-          variants={fieldVariants}
-        >
-          ✨ Create Your Character
-        </motion.h1>
+        <div className="lg:col-span-2 text-center mb-8 space-y-4">
+          <h1 className="text-5xl font-black text-white italic tracking-tighter uppercase italic">
+            Create Character
+          </h1>
+          <p className="text-white/40 text-xs font-black uppercase tracking-[0.3em]">Design a unique artificial intelligence profile.</p>
+        </div>
 
         {/* Left Side Form Fields */}
         <motion.div
@@ -113,17 +113,32 @@ const CreateCharacterPage: React.FC = () => {
           initial="hidden"
           animate="visible"
         >
-          {/* Image Upload */}
-          <motion.div variants={fieldVariants} className="w-full">
-            <label className="block mb-2 font-semibold">Character Image</label>
+          <motion.div variants={fieldVariants} className="w-full space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Character Visual</label>
             <label
               htmlFor="image-upload"
-              className="w-full border-2 border-dashed border-cyan-500/40 rounded-lg h-40 flex flex-col items-center justify-center cursor-pointer hover:border-cyan-400 transition-all"
+              className="group relative w-full border-2 border-dashed border-white/5 bg-white/[0.02] rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-white/[0.05] transition-all overflow-hidden"
             >
-              <FaUpload className="text-cyan-400 mb-2 text-xl" />
-              <span className="text-cyan-300 text-sm">
-                {image ? image.name : "Upload an image"}
-              </span>
+              {image ? (
+                <div className="absolute inset-0">
+                  <img src={URL.createObjectURL(image)} className="w-full h-full object-cover opacity-40" alt="Preview" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-sm">
+                    <FaUpload className="text-primary mb-2 text-xl" />
+                    <span className="text-white font-bold text-sm">{image.name}</span>
+                    <span className="text-white/40 text-[9px] uppercase font-black mt-1">Click to change</span>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <FaUpload className="text-white/20 group-hover:text-primary transition-colors text-2xl" />
+                  </div>
+                  <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">
+                    Upload Identity Image
+                  </span>
+                  <span className="text-white/20 text-[9px] mt-1 font-medium">PNG, JPG or WebP</span>
+                </>
+              )}
               <input
                 id="image-upload"
                 type="file"
@@ -135,44 +150,40 @@ const CreateCharacterPage: React.FC = () => {
             </label>
           </motion.div>
 
-          {/* Name */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Name</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Identity Name</label>
             <motion.input
               value={characterName}
               onChange={(e) => setCharacterName(e.target.value)}
-              placeholder="Character name"
+              placeholder="Full name of the character"
               required
-              className="w-full bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none transition-all"
+              className="input-modern"
             />
           </motion.div>
 
-          {/* Alias */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Alias (optional)</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Callsign / Alias</label>
             <motion.input
               value={characterAlias}
               onChange={(e) => setCharacterAlias(e.target.value)}
-              placeholder="Nickname"
-              className="w-full bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none transition-all"
+              placeholder="Known as..."
+              className="input-modern"
             />
           </motion.div>
 
-          {/* Bio */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Bio</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Public Biography</label>
             <motion.textarea
               value={characterBio}
               onChange={(e) => setCharacterBio(e.target.value)}
-              placeholder="Describe your character..."
+              placeholder="A brief history or summary..."
               required
-              className="w-full h-40 bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none resize-none transition-all"
+              className="input-modern h-32 resize-none"
             />
           </motion.div>
 
-          {/* Tags */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Tags</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Classification Tags</label>
             <CharacterTags
               selectedOptions={selectedOptions}
               setSelectedOptions={setSelectedOptions}
@@ -187,38 +198,35 @@ const CreateCharacterPage: React.FC = () => {
           initial="hidden"
           animate="visible"
         >
-          {/* Persona */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Persona</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Internal Persona</label>
             <motion.textarea
               value={characterPersona}
               onChange={(e) => setCharacterPersona(e.target.value)}
-              placeholder="Describe personality, traits, and background..."
+              placeholder="Personality, traits, and hidden knowledge..."
               required
-              className="w-full h-40 bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none resize-none transition-all"
+              className="input-modern h-40 resize-none"
             />
           </motion.div>
 
-          {/* Scenario */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Scenario</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Environmental Scenario</label>
             <motion.textarea
               value={scenario}
               onChange={(e) => setScenario(e.target.value)}
-              placeholder="Where and when does this take place?"
-              className="w-full h-40 bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none resize-none transition-all"
+              placeholder="Describe the current context or world setting..."
+              className="input-modern h-40 resize-none"
             />
           </motion.div>
 
-          {/* Initial Message */}
-          <motion.div variants={fieldVariants}>
-            <label className="block mb-2 font-semibold">Initial Message</label>
+          <motion.div variants={fieldVariants} className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1">Greeting Protocol</label>
             <motion.textarea
               value={initialMessage}
               onChange={(e) => setInitialMessage(e.target.value)}
-              placeholder="First message your character will send..."
+              placeholder="First message to establish connection..."
               required
-              className="w-full h-40 bg-transparent border border-white/20 rounded-md px-4 py-3 focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(0,196,179,0.4)] outline-none resize-none transition-all"
+              className="input-modern h-40 resize-none"
             />
           </motion.div>
         </motion.div>
@@ -249,18 +257,15 @@ const CreateCharacterPage: React.FC = () => {
         <motion.button
           type="submit"
           disabled={loading}
-          whileHover={{
-            scale: 1.05,
-            boxShadow: "0 0 25px rgba(0,196,179,0.4)",
-          }}
-          whileTap={{ scale: 0.95 }}
-          className="col-span-2 mt-8 bg-cyan-500 hover:bg-cyan-400 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="btn-primary col-span-2 mt-8 py-5 flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs font-black shadow-[0_0_40px_rgba(56,189,248,0.2)]"
         >
           {loading ? (
-            "Creating..."
+            <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
           ) : (
             <>
-              <FaPlus /> Create Character
+              <FaPlus /> Initialize Character
             </>
           )}
         </motion.button>

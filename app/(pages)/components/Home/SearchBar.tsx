@@ -1,0 +1,153 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { FiSearch, FiX, FiTrendingUp, FiUser, FiHash } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+
+interface SearchBarProps {
+    characters: any[];
+    onSearch: (query: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
+    const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        if (query.trim().length > 0) {
+            const filtered = characters
+                .filter((char) =>
+                    char.name.toLowerCase().includes(query.toLowerCase()) ||
+                    char.tags.some((tag: any) => tag.name.toLowerCase().includes(query.toLowerCase()))
+                )
+                .slice(0, 6);
+            setSuggestions(filtered);
+            setIsOpen(true);
+        } else {
+            setSuggestions([]);
+            setIsOpen(false);
+        }
+    }, [query, characters]);
+
+    const handleSelect = (charId: string) => {
+        router.push(`/character/${charId}`);
+        setIsOpen(false);
+        setQuery("");
+    };
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSearch(query);
+        setIsOpen(false);
+    };
+
+    return (
+        <div ref={containerRef} className="relative w-full max-w-2xl mx-auto z-40">
+            <form onSubmit={handleSearchSubmit} className="relative group">
+                <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
+
+                <div className="relative flex items-center bg-[#0f172a]/40 border border-white/5 rounded-3xl p-2 backdrop-blur-2xl group-focus-within:border-primary/30 transition-all duration-500 shadow-2xl">
+                    <FiSearch className="ml-5 text-white/20 group-focus-within:text-primary transition-colors text-xl" />
+
+                    <input
+                        type="text"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => query.length > 0 && setIsOpen(true)}
+                        placeholder="Search characters or tags..."
+                        className="flex-1 bg-transparent border-none outline-none py-4 px-4 text-white placeholder:text-white/20 font-medium text-sm"
+                    />
+
+                    <AnimatePresence>
+                        {query && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                type="button"
+                                onClick={() => { setQuery(""); onSearch(""); }}
+                                className="p-3 hover:bg-white/5 rounded-2xl text-white/20 hover:text-white transition-all mr-2"
+                            >
+                                <FiX size={16} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
+                    <button
+                        type="submit"
+                        className="bg-primary hover:scale-[1.02] active:scale-[0.98] text-slate-950 font-black text-[10px] uppercase tracking-widest px-8 py-4 rounded-[1.25rem] transition-all duration-300 shadow-[0_0_30px_rgba(56,189,248,0.2)]"
+                    >
+                        Query
+                    </button>
+                </div>
+            </form>
+
+            {/* Suggestions Dropdown */}
+            <AnimatePresence>
+                {isOpen && suggestions.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 20, scale: 0.98 }}
+                        className="absolute top-full left-0 right-0 mt-4 bg-[#0f172a]/90 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-50"
+                    >
+                        <div className="p-3">
+                            <p className="px-6 py-4 text-[9px] uppercase tracking-[0.4em] font-black text-white/20 flex items-center gap-3 italic">
+                                <span className="w-8 h-px bg-white/5" />
+                                <FiTrendingUp size={10} /> Results
+                            </p>
+
+                            <div className="space-y-1">
+                                {suggestions.map((char, index) => (
+                                    <button
+                                        key={char.id}
+                                        onClick={() => handleSelect(char.id)}
+                                        className="w-full flex items-center gap-5 p-4 hover:bg-white/[0.03] rounded-[1.75rem] transition-all group"
+                                    >
+                                        <div className="w-12 h-12 rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
+                                            <img
+                                                src={`/api/image/${char.id}`}
+                                                alt={char.name}
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                            />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic">{char.name}</p>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{char.author.username}</span>
+                                                <div className="flex gap-1.5">
+                                                    {char.tags.slice(0, 2).map((tag: any) => (
+                                                        <span key={tag.id} className="text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
+                                            <FiSearch size={14} />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+export default SearchBar;

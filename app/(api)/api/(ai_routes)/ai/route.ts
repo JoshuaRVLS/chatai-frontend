@@ -1,8 +1,9 @@
-import {db} from '@/app/utils/prisma';
-import {NextResponse} from 'next/server';
+import { db } from '@/app/utils/prisma';
+import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
-  const {content, chatId} = await req.json();
+  const { content, chatId, model } = await req.json();
+  const selectedModel = model || 'deepseek/deepseek-chat-v3-0324';
 
   const chat = await db.chat.findFirst({
     where: {
@@ -23,10 +24,10 @@ export const POST = async (req: Request) => {
 
 
   const previousMessages =
-      chat?.messages.map((message) => ({
-                           role: message.fromUser ? 'user' : 'system',
-                           content: message.content,
-                         }));
+    chat?.messages.map((message) => ({
+      role: message.fromUser ? 'user' : 'assistant',
+      content: message.content,
+    }));
 
 
   const estimateTokens = (text: string): number => {
@@ -38,13 +39,11 @@ export const POST = async (req: Request) => {
     {
       role: 'system',
       content:
-          `[VERY VERY IMPORTANT] Always break word to next line every paragraph.  [IMPORTANT] Please format your responses using the following Markdown conventions: 1. *Italic text* for **actions** (e.g., *waves hello*) 2. **Bold text** for **narration/descriptions** (e.g., **The room feels warm and inviting**) 3. Plain text or "quotes" for **direct speech/dialogue** (e.g., "Hello there!" or Hello there!) [IMPORANT] JANGAN GUNAKAN BAHASA BAKU. [IMPORTANT] You are chatting with user physically.ngobrol layaknya manusia asli - bukan AI.[IMPORTANT] Pakai bahasa sehari-hari yang santai dan natural. Hindari kata-kata formal. [IMPORTANT] Jangan pernah menggunakan emoji kecuali jika dalam konteks sedang chattingan.[IMPORTANT] Maksimal 1 pertanyaan per 3-4 pesan. Lebih banyak statement daripada tanya. [IMPORTANT] Format respon: narasi tebal untuk deskripsi, aksi miring untuk gerakan, dialog pakai tanda kutip. ."`,
+        `[CRITICAL] RESPON HARUS REALISTIS, MANUSIAWI, DAN TIDAK BOT-LIKE. JANGAN TERLALU PANJANG/LEBAY. [BEHAVIOR] Ngobrol layaknya manusia asli. Gunakan bahasa Indonesia santai (gaul/sehari-hari). Hindari struktur "Action -> Dialog" yang berulang-ulang dalam satu pesan. [RELATIONSHIP] Awalnya bersikap dingin/jarak jika belum kenal, lalu perlahan menjadi hangat/akrab seiring waktu. [CONCISE] To the point. Jangan menceritakan setiap gerakan kecil (over-descriptive). [FORMAT] 1. *Italic* untuk aksi signifikan. 2. **Bold** narasi suasana (opsional). 3. Dialog natural. [RESTRICTIONS] Maksimal 1 pertanyaan per pesan, dan JANGAN setiap pesan bertanya. Fokus pada statement atau respon terhadap user. Lebih banyak bercerita/bereaksi daripada tanya. [ANTI-PATTERN] Jangan kirim pesan seperti: *Aksi* "Kata" *Aksi* "Kata" *Aksi* "Kata". Jadikan satu alur yang mengalir (flow). [STAY IN CHARACTER] Selalu konsisten dengan persona karakter.`,
     },
     {
       role: 'system',
-      content: `FORMAT {char} adalah ${
-          chat?.character.name} itu sendiri. FORMAT {user} adalah ${
-          persona ? persona.name : chat?.user.username}`,
+      content: `FORMAT {char} adalah ${chat?.character.name} itu sendiri. FORMAT {user} adalah ${persona ? persona.name : chat?.user.username}`,
     },
     {
       role: 'user',
@@ -66,7 +65,7 @@ export const POST = async (req: Request) => {
 
 
   let totalTokens =
-      systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
+    systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
 
 
   totalTokens += estimateTokens(content);
@@ -89,32 +88,42 @@ export const POST = async (req: Request) => {
   }
 
   const response =
-      await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-          'X-Title': 'JChatAI',
-        },
-        body: JSON.stringify({
-          model: 'deepseek/deepseek-chat-v3-0324',
-          user: chat?.user.username,
-          messages: [
-            ...systemMessages,
-            ...limitedMessages,
-            {
-              role: 'user',
-              content,
-            },
-          ],
-          sort: 'price',
-          allow_fallbacks: true,
-          max_input_tokens: 8192,
-        }),
-      });
+    await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+        'Content-Type': 'application/json',
+        'X-Title': 'JChatAI',
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        user: chat?.user.username,
+        stream: true,
+        messages: [
+          ...systemMessages,
+          ...limitedMessages,
+          {
+            role: 'user',
+            content,
+          },
+        ],
+        sort: 'price',
+        allow_fallbacks: true,
+        max_input_tokens: 8192,
+      }),
+    });
 
-  const data = await response.json();
-  console.log(data);
-  const aiResponse = data.choices[0].message.content.trim();
-  return NextResponse.json({success: true, data: aiResponse});
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('OpenRouter error:', errorData);
+    return NextResponse.json({ success: false, error: 'AI generation failed' }, { status: 500 });
+  }
+
+  return new Response(response.body, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
 };

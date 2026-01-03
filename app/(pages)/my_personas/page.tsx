@@ -9,7 +9,7 @@ const page = async () => {
   const session = await getServerSession();
 
   await queryClient.prefetchQuery({
-    queryKey: ["myCharacters"],
+    queryKey: ["personas"],
     queryFn: () =>
       fetch(`/api/persona/${session?.user.id}`).then((res) =>
         res.json().then((data) => data.data)

@@ -16,6 +16,7 @@ import CharacterCard from "../CharacterCard/CharacterCard";
 const CharacterEdit = ({ id }: { id: string }) => {
   const [defaultImage, setDefaultImage] = useState<string | null>(null);
   const [image, setImage] = useState<File | string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [characterName, setCharacterName] = useState<string>("");
   const [characterAlias, setCharacterAlias] = useState<string>("");
   const [characterBio, setCharacterBio] = useState<string>("");
@@ -45,7 +46,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
   useEffect(() => {
     if (data) {
-      setImage(bytesToBase64(data.photo));
+      const base64Image = bytesToBase64(data.photo);
+      setImage(base64Image);
+      setImagePreview(base64Image);
       setCharacterName(data.name);
       setCharacterBio(data.bio);
       setCharacterPersona(data.persona);
@@ -112,7 +115,13 @@ const CharacterEdit = ({ id }: { id: string }) => {
             type="file"
             id="image-upload"
             accept="image/*"
-            onChange={(e) => setImage(e.target.files![0])}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setImage(file);
+                setImagePreview(URL.createObjectURL(file));
+              }
+            }}
             className="hidden"
           />
           <label
@@ -260,7 +269,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
               (characterPersona.length +
                 scenario.length +
                 initialMessage.length) /
-                4
+              4
             )}
             , Permenant Token:{" "}
             {Math.floor((characterPersona.length + scenario.length) / 4)}
@@ -274,10 +283,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
         <div className="w-1/2 lg:w-full">
           {user && (
             <CharacterCard
-              
+
               authorName={user!.username}
               characterName={characterName}
-              image={image}
+              image={imagePreview}
               characterBio={characterBio}
             />
           )}

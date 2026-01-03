@@ -19,6 +19,9 @@ export const POST = async (req: Request) => {
       where: {
         OR: [{ username }, { email: username }],
       },
+      include: {
+        profileImage: true,
+      },
     });
     if (!user) {
       return NextResponse.json(
@@ -52,6 +55,7 @@ export const POST = async (req: Request) => {
         message: "Login berhasil",
         userId: user.id,
         username: user.username,
+        hasPicture: !!user.profileImage,
       },
       {
         status: 200,

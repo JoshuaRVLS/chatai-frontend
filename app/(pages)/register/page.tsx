@@ -13,252 +13,168 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [formError, setFormError] = useState("");
   const router = useRouter();
 
   useEffect(() => {
     if (password !== confirmPassword && confirmPassword.length > 0) {
-      setError("Passwords don’t match");
-    } else setError("");
+      setFormError("Passwords don’t match");
+    } else {
+      setFormError("");
+    }
   }, [password, confirmPassword]);
 
-  const register = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-      if (error) return toast.error("Please fix form errors first");
-      setLoading(true);
+  const handleRegister = async (e: FormEvent) => {
+    e.preventDefault();
+    if (formError) return toast.error("Please fix form errors first");
+    setLoading(true);
 
-      try {
-        const response = await fetch("/api/users/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: username.trim(),
-            email: email.trim(),
-            password,
-            confirmPassword,
-          }),
-        });
-
-        const data = await response.json();
-        if (!data.success) {
-          toast.error(data.message);
-          setLoading(false);
-          return;
-        }
-
-        toast.success(data.message);
-        router.push("/login");
-      } catch {
-        toast.error("Unexpected error occurred");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [username, email, password, confirmPassword, error]
-  );
-
-  // Animated gradient + floating particles
-  const controls = useAnimation();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    controls.start({
-      backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-      transition: { duration: 15, repeat: Infinity, ease: "linear" },
-    });
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    let particles: { x: number; y: number; dx: number; dy: number }[] = [];
-    const num = 50;
-
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      particles = Array.from({ length: num }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        dx: (Math.random() - 0.5) * 0.4,
-        dy: (Math.random() - 0.5) * 0.4,
-      }));
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    const draw = () => {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(0,255,255,0.7)";
-      particles.forEach((p) => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-        p.x += p.dx;
-        p.y += p.dy;
-        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    try {
+      const response = await fetch("/api/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim(),
+          email: email.trim(),
+          password,
+          confirmPassword,
+        }),
       });
-      requestAnimationFrame(draw);
-    };
-    draw();
 
-    return () => window.removeEventListener("resize", resize);
-  }, [controls]);
+      const data = await response.json();
+      if (!data.success) {
+        toast.error(data.message);
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Account created successfully!");
+      router.push("/login");
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <motion.div
-      className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-8"
-      animate={controls}
-      style={{
-        backgroundImage:
-          "linear-gradient(-45deg, #001F3F, #003C5F, #00A6A6, #00C6B3)",
-        backgroundSize: "300% 300%",
-      }}
-    >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-      />
+    <div className="relative min-h-[calc(100vh-80px)] flex items-center justify-center p-6">
+      {/* Background Glow */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] opacity-50" />
+      </div>
 
       <motion.div
-        className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 shadow-2xl"
-        initial={{ opacity: 0, y: 30, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md"
       >
-        <motion.div
-          className="text-center mb-8"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h1 className="text-3xl font-bold text-white mb-1 tracking-wide">
-            Create Account
-          </h1>
-          <p className="text-cyan-200 text-sm">Join our community today</p>
-        </motion.div>
+        <div className="card-premium space-y-8 relative overflow-hidden group">
+          {/* Accent decoration */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
 
-        <form onSubmit={register} className="space-y-5">
-          {[
-            {
-              icon: <FiUser />,
-              placeholder: "Username",
-              type: "text",
-              value: username,
-              setValue: setUsername,
-            },
-            {
-              icon: <FiMail />,
-              placeholder: "Email address",
-              type: "email",
-              value: email,
-              setValue: setEmail,
-            },
-            {
-              icon: <FiLock />,
-              placeholder: "Password",
-              type: "password",
-              value: password,
-              setValue: setPassword,
-            },
-            {
-              icon: <FiLock />,
-              placeholder: "Confirm password",
-              type: "password",
-              value: confirmPassword,
-              setValue: setConfirmPassword,
-            },
-          ].map((field, i) => (
-            <motion.div
-              key={i}
-              className="relative"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + i * 0.1 }}
-            >
-              <div className="absolute left-3 top-3 text-cyan-300">
-                {field.icon}
+          <div className="text-center space-y-2 relative">
+            <h1 className="text-4xl font-black tracking-tighter text-white">
+              JOIN <span className="text-primary italic">COMMUNITY</span>
+            </h1>
+            <p className="text-sm text-white/40 uppercase tracking-[0.2em] font-medium">Start your experience</p>
+          </div>
+
+          <form onSubmit={handleRegister} className="space-y-5 relative">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-4">Username</label>
+                <div className="relative">
+                  <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/50" />
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    type="text"
+                    placeholder="Choose a username"
+                    required
+                    className="input-modern has-icon h-14"
+                  />
+                </div>
               </div>
-              <input
-                value={field.value}
-                onChange={(e) => field.setValue(e.target.value)}
-                type={field.type}
-                placeholder={field.placeholder}
-                required
-                className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-xl text-white placeholder-cyan-300/60 focus:ring-2 focus:ring-cyan-400 outline-none transition-all duration-200 ${
-                  error &&
-                  field.placeholder.toLowerCase().includes("confirm") &&
-                  confirmPassword.length > 0
-                    ? "border-red-400 focus:ring-red-400"
-                    : "border-white/20"
-                }`}
-              />
-            </motion.div>
-          ))}
 
-          {error && (
-            <motion.div
-              className="text-red-400 text-sm flex items-center gap-2"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, scale: [1, 1.05, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              <div className="w-2 h-2 bg-red-400 rounded-full" />
-              {error}
-            </motion.div>
-          )}
+              <div className="space-y-2">
+                <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-4">Email Address</label>
+                <div className="relative">
+                  <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/50" />
+                  <input
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                    className="input-modern has-icon h-14"
+                  />
+                </div>
+              </div>
 
-          <motion.button
-            disabled={loading || !!error}
-            type="submit"
-            className="w-full mt-4 py-3 rounded-xl font-semibold bg-cyan-500 text-white hover:bg-cyan-400 active:bg-cyan-600 transition-all flex justify-center items-center gap-2 disabled:opacity-50"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 200 }}
-          >
-            {loading ? (
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
-              />
-            ) : (
-              <>
-                Create Account
-                <FiArrowRight className="w-4 h-4" />
-              </>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-4">Password</label>
+                  <div className="relative">
+                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/50" />
+                    <input
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                      className="input-modern has-icon h-14"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-black text-white/40 ml-4">Confirm</label>
+                  <div className="relative">
+                    <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/50" />
+                    <input
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      type="password"
+                      placeholder="••••••••"
+                      required
+                      className={`input-modern has-icon h-14 ${formError ? 'border-error/50 ring-1 ring-error/20' : ''}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {formError && (
+              <p className="text-[10px] text-error font-bold uppercase tracking-widest text-center">{formError}</p>
             )}
-          </motion.button>
-        </form>
 
-        <motion.div
-          className="text-center mt-6 text-cyan-100 text-sm space-y-1"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-        >
-          <p>
-            Already have an account?{" "}
-            <Link
-              href="/login"
-              className="text-cyan-300 hover:text-white font-semibold transition-colors"
+            <button
+              disabled={loading || !!formError}
+              type="submit"
+              className="btn-primary w-full h-14 text-sm uppercase tracking-widest font-black flex items-center justify-center gap-2 group"
             >
-              Sign in here
-            </Link>
-          </p>
-          <p className="text-xs text-cyan-200/70">
-            By creating an account, you agree to our{" "}
-            <Link
-              href="/terms"
-              className="text-cyan-300 hover:underline transition-colors"
-            >
-              Terms of Service
-            </Link>
-          </p>
-        </motion.div>
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  Create Account
+                  <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="text-center pt-4 relative">
+            <p className="text-xs text-white/40">
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary font-bold hover:underline transition-all">
+                Sign In
+              </Link>
+            </p>
+          </div>
+        </div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

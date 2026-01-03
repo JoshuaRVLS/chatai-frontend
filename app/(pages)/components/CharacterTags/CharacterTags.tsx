@@ -5,6 +5,8 @@ import Select from "react-select";
 import React, { useEffect, useState } from "react";
 import { CharacterTag } from "@/app/generated/prisma";
 
+type TagOption = { label: string; value: string };
+
 const CharacterTags = ({
   selectedOptions,
   setSelectedOptions,
@@ -24,56 +26,85 @@ const CharacterTags = ({
 
   return (
     <Select
-      placeholder="Select tags"
+      placeholder="Select relevant tags..."
       name="tags"
       isMulti
       options={data?.map((tag) => ({ label: tag.name, value: tag.id })) || []}
-      className="input"
       value={selectedOptions}
-      onChange={(selectedOptions) => setSelectedOptions([...selectedOptions])}
+      onChange={(options) => setSelectedOptions([...(options as TagOption[])])}
       classNamePrefix={"select"}
       styles={{
-        control: (styles) => ({
+        control: (styles, { isFocused }) => ({
           ...styles,
-          backgroundColor: "black",
-          border: "none",
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
+          border: isFocused ? "1px solid rgba(56, 189, 248, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "12px",
+          padding: "4px",
+          boxShadow: isFocused ? "0 0 0 1px rgba(56, 189, 248, 0.2)" : "none",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            borderColor: "rgba(255, 255, 255, 0.2)",
+          }
         }),
         valueContainer: (styles) => ({
           ...styles,
-          padding: "10px",
+          padding: "8px 12px",
+        }),
+        input: (styles) => ({
+          ...styles,
+          color: "white",
+        }),
+        placeholder: (styles) => ({
+          ...styles,
+          color: "rgba(255, 255, 255, 0.2)",
+          fontSize: "13px",
+          fontWeight: "500",
         }),
         multiValue: (styles) => ({
           ...styles,
-          color: "purple",
-          backgroundColor: "black",
-          border: "1px solid gray",
-          padding: "5px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "rgba(56, 189, 248, 0.1)",
+          borderRadius: "8px",
+          padding: "2px 6px",
+          border: "1px solid rgba(56, 189, 248, 0.3)",
         }),
         multiValueLabel: (styles) => ({
           ...styles,
-          color: "white",
-          backgroundColor: "black",
-
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          color: "#38bdf8",
+          fontSize: "11px",
+          fontWeight: "800",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
         }),
-        option: (styles, { data, isDisabled, isFocused, isSelected }) => ({
+        multiValueRemove: (styles) => ({
           ...styles,
-          color: "white",
-          backgroundColor: isFocused ? "black" : "transparent",
+          color: "#38bdf8",
           ":hover": {
-            backgroundColor: "transparent",
-            border: "1px solid purple",
-            cursor: "pointer",
-            transition: "background-color 0.3s ease",
+            backgroundColor: "rgba(56, 189, 248, 0.2)",
+            color: "white",
+            borderRadius: "6px",
           },
         }),
         menu: (styles) => ({
           ...styles,
-          backgroundColor: "black",
-          border: "1px solid gray",
-          padding: "5px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "rgba(15, 23, 42, 0.95)",
+          backdropFilter: "blur(20px)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginTop: "8px",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+        }),
+        option: (styles, { isFocused, isSelected }) => ({
+          ...styles,
+          backgroundColor: isSelected ? "#38bdf8" : isFocused ? "rgba(255, 255, 255, 0.05)" : "transparent",
+          color: isSelected ? "#0f172a" : "white",
+          fontSize: "13px",
+          fontWeight: isSelected ? "800" : "500",
+          cursor: "pointer",
+          padding: "12px 16px",
+          active: {
+            backgroundColor: "rgba(56, 189, 148, 0.2)",
+          }
         }),
       }}
     />

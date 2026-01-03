@@ -35,7 +35,9 @@ export const authOptions: NextAuthOptions = {
           console.log("Logged in");
           return {
             id: data.userId as string,
+            name: data.username as string,
             username: data.username as string,
+            image: data.hasPicture ? `/api/users/picture/${data.userId}` : null,
           };
         } catch (error) {
           if (error instanceof Error) {

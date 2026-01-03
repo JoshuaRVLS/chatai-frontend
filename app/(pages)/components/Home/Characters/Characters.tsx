@@ -3,12 +3,13 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import CharacterCard from "../../CharacterCard/CharacterCard";
-import { CharactersData } from "@/@types/type";
 import { motion, AnimatePresence } from "motion/react";
-import { FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
+import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid } from "react-icons/fi";
 
-const Characters = () => {
-  const { isPending, error, data, refetch } = useQuery<CharactersData>({
+const Characters = ({ searchQuery }: { searchQuery: string }) => {
+  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+
+  const { isPending, error, data, refetch } = useQuery<any[]>({
     queryKey: ["characters"],
     queryFn: () =>
       fetch("/api/characters").then((res) =>
@@ -16,188 +17,125 @@ const Characters = () => {
       ),
   });
 
-  // =========================
-  // 💠 Pending (Loading)
-  // =========================
+  // Extract unique tags
+  const allTags = React.useMemo(() => {
+    if (!data) return [];
+    const tags = new Set<string>();
+    data.forEach(char => {
+      char.tags.forEach((tag: any) => tags.add(tag.name));
+    });
+    return Array.from(tags).sort();
+  }, [data]);
+
+  const filteredData = data?.filter((char) => {
+    const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      char.tags.some((tag: any) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesTag = !selectedTag || char.tags.some((tag: any) => tag.name === selectedTag);
+
+    return matchesSearch && matchesTag;
+  });
+
   if (isPending) {
     return (
-      <motion.div
-        className="flex flex-col gap-4 w-full pb-8 px-12"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <motion.h1
-          className="text-3xl font-semibold text-cyan-300 mb-2"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          Community Characters
-        </motion.h1>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="relative grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3"
-        >
+      <div className="flex flex-col gap-10 w-full px-6 md:px-12">
+        <div className="h-8 w-48 bg-white/5 rounded-xl shimmer" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {Array.from({ length: 10 }).map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{
-                opacity: [0.4, 1, 0.4],
-                scale: [0.95, 1, 0.95],
-              }}
-              transition={{
-                repeat: Infinity,
-                duration: 2,
-                delay: i * 0.1,
-                ease: "easeInOut",
-              }}
-              className="card bg-[rgba(10,20,25,0.8)] border border-cyan-400/20 rounded-xl overflow-hidden backdrop-blur-md"
-            >
-              <div className="aspect-[4/3] bg-cyan-400/10 shimmer relative overflow-hidden">
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400/20 to-transparent"
-                  animate={{
-                    x: ["-100%", "100%"],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2,
-                    ease: "linear",
-                  }}
-                />
-              </div>
-              <div className="p-4 space-y-2">
-                <div className="h-4 bg-cyan-400/10 rounded shimmer"></div>
-                <div className="h-3 bg-cyan-400/10 rounded w-3/4 shimmer"></div>
-                <div className="h-3 bg-cyan-400/10 rounded w-1/2 shimmer"></div>
-              </div>
-            </motion.div>
+            <div key={i} className="h-[450px] rounded-[2rem] bg-white/5 shimmer border border-white/5" />
           ))}
-        </motion.div>
-
-        <motion.p
-          className="text-cyan-400/70 text-sm text-center mt-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          Loading community creations...
-        </motion.p>
-      </motion.div>
+        </div>
+      </div>
     );
   }
 
-  // =========================
-  // ❌ Error Animation
-  // =========================
   if (error) {
     return (
-      <motion.div
-        className="flex flex-col items-center justify-center py-24 gap-4 text-center"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <motion.div
-          animate={{
-            x: [-10, 10, -8, 8, 0],
-          }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center"
-        >
-          <div className="p-4 bg-red-500/10 rounded-full border border-red-500/30">
-            <FiAlertTriangle className="text-red-400 w-10 h-10" />
-          </div>
-          <h3 className="text-lg font-semibold text-red-400 mt-3">
-            Failed to load characters
-          </h3>
-          <p className="text-red-400/70 text-sm">
-            {error.message || "Something went wrong fetching the data."}
-          </p>
-        </motion.div>
-
-        <motion.button
-          onClick={() => refetch()}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-4 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold flex items-center gap-2 shadow-lg"
-        >
-          <FiRefreshCw className="animate-spin-slow" /> Retry
-        </motion.button>
-      </motion.div>
+      <div className="flex flex-col items-center justify-center py-32 gap-6 text-center">
+        <div className="w-16 h-16 rounded-3xl bg-error/10 flex items-center justify-center">
+          <FiAlertTriangle className="text-error w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h3 className="text-xl font-black uppercase tracking-tighter text-white italic">Node Connectivity Lost</h3>
+          <p className="text-white/40 text-sm max-w-xs mx-auto">Unable to establish connection with the central character database.</p>
+        </div>
+        <button onClick={() => refetch()} className="btn-primary px-8 py-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+          <FiRefreshCw /> Initialize Reconnect
+        </button>
+      </div>
     );
   }
 
-  // =========================
-  // ✅ Main Grid
-  // =========================
-  const shouldAnimate = !!data && data.length > 0;
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
-
-  // ✅ Fixed section of your Characters component
   return (
-    <motion.div
-      className="flex flex-col gap-4 w-full pb-8 px-12"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6 }}
-    >
-      <motion.h1
-        className="text-3xl font-semibold text-cyan-300 mb-2"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        Community Characters
-      </motion.h1>
+    <div className="flex flex-col gap-10 w-full px-6 md:px-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-4">
+          <h2 className="text-4xl font-black uppercase tracking-tighter text-white/90 italic flex items-center gap-4">
+            <span className="w-12 h-1 bg-primary rounded-full" />
+            {searchQuery ? `Search: "${searchQuery}"` : "Community Characters"}
+          </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 w-full">
-        {data?.map((character, index) => (
-          <motion.div
-            key={character.id}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.08, duration: 0.5 }}
-            whileHover={{
-              scale: 1.05,
-              boxShadow: "0 10px 30px rgba(0, 255, 255, 0.3)",
-            }}
-          >
-            <CharacterCard
-              characterName={character.name}
-              image={
-                character.photo?.data
-                  ? `data:${character.photo.mimetype};base64,${Buffer.from(
-                      Object.values(character.photo.data)
-                    ).toString("base64")}`
-                  : null
-              }
-              characterId={character.id}
-              characterBio={character.bio}
-              authorName={character.author.username}
-              tags={character.tags}
-            />
-          </motion.div>
-        ))}
+          {/* Tag Filter Chips */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedTag(null)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === null
+                ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(56,189,248,0.2)]"
+                : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+                }`}
+            >
+              <FiGrid size={12} /> All
+            </button>
+            {allTags.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === tag
+                  ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(56,189,248,0.2)]"
+                  : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+                  }`}
+              >
+                <FiHash size={12} /> {tag}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-    </motion.div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+        <AnimatePresence mode="popLayout">
+          {filteredData?.map((character, index) => (
+            <motion.div
+              key={character.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+            >
+              <CharacterCard
+                characterName={character.name}
+                image={`/api/image/${character.id}`}
+                characterId={character.id}
+                characterBio={character.bio}
+                authorName={character.author.username}
+                tags={character.tags}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {filteredData?.length === 0 && (
+        <div className="py-20 text-center space-y-4">
+          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-white/20">
+            <FiAlertTriangle size={32} />
+          </div>
+          <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
+        </div>
+      )}
+    </div>
   );
 };
 

@@ -1,261 +1,152 @@
 "use client";
-import {
-  Character,
-  CharacterImage,
-  Chat,
-  Message,
-  User,
-} from "@/app/generated/prisma";
+
 import { useQuery } from "@tanstack/react-query";
-import { useCanvasGlow } from "@/app/(pages)/hooks/useCanvasGlow";
-import React, { useContext } from "react";
-import { AuthContext } from "@/app/(pages)/providers/AuthProvider";
+import React, { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  FiMessageCircle,
-  FiClock,
-  FiArrowRight,
   FiPlay,
-  FiAlertTriangle,
-  FiRefreshCw,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "motion/react";
+import Image from "next/image";
 
 const History = () => {
-  const { user } = useContext(AuthContext);
-  const glowRef = useCanvasGlow();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
 
-  const { isPending, data, error, refetch } = useQuery<
-    (Chat & {
-      character: Character & {
-        photo: CharacterImage;
-        author: User;
-        tags?: { name: string; id: string }[];
-      };
-      messages: Message[];
-    })[]
-  >({
+  const { isPending, data, error } = useQuery<any[]>({
     queryKey: ["chatsHistory"],
-    queryFn: () =>
-      fetch(`/api/history/${user?.id}`).then((res) =>
-        res.json().then((data) => data.data)
-      ),
-    enabled: !!user?.id,
+    queryFn: async () => {
+      const resp = await fetch("/api/chats");
+      if (!resp.ok) throw new Error("Failed to fetch chats");
+      const json = await resp.json();
+      return json.chats || [];
+    },
+    staleTime: 1000 * 60 * 5,
   });
 
-  // ✅ Loading (Pending) State
-  if (isPending)
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+      setShowLeftArrow(scrollLeft > 20);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 20);
+    }
+  };
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      // Initial check
+      handleScroll();
+    }
+    return () => container?.removeEventListener("scroll", handleScroll);
+  }, [data]);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = direction === "left" ? -400 : 400;
+      scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  if (isPending) {
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative w-full mb-12 px-12 py-12 flex flex-col items-center justify-center"
-      >
-        {/* Glow canvas */}
-        <canvas
-          ref={glowRef}
-          className="absolute inset-0 w-full h-full pointer-events-none z-0"
-        />
-        <motion.div
-          animate={{
-            opacity: [0.4, 1, 0.4],
-            scale: [1, 1.05, 1],
-          }}
-          transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-          className="w-24 h-24 rounded-full bg-cyan-400/10 border border-cyan-400/20 absolute"
-        ></motion.div>
-
-        <div className="relative z-10 w-full max-w-5xl">
-          <div className="animate-pulse mb-8">
-            <div className="h-8 bg-cyan-900/30 rounded w-1/3 mb-6"></div>
-            <div className="flex gap-4 overflow-hidden">
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="min-w-64 h-80 bg-cyan-900/20 border border-cyan-400/20 rounded-2xl"
-                />
-              ))}
-            </div>
-          </div>
-
-          <p className="text-cyan-400/60 text-sm text-center">
-            Loading your conversations...
-          </p>
-        </div>
-      </motion.div>
-    );
-
-  // ❌ Error State
-  if (error)
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="w-full py-24 flex flex-col items-center justify-center text-center space-y-4"
-      >
-        <motion.div
-          animate={{ x: [-10, 10, -8, 8, 0] }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col items-center"
-        >
-          <div className="p-4 bg-red-500/10 rounded-full border border-red-500/30">
-            <FiAlertTriangle className="text-red-400 w-10 h-10" />
-          </div>
-          <h3 className="text-lg font-semibold text-red-400 mt-3">
-            Error loading chat history
-          </h3>
-          <p className="text-red-400/70 text-sm max-w-sm">
-            {error.message || "Something went wrong fetching your chats."}
-          </p>
-        </motion.div>
-
-        <motion.button
-          onClick={() => refetch()}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-4 px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-semibold flex items-center gap-2 shadow-lg"
-        >
-          <FiRefreshCw className="animate-spin-slow" /> Retry
-        </motion.button>
-      </motion.div>
-    );
-
-  // No history — don’t render anything
-  if (!data || data.length === 0) return null;
-
-  // ✅ Main Section
-  return (
-    <div className="relative w-full mb-12 px-12">
-      {/* Canvas Glow Layer */}
-      <canvas
-        ref={glowRef}
-        className="absolute inset-0 w-full h-full pointer-events-none z-0"
-      />
-
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="relative z-10 flex items-center justify-between mb-6"
-      >
-        <div>
-          <h2 className="text-3xl font-bold text-cyan-300 mb-2 drop-shadow-[0_0_10px_rgba(0,255,255,0.4)]">
-            Continue Chatting
-          </h2>
-          <p className="text-cyan-200/70 flex items-center gap-2 text-sm">
-            <FiClock className="w-4 h-4" /> Pick up where you left off
-          </p>
-        </div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="hidden lg:flex items-center gap-2 text-cyan-400/40 text-sm"
-        >
-          <FiArrowRight className="w-4 h-4 animate-pulse" />
-          Scroll horizontally to browse
-        </motion.div>
-      </motion.div>
-
-      {/* Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="relative z-10"
-      >
-        <div className="flex gap-6 pb-4 overflow-x-auto scrollbar-hide">
-          {data.map((chat, index) => (
-            <motion.div
-              key={chat.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{
-                y: -10,
-                boxShadow: "0 0 25px rgba(0,255,255,0.3)",
-                borderColor: "rgba(0,255,255,0.6)",
-              }}
-              className="flex flex-col min-w-64 max-w-64 rounded-2xl overflow-hidden border border-cyan-400/20 
-                         bg-[rgba(15,20,25,0.65)] backdrop-blur-lg transition-all duration-300 flex-shrink-0"
-            >
-              {/* Image */}
-              <div className="relative aspect-square overflow-hidden">
-                {chat.character.photo?.data ? (
-                  <motion.img
-                    src={`data:${
-                      chat.character.photo.mimetype
-                    };base64,${Buffer.from(
-                      Object.values(chat.character.photo.data)
-                    ).toString("base64")}`}
-                    alt={chat.character.name}
-                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center w-full h-full bg-cyan-900/20">
-                    <FiMessageCircle className="text-cyan-400 w-8 h-8" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-60"></div>
-              </div>
-
-              {/* Info */}
-              <div className="flex-1 p-4 flex flex-col justify-between">
-                <div>
-                  <h3 className="font-semibold text-cyan-300 text-sm line-clamp-1 mb-1">
-                    {chat.character.name}
-                  </h3>
-                  <p className="text-gray-400 text-xs line-clamp-2 leading-relaxed">
-                    {chat.character.bio}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 text-cyan-400/60 text-xs mt-2">
-                  <FiMessageCircle className="w-3 h-3" />
-                  <span>{chat.messages.length} messages</span>
-                </div>
-              </div>
-
-              {/* Action */}
-              <div className="border-t border-cyan-400/20 bg-cyan-900/20 p-3">
-                {chat.messages.length > 0 && (
-                  <div className="mb-2">
-                    <p className="text-[10px] text-cyan-400/60 mb-1">
-                      Last message:
-                    </p>
-                    <p className="text-xs text-cyan-200/80 line-clamp-2 bg-cyan-400/10 p-2 rounded border border-cyan-400/20">
-                      {chat.messages[chat.messages.length - 1].content}
-                    </p>
-                  </div>
-                )}
-                <Link
-                  href={`/chat/${chat.id}`}
-                  className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white py-2 px-3 rounded-lg 
-                             hover:from-cyan-500 hover:to-blue-600 transition-all duration-300 
-                             flex items-center justify-center gap-2 text-sm font-medium"
-                >
-                  <FiPlay className="w-3 h-3" /> Continue
-                </Link>
-              </div>
-            </motion.div>
+      <div className="flex flex-col gap-10 px-6 md:px-12 py-8">
+        <div className="h-6 w-40 bg-white/5 rounded-full shimmer" />
+        <div className="flex gap-8 overflow-hidden">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="min-w-[320px] h-44 rounded-[2rem] bg-white/5 shimmer border border-white/5" />
           ))}
         </div>
-      </motion.div>
+      </div>
+    );
+  }
 
-      {/* Mobile Hint */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="lg:hidden text-center mt-4 text-cyan-400/50 text-xs flex items-center justify-center gap-2"
+  if (error) return null;
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-8 px-6 md:px-12 py-8 relative group/history">
+      <div className="flex items-center justify-between">
+        <h2 className="text-4xl font-black uppercase tracking-tighter text-white/90 italic flex items-center gap-4">
+          <span className="w-12 h-1 bg-primary rounded-full" />
+          Chat History
+        </h2>
+
+        <div className="hidden md:flex items-center gap-2">
+          <button
+            onClick={() => scroll("left")}
+            disabled={!showLeftArrow}
+            className={`p-2 rounded-xl bg-white/5 border border-white/10 text-white transition-all ${showLeftArrow ? "opacity-100 hover:bg-primary hover:text-slate-950 hover:border-primary" : "opacity-0 pointer-events-none"
+              }`}
+          >
+            <FiChevronLeft size={16} />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            disabled={!showRightArrow}
+            className={`p-2 rounded-xl bg-white/5 border border-white/10 text-white transition-all ${showRightArrow ? "opacity-100 hover:bg-primary hover:text-slate-950 hover:border-primary" : "opacity-0 pointer-events-none"
+              }`}
+          >
+            <FiChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollContainerRef}
+        className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide -mx-6 px-6 snap-x"
       >
-        <FiArrowRight className="w-3 h-3 animate-bounce-x" />
-        Swipe to see more conversations
-      </motion.div>
+        {data.map((chat, index) => (
+          <Link
+            key={chat.id}
+            href={`/chat/${chat.id}`}
+            className="group flex-shrink-0 w-[340px] snap-start"
+          >
+            <motion.div
+              className="relative h-44 flex gap-6 p-5 items-center rounded-[2rem] border border-white/5 bg-[#0f172a]/40 backdrop-blur-md hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(56,189,248,0.1)]"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5 shadow-xl">
+                <Image
+                  src={`/api/image/${chat.character.id}`}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  alt={chat.character.name}
+                  sizes="112px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/40 to-transparent" />
+              </div>
+
+              <div className="flex flex-col justify-between flex-1 min-w-0 h-full py-2">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-white truncate group-hover:text-primary transition-colors tracking-tight italic uppercase">
+                    {chat.character.name}
+                  </h3>
+                  <p className="text-[11px] text-white/40 line-clamp-2 leading-relaxed font-medium">
+                    {chat.messages[0]?.content || "No active signal detected."}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between mt-4">
+                  <div className="flex items-center gap-2 text-[9px] text-primary/60 uppercase tracking-widest font-black">
+                    <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+                    {chat._count?.messages || chat.messages.length} Packets
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-slate-950 scale-0 group-hover:scale-100 transition-transform">
+                    <FiPlay size={10} className="fill-current ml-0.5" />
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 };

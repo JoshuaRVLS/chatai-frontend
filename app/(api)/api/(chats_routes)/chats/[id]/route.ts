@@ -18,7 +18,11 @@ export const GET = async (
             photo: true,
           },
         },
-        messages: true,
+        messages: {
+          orderBy: {
+            id: 'asc'
+          }
+        },
         user: {
           include: {
             profileImage: true,
@@ -34,7 +38,6 @@ export const GET = async (
         updatedAt: new Date(),
       },
     });
-    console.log(chat);
     return NextResponse.json({ success: true, data: chat }, { status: 200 });
   } catch (error) {
     console.log(error);

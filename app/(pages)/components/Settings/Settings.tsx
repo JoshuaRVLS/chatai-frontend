@@ -5,16 +5,16 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../providers/AuthProvider";
 import { User } from "@/app/generated/prisma";
 import {
-  FiEdit,
   FiLock,
   FiUser,
-  FiMail,
   FiTrash2,
   FiCamera,
+  FiCpu,
+  FiShield,
+  FiChevronRight,
 } from "react-icons/fi";
 import { Image } from "@/@types/type";
 import { motion, AnimatePresence } from "motion/react";
-import SettingsSection from "./SettingsSections";
 import Security from "./Security";
 import Profile from "./Profile";
 import toast from "react-hot-toast";
@@ -24,8 +24,9 @@ import AiSettings from "./AiSettings";
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
-  const [activeSection, setActiveSection] = useState("profile");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // State for modal
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const router = useRouter();
 
   const { data, isPending, error } = useQuery<User & { profileImage: Image }>({
     queryKey: ["settingsData"],
@@ -36,229 +37,131 @@ const Settings = () => {
     enabled: !!user?.id,
   });
 
-  const router = useRouter();
-
-  const deleteAccount = async () => {
+  const handleDeleteAccount = async () => {
     try {
       const response = await fetch(`/api/users/${user?.id}`, {
         method: "DELETE",
       });
-      const data = await response.json();
       if (response.ok) {
-        toast.success(data.message || "Account deleted successfully");
+        toast.success("Account deleted successfully");
         router.push("/login");
       } else {
-        toast.error(data.message || "Failed to delete account");
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to delete account");
       }
-    } catch (error) {
-      console.error("Error deleting account:", error);
+    } catch (err) {
+      console.error("Error deleting account:", err);
+      toast.error("An error occurred. Please try again.");
     }
   };
 
-  const handleDeleteConfirm = () => {
-    setIsDeleteModalOpen(false); // Close modal
-    deleteAccount(); // Proceed with deletion
-  };
+  const tabs = [
+    { id: "profile", label: "Profile", icon: <FiUser />, description: "Public details and bio" },
+    { id: "ai-settings", label: "AI Engine", icon: <FiCpu />, description: "Models and API keys" },
+    { id: "security", label: "Security", icon: <FiShield />, description: "Password and safety" },
+  ];
 
-  if (isPending)
+  if (isPending) {
     return (
-      <motion.div
-        className="min-h-screen bg-var-color-primary-background pt-24 px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 bg-var-color-borders rounded w-1/3 mb-6"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <motion.div
-                  key={i}
-                  className="h-20 bg-var-color-borders rounded-lg"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.1, duration: 0.4 }}
-                ></motion.div>
-              ))}
-            </div>
+      <div className="min-h-screen pt-32 px-6 flex justify-center">
+        <div className="w-full max-w-5xl animate-pulse space-y-8">
+          <div className="h-12 w-48 bg-white/5 rounded-xl" />
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
+            <div className="h-64 bg-white/5 rounded-2xl" />
+            <div className="h-[500px] bg-white/5 rounded-2xl" />
           </div>
         </div>
-      </motion.div>
+      </div>
     );
-
-  if (error)
-    return (
-      <motion.div
-        className="min-h-screen bg-var-color-primary-background pt-24 px-4 flex items-center justify-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="text-center">
-          <p className="text-var-color-error text-lg">
-            Error loading settings: {error.message}
-          </p>
-        </div>
-      </motion.div>
-    );
+  }
 
   return (
-    <motion.div
-      className="min-h-screen bg-var-color-primary-background pt-24 pb-8 px-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen pt-32 pb-20 px-6">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-var-color-primary-text mb-2">
+        <header className="mb-12">
+          <motion.h1
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-4xl font-bold tracking-tight text-white mb-2"
+          >
             Settings
-          </h1>
-          <p className="text-var-color-secondary-text">
-            Manage your account settings and preferences
-          </p>
-        </motion.div>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-white/40"
+          >
+            Manage your digital presence and AI preferences.
+          </motion.p>
+        </header>
 
-        {/* Profile Card */}
-        <motion.div
-          className="bg-var-color-for-dark-surface rounded-lg border border-var-color-borders p-6 mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          whileHover={{ boxShadow: "0 10px 30px rgba(0, 196, 179, 0.2)" }}
-        >
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              {data?.profileImage ? (
-                <motion.img
-                  src={`data:${data.profileImage.mimetype};base64,${Buffer.from(
-                    Object.values(data.profileImage.data)
-                  ).toString("base64")}`}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-var-color-borders"
-                  alt="Profile"
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              ) : (
-                <motion.div
-                  className="w-16 h-16 rounded-full bg-gradient-to-br from-var-color-primary-button to-var-color-secondary-button flex items-center justify-center text-white font-semibold text-lg"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ duration: 0.2 }}
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-10">
+          {/* Sidebar Nav */}
+          <aside className="space-y-6">
+            <nav className="flex flex-col gap-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left group ${activeTab === tab.id
+                      ? "bg-primary/10 border border-primary/20 text-primary"
+                      : "hover:bg-white/5 border border-transparent text-white/50"
+                    }`}
                 >
-                  {data?.username?.charAt(0).toUpperCase()}
-                </motion.div>
-              )}
-              <motion.button
-                className="absolute -bottom-1 -right-1 bg-var-color-primary-button text-white p-1.5 rounded-full border-2 border-var-color-for-dark-surface hover:bg-var-color-primary-hover-state transition-colors"
-                whileHover={{
-                  scale: 1.1,
-                  boxShadow: "0 5px 15px rgba(0, 196, 179, 0.3)",
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <FiCamera size={14} />
-              </motion.button>
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-semibold text-var-color-primary-text">
-                {data?.username}
-              </h2>
-              <p className="text-var-color-secondary-text">{data?.email}</p>
-              <p className="text-sm text-var-color-disabled mt-1">
-                Member since 2024
-              </p>
-            </div>
-          </div>
-        </motion.div>
+                  <div className={`text-xl transition-transform duration-300 ${activeTab === tab.id ? "scale-110" : "group-hover:scale-110"}`}>
+                    {tab.icon}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`font-bold text-sm ${activeTab === tab.id ? "text-white" : ""}`}>{tab.label}</p>
+                    <p className="text-[10px] opacity-60 uppercase tracking-widest mt-0.5">{tab.description}</p>
+                  </div>
+                  {activeTab === tab.id && <FiChevronRight />}
+                </button>
+              ))}
+            </nav>
 
-        {/* Settings Sections */}
-        <motion.div
-          className="space-y-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          {/* Profile Information */}
-          <SettingsSection
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            title="Profile Information"
-            icon={<FiUser className="w-5 h-5" />}
-            id="profile"
-          >
-            <Profile data={data} />
-          </SettingsSection>
+            <div className="h-px bg-white/5 mx-4" />
 
-          <SettingsSection
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            title="AI Settings"
-            icon={<FiUser className="w-5 h-5" />}
-            id="ai-settings"
-          >
-            <AiSettings data={data} />
-          </SettingsSection>
-
-          {/* Security */}
-          <SettingsSection
-            activeSection={activeSection}
-            setActiveSection={setActiveSection}
-            title="Security"
-            icon={<FiLock className="w-5 h-5" />}
-            id="security"
-          >
-            <Security />
-          </SettingsSection>
-
-          {/* Danger Zone */}
-          <motion.div
-            className="bg-var-color-for-dark-surface rounded-lg border border-var-color-error overflow-hidden"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            whileHover={{ boxShadow: "0 10px 30px rgba(244, 67, 54, 0.2)" }}
-          >
-            <div className="px-6 py-4">
-              <div className="flex items-center gap-3 mb-2">
-                <FiTrash2 className="w-5 h-5 text-var-color-error" />
-                <h3 className="text-lg font-semibold text-var-color-error">
-                  Danger Zone
-                </h3>
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left group hover:bg-error/10 border border-transparent hover:border-error/20 text-white/30 hover:text-error"
+            >
+              <div className="text-xl group-hover:scale-110 transition-transform"><FiTrash2 /></div>
+              <div className="flex-1">
+                <p className="font-bold text-sm">Danger Zone</p>
+                <p className="text-[10px] uppercase tracking-widest mt-0.5">Delete account</p>
               </div>
-              <p className="text-var-color-secondary-text text-sm mb-4">
-                Once you delete your account, there is no going back. Please be
-                certain.
-              </p>
-              <motion.button
-                className="px-6 py-2 bg-var-color-error text-white rounded-lg hover:bg-red-600 transition-colors"
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 20px rgba(244, 67, 54, 0.3)",
-                }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setIsDeleteModalOpen(true)} // Open modal instead of direct delete
+            </button>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="relative">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                className="card-premium min-h-[500px] border border-white/5"
               >
-                Delete Account
-              </motion.button>
-            </div>
-          </motion.div>
-        </motion.div>
+                {activeTab === "profile" && <Profile data={data!} />}
+                {activeTab === "ai-settings" && <AiSettings data={data!} />}
+                {activeTab === "security" && <Security />}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
       <DeleteConfirmation
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={handleDeleteAccount}
       />
-    </motion.div>
+    </div>
   );
 };
 

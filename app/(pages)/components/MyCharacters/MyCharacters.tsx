@@ -13,6 +13,7 @@ import { CharactersData } from "@/@types/type"; // adjust the import path to you
 const MyCharacters: React.FC = () => {
   const { user } = useContext(AuthContext);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { isPending, data, error } = useQuery<CharactersData>({
     queryKey: ["myCharacters", user?.id],
@@ -23,6 +24,11 @@ const MyCharacters: React.FC = () => {
     },
     enabled: !!user?.id,
   });
+
+  const filteredCharacters = data?.filter((char) =>
+    char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    char.tags.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   useEffect(() => {
     if (data && !hasAnimated) setHasAnimated(true);
@@ -55,35 +61,27 @@ const MyCharacters: React.FC = () => {
 
   // Animation variants
   const containerVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, staggerChildren: 0.05, ease: "easeOut" },
+      transition: { staggerChildren: 0.1 },
     },
   };
 
   const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 30, rotateX: -10 },
-    show: {
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 },
   };
 
   if (isPending)
     return (
-      <div className="min-h-screen bg-[var(--color-primary-background)] pt-24 px-6 animate-pulse">
-        <div className="max-w-7xl mx-auto">
-          <div className="h-8 bg-var-color-borders rounded w-1/2 mb-6"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="min-h-screen bg-[#020617] pt-32 px-6">
+        <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+          <div className="h-12 bg-white/5 rounded-2xl w-1/4" />
+          <div className="h-64 bg-white/5 rounded-[2.5rem]" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="h-80 bg-var-color-borders rounded-xl"
-              ></div>
+              <div key={i} className="h-80 bg-white/5 rounded-[2.5rem]" />
             ))}
           </div>
         </div>
@@ -92,168 +90,164 @@ const MyCharacters: React.FC = () => {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-primary-background)] pt-20 px-6">
-        <p className="text-var-color-error text-lg">Error loading characters</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] pt-20 px-6">
+        <p className="text-red-400 text-lg font-black uppercase tracking-widest">Error syncing neural data</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[var(--color-primary-background)] pt-24 pb-12 px-6 sm:px-12">
+    <div className="min-h-screen bg-[#020617] pt-32 pb-20 px-6 sm:px-12 relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full animate-pulse" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full" />
+      </div>
+
       <motion.div
         key="characters-page"
-        initial={!hasAnimated ? { opacity: 0, y: 15 } : false}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="max-w-7xl mx-auto flex flex-col gap-10"
+        className="max-w-7xl mx-auto relative z-10"
       >
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-var-color-primary-text mb-2">
-              My Characters
-            </h1>
-            <p className="text-var-color-secondary-text text-sm sm:text-base">
-              Manage your AI characters and create new ones
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+              <h1 className="text-5xl sm:text-7xl font-black text-white italic tracking-tighter uppercase leading-none">
+                My Characters
+              </h1>
+            </div>
+            <p className="text-white/30 text-xs sm:text-sm font-black uppercase tracking-[0.3em] ml-5 leading-loose">
+              Neural Entities • Control Center • {data?.length || 0} Records Found
             </p>
           </div>
-          <motion.div whileHover={{ scale: 1.05 }}>
+
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               href="/create_character"
-              className="bg-[var(--color-primary-button)] text-white px-5 sm:px-6 py-3 rounded-lg hover:bg-[var(--color-primary-hover-state)] shadow-lg flex items-center justify-center gap-2 font-semibold"
+              className="group relative px-8 py-5 bg-primary text-slate-950 rounded-[1.5rem] font-black uppercase tracking-widest text-xs flex items-center gap-3 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
             >
-              <FaPlus className="w-4 h-4" />
-              Create New
+              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+              <FaPlus className="relative z-10" />
+              <span className="relative z-10">Deploy New Entity</span>
             </Link>
           </motion.div>
         </div>
 
-        {/* Stats */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-        >
-          <div className="bg-[var(--color-for-dark-surface)] border border-[var(--color-borders)] rounded-xl p-5 flex items-center gap-4 backdrop-blur-xl">
-            <div className="p-3 bg-[var(--color-primary-button)] rounded-lg">
-              <FaRobot className="text-white w-6 h-6" />
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+          {/* Stats & Search Column */}
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl">
+              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6">Search Database</p>
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder="Enter character name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-primary/50 focus:bg-white/10 transition-all text-sm"
+                />
+                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-white/10 group-focus-within:text-primary transition-colors">
+                  <FaRobot />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-bold text-[var(--color-primary-text)]">
-                {data?.length || 0}
-              </p>
-              <p className="text-[var(--color-secondary-text)] text-sm">
-                Total Characters
-              </p>
+
+            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl">
+              <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-6">Archive Statistics</p>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black text-white/40 uppercase">Total Entities</span>
+                  <span className="text-2xl font-black text-white italic tracking-tighter">{data?.length || 0}</span>
+                </div>
+                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    className="h-full bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </motion.div>
 
-        {/* Character Grid */}
-        {data && data.length > 0 ? (
-          <motion.div
-            key={data?.length}
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            {data.map((character) => (
+          {/* List Column */}
+          <div className="lg:col-span-8">
+            {filteredCharacters && filteredCharacters.length > 0 ? (
               <motion.div
-                key={character.id}
-                variants={cardVariants}
-                whileHover={{
-                  scale: 1.03,
-                  rotateX: 2,
-                  boxShadow: "0 8px 25px rgba(0,196,179,0.25)",
-                }}
-                transition={{ type: "spring", stiffness: 250, damping: 15 }}
-                className="group relative bg-[var(--color-for-dark-surface)] border border-[var(--color-borders)] rounded-xl overflow-hidden transition-all duration-300"
+                variants={containerVariants}
+                initial="hidden"
+                animate="show"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-6"
               >
-                <CharacterCard
-                  characterName={character.name}
-                  image={
-                    character.photo?.data
-                      ? `data:${character.photo.mimetype};base64,${Buffer.from(
-                          Object.values(character.photo.data)
-                        ).toString("base64")}`
-                      : null
-                  }
-                  characterId={character.id}
-                  characterBio={character.bio}
-                  authorName={character.author.username}
-                  tags={character.tags}
-                />
-
-                {/* Desktop Hover Buttons */}
-                <div className="hidden sm:flex absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 gap-2">
-                  <Link
-                    href={`/edit_character/${character.id}`}
-                    className="p-2 bg-[var(--color-for-dark-surface)]/80 backdrop-blur-sm border border-[var(--color-borders)] rounded-lg hover:bg-[var(--color-primary-button)] hover:text-white transition-colors shadow-md"
-                    title="Edit character"
+                {filteredCharacters.map((character) => (
+                  <motion.div
+                    key={character.id}
+                    variants={cardVariants}
+                    className="group relative"
                   >
-                    <FaPencilAlt className="w-3 h-3" />
-                  </Link>
-                  <button
-                    onClick={() => deleteChar(character.id, character.name)}
-                    className="p-2 bg-[var(--color-for-dark-surface)]/80 backdrop-blur-sm border border-[var(--color-borders)] rounded-lg hover:bg-[var(--color-error)] hover:text-white transition-colors shadow-md"
-                    title="Delete character"
-                  >
-                    <FaTrash className="w-3 h-3" />
-                  </button>
-                </div>
+                    <div className="relative z-10">
+                      <CharacterCard
+                        characterName={character.name}
+                        image={
+                          character.photo?.data
+                            ? `data:${character.photo.mimetype};base64,${Buffer.from(
+                              Object.values(character.photo.data)
+                            ).toString("base64")}`
+                            : null
+                        }
+                        characterId={character.id}
+                        characterBio={character.bio}
+                        authorName={character.author.username}
+                        tags={character.tags}
+                      />
+                    </div>
 
-                {/* Mobile Action Bar */}
-                <div className="sm:hidden border-t border-[var(--color-borders)] bg-[var(--color-primary-background)]/80 p-3">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/edit_character/${character.id}`}
-                      className="flex-1 bg-[var(--color-primary-button)] text-white py-2 px-3 rounded text-sm font-medium text-center flex items-center justify-center gap-1"
-                    >
-                      <FaPencilAlt className="w-3 h-3" />
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => deleteChar(character.id, character.name)}
-                      className="flex-1 bg-[var(--color-error)] text-white py-2 px-3 rounded text-sm font-medium text-center flex items-center justify-center gap-1"
-                    >
-                      <FaTrash className="w-3 h-3" />
-                      Delete
-                    </button>
+                    {/* Quick Controls overlay */}
+                    <div className="absolute top-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                      <Link
+                        href={`/edit_character/${character.id}`}
+                        className="w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/40 hover:text-primary hover:border-primary/40 transition-all"
+                        title="Modify DNA"
+                      >
+                        <FaPencilAlt size={14} />
+                      </Link>
+                      <button
+                        onClick={() => deleteChar(character.id, character.name)}
+                        className="w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/40 hover:text-red-400 hover:border-red-400/40 transition-all"
+                        title="Terminate Entity"
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="h-full flex items-center justify-center bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem] p-12 text-center"
+              >
+                <div className="max-w-xs space-y-6">
+                  <div className="w-20 h-20 mx-auto bg-white/5 border border-white/10 rounded-[2rem] flex items-center justify-center">
+                    <FaRobot className="text-white/10 text-3xl" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">
+                      Database Empty
+                    </h3>
+                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
+                      No neural entities matching your current search parameters.
+                    </p>
                   </div>
                 </div>
               </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          // Empty State
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center py-16"
-          >
-            <div className="max-w-md mx-auto px-4">
-              <div className="w-24 h-24 mx-auto mb-6 bg-[var(--color-borders)] rounded-full flex items-center justify-center">
-                <FaUser className="text-[var(--color-disabled)] w-10 h-10" />
-              </div>
-              <h3 className="text-2xl font-semibold text-[var(--color-primary-text)] mb-2">
-                No characters yet
-              </h3>
-              <p className="text-[var(--color-secondary-text)] mb-6">
-                Create your first AI character to start chatting and sharing
-                with the community.
-              </p>
-              <Link
-                href="/create_character"
-                className="bg-[var(--color-primary-button)] text-white px-6 py-3 rounded-lg hover:bg-[var(--color-primary-hover-state)] transition-all duration-200 inline-flex items-center justify-center gap-2 font-semibold"
-              >
-                <FaPlus className="w-4 h-4" />
-                Create Your First Character
-              </Link>
-            </div>
-          </motion.div>
-        )}
+            )}
+          </div>
+        </div>
       </motion.div>
     </div>
   );
