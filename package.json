@@ -24,7 +24,7 @@
     "jose": "^6.0.12",
     "locomotive-scroll": "^5.0.0-beta.21",
     "motion": "^12.23.6",
-    "next": "15.3.5",
+    "next": "15.3.8",
     "next-auth": "^4.24.11",
     "node-loader": "^2.1.0",
     "nodemailer": "^6.10.1",
