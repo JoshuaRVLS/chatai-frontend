@@ -31,8 +31,7 @@ export default function LoginPage() {
         return;
       }
       toast.success("Welcome back!");
-      router.refresh();
-      router.push("/");
+      window.location.href = "/";
     } catch {
       toast.error("Something went wrong");
     } finally {
