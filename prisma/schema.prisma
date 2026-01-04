@@ -61,6 +61,7 @@ model Character {
   bio String
   scenario String
   introMessage String
+  exampleConversations String?
   author User @relation(fields: [authorId], references: [id])
   authorId String
   chats Chat[]
@@ -114,6 +115,7 @@ model Message {
   id String @id @default(cuid()) @map("_id")
   content String 
   fromUser Boolean
+  pinned Boolean @default(false)
   chat Chat @relation(fields: [chatId], references: [id])
   chatId String 
 }

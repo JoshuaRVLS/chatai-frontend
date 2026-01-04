@@ -7,16 +7,22 @@ export async function generateMetadata({
 }: {
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
-  // Fetch your data (this will be deduped with the same call in the Page component)
-  const { data } = await fetch(
-    `${process.env.NEXTAUTH_URL}/api/chats/${(await params).id}`
-  ).then((res) => res.json());
+  try {
+    const { data } = await fetch(
+      `${process.env.NEXTAUTH_URL}/api/chats/${(await params).id}`
+    ).then((res) => res.json());
 
-  return {
-    title: `${data.character.name} | Character Chat`,
-    description: data.bio,
-    // other metadata...
-  };
+    if (!data?.character) {
+      return { title: "Chat | Character AI" };
+    }
+
+    return {
+      title: `${data.character.name} | Character Chat`,
+      description: data.character.bio,
+    };
+  } catch (err) {
+    return { title: "Chat | Character AI" };
+  }
 }
 
 

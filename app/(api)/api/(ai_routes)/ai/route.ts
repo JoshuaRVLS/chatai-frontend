@@ -30,6 +30,11 @@ export const POST = async (req: Request) => {
       content: message.content,
     })) || [];
 
+  const pinnedMessages = chat?.messages
+    .filter(m => m.pinned)
+    .map(m => `[PINNED MEMORY - ${m.fromUser ? 'USER' : 'CHAR'}]: ${m.content}`)
+    .join('\n') || "";
+
   // --- SUMMARIZATION LOGIC ---
   let contextSummary = chat?.summary || "";
   let contextMemory = chat?.memory || "";
@@ -144,8 +149,14 @@ ${chat?.character.persona}
 [SCENARIO]
 ${chat?.character.scenario}
  
+[CHARACTER'S OPENING STATEMENT]
+${chat?.character.introMessage}
+ 
+${chat?.character.exampleConversations ? `[DIALOGUE EXAMPLES]\n${chat?.character.exampleConversations}` : ''}
+ 
 ${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${contextSummary}` : ''}
 ${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${contextMemory}` : ''}
+${pinnedMessages ? `[PINNED IMPORTANT CONTEXT]\n${pinnedMessages}` : ''}
  
 [IMPORTANT RULES]
 1. MATURITY & GRAVITAS: Act with the maturity appropriate to your age and profession (e.g., embassy worker, adult). No "bocah" (childish) behavior. Avoid theatrical, overly dramatic, or generic AI-girlfriend over-reactions.

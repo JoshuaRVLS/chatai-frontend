@@ -70,6 +70,18 @@ export const POST = async (req: Request) => {
         character: true,
       },
     });
+
+    // Seed the first message with character's introMessage
+    if (chat.character.introMessage) {
+      await db.message.create({
+        data: {
+          content: chat.character.introMessage,
+          fromUser: false,
+          chatId: chat.id,
+        },
+      });
+    }
+
     return NextResponse.json({ success: true, chat }, { status: 201 });
   } catch (error) {
     console.log(error);

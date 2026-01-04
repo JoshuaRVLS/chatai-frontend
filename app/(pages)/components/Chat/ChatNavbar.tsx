@@ -13,6 +13,7 @@ interface ChatNavbarProps {
     onUndo: () => void;
     onClearHistory: () => void;
     onShowSettings: () => void;
+    onShowBrain: () => void;
     hasUndo: boolean;
 }
 
@@ -23,6 +24,7 @@ const ChatNavbar = ({
     onUndo,
     onClearHistory,
     onShowSettings,
+    onShowBrain,
     hasUndo,
 }: ChatNavbarProps) => {
     const router = useRouter();
@@ -55,6 +57,23 @@ const ChatNavbar = ({
             </div>
 
             <div className="flex items-center gap-2">
+                <button
+                    onClick={onShowBrain}
+                    className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                    title="Neural brain & memories"
+                >
+                    <motion.div
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                    >
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9.5 2A1.5 1.5 0 0 0 8 3.5V6a2 2 0 0 1-2 2h-2.5a1.5 1.5 0 0 0-1.5 1.5V11a2 2 0 0 1-2 2" />
+                            <path d="M14.5 2A1.5 1.5 0 0 1 16 3.5V6a2 2 0 0 0 2 2h2.5a1.5 1.5 0 0 1 1.5 1.5V11a2 2 0 0 0 2 2" />
+                            <path d="M2 13a2 2 0 0 0-2 2v1.5A1.5 1.5 0 0 0 1.5 18H4a2 2 0 0 1 2 2v2.5A1.5 1.5 0 0 0 7.5 24" />
+                            <path d="M22 13a2 2 0 0 1 2 2v1.5a1.5 1.5 0 0 1-1.5 1.5H20a2 2 0 0 0-2 2v2.5a1.5 1.5 0 0 1-1.5 1.5" />
+                        </svg>
+                    </motion.div>
+                </button>
                 {hasUndo && (
                     <button
                         onClick={onUndo}

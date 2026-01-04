@@ -74,3 +74,29 @@ export const PUT = async (
         );
     }
 };
+
+export const PATCH = async (
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) => {
+    const messageId = (await params).id;
+    const { pinned } = await req.json();
+
+    try {
+        const updatedMessage = await db.message.update({
+            where: { id: messageId },
+            data: { pinned },
+        });
+
+        return NextResponse.json(
+            { success: true, data: updatedMessage },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Update message error:", error);
+        return NextResponse.json(
+            { success: false, message: "Failed to update pinned status" },
+            { status: 500 }
+        );
+    }
+};

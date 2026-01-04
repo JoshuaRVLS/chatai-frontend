@@ -11,9 +11,10 @@ import React, {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo } from "react-icons/fa";
+import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack } from "react-icons/fa";
 import ChatSettingsModal from "./ChatSettingsModal";
 import ChatNavbar from "./ChatNavbar";
+import BrainPanel from "./BrainPanel";
 import { useRouter } from "next/navigation";
 import MarkDown from "../MarkDown/MarkDown";
 import { bytesToBase64 } from "@/app/utils/image";
@@ -49,6 +50,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-chat-v3-0324");
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
+  const [showBrainPanel, setShowBrainPanel] = useState(false);
   const [undoStack, setUndoStack] = useState<Message[][]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
@@ -207,6 +209,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       id: `temp-${Date.now()}`,
       content: content.trim(),
       fromUser: true,
+      pinned: false,
       chatId,
     };
 
@@ -354,6 +357,54 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   }, [chatId, queryClient]);
 
+
+  const handleTogglePin = useCallback(async (messageId: string, currentStatus: boolean) => {
+    try {
+      // Optimistic update
+      queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          messages: oldData.messages.map(m => m.id === messageId ? { ...m, pinned: !currentStatus } : m)
+        };
+      });
+
+      const res = await fetch(`/api/messages/${messageId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned: !currentStatus }),
+      });
+
+      if (!res.ok) throw new Error();
+    } catch (err) {
+      toast.error("Failed to update pin status");
+      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+    }
+  }, [chatId, queryClient]);
+
+  const handleClearMemory = useCallback(async () => {
+    if (!(await confirm({
+      title: "Reset Neural Brain",
+      message: "Are you sure you want to clear all learned facts and long-term memories? This will make the character 'forget' specific details they learned about you.",
+      confirmLabel: "Reset Memory",
+      variant: "danger"
+    }))) return;
+
+    try {
+      const res = await fetch(`/api/chats/${chatId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memory: null }),
+      });
+      if (res.ok) {
+        toast.success("AI brain reset successfully");
+        await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      }
+    } catch (err) {
+      toast.error("Failed to reset memory");
+    }
+  }, [chatId, queryClient]);
+
   // ───────────────────────────────
   // UI
   // ───────────────────────────────
@@ -460,21 +511,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
           onUndo={handleUndo}
           onClearHistory={handleClearHistory}
           onShowSettings={() => setShowSettingsModal(true)}
+          onShowBrain={() => setShowBrainPanel(true)}
           hasUndo={undoStack.length > 0}
         />
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-8 pt-8 space-y-8 scrollbar-hide">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center mb-12"
-          >
-            <div className="max-w-md bg-white/5 border border-white/5 rounded-3xl p-6 text-center backdrop-blur-sm">
-              <p className="text-white/40 text-xs italic font-medium leading-relaxed">"{data.character.introMessage}"</p>
-            </div>
-          </motion.div>
-
           <AnimatePresence initial={false}>
             {data.messages.map((msg) => (
               <motion.div
@@ -500,6 +542,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   onEditContentChange={handleEditContentChange}
                   onSaveEdit={handleSaveEdit}
                   onCancelEdit={handleCancelEdit}
+                  onTogglePin={handleTogglePin}
                 />
               </motion.div>
             ))}
@@ -522,6 +565,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   onDelete={() => { }}
                   onRegenerate={() => { }}
                   onUserRegenerate={() => { }}
+                  onTogglePin={() => { }}
                 />
               </motion.div>
             )}
@@ -558,6 +602,16 @@ const Chat = ({ chatId }: { chatId: string }) => {
         onModelChange={setSelectedModel}
         onPersonaChange={setSelectedPersonaId}
       />
+
+      {/* Brain Panel */}
+      <BrainPanel
+        isOpen={showBrainPanel}
+        onClose={() => setShowBrainPanel(false)}
+        memory={data.memory}
+        onClearMemory={handleClearMemory}
+        pinnedMessages={data.messages.filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
+        onUnpin={(id) => handleTogglePin(id, true)}
+      />
     </div>
   );
 };
@@ -579,6 +633,7 @@ const MessageBubble = React.memo(
     onEditContentChange,
     onSaveEdit,
     onCancelEdit,
+    onTogglePin,
   }: {
     message: Message;
     userImage: string | null;
@@ -595,6 +650,7 @@ const MessageBubble = React.memo(
     onEditContentChange?: (content: string) => void;
     onSaveEdit?: (messageId: string) => void;
     onCancelEdit?: () => void;
+    onTogglePin: (messageId: string, currentStatus: boolean) => void;
   }) => {
     const [showActions, setShowActions] = useState(false);
     const imageSrc = isUserMessage
@@ -737,6 +793,17 @@ const MessageBubble = React.memo(
                   <FaRedo size={12} />
                 </button>
               )}
+
+              <button
+                onClick={() => onTogglePin(message.id, !!message.pinned)}
+                className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.pinned
+                  ? "bg-primary/20 border-primary/40 text-primary"
+                  : "bg-white/10 border-white/10 text-white/60 hover:bg-primary/10 hover:text-primary"
+                  }`}
+                title={message.pinned ? "Unpin message" : "Pin message"}
+              >
+                <FaThumbtack size={12} className={message.pinned ? "" : "-rotate-45"} />
+              </button>
             </div>
           )}
         </div>

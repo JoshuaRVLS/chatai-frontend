@@ -33,6 +33,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
   const [characterPersona, setCharacterPersona] = useState<string>("");
   const [scenario, setScenario] = useState<string>("");
   const [initialMessage, setInitialMessage] = useState<string>("");
+  const [exampleConversations, setExampleConversations] = useState<string>("");
+  const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [selectedOptions, setSelectedOptions] = useState<
     { label: string; value: string }[]
@@ -65,6 +67,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
       setCharacterPersona(data.persona);
       setScenario(data.scenario);
       setInitialMessage(data.introMessage);
+      setExampleConversations(data.exampleConversations || "");
       setSelectedOptions(
         data.tags.map((tag) => ({ label: tag.name, value: tag.id }))
       );
@@ -87,6 +90,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     formData.append("characterPersona", characterPersona);
     formData.append("scenario", scenario);
     formData.append("initialMessage", initialMessage);
+    formData.append("exampleConversations", exampleConversations);
     formData.append("userId", user?.id as string);
     formData.append("tags", JSON.stringify(selectedOptions));
 
@@ -113,8 +117,39 @@ const CharacterEdit = ({ id }: { id: string }) => {
     }
   };
 
+  const handleGenerateImage = async () => {
+    if (!characterName || !characterBio) {
+      toast.error("Please provide at least a name and bio first");
+      return;
+    }
+
+    setIsGeneratingImage(true);
+    const toastId = toast.loading("Synthesizing character visual...");
+
+    try {
+      const prompt = encodeURIComponent(`${characterName}, ${characterBio.slice(0, 200)}, highly detailed, masterpiece, anime style, high quality`);
+      const seed = Math.floor(Math.random() * 1000000);
+      const imageUrl = `https://pollinations.ai/p/${prompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+
+      // Fetch the image and convert to blob/file
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `${characterName.toLowerCase().replace(/\s+/g, "_")}.jpg`, { type: "image/jpeg" });
+
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+
+      toast.success("Visual synthesized successfully!", { id: toastId });
+    } catch (err) {
+      console.error(err);
+      toast.error("Vision synthesis failed", { id: toastId });
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
-  const permanentTokens = getTokenCount(characterPersona) + getTokenCount(scenario);
+  const permanentTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(exampleConversations);
   const totalTokens = permanentTokens + getTokenCount(initialMessage);
 
   if (isPending) return (
@@ -213,8 +248,23 @@ const CharacterEdit = ({ id }: { id: string }) => {
                       <span className="text-[10px] font-black text-white uppercase tracking-widest">Update Visuals</span>
                     </label>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateImage}
+                    disabled={isGeneratingImage || !characterName || !characterBio}
+                    className="w-full py-3 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center gap-3 text-primary hover:bg-primary/20 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingImage ? (
+                      <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                    ) : (
+                      <FiZap className="group-hover:scale-110 transition-transform" />
+                    )}
+                    <span className="text-[10px] font-black uppercase tracking-widest">Magic Generate</span>
+                  </button>
+
                   <p className="text-[9px] text-white/20 uppercase tracking-wider text-center px-4 font-bold leading-relaxed">
-                    Neural optics support JPG, PNG up to 1MB. Resolution is auto-optimized.
+                    Neural optics support JPG, PNG up to 1MB. Use Magic Generate for AI-synthesized visuals.
                   </p>
                 </div>
 
@@ -317,6 +367,27 @@ const CharacterEdit = ({ id }: { id: string }) => {
                       className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed italic"
                       placeholder="The simulation's first response..."
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Example Conversations</label>
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(exampleConversations)} Tokens</span>
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      value={exampleConversations}
+                      onChange={(e) => setExampleConversations(e.target.value)}
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
+                      placeholder={`<START>\n{user}: Hello!\n{char}: Hey there, how's it going?\n<START>\n...`}
+                    />
+                  </div>
+                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-3">
+                    <div className="text-primary pt-0.5"><FiInfo size={14} /></div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-bold">
+                      Use <span className="text-primary">{`<START>`}</span> to separate different conversation blocks. This helps the AI learn the specific speaking style of the character.
+                    </p>
                   </div>
                 </div>
               </div>

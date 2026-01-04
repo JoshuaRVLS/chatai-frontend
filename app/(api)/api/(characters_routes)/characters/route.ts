@@ -14,6 +14,7 @@ export const POST = async (req: Request) => {
     const characterPersona = form.get("characterPersona") as string;
     const scenario = form.get("scenario") as string;
     const initialMessage = form.get("initialMessage") as string;
+    const exampleConversations = form.get("exampleConversations") as string;
     const userId = form.get("userId") as string;
     const tags: { label: string; value: string }[] = JSON.parse(
       form.get("tags") as string
@@ -30,6 +31,7 @@ export const POST = async (req: Request) => {
         persona: characterPersona,
         introMessage: initialMessage,
         scenario: scenario,
+        exampleConversations: exampleConversations,
         tags: {
           set: tags.map((tag) => ({ id: tag.value })),
         },
@@ -69,6 +71,7 @@ export const POST = async (req: Request) => {
         persona: characterPersona,
         introMessage: initialMessage,
         scenario: scenario,
+        exampleConversations: exampleConversations,
         author: {
           connect: { id: userId },
         },
