@@ -13,7 +13,7 @@ export const GET = async (
       include: {
         character: { include: { photo: true } },
         messages: { orderBy: { id: 'asc' } },
-        user: { include: { profileImage: true } },
+        user: { include: { profileImage: true, userSettings: true } },
       },
     });
 

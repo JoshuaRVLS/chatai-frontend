@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
   const { content, chatId, model, regenerate } = await req.json();
-  const selectedModel = model || 'deepseek/deepseek-chat-v3-0324';
   const isRegenerate = regenerate === true;
 
   const chat = await db.chat.findFirst({
@@ -17,11 +16,15 @@ export const POST = async (req: Request) => {
     },
   });
 
+  const personaId = chat?.personaId || chat?.user.personaUsed;
   const persona = await db.userPersona.findFirst({
     where: {
-      id: (chat?.user.personaUsed as string) || undefined,
+      id: (personaId as string) || undefined,
     },
   });
+
+  const chatSettings = chat?.chatSettings as any;
+  const selectedModel = chatSettings?.model || model || 'deepseek/deepseek-chat-v3-0324';
 
 
   const previousMessages =

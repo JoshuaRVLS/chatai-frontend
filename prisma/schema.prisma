@@ -107,6 +107,8 @@ model Chat {
   messages Message[]
   summary String?
   memory String?
+  personaId String?
+  chatSettings Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }

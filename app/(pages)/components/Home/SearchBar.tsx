@@ -60,16 +60,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
             <form onSubmit={handleSearchSubmit} className="relative group">
                 <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
-                <div className="relative flex items-center bg-[#0f172a]/40 border border-white/5 rounded-3xl p-2 backdrop-blur-2xl group-focus-within:border-primary/30 transition-all duration-500 shadow-2xl">
-                    <FiSearch className="ml-5 text-white/20 group-focus-within:text-primary transition-colors text-xl" />
+                <div className="relative flex items-center bg-[#0f172a]/40 border border-white/5 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2 backdrop-blur-2xl group-focus-within:border-primary/30 transition-all duration-500 shadow-2xl">
+                    <FiSearch className="ml-3 sm:ml-5 text-white/20 group-focus-within:text-primary transition-colors text-lg sm:text-xl" />
 
                     <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => query.length > 0 && setIsOpen(true)}
-                        placeholder="Search characters or tags..."
-                        className="flex-1 bg-transparent border-none outline-none py-4 px-4 text-white placeholder:text-white/20 font-medium text-sm"
+                        placeholder="Search..."
+                        className="flex-1 bg-transparent border-none outline-none py-3 sm:py-4 px-2 sm:px-4 text-white placeholder:text-white/20 font-medium text-xs sm:text-sm"
                     />
 
                     <AnimatePresence>
@@ -89,7 +89,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
 
                     <button
                         type="submit"
-                        className="bg-primary hover:scale-[1.02] active:scale-[0.98] text-slate-950 font-black text-[10px] uppercase tracking-widest px-8 py-4 rounded-[1.25rem] transition-all duration-300 shadow-[0_0_30px_rgba(56,189,248,0.2)]"
+                        className="bg-primary hover:scale-[1.02] active:scale-[0.98] text-slate-950 font-black text-[9px] sm:text-[10px] uppercase tracking-widest px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-[1.25rem] transition-all duration-300 shadow-[0_0_30px_rgba(56,189,248,0.2)]"
                     >
                         Query
                     </button>
@@ -116,9 +116,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                                     <button
                                         key={char.id}
                                         onClick={() => handleSelect(char.id)}
-                                        className="w-full flex items-center gap-5 p-4 hover:bg-white/[0.03] rounded-[1.75rem] transition-all group"
+                                        className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/[0.03] rounded-2xl sm:rounded-[1.75rem] transition-all group"
                                     >
-                                        <div className="w-12 h-12 rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
                                             <img
                                                 src={`/api/image/${char.id}`}
                                                 alt={char.name}
@@ -126,18 +126,18 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                                             />
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <p className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic">{char.name}</p>
-                                            <div className="flex items-center gap-3 mt-1">
-                                                <span className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{char.author.username}</span>
-                                                <div className="flex gap-1.5">
-                                                    {char.tags.slice(0, 2).map((tag: any) => (
-                                                        <span key={tag.id} className="text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
+                                            <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic">{char.name}</p>
+                                            <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                                                <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author.username}</span>
+                                                <div className="hidden xs:flex gap-1.5">
+                                                    {char.tags.slice(0, 1).map((tag: any) => (
+                                                        <span key={tag.id} className="text-[8px] sm:text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
                                                     ))}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="w-10 h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
-                                            <FiSearch size={14} />
+                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
+                                            <FiSearch className="w-3 h-3 sm:w-[14px] sm:h-[14px]" />
                                         </div>
                                     </button>
                                 ))}

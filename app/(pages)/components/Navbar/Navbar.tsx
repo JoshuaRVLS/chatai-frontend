@@ -53,8 +53,24 @@ const Navbar = () => {
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-6 px-6 md:px-12 ${isScrolled ? "bg-slate-950/60 backdrop-blur-md border-b border-white/5 py-4" : "bg-transparent"
+      <motion.nav
+        initial={false}
+        animate={{
+          y: isScrolled ? 20 : 0,
+          width: isScrolled ? "calc(100% - 40px)" : "100%",
+          maxWidth: isScrolled ? "1200px" : "100%",
+          paddingTop: isScrolled ? "12px" : "24px",
+          paddingBottom: isScrolled ? "12px" : "24px",
+          borderRadius: isScrolled ? "32px" : "0px",
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+          damping: 30,
+        }}
+        className={`fixed top-0 left-1/2 -translate-x-1/2 z-50 px-6 md:px-12 transition-colors duration-500 ${isScrolled
+          ? "bg-slate-950/40 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] after:absolute after:inset-0 after:rounded-[32px] after:shadow-[0_0_30px_rgba(56,189,248,0.05)] after:-z-10"
+          : "bg-transparent"
           }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -112,7 +128,7 @@ const Navbar = () => {
             {isMobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
           </button>
         </div>
-      </nav>
+      </motion.nav>
 
       <AnimatePresence>
         {isMobileMenuOpen && (

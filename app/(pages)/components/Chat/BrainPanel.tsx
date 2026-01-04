@@ -10,6 +10,7 @@ interface BrainPanelProps {
     onClose: () => void;
     memory: string | null;
     onClearMemory: () => void;
+    onUpdateMemory: (newMemory: string) => void;
     pinnedMessages: { id: string; content: string; fromUser: boolean }[];
     onUnpin: (id: string) => void;
 }
@@ -19,9 +20,21 @@ const BrainPanel = ({
     onClose,
     memory,
     onClearMemory,
+    onUpdateMemory,
     pinnedMessages,
     onUnpin
 }: BrainPanelProps) => {
+    const [isEditing, setIsEditing] = React.useState(false);
+    const [editValue, setEditValue] = React.useState(memory || "");
+
+    React.useEffect(() => {
+        setEditValue(memory || "");
+    }, [memory]);
+
+    const handleSave = () => {
+        onUpdateMemory(editValue);
+        setIsEditing(false);
+    };
     return (
         <AnimatePresence>
             {isOpen && (
@@ -74,28 +87,71 @@ const BrainPanel = ({
                                         <FaLightbulb className="text-primary" />
                                         <h4 className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Learned Facts</h4>
                                     </div>
-                                    {memory && (
-                                        <button
-                                            onClick={onClearMemory}
-                                            className="text-[9px] font-black text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5 group"
-                                        >
-                                            <FaTrash size={8} className="group-hover:scale-110 transition-transform" /> Reset Brain
-                                        </button>
-                                    )}
+                                    <div className="flex items-center gap-4">
+                                        {isEditing ? (
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setIsEditing(false)}
+                                                    className="text-[9px] font-black text-white/40 hover:text-white uppercase tracking-widest transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleSave}
+                                                    className="text-[9px] font-black text-primary hover:text-primary/80 uppercase tracking-widest transition-colors"
+                                                >
+                                                    Save Facts
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => setIsEditing(true)}
+                                                    className="text-[9px] font-black text-primary/60 hover:text-primary uppercase tracking-widest transition-colors"
+                                                >
+                                                    {memory ? "Edit Brain" : "Add Memory"}
+                                                </button>
+                                                {memory && (
+                                                    <button
+                                                        onClick={onClearMemory}
+                                                        className="text-[9px] font-black text-red-400/60 hover:text-red-400 uppercase tracking-widest transition-colors flex items-center gap-1.5 group"
+                                                    >
+                                                        <FaTrash size={8} className="group-hover:scale-110 transition-transform" /> Reset
+                                                    </button>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
 
-                                {memory ? (
+                                {isEditing ? (
+                                    <div className="bg-white/5 border border-primary/30 rounded-3xl p-4">
+                                        <textarea
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            placeholder="Add facts about your history or preferences here... AI will remember these permanently."
+                                            className="w-full bg-transparent border-none outline-none text-white/80 text-sm leading-relaxed min-h-[150px] resize-none scrollbar-hide"
+                                            autoFocus
+                                        />
+                                    </div>
+                                ) : memory ? (
                                     <div className="bg-white/5 border border-white/10 rounded-3xl p-6 space-y-4">
                                         <div className="prose prose-invert prose-sm max-w-none text-white/70 leading-relaxed font-medium">
                                             {memory.split('\n').map((line, i) => (
-                                                <p key={i}>{line.replace(/^-\s*/, '')}</p>
+                                                <p key={i} className="flex gap-2 items-start">
+                                                    <span className="w-1 h-1 bg-primary/40 rounded-full mt-2.5 flex-shrink-0" />
+                                                    <span>{line.replace(/^-\s*/, '')}</span>
+                                                </p>
                                             ))}
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-10 text-center">
-                                        <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em]">No deep memories established yet</p>
-                                    </div>
+                                    <button
+                                        onClick={() => setIsEditing(true)}
+                                        className="w-full bg-white/[0.02] border border-dashed border-white/10 rounded-3xl p-10 text-center group hover:bg-white/[0.04] hover:border-primary/20 transition-all"
+                                    >
+                                        <p className="text-[10px] font-black text-white/10 group-hover:text-primary/40 uppercase tracking-[0.2em] transition-colors">No deep memories established yet • Click to add</p>
+                                    </button>
                                 )}
                             </section>
 

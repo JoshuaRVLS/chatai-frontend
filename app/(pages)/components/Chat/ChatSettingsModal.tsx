@@ -12,8 +12,7 @@ interface ChatSettingsModalProps {
     onClose: () => void;
     currentModel: string;
     currentPersonaId: string | null;
-    onModelChange: (model: string) => void;
-    onPersonaChange: (personaId: string | null) => void;
+    onSave: (model: string, personaId: string | null) => void;
 }
 
 const AVAILABLE_MODELS = [
@@ -29,8 +28,7 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
     onClose,
     currentModel,
     currentPersonaId,
-    onModelChange,
-    onPersonaChange,
+    onSave,
 }) => {
     const { user } = useContext(AuthContext);
     const [selectedModel, setSelectedModel] = useState(currentModel);
@@ -52,8 +50,7 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
     }, [currentModel, currentPersonaId, isOpen]);
 
     const handleSave = () => {
-        onModelChange(selectedModel);
-        onPersonaChange(selectedPersonaId);
+        onSave(selectedModel, selectedPersonaId);
         onClose();
     };
 

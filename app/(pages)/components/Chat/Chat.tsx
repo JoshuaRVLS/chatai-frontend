@@ -26,6 +26,8 @@ import type {
   Message,
   User,
   UserProfileImage,
+  UserSettings,
+  UserPersona,
 } from "@/app/generated/prisma";
 import { AnimatePresence, motion } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
@@ -33,7 +35,7 @@ import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 type ChatData = ChatModel & {
   character: Character & { photo: CharacterImage };
   messages: Message[];
-  user: User & { profileImage: UserProfileImage };
+  user: User & { profileImage: UserProfileImage; userSettings: UserSettings | null };
 };
 
 const Chat = ({ chatId }: { chatId: string }) => {
@@ -48,7 +50,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const [editContent, setEditContent] = useState("");
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-chat-v3-0324");
+  const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-v3.2");
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
   const [showBrainPanel, setShowBrainPanel] = useState(false);
   const [undoStack, setUndoStack] = useState<Message[][]>([]);
@@ -126,6 +128,26 @@ const Chat = ({ chatId }: { chatId: string }) => {
       scrollToBottom();
     }
   }, [data?.messages.length, isLoading, scrollToBottom]);
+
+  // Synchronize local settings with chat data
+  useEffect(() => {
+    if (data) {
+      // 1. Model priority: Chat-specific > Global User Settings > Default
+      if (data.chatSettings && (data.chatSettings as any).model) {
+        setSelectedModel((data.chatSettings as any).model);
+      } else if (data.user.userSettings?.chatSettings) {
+        const globalModel = (data.user.userSettings.chatSettings as any).model;
+        if (globalModel) setSelectedModel(globalModel);
+      }
+
+      // 2. Persona priority: Chat-specific > User's Active Persona
+      if (data.personaId) {
+        setSelectedPersonaId(data.personaId);
+      } else {
+        setSelectedPersonaId(data.user.personaUsed || null);
+      }
+    }
+  }, [data]);
 
   const pushToUndoStack = useCallback(() => {
     if (data?.messages) {
@@ -405,6 +427,46 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   }, [chatId, queryClient]);
 
+  const handleUpdateChatSettings = useCallback(async (model: string, personaId: string | null) => {
+    setSelectedModel(model);
+    setSelectedPersonaId(personaId);
+
+    try {
+      const res = await fetch(`/api/chats/${chatId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatSettings: { model },
+          personaId: personaId
+        }),
+      });
+      if (res.ok) {
+        toast.success("Chat settings updated");
+        await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      } else {
+        throw new Error();
+      }
+    } catch (err) {
+      toast.error("Failed to update chat settings");
+    }
+  }, [chatId, queryClient]);
+
+  const handleUpdateMemory = useCallback(async (newMemory: string) => {
+    try {
+      const res = await fetch(`/api/chats/${chatId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memory: newMemory }),
+      });
+      if (res.ok) {
+        toast.success("AI brain updated");
+        await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      }
+    } catch (err) {
+      toast.error("Failed to update brain");
+    }
+  }, [chatId, queryClient]);
+
   // ───────────────────────────────
   // UI
   // ───────────────────────────────
@@ -599,8 +661,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         onClose={() => setShowSettingsModal(false)}
         currentModel={selectedModel}
         currentPersonaId={selectedPersonaId}
-        onModelChange={setSelectedModel}
-        onPersonaChange={setSelectedPersonaId}
+        onSave={handleUpdateChatSettings}
       />
 
       {/* Brain Panel */}
@@ -609,6 +670,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         onClose={() => setShowBrainPanel(false)}
         memory={data.memory}
         onClearMemory={handleClearMemory}
+        onUpdateMemory={handleUpdateMemory}
         pinnedMessages={data.messages.filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
         onUnpin={(id) => handleTogglePin(id, true)}
       />
