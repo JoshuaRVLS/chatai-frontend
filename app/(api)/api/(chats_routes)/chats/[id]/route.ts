@@ -41,5 +41,32 @@ export const GET = async (
     return NextResponse.json({ success: true, data: chat }, { status: 200 });
   } catch (error) {
     console.log(error);
+    return NextResponse.json({ success: false, message: "Internal server error" }, { status: 500 });
+  }
+};
+
+export const DELETE = async (
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) => {
+  const chatId = (await params).id;
+
+  try {
+    await db.message.deleteMany({
+      where: {
+        chatId: chatId,
+      },
+    });
+
+    await db.chat.delete({
+      where: {
+        id: chatId,
+      },
+    });
+
+    return NextResponse.json({ success: true, message: "Chat history cleared and record removed" }, { status: 200 });
+  } catch (error) {
+    console.error("Failed to clear chat history:", error);
+    return NextResponse.json({ success: false, message: "Failed to clear history" }, { status: 500 });
   }
 };

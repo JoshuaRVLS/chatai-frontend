@@ -7,14 +7,20 @@ import {
   FiPlay,
   FiChevronLeft,
   FiChevronRight,
+  FiTrash2,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 const History = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const { isPending, data, error } = useQuery<any[]>({
     queryKey: ["chatsHistory"],
@@ -49,6 +55,31 @@ const History = () => {
     if (scrollContainerRef.current) {
       const scrollAmount = direction === "left" ? -400 : 400;
       scrollContainerRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!(await confirm({
+      title: "Clear History",
+      message: "Are you sure you want to remove this chat from your history? This action cannot be undone.",
+      confirmLabel: "Terminate Record",
+      variant: "danger"
+    }))) return;
+
+    try {
+      const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("Chat removed from history");
+        queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
+      } else {
+        toast.error("Failed to remove chat");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred");
     }
   };
 
@@ -138,8 +169,16 @@ const History = () => {
                     <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
                     {chat._count?.messages || chat.messages.length} Packets
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-slate-950 scale-0 group-hover:scale-100 transition-transform">
-                    <FiPlay size={10} className="fill-current ml-0.5" />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => handleDeleteChat(e, chat.id)}
+                      className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-red-400/10 hover:border-red-400/20 transition-all opacity-0 group-hover:opacity-100"
+                    >
+                      <FiTrash2 size={12} />
+                    </button>
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-slate-950 scale-0 group-hover:scale-100 transition-transform">
+                      <FiPlay size={10} className="fill-current ml-0.5" />
+                    </div>
                   </div>
                 </div>
               </div>

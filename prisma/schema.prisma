@@ -104,6 +104,8 @@ model Chat {
   user User @relation(fields: [userId], references: [id])
   userId String
   messages Message[]
+  summary String?
+  memory String?
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }

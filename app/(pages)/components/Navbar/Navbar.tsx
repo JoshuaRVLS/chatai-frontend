@@ -30,12 +30,26 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
+
   const navLinks = [
     { name: "Home", href: "/", icon: <FiHome /> },
     { name: "Create", href: "/create_character", icon: <FiPlusSquare /> },
     { name: "Characters", href: "/my_characters", icon: <FiUsers /> },
     { name: "Personas", href: "/my_personas", icon: <FiCpu /> },
   ];
+
+  if (pathname.startsWith("/chat/")) return null;
 
   return (
     <>
@@ -106,7 +120,7 @@ const Navbar = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="fixed inset-0 z-40 bg-[#020617] backdrop-blur-2xl flex flex-col p-8 pt-32 gap-10 md:hidden"
+            className="fixed inset-0 z-[60] bg-[#020617] backdrop-blur-2xl flex flex-col p-8 pt-32 gap-10 md:hidden"
           >
             <div className="flex flex-col gap-4">
               <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20 px-4">Menu</p>

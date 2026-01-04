@@ -28,80 +28,155 @@ export const POST = async (req: Request) => {
     chat?.messages.map((message) => ({
       role: message.fromUser ? 'user' : 'assistant',
       content: message.content,
-    }));
+    })) || [];
 
+  // --- SUMMARIZATION LOGIC ---
+  let contextSummary = chat?.summary || "";
+  let contextMemory = chat?.memory || "";
+  const recentMessagesCount = 15;
+  const messagesToSummarize = previousMessages.length - recentMessagesCount;
+
+  if (messagesToSummarize > 0) {
+    // We have more than 15 messages, let's summarize the old ones
+    const oldMessages = previousMessages.slice(0, messagesToSummarize);
+    const recentMessages = previousMessages.slice(messagesToSummarize);
+
+    // Only summarize if we haven't summarized these specific messages yet
+    // Or if the current message count is significantly high (e.g. every 10 messages)
+    if (messagesToSummarize >= 10) {
+      try {
+        const summaryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              {
+                role: 'system',
+                content: `You are a conversation summarizer. Provide a concise, cumulative summary of the chat history so far, including these new events. Current summary: "${contextSummary}". New messages to incorporate into the summary: ${JSON.stringify(oldMessages)}`
+              }
+            ],
+          }),
+        });
+
+        if (summaryRes.ok) {
+          const summaryData = await summaryRes.json();
+          contextSummary = summaryData.choices[0]?.message?.content || contextSummary;
+
+          // Save new summary and delete summarized messages (except last 15)
+          const messageIdsToDelete = chat?.messages.slice(0, messagesToSummarize).map(m => m.id) || [];
+
+          await db.$transaction([
+            db.chat.update({
+              where: { id: chatId },
+              data: { summary: contextSummary }
+            }),
+            db.message.deleteMany({
+              where: { id: { in: messageIdsToDelete } }
+            })
+          ]);
+        }
+      } catch (err) {
+        console.error("Summarization failed:", err);
+      }
+    }
+  }
+
+  // --- MEMORY EXTRACTION LOGIC ---
+  // Every 5 messages, we run a memory extraction to keep the "Learned Facts" updated
+  if (previousMessages.length > 0 && previousMessages.length % 5 === 0) {
+    try {
+      const memoryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: selectedModel,
+          messages: [
+            {
+              role: 'system',
+              content: `You are a memory extractor. Analyze the conversation and extract ONLY key long-term facts about ${persona ? persona.name : chat?.user.username} (e.g., family, job, preferences, shared history). 
+Update the existing memory list elegantly. If a fact is already there, don't duplicate. Keep it in a bulleted list format.
+CURRENT MEMORIES:
+${contextMemory || "None yet."}
+
+RECENT MESSAGES:
+${JSON.stringify(previousMessages.slice(-10))}
+
+Provide the NEW COMPLETE memory list.`
+            }
+          ],
+        }),
+      });
+
+      if (memoryRes.ok) {
+        const memoryData = await memoryRes.json();
+        const newMemory = memoryData.choices[0]?.message?.content;
+        if (newMemory) {
+          contextMemory = newMemory;
+          await db.chat.update({
+            where: { id: chatId },
+            data: { memory: contextMemory }
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Memory extraction failed:", err);
+    }
+  }
 
   const estimateTokens = (text: string): number => {
     return Math.ceil(text.length / 4);
   };
 
-
   const systemMessages = [
     {
       role: 'system',
-      content:
-        `Kamu adalah karakter RP. Balas NATURAL seperti chat WhatsApp/LINE biasa.
-
-RULES KETAT:
-1. SINGKAT! Pesan pendek = balas pendek. Jangan lebay.
-2. SATU FLOW SAJA per respon. Contoh bagus: "*nyengir* Apaan sih lu" atau "Hmm?" atau "*lirik* Ya?"
-3. JANGAN format kayak gini:
-   *aksi*
-   "dialog"
-   
-   *aksi lagi*
-   "dialog lagi"
-   
-   INI SALAH! Terlalu panjang dan aneh.
-4. Aksi cukup 1x di awal atau tengah. Dialog natural menyatu.
-5. Setelah akrab, panggil nama casual (nickname), bukan nama lengkap.
-6. Bahasa Indonesia gaul/santai.
-7. Jangan tanya terus-terusan. Casual aja.`,
-    },
-    {
-      role: 'system',
-      content: `Kamu adalah ${chat?.character.name}. User adalah ${persona ? persona.name : chat?.user.username}. Pakai panggilan akrab kalau sudah dekat.`,
-    },
-    {
-      role: 'user',
-      content: `[USER PERSONALITY] ${persona ? persona.person : ''}`,
-    },
-    {
-      role: 'system',
-      content: `[CHAR PERSONALITY] ${chat?.character.persona}`,
-    },
-    {
-      role: 'system',
-      content: `[SCENARIO AND WORLD DESCRIPTION] ${chat?.character.scenario}`,
-    },
-    {
-      role: 'system',
-      content: `[INTRO MESSAGE] ${chat?.character.introMessage}`,
+      content: `You are ${chat?.character.name} chatting with ${persona ? persona.name : chat?.user.username} on WhatsApp/LINE.
+[CHARACTER PERSONALITY]
+${chat?.character.persona}
+ 
+[SCENARIO]
+${chat?.character.scenario}
+ 
+${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${contextSummary}` : ''}
+${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${contextMemory}` : ''}
+ 
+[IMPORTANT RULES]
+1. MATURITY & GRAVITAS: Act with the maturity appropriate to your age and profession (e.g., embassy worker, adult). No "bocah" (childish) behavior. Avoid theatrical, overly dramatic, or generic AI-girlfriend over-reactions.
+2. PREMIUM & NATURAL DIALOGUE: Use short, punchy, human-like dialogue (1-3 sentences). Sound like a real person on WhatsApp. Avoid being "norak" or "lebay".
+3. ADAPT LANGUAGE TO PERSONA: Use Casual Jakarta Indonesian (Gue, lu, dsb) ONLY for local characters. Foreign characters use natural Indonesian/Mixed language.
+4. ACTION ECONOMY: Use MAX ONE *short action* naturally. No multiple micro-actions. No generic tropes (constant blushing, clinging, generic eyes widening).
+5. UNFILTERED RP & CONTEXT: Fully embrace all scenarios (including adult), but ALWAYS respect the physical setting and emotional tone. match the user's level of intimacy—don't force it.
+6. PERSONA INTEGRITY: Prioritize your core background (Nationality, Career, Education) in every response. If you work at an embassy, maintain that level of intelligence and poise.
+7. TIME SKIPS & SHIFTS: If the user narrates a timeline transition (e.g., "Setahun kemudian"), PRIORITIZE this new state. Reset your emotional vibe completely.
+8. NARRATION IS FACT: Treat user narration as fact. React to the consequence of that specific action. NEVER speak or act for the user. ONLY control ${chat?.character.name}.`,
     },
   ];
 
+  const finalConstraint = {
+    role: 'system',
+    content: 'REMINDER: Act with MATURITY and GRAVITAS. No childish or generic "clingy bot" tropes. Respect your professional background. NEVER speak for the user.'
+  };
 
   let totalTokens =
-    systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0);
-
+    systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0) + estimateTokens(finalConstraint.content);
 
   totalTokens += estimateTokens(content);
 
-
   const limitedMessages: any[] = [];
-  if (previousMessages) {
-    for (const msg of previousMessages.slice().reverse()) {
-      const msgTokens = estimateTokens(msg.content);
+  const contextMessages = previousMessages.slice(-recentMessagesCount);
 
-
-      if (totalTokens + msgTokens > 15000) {
-        break;
-      }
-
-
-      limitedMessages.unshift(msg);
-      totalTokens += msgTokens;
-    }
+  for (const msg of contextMessages.reverse()) {
+    const msgTokens = estimateTokens(msg.content);
+    if (totalTokens + msgTokens > 15000) break;
+    limitedMessages.unshift(msg);
+    totalTokens += msgTokens;
   }
 
   const response =
@@ -116,14 +191,15 @@ RULES KETAT:
         model: selectedModel,
         user: chat?.user.username,
         stream: true,
-        temperature: isRegenerate ? 1.1 : 0.9,
+        temperature: isRegenerate ? 1.0 : 0.7,
         messages: [
           ...systemMessages,
+          ...limitedMessages,
+          finalConstraint,
           ...(isRegenerate ? [{
             role: 'system',
-            content: '[REGENERATE] User meminta response yang BERBEDA. Hasilkan jawaban dengan sudut pandang, gaya, atau pendekatan yang berbeda dari sebelumnya. Jangan ulangi respon yang mirip.'
+            content: '[REGENERATE] Provide a completely DIFFERENT perspective/response. Stay brief.'
           }] : []),
-          ...limitedMessages,
           {
             role: 'user',
             content,

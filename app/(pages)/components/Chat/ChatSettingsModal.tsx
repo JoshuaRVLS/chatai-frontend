@@ -17,11 +17,11 @@ interface ChatSettingsModalProps {
 }
 
 const AVAILABLE_MODELS = [
-    { id: "deepseek/deepseek-chat-v3-0324", name: "DeepSeek V3", description: "Fast & capable" },
+    { id: "deepseek/deepseek-v3.2", name: "DeepSeek V3.2", description: "Default Model" },
+    { id: "xiaomi/mimo-v2-flash:free", name: "Mimo V2 Flash", description: "Fast & Free" },
+    { id: "google/gemini-2.5-flash-lite", name: "Gemini 2.5 Flash Lite", description: "Balanced Speed" },
+    { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash", description: "High Logic" },
     { id: "openai/gpt-4o-mini", name: "GPT-4o Mini", description: "Balanced performance" },
-    { id: "google/gemini-2.0-flash-001", name: "Gemini 2.0 Flash", description: "Google's latest" },
-    { id: "anthropic/claude-3.5-haiku", name: "Claude 3.5 Haiku", description: "Quick responses" },
-    { id: "meta-llama/llama-3.3-70b-instruct", name: "Llama 3.3 70B", description: "Open source" },
 ];
 
 const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
@@ -104,8 +104,8 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
                                         key={model.id}
                                         onClick={() => setSelectedModel(model.id)}
                                         className={`w-full p-4 rounded-2xl border text-left transition-all ${selectedModel === model.id
-                                                ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
-                                                : "bg-white/5 border-white/10 hover:bg-white/10"
+                                            ? "bg-primary/10 border-primary/50 shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+                                            : "bg-white/5 border-white/10 hover:bg-white/10"
                                             }`}
                                     >
                                         <div className="flex items-center justify-between">
@@ -138,8 +138,8 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
                                 <button
                                     onClick={() => setSelectedPersonaId(null)}
                                     className={`w-full p-4 rounded-2xl border text-left transition-all ${selectedPersonaId === null
-                                            ? "bg-purple-500/10 border-purple-500/50"
-                                            : "bg-white/5 border-white/10 hover:bg-white/10"
+                                        ? "bg-purple-500/10 border-purple-500/50"
+                                        : "bg-white/5 border-white/10 hover:bg-white/10"
                                         }`}
                                 >
                                     <div className="flex items-center justify-between">
@@ -164,8 +164,8 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
                                         key={persona.id}
                                         onClick={() => setSelectedPersonaId(persona.id)}
                                         className={`w-full p-4 rounded-2xl border text-left transition-all ${selectedPersonaId === persona.id
-                                                ? "bg-purple-500/10 border-purple-500/50"
-                                                : "bg-white/5 border-white/10 hover:bg-white/10"
+                                            ? "bg-purple-500/10 border-purple-500/50"
+                                            : "bg-white/5 border-white/10 hover:bg-white/10"
                                             }`}
                                     >
                                         <div className="flex items-center justify-between">

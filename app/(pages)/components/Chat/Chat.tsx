@@ -9,9 +9,11 @@ import React, {
   useEffect,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaCog, FaUndo } from "react-icons/fa";
+import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo } from "react-icons/fa";
 import ChatSettingsModal from "./ChatSettingsModal";
+import ChatNavbar from "./ChatNavbar";
 import { useRouter } from "next/navigation";
 import MarkDown from "../MarkDown/MarkDown";
 import { bytesToBase64 } from "@/app/utils/image";
@@ -25,6 +27,7 @@ import type {
   UserProfileImage,
 } from "@/app/generated/prisma";
 import { AnimatePresence, motion } from "motion/react";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 type ChatData = ChatModel & {
   character: Character & { photo: CharacterImage };
@@ -35,7 +38,6 @@ type ChatData = ChatModel & {
 const Chat = ({ chatId }: { chatId: string }) => {
   const { user } = useContext(AuthContext);
   const router = useRouter();
-  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
@@ -51,6 +53,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const { data, isLoading, error } = useQuery<ChatData>({
     queryKey: ["chat", chatId],
@@ -114,6 +117,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
       };
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
+
+  // Scroll to bottom on initial load
+  useEffect(() => {
+    if (data?.messages && !isLoading) {
+      scrollToBottom();
+    }
+  }, [data?.messages.length, isLoading, scrollToBottom]);
 
   const pushToUndoStack = useCallback(() => {
     if (data?.messages) {
@@ -188,16 +198,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   };
 
-  const handleSubmit = useCallback(async () => {
-    if (!message.trim() || !user?.id || isSubmitting) return;
+  const handleSubmit = useCallback(async (content: string) => {
+    if (!content.trim() || !user?.id || isSubmitting) return;
 
-    const content = message.trim();
-    setMessage("");
     setIsSubmitting(true);
 
     const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
-      content,
+      content: content.trim(),
       fromUser: true,
       chatId,
     };
@@ -216,7 +224,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chatId,
-          content,
+          content: content.trim(),
           userId: user.id,
           fromUser: true,
         }),
@@ -224,7 +232,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       if (!saveRes.ok) throw new Error("Failed to send message");
 
       // 2. Start streaming AI response
-      await startStreaming(content);
+      await startStreaming(content.trim());
     } catch (err) {
       console.error(err);
       queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
@@ -236,33 +244,21 @@ const Chat = ({ chatId }: { chatId: string }) => {
           ),
         };
       });
-      setMessage(content);
       setIsSubmitting(false);
+      throw err; // Propagate to ChatInput to restore message
     }
-  }, [message, user?.id, chatId, isSubmitting, queryClient, scrollToBottom, startStreaming]);
+  }, [user?.id, chatId, isSubmitting, queryClient, scrollToBottom, startStreaming]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-      // Reset height after submit
-      const target = e.target as HTMLTextAreaElement;
-      target.style.height = '64px';
-    }
-  };
-
-  const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
-    const target = e.target as HTMLTextAreaElement;
-    target.style.height = '64px';
-    target.style.height = `${target.scrollHeight}px`;
-  };
-
-  const handleEdit = (messageId: string, content: string) => {
+  const handleEdit = useCallback((messageId: string, content: string) => {
     setEditingMessageId(messageId);
     setEditContent(content);
-  };
+  }, []);
 
-  const handleSaveEdit = async (messageId: string) => {
+  const handleEditContentChange = useCallback((content: string) => {
+    setEditContent(content);
+  }, []);
+
+  const handleSaveEdit = useCallback(async (messageId: string) => {
     if (!editContent.trim()) return;
     await fetch(`/api/messages/${messageId}`, {
       method: "PUT",
@@ -272,22 +268,27 @@ const Chat = ({ chatId }: { chatId: string }) => {
     await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     setEditingMessageId(null);
     setEditContent("");
-  };
+  }, [editContent, chatId, queryClient]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingMessageId(null);
     setEditContent("");
-  };
+  }, []);
 
-  const handleDelete = async (messageId: string, isUserMessage: boolean) => {
-    if (!confirm("Delete this message?")) return;
+  const handleDelete = useCallback(async (messageId: string, isUserMessage: boolean) => {
+    if (!(await confirm({
+      title: "Delete Message",
+      message: "Are you sure you want to delete this message? This will permanently remove it from the simulation.",
+      confirmLabel: "Delete",
+      variant: "danger"
+    }))) return;
     pushToUndoStack();
     const cascade = isUserMessage ? "?cascade=true" : "";
     await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
     await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-  };
+  }, [chatId, queryClient, pushToUndoStack]);
 
-  const handleUserRegenerate = async (messageId: string) => {
+  const handleUserRegenerate = useCallback(async (messageId: string) => {
     if (isSubmitting || !data) return;
     const msgIndex = data.messages.findIndex((m) => m.id === messageId);
     if (msgIndex === -1) return;
@@ -295,14 +296,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
     if (!userMsg.fromUser) return;
 
     pushToUndoStack();
-    setMessage(userMsg.content);
-
     const cascade = "?cascade=true";
     await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
     await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-  };
+  }, [isSubmitting, data, chatId, queryClient, pushToUndoStack]);
 
-  const handleRegenerate = async (messageId: string) => {
+  const handleRegenerate = useCallback(async (messageId: string) => {
     if (isSubmitting || !data) return;
 
     const msgIndex = data.messages.findIndex((m) => m.id === messageId);
@@ -328,7 +327,32 @@ const Chat = ({ chatId }: { chatId: string }) => {
       console.error(err);
       setIsSubmitting(false);
     }
-  };
+  }, [isSubmitting, data, chatId, queryClient, startStreaming]);
+
+  const handleClearHistory = useCallback(async () => {
+    if (!(await confirm({
+      title: "Clear Neural History",
+      message: "Are you sure you want to clear the entire chat history? This cannot be undone and will reset the conversation state.",
+      confirmLabel: "Clear History",
+      variant: "danger"
+    }))) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
+      if (res.ok) {
+        toast.success("History cleared");
+        await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      } else {
+        toast.error("Failed to clear history");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [chatId, queryClient]);
 
   // ───────────────────────────────
   // UI
@@ -366,7 +390,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
     );
 
   return (
-    <div className="fixed inset-0 pt-20 flex justify-center h-full w-full bg-[#020617]">
+    <div className="fixed inset-0 flex items-center justify-center h-full w-full bg-[#020617]">
       {/* Dynamic Background Effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
@@ -429,57 +453,15 @@ const Chat = ({ chatId }: { chatId: string }) => {
         className="relative w-full max-w-5xl flex flex-col h-[calc(100vh-120px)] sm:h-[calc(100vh-120px)] h-full bg-white/[0.02] border-x border-t sm:border border-white/10 rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-sm"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-6 border-b border-white/5 bg-white/[0.02] backdrop-blur-xl z-20">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <button
-              onClick={handleProfileClick}
-              className="relative group group-active:scale-95 transition-all"
-            >
-              <div className="absolute -inset-1.5 bg-gradient-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
-              <Image
-                src={characterImage || "/default-character.png"}
-                width={56}
-                height={56}
-                alt={data.character.name}
-                className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 object-cover"
-              />
-            </button>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-black text-white italic tracking-tighter uppercase leading-none">
-                {data.character.name}
-              </h2>
-              <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
-                <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                <span className="text-[8px] sm:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Neural Connection</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {undoStack.length > 0 && (
-              <button
-                onClick={handleUndo}
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
-                title="Undo last action"
-              >
-                <FaUndo size={14} />
-              </button>
-            )}
-            <button
-              onClick={() => setShowSettingsModal(true)}
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
-              title="Chat settings"
-            >
-              <FaCog size={14} />
-            </button>
-            <button
-              onClick={() => router.push('/')}
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all border border-white/5"
-            >
-              <FaTimes size={16} />
-            </button>
-          </div>
-        </div>
+        <ChatNavbar
+          characterName={data.character.name}
+          characterImage={characterImage}
+          onProfileClick={handleProfileClick}
+          onUndo={handleUndo}
+          onClearHistory={handleClearHistory}
+          onShowSettings={() => setShowSettingsModal(true)}
+          hasUndo={undoStack.length > 0}
+        />
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-8 pt-8 space-y-8 scrollbar-hide">
@@ -489,7 +471,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
             className="flex justify-center mb-12"
           >
             <div className="max-w-md bg-white/5 border border-white/5 rounded-3xl p-6 text-center backdrop-blur-sm">
-              <p className="text-[11px] font-black text-primary uppercase tracking-[0.3em] mb-3 leading-none italic">Incoming Transmission</p>
               <p className="text-white/40 text-xs italic font-medium leading-relaxed">"{data.character.introMessage}"</p>
             </div>
           </motion.div>
@@ -516,7 +497,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   onUserRegenerate={handleUserRegenerate}
                   isEditing={editingMessageId === msg.id}
                   editContent={editContent}
-                  onEditContentChange={setEditContent}
+                  onEditContentChange={handleEditContentChange}
                   onSaveEdit={handleSaveEdit}
                   onCancelEdit={handleCancelEdit}
                 />
@@ -564,35 +545,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
         </div>
 
         {/* Input area */}
-        <div className="p-4 sm:p-8 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-8 sm:pb-8">
-          <div className="relative flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto">
-            <div className="relative flex-1 group">
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onInput={handleInput}
-                rows={1}
-                placeholder="Talk to character..."
-                disabled={isSubmitting}
-                className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-[1.5rem] sm:rounded-[2rem] px-6 sm:px-8 py-4 sm:py-5 pr-14 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-[border-color,background-color] duration-300 text-sm leading-relaxed"
-                style={{ height: '56px', minHeight: '56px', maxHeight: '200px', overflowY: 'auto' }}
-              />
-              <div className="absolute top-[18px] left-3 w-1 h-5 bg-primary/40 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleSubmit}
-              disabled={!message.trim() || isSubmitting}
-              className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20"
-            >
-              <FaPaperPlane size={18} />
-            </motion.button>
-          </div>
-          <p className="hidden sm:block text-center text-[9px] font-black text-white/10 uppercase tracking-[0.4em] mt-4 italic">Encrypted Neural Interface • Version 2.0</p>
-        </div>
+        <ChatInput onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <p className="hidden sm:block text-center text-[9px] font-black text-white/10 uppercase tracking-[0.4em] mt-4 italic">Secure AI Chat Interface • Version 2.0</p>
       </motion.div>
 
       {/* Settings Modal */}
@@ -746,7 +700,6 @@ const MessageBubble = React.memo(
               className={`flex gap-1.5 mt-3 transition-all duration-200 ${showActions ? "opacity-100" : "opacity-0 sm:group-hover:opacity-100"
                 } ${isUserMessage ? "justify-end" : "justify-start"}`}
             >
-              {/* Edit Button (only for user messages) */}
               {isUserMessage && (
                 <button
                   onClick={() => onEdit(message.id, message.content)}
@@ -757,7 +710,6 @@ const MessageBubble = React.memo(
                 </button>
               )}
 
-              {/* Delete Button */}
               <button
                 onClick={() => onDelete(message.id)}
                 className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-red-500/20 hover:border-red-500/30 transition-all text-white/60 hover:text-red-400"
@@ -766,7 +718,6 @@ const MessageBubble = React.memo(
                 <FaTrash size={12} />
               </button>
 
-              {/* Regenerate Button (only for AI messages) */}
               {!isUserMessage && (
                 <button
                   onClick={() => onRegenerate(message.id)}
@@ -777,7 +728,6 @@ const MessageBubble = React.memo(
                 </button>
               )}
 
-              {/* Retry Button (only for user messages) */}
               {isUserMessage && (
                 <button
                   onClick={() => onUserRegenerate(message.id)}
@@ -796,5 +746,74 @@ const MessageBubble = React.memo(
 );
 
 MessageBubble.displayName = "MessageBubble";
+
+const ChatInput = React.memo(({
+  onSubmit,
+  isSubmitting
+}: {
+  onSubmit: (content: string) => Promise<void>;
+  isSubmitting: boolean;
+}) => {
+  const [message, setMessage] = useState("");
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleInternalSubmit();
+    }
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const target = e.target as HTMLTextAreaElement;
+    target.style.height = '56px';
+    target.style.height = `${target.scrollHeight}px`;
+  };
+
+  const handleInternalSubmit = async () => {
+    if (!message.trim() || isSubmitting) return;
+    const content = message;
+    setMessage("");
+    try {
+      await onSubmit(content);
+      const textarea = document.querySelector('textarea[placeholder="Talk to character..."]') as HTMLTextAreaElement;
+      if (textarea) textarea.style.height = '56px';
+    } catch (err) {
+      setMessage(content);
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-8 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-0 sm:pb-0">
+      <div className="relative flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto">
+        <div className="relative flex-1 group">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onInput={handleInput}
+            rows={1}
+            placeholder="Talk to character..."
+            disabled={isSubmitting}
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-[1.5rem] sm:rounded-[2rem] px-6 sm:px-8 py-4 sm:py-5 pr-14 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-[border-color,background-color] duration-300 text-sm leading-relaxed"
+            style={{ height: '56px', minHeight: '56px', maxHeight: '200px', overflowY: 'auto' }}
+          />
+          <div className="absolute top-[18px] left-3 w-1 h-5 bg-primary/40 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleInternalSubmit}
+          disabled={!message.trim() || isSubmitting}
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20"
+        >
+          <FaPaperPlane size={18} />
+        </motion.button>
+      </div>
+    </div>
+  );
+});
+
+ChatInput.displayName = "ChatInput";
 
 export default Chat;

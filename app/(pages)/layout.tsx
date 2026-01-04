@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar/Navbar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
+import { ConfirmationProvider } from "./providers/ConfirmationProvider";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
@@ -30,24 +31,26 @@ export default function RootLayout({
         <QueryProvider>
           <ScrollProvider>
             <AuthProvider>
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  className: "glass-morphism border-white/10 text-white",
-                  duration: 4000,
-                  style: {
-                    background: "rgba(17, 24, 39, 0.8)",
-                    backdropFilter: "blur(12px)",
-                    color: "#fff",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "16px",
-                  },
-                }}
-              />
-              <Navbar />
-              <main className="relative min-h-screen pt-20">
-                {children}
-              </main>
+              <ConfirmationProvider>
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    className: "glass-morphism border-white/10 text-white",
+                    duration: 4000,
+                    style: {
+                      background: "rgba(17, 24, 39, 0.8)",
+                      backdropFilter: "blur(12px)",
+                      color: "#fff",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "16px",
+                    },
+                  }}
+                />
+                <Navbar />
+                <main className="relative min-h-screen">
+                  {children}
+                </main>
+              </ConfirmationProvider>
             </AuthProvider>
           </ScrollProvider>
         </QueryProvider>

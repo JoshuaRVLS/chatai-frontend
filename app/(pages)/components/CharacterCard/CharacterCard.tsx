@@ -34,7 +34,7 @@ const CharacterCard = ({
   return (
     <motion.div
       onClick={handleNavigate}
-      className="group relative h-[450px] flex flex-col cursor-pointer overflow-hidden rounded-[2rem] border border-white/5 bg-[#0f172a]/40 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.1)]"
+      className="group relative h-[400px] flex flex-col cursor-pointer overflow-hidden rounded-[2rem] border border-white/5 bg-[#0f172a]/40 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.1)]"
       whileHover={{ y: -10 }}
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}

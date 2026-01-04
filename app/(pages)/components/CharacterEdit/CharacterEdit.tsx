@@ -4,21 +4,31 @@ import { Character, CharacterTag, User } from "@/app/generated/prisma";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import React, { FormEvent, useContext, useEffect, useState } from "react";
-import Dropdown from "../Dropdown/Dropdown";
-import Comments from "../Comments/Comments";
 import { useRouter } from "next/navigation";
 import { bytesToBase64 } from "@/app/utils/image";
 import { AuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
 import CharacterTags from "../CharacterTags/CharacterTags";
 import CharacterCard from "../CharacterCard/CharacterCard";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  FiCamera,
+  FiInfo,
+  FiType,
+  FiCpu,
+  FiMap,
+  FiMessageSquare,
+  FiSave,
+  FiHash,
+  FiZap,
+  FiChevronLeft
+} from "react-icons/fi";
+import Link from "next/link";
 
 const CharacterEdit = ({ id }: { id: string }) => {
-  const [defaultImage, setDefaultImage] = useState<string | null>(null);
   const [image, setImage] = useState<File | string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [characterName, setCharacterName] = useState<string>("");
-  const [characterAlias, setCharacterAlias] = useState<string>("");
   const [characterBio, setCharacterBio] = useState<string>("");
   const [characterPersona, setCharacterPersona] = useState<string>("");
   const [scenario, setScenario] = useState<string>("");
@@ -35,7 +45,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
       tags: CharacterTag[];
     }
   >({
-    queryKey: ["character"],
+    queryKey: ["character", id],
     queryFn: () =>
       fetch(`/api/characters/${id}`).then((res) =>
         res.json().then((data) => data.data)
@@ -43,6 +53,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
   });
 
   const router = useRouter();
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     if (data) {
@@ -65,11 +76,13 @@ const CharacterEdit = ({ id }: { id: string }) => {
     e.preventDefault();
 
     const formData = new FormData();
-
     formData.append("characterId", id);
-    formData.append("image", image!);
+    if (image instanceof File) {
+      formData.append("image", image);
+    } else if (typeof image === 'string') {
+      formData.append("image", image);
+    }
     formData.append("characterName", characterName);
-    formData.append("characterAlias", characterAlias);
     formData.append("characterBio", characterBio);
     formData.append("characterPersona", characterPersona);
     formData.append("scenario", scenario);
@@ -85,212 +98,306 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
       setLoading(false);
 
-      if (!response.ok) {
-        console.log(response);
-        return;
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(result.message);
+        router.push("/my_characters");
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Failed to update character");
       }
-      const data = await response.json();
-      toast.success(data.message);
-      router.push("/");
     } catch (error) {
       setLoading(false);
-      console.log(error);
+      console.error(error);
+      toast.error("An error occurred");
     }
   };
 
-  const { user } = useContext(AuthContext);
+  const getTokenCount = (text: string) => Math.floor(text.length / 4);
+  const permanentTokens = getTokenCount(characterPersona) + getTokenCount(scenario);
+  const totalTokens = permanentTokens + getTokenCount(initialMessage);
 
-  if (isPending) return <p></p>;
-  if (error) return <p>{error.message}</p>;
+  if (isPending) return (
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <p className="text-white/20 font-black uppercase tracking-[0.3em] text-[10px]">Loading Character Data...</p>
+      </div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <p className="text-red-400 font-black uppercase tracking-widest">{error.message}</p>
+    </div>
+  );
 
   return (
-    <div className="create-character-container">
-      <form onSubmit={handleSubmit} className="create-character-form">
-        <h1 className="text-3xl text-center w-full">Create a Character</h1>
-        <div className="flex flex-col gap-1 w-full">
-          <span>
-            Foto<sup className="error">*</sup>
-          </span>
-          <input
-            type="file"
-            id="image-upload"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setImage(file);
-                setImagePreview(URL.createObjectURL(file));
-              }
-            }}
-            className="hidden"
-          />
-          <label
-            htmlFor="image-upload"
-            className="w-full flex transition hover:opacity-70 cursor-pointer items-center justify-center border border-dashed rounded-md h-36"
-          >
-            {!image ? "Upload Image" : "Change Image"}
-          </label>
-          <ul>
-            <li>Max size: 1MB</li>
-            <li>Supported formats: jpg, jpeg, png</li>
-            <li>
-              Preview at the bottom for <b>MOBILE</b>
-            </li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>
-            Nama Karakter<sup className="error">*</sup>
-          </span>
-          <input
-            required
-            value={characterName}
-            onChange={(e) => setCharacterName(e.target.value)}
-            type="text"
-            placeholder="Character Name"
-            className="input"
-          />
-          <ul>
-            <li>Nama karakter masukin sini. </li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>Panggilan Karakter</span>
-          <input
-            value={characterAlias}
-            onChange={(e) => setCharacterAlias(e.target.value)}
-            type="text"
-            placeholder="Character Alias"
-            className="input scrollbar-hide"
-          />
-          <ul>
-            <li>Nama panggilan buat karakter. OPTIONAL</li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>
-            Character Bio<sup className="error">*</sup>
-          </span>
-          <textarea
-            value={characterBio}
-            required
-            onChange={(e) => setCharacterBio(e.target.value)}
-            placeholder="Deskripsi tentang bot lu"
-            className="input resize-none h-52 scrollbar-hide"
-          />
-          <ul>
-            <li>
-              Ga ngaruh ke AI nya nanti. Ini kayak ngasih penjelasan ke user
-              lain doang.
-            </li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>
-            Character Persona<sup className="error">*</sup>
-          </span>
-          <textarea
-            required
-            value={characterPersona}
-            onChange={(e) => setCharacterPersona(e.target.value)}
-            placeholder="Persona character "
-            className="input resize-none h-52 scrollbar-hide"
-          />
-          <ul>
-            <li>
-              <span>{"{char}"} untuk format karakter nya, contoh</span>
-              <span>
-                {"{user}"} untuk format user nya, contoh:{" "}
-                {"{char} adalah sahabat {user}"}
-              </span>
-            </li>
-            <li>
-              Personality AI lu, <b>sifat</b>, <b>fisik</b>, <b>nama</b>,{" "}
-              <b>latar belakang</b>, dan banyak lagi. Semua jelaskan disini.
-            </li>
-            <li>
-              {Math.floor(characterPersona.length / 4)} Token ( 1 token = 4
-              huruf )
-            </li>
-          </ul>
-        </div>
-        <div className="w-full flex flex-col gap-1">
-          <span>Character Tags</span>
-          <CharacterTags
-            selectedOptions={selectedOptions}
-            setSelectedOptions={setSelectedOptions}
-          />
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>Scenario</span>
-          <textarea
-            value={scenario}
-            onChange={(e) => setScenario(e.target.value)}
-            placeholder="Scenario buat AI"
-            className="input resize-none h-52 scrollbar-hide"
-          />
-          <ul>
-            <li>
-              Konteks nya lagi ngapain, latar belakang tempat seperti apa.
-              Contoh kayak misalkan dunia magic, Lu kasih info nya disini.
-              Misalkan tinggal di indonesia, jakarta tahun 1999.
-            </li>
-            <li>
-              {Math.floor(scenario.length / 4)} Token ( 1 token = 4 huruf )
-            </li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-1 w-full">
-          <span>
-            Initial Message<sup className="error">*</sup>
-          </span>
-          <textarea
-            required
-            value={initialMessage}
-            onChange={(e) => setInitialMessage(e.target.value)}
-            placeholder="Initial Message"
-            className="input resize-none h-52 scrollbar-hide"
-          />
-          <ul>
-            <li>
-              ini tuh kayak chat pertama lu. Contoh: **Di suatu cafe yang ramai
-              dengan pengunjung**
-            </li>
-            <li>
-              {Math.floor(initialMessage.length / 4)} Token ( 1 token = 4 huruf
-              )
-            </li>
-          </ul>
-        </div>
-        <div className="flex flex-col gap-2 justify-center w-full">
-          <span>
-            Token:{" "}
-            {Math.floor(
-              (characterPersona.length +
-                scenario.length +
-                initialMessage.length) /
-              4
-            )}
-            , Permenant Token:{" "}
-            {Math.floor((characterPersona.length + scenario.length) / 4)}
-          </span>
-          <button className="btn">
-            {loading ? "Sedang diupdate..." : "Update"}
-          </button>
-        </div>
-      </form>
-      <div className="w-full md:w-auto flex justify-center">
-        <div className="w-1/2 lg:w-full">
-          {user && (
-            <CharacterCard
+    <div className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
+      {/* Background Blobs */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[100px] rounded-full" />
+      </div>
 
-              authorName={user!.username}
-              characterName={characterName}
-              image={imagePreview}
-              characterBio={characterBio}
-            />
-          )}
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Navigation / Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div className="space-y-2">
+            <Link
+              href="/my_characters"
+              className="flex items-center gap-2 text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group"
+            >
+              <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" /> Back to My Characters
+            </Link>
+            <div className="flex items-center gap-4">
+              <div className="w-1.5 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+              <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+                Edit Character
+              </h1>
+            </div>
+            <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
+              Character • ID: {id.slice(0, 8)}... • Modifying Configuration
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-3 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Token Usage</p>
+              <div className="flex items-center gap-2">
+                <FiZap className="text-primary animate-pulse" />
+                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-white/20 not-italic">Tokens</span></span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Main Editing Column */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Image & Identity Section */}
+            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+              <div className="flex items-center gap-3 mb-2">
+                <FiInfo className="text-primary" />
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-10">
+                <div className="w-full md:w-1/3 space-y-4">
+                  <div className="relative aspect-square rounded-[2rem] overflow-hidden border border-white/10 bg-white/5 group">
+                    {imagePreview ? (
+                      <Image src={imagePreview} fill className="object-cover" alt="Preview" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <FiCamera className="text-white/10 text-4xl" />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      id="image-upload"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setImage(file);
+                          setImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm"
+                    >
+                      <FiCamera className="text-white text-2xl mb-2" />
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Update Visuals</span>
+                    </label>
+                  </div>
+                  <p className="text-[9px] text-white/20 uppercase tracking-wider text-center px-4 font-bold leading-relaxed">
+                    Neural optics support JPG, PNG up to 1MB. Resolution is auto-optimized.
+                  </p>
+                </div>
+
+                <div className="flex-1 space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Character Name</label>
+                    <div className="relative group">
+                      <FiType className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-primary transition-colors" />
+                      <input
+                        required
+                        value={characterName}
+                        onChange={(e) => setCharacterName(e.target.value)}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/10 transition-all font-bold"
+                        placeholder="Name..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Archive Bio</label>
+                    <textarea
+                      required
+                      value={characterBio}
+                      onChange={(e) => setCharacterBio(e.target.value)}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/10 transition-all text-sm h-32 resize-none scrollbar-hide font-medium leading-relaxed"
+                      placeholder="Public description for the central archives..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Tags Section */}
+            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <FiHash className="text-primary" />
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Character Tags</h3>
+              </div>
+              <CharacterTags
+                selectedOptions={selectedOptions}
+                setSelectedOptions={setSelectedOptions}
+              />
+            </section>
+
+            {/* Intelligence Configuration */}
+            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+              <div className="flex items-center gap-3 mb-2">
+                <FiCpu className="text-primary" />
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">AI configuration</h3>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Character Persona</label>
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
+                  </div>
+                  <textarea
+                    required
+                    value={characterPersona}
+                    onChange={(e) => setCharacterPersona(e.target.value)}
+                    className="w-full bg-white/1 shadow-inner border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
+                    placeholder="Describe {char}'s personality, physical traits, background..."
+                  />
+                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-3">
+                    <div className="text-primary pt-0.5"><FiInfo size={14} /></div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-bold">
+                      Use <span className="text-primary">{`{char}`}</span> for the character and <span className="text-primary">{`{user}`}</span> for the person chatting. Example: <span className="italic text-white/60">{`{char} is a rival of {user}`}</span>.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Environmental Scenario</label>
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
+                  </div>
+                  <div className="relative">
+                    <FiMap className="absolute right-6 top-6 text-white/10" />
+                    <textarea
+                      value={scenario}
+                      onChange={(e) => setScenario(e.target.value)}
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed"
+                      placeholder="Describe the current context or world setting..."
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Intro Message</label>
+                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(initialMessage)} Tokens</span>
+                  </div>
+                  <div className="relative">
+                    <FiMessageSquare className="absolute right-6 top-6 text-white/10" />
+                    <textarea
+                      required
+                      value={initialMessage}
+                      onChange={(e) => setInitialMessage(e.target.value)}
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed italic"
+                      placeholder="The simulation's first response..."
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Submit Section (Mobile Only) */}
+            <div className="lg:hidden">
+              <button
+                disabled={loading}
+                className="btn-primary w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 group transition-all"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <FiSave className="group-hover:scale-110 transition-transform" />
+                    <span className="font-black uppercase tracking-widest text-xs">Save Changes</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Right Sticky Preview Column */}
+          <div className="lg:col-span-4 lg:sticky lg:top-32 h-fit space-y-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 px-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Preview</h3>
+              </div>
+              <div className="scale-95 sm:scale-100 origin-top">
+                <CharacterCard
+                  authorName={user?.username || "Architect"}
+                  characterName={characterName || "New Neural Entity"}
+                  image={imagePreview}
+                  characterBio={characterBio || "Describe your entity to see it reflected here..."}
+                  tags={selectedOptions.map(opt => ({ name: opt.label, id: opt.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+              <div className="flex items-center gap-3">
+                <FiZap className="text-primary" />
+                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Usage</h3>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex justify-between text-[11px] font-black uppercase tracking-tight">
+                  <span className="text-white/30">Total Tokens</span>
+                  <span className="text-white">{totalTokens}/2048</span>
+                </div>
+                <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min((totalTokens / 2048) * 100, 100)}%` }}
+                    className={`h-full transition-all duration-500 shadow-[0_0_10px_rgba(34,211,238,0.5)] ${totalTokens > 1500 ? 'bg-orange-500' : 'bg-primary'
+                      }`}
+                  />
+                </div>
+                <p className="text-[9px] text-white/20 leading-relaxed font-bold">
+                  High token density results in deeper context but may increase simulation latency.
+                </p>
+              </div>
+
+              <button
+                disabled={loading}
+                className="btn-primary w-full py-5 rounded-2xl flex items-center justify-center gap-3 group mt-6"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <FiSave className="group-hover:scale-110 transition-transform" />
+                    <span className="font-black uppercase tracking-widest text-xs">Commit Changes</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

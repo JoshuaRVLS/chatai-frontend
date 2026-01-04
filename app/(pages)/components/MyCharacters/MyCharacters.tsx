@@ -8,12 +8,15 @@ import { FaPencilAlt, FaTrash, FaPlus, FaUser, FaRobot } from "react-icons/fa";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { motion, Variants } from "motion/react";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 import { CharactersData } from "@/@types/type"; // adjust the import path to your type definitions
 
 const MyCharacters: React.FC = () => {
   const { user } = useContext(AuthContext);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isManageMode, setIsManageMode] = useState(false);
+  const confirm = useConfirm();
 
   const { isPending, data, error } = useQuery<CharactersData>({
     queryKey: ["myCharacters", user?.id],
@@ -36,9 +39,12 @@ const MyCharacters: React.FC = () => {
 
   const deleteChar = async (characterId: string, characterName: string) => {
     if (
-      !confirm(
-        `Are you sure you want to delete "${characterName}"? This action cannot be undone.`
-      )
+      !(await confirm({
+        title: "Terminate Entity",
+        message: `Are you sure you want to delete "${characterName}"? This action cannot be undone and will erase all associated DNA records.`,
+        confirmLabel: "Terminate",
+        variant: "danger"
+      }))
     )
       return;
 
@@ -123,16 +129,29 @@ const MyCharacters: React.FC = () => {
             </p>
           </div>
 
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Link
-              href="/create_character"
-              className="group relative px-8 py-5 bg-primary text-slate-950 rounded-[1.5rem] font-black uppercase tracking-widest text-xs flex items-center gap-3 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button
+              onClick={() => setIsManageMode(!isManageMode)}
+              className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${isManageMode
+                ? "bg-purple-500/20 text-purple-400 border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
+                : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+                }`}
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <FaPlus className="relative z-10" />
-              <span className="relative z-10">Deploy New Entity</span>
-            </Link>
-          </motion.div>
+              <FaPencilAlt size={12} />
+              {isManageMode ? "Exit Management" : "Manage Entities"}
+            </button>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/create_character"
+                className="group relative px-8 py-5 bg-primary text-slate-950 rounded-[1.5rem] font-black uppercase tracking-widest text-xs flex items-center gap-3 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+              >
+                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                <FaPlus className="relative z-10" />
+                <span className="relative z-10">Deploy New Entity</span>
+              </Link>
+            </motion.div>
+          </div>
         </div>
 
         {/* Dashboard Grid */}
@@ -206,17 +225,20 @@ const MyCharacters: React.FC = () => {
                     </div>
 
                     {/* Quick Controls overlay */}
-                    <div className="absolute top-4 right-4 z-20 flex gap-2 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0">
+                    <div className={`absolute top-4 right-4 z-20 flex gap-2 transition-all ${isManageMode
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+                      }`}>
                       <Link
                         href={`/edit_character/${character.id}`}
-                        className="w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/40 hover:text-primary hover:border-primary/40 transition-all"
+                        className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/80 hover:text-primary hover:border-primary/40 transition-all shadow-xl"
                         title="Modify DNA"
                       >
                         <FaPencilAlt size={14} />
                       </Link>
                       <button
                         onClick={() => deleteChar(character.id, character.name)}
-                        className="w-10 h-10 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/40 hover:text-red-400 hover:border-red-400/40 transition-all"
+                        className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/80 hover:text-red-400 hover:border-red-400/40 transition-all shadow-xl"
                         title="Terminate Entity"
                       >
                         <FaTrash size={14} />

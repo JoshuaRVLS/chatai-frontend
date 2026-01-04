@@ -4,9 +4,18 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
-import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid } from "react-icons/fi";
+import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch } from "react-icons/fi";
+import SearchBar from "../SearchBar";
 
-const Characters = ({ searchQuery }: { searchQuery: string }) => {
+const Characters = ({
+  searchQuery,
+  onSearch,
+  allCharacters
+}: {
+  searchQuery: string;
+  onSearch: (q: string) => void;
+  allCharacters: any[];
+}) => {
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
 
   const { isPending, error, data, refetch } = useQuery<any[]>({
@@ -41,7 +50,7 @@ const Characters = ({ searchQuery }: { searchQuery: string }) => {
     return (
       <div className="flex flex-col gap-10 w-full px-6 md:px-12">
         <div className="h-8 w-48 bg-white/5 rounded-xl shimmer" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
           {Array.from({ length: 10 }).map((_, i) => (
             <div key={i} className="h-[450px] rounded-[2rem] bg-white/5 shimmer border border-white/5" />
           ))}
@@ -69,14 +78,15 @@ const Characters = ({ searchQuery }: { searchQuery: string }) => {
 
   return (
     <div className="flex flex-col gap-10 w-full px-6 md:px-12">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b border-white/5 pb-10">
         <div className="space-y-4">
-          <h2 className="text-4xl font-black uppercase tracking-tighter text-white/90 italic flex items-center gap-4">
-            <span className="w-12 h-1 bg-primary rounded-full" />
-            {searchQuery ? `Search: "${searchQuery}"` : "Community Characters"}
-          </h2>
+          <div className="flex items-center gap-4">
+            <div className="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-white italic">
+              {searchQuery ? "Search Results" : "Community Characters"}
+            </h2>
+          </div>
 
-          {/* Tag Filter Chips */}
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setSelectedTag(null)}
@@ -101,9 +111,13 @@ const Characters = ({ searchQuery }: { searchQuery: string }) => {
             ))}
           </div>
         </div>
+
+        <div className="w-full lg:max-w-md">
+          <SearchBar characters={allCharacters} onSearch={onSearch} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
         <AnimatePresence mode="popLayout">
           {filteredData?.map((character, index) => (
             <motion.div

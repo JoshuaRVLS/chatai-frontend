@@ -7,6 +7,7 @@ import { AuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
   const [personaName, setPersonaName] = useState<string>(initialPersona.name);
@@ -15,6 +16,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext);
+  const confirm = useConfirm();
 
   const { data: activePersonaId, refetch } = useQuery<string>({
     queryKey: ["personaUsed"],
@@ -82,7 +84,12 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
   };
 
   const deletePersona = async () => {
-    if (!confirm(`Are you sure you want to delete "${personaName}"?`)) return;
+    if (!(await confirm({
+      title: "Delete Persona",
+      message: `Are you sure you want to delete "${personaName}"? This action cannot be undone.`,
+      confirmLabel: "Delete Persona",
+      variant: "danger"
+    }))) return;
 
     try {
       const response = await fetch(`/api/persona/${initialPersona.id}`, {
@@ -103,7 +110,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
   const isActive = activePersonaId === initialPersona.id;
 
   return (
-    <motion.div 
+    <motion.div
       className="bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl overflow-hidden"
       whileHover={{ boxShadow: "0 10px 30px rgba(0, 196, 179, 0.2)" }}
       transition={{ duration: 0.3 }}
@@ -116,10 +123,9 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center gap-3">
-          <motion.div 
-            className={`p-2 rounded-full ${
-              isActive ? 'bg-var-color-primary-button text-white' : 'bg-var-color-borders text-var-color-secondary-text'
-            }`}
+          <motion.div
+            className={`p-2 rounded-full ${isActive ? 'bg-var-color-primary-button text-white' : 'bg-var-color-borders text-var-color-secondary-text'
+              }`}
             animate={{ scale: isActive ? [1, 1.1, 1] : 1 }}
             transition={{ repeat: isActive ? Infinity : 0, duration: 2 }}
           >
@@ -134,7 +140,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
             </p>
           </div>
         </div>
-        <motion.div 
+        <motion.div
           className="flex items-center gap-2"
           animate={{ rotate: isExpanded ? 90 : 0 }}
           transition={{ duration: 0.3 }}
@@ -151,7 +157,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
       {/* Expanded Content */}
       <AnimatePresence>
         {isExpanded && (
-          <motion.div 
+          <motion.div
             className="p-6 border-t border-var-color-borders"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
@@ -178,7 +184,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-var-color-secondary-text mb-2">
                     Personality Description
@@ -250,15 +256,14 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
                       Delete
                     </motion.button>
                   </div>
-                  
+
                   <motion.button
                     onClick={usePersona}
                     disabled={isActive}
-                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
-                      isActive
-                        ? 'bg-var-color-primary-button text-white cursor-default'
-                        : 'bg-var-color-secondary-button text-white hover:bg-var-color-secondary-hover-state'
-                    }`}
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${isActive
+                      ? 'bg-var-color-primary-button text-white cursor-default'
+                      : 'bg-var-color-secondary-button text-white hover:bg-var-color-secondary-hover-state'
+                      }`}
                     whileHover={!isActive ? { scale: 1.05, boxShadow: "0 10px 20px rgba(164, 95, 255, 0.3)" } : {}}
                     whileTap={!isActive ? { scale: 0.95 } : {}}
                   >

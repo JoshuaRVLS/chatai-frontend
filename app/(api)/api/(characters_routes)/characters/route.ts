@@ -7,69 +7,105 @@ import { NextResponse } from "next/server";
 export const POST = async (req: Request) => {
   try {
     const form = await req.formData();
-    const image = form.get("image") as File;
-    const characterId = form.get("characterId");
-    const characterName = form.get("characterName");
-    const characterAlias = form.get("characterAlias");
-    const characterBio = form.get("characterBio");
-    const characterPersona = form.get("characterPersona");
-    const scenario = form.get("scenario");
-    const initialMessage = form.get("initialMessage");
-    const userId = form.get("userId");
+    const image = form.get("image");
+    const characterId = form.get("characterId") as string;
+    const characterName = form.get("characterName") as string;
+    const characterBio = form.get("characterBio") as string;
+    const characterPersona = form.get("characterPersona") as string;
+    const scenario = form.get("scenario") as string;
+    const initialMessage = form.get("initialMessage") as string;
+    const userId = form.get("userId") as string;
     const tags: { label: string; value: string }[] = JSON.parse(
       form.get("tags") as string
     );
 
-    await db.character.upsert({
-      where: {
-        id: (characterId as string) || "",
-      },
-      create: {
-        name: characterName as string,
-        bio: characterBio as string,
-        persona: characterPersona as string,
+    const isNewImage = image instanceof File;
+    const isEditing = !!characterId && characterId !== "undefined";
+
+    if (isEditing) {
+      // --- UPDATE LOGIC ---
+      const updateData: any = {
+        name: characterName,
+        bio: characterBio,
+        persona: characterPersona,
+        introMessage: initialMessage,
+        scenario: scenario,
+        tags: {
+          set: tags.map((tag) => ({ id: tag.value })),
+        },
+      };
+
+      if (isNewImage) {
+        updateData.photo = {
+          upsert: {
+            create: {
+              data: Buffer.from(await image.arrayBuffer()),
+              mimetype: image.type,
+              name: image.name,
+            },
+            update: {
+              data: Buffer.from(await image.arrayBuffer()),
+              mimetype: image.type,
+              name: image.name,
+            },
+          },
+        };
+      }
+
+      await db.character.update({
+        where: { id: characterId },
+        data: updateData,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Character updated successfully",
+      });
+    } else {
+      // --- CREATE LOGIC ---
+      const createData: any = {
+        name: characterName,
+        bio: characterBio,
+        persona: characterPersona,
+        introMessage: initialMessage,
+        scenario: scenario,
         author: {
-          connect: {
-            id: userId as string,
-          },
+          connect: { id: userId },
         },
-        introMessage: initialMessage as string,
-        photo: {
+        tags: {
+          connect: tags.map((tag) => ({ id: tag.value })),
+        },
+      };
+
+      if (isNewImage) {
+        createData.photo = {
           create: {
-            data: (await image.bytes()) || null,
+            data: Buffer.from(await image.arrayBuffer()),
             mimetype: image.type,
             name: image.name,
           },
-        },
-        scenario: scenario as string,
-        tags: {
-          connect: tags.map((tag) => ({ id: tag.value })),
-        },
+        };
+      }
+
+      await db.character.create({
+        data: createData,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Character created successfully",
+      });
+    }
+  } catch (error: any) {
+    console.error("Character save error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error during character save",
+        details: error.message
       },
-      update: {
-        name: characterName as string,
-        bio: characterBio as string,
-        persona: characterPersona as string,
-        introMessage: initialMessage as string,
-        photo: {
-          update: {
-            data: (await image.bytes()) || null,
-            mimetype: image.type,
-            name: image.name,
-          },
-        },
-        scenario: scenario as string,
-        tags: {
-          connect: tags.map((tag) => ({ id: tag.value })),
-        },
-      },
-    });
-    return NextResponse.json({
-      success: true,
-      message: "Karakter Berhasil dibuat",
-    });
-  } catch (error) {
-    console.log(error);
+      { status: 500 }
+    );
   }
 };
 

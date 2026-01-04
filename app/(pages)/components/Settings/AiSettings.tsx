@@ -18,6 +18,7 @@ const AiSettings = ({ data }: { data: any }) => {
     { name: "xiaomi/mimo-v2-flash:free", id: "mimo-v2-flash", desc: "Fast & Free" },
     { name: "google/gemini-2.5-flash-lite", id: "gemini-2.5-flash", desc: "Balanced Speed" },
     { name: "google/gemini-2.0-flash-001", id: "gemini-2.0-flash", desc: "High Logic" },
+    { name: "openai/gpt-4o-mini", id: "gpt-4o-mini", desc: "Balanced performance" },
   ];
 
   // Load preferences from localStorage
