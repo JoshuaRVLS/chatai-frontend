@@ -2,7 +2,7 @@
 
 import { UserPersona } from "@/app/generated/prisma";
 import React, { useContext, useState } from "react";
-import { FaUser, FaInfo, FaCheck, FaEdit, FaTrash, FaTimes } from "react-icons/fa";
+import { FaUser, FaInfo, FaCheck, FaEdit, FaTrash, FaTimes, FaPlus } from "react-icons/fa";
 import { AuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
 import { useQuery } from "@tanstack/react-query";
@@ -31,23 +31,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
     try {
       const response = await fetch("/api/persona-used", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user?.id,
-          personaId: initialPersona.id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user?.id, personaId: initialPersona.id }),
       });
-      if (!response.ok) {
-        toast.error("Failed to set persona as default");
-        return;
-      }
-
-      toast.success("Persona set as default");
+      if (!response.ok) return toast.error("Failed to set persona as default");
+      toast.success("Identity core synchronized");
       await refetch();
     } catch (error) {
-      console.log(error);
       toast.error("An error occurred while setting persona");
     }
   };
@@ -61,48 +51,32 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
     try {
       const response = await fetch(`/api/persona/${user?.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          personaName,
-          persona: persona,
-          personaId: initialPersona.id,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ personaName, persona, personaId: initialPersona.id }),
       });
-      if (!response.ok) {
-        return toast.error("Failed to update persona");
-      }
-
-      toast.success("Persona updated successfully");
+      if (!response.ok) return toast.error("Failed to update persona");
+      toast.success("Identity reconfiguration successful");
       setIsEditing(false);
       await refetch();
     } catch (error) {
-      console.log(error);
       toast.error("An error occurred while updating persona");
     }
   };
 
   const deletePersona = async () => {
     if (!(await confirm({
-      title: "Delete Persona",
-      message: `Are you sure you want to delete "${personaName}"? This action cannot be undone.`,
+      title: "Deconstruct Identity",
+      message: `Are you sure you want to permanently delete "${personaName}"? This process is irreversible.`,
       confirmLabel: "Delete Persona",
       variant: "danger"
     }))) return;
 
     try {
-      const response = await fetch(`/api/persona/${initialPersona.id}`, {
-        method: "DELETE",
-      });
-      if (!response.ok) {
-        return toast.error("Failed to delete persona");
-      }
-
-      toast.success("Persona deleted successfully");
+      const response = await fetch(`/api/persona/${initialPersona.id}`, { method: "DELETE" });
+      if (!response.ok) return toast.error("Failed to delete persona");
+      toast.success("Identity purged from network");
       await refetch();
     } catch (error) {
-      console.log(error);
       toast.error("An error occurred while deleting persona");
     }
   };
@@ -111,168 +85,138 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
 
   return (
     <motion.div
-      className="bg-var-color-for-dark-surface border border-var-color-borders rounded-2xl overflow-hidden"
-      whileHover={{ boxShadow: "0 10px 30px rgba(0, 196, 179, 0.2)" }}
-      transition={{ duration: 0.3 }}
+      className={`relative rounded-[2.5rem] overflow-hidden border transition-all duration-500 ${isActive ? 'bg-white/[0.05] border-purple-500/50 shadow-[0_20px_60px_rgba(168,85,247,0.15)]' : 'bg-white/[0.02] border-white/10 hover:border-white/20'}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
     >
-      {/* Header */}
+      {/* Background Glow for Active Card */}
+      {isActive && (
+        <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
+      )}
+
+      {/* Header Button */}
       <motion.button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-6 flex items-center justify-between text-left hover:bg-var-color-borders transition-colors"
-        whileHover={{ backgroundColor: "var(--color-borders)" }}
+        className="w-full p-8 flex items-center justify-between text-left group"
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center gap-3">
-          <motion.div
-            className={`p-2 rounded-full ${isActive ? 'bg-var-color-primary-button text-white' : 'bg-var-color-borders text-var-color-secondary-text'
-              }`}
-            animate={{ scale: isActive ? [1, 1.1, 1] : 1 }}
-            transition={{ repeat: isActive ? Infinity : 0, duration: 2 }}
-          >
-            <FaUser className="w-4 h-4" />
-          </motion.div>
+        <div className="flex items-center gap-5">
+          <div className="relative">
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-white/30 group-hover:bg-white/10'}`}>
+              <FaUser size={20} />
+            </div>
+            {isActive && (
+              <motion.div
+                className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-[#020617] shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              />
+            )}
+          </div>
           <div>
-            <h3 className="text-lg font-semibold text-var-color-primary-text">
+            <h3 className="text-xl font-black text-white italic tracking-tight uppercase leading-tight group-hover:text-primary transition-colors">
               {personaName}
             </h3>
-            <p className="text-var-color-secondary-text text-sm">
-              {isActive ? "Default Persona" : "Click to expand"}
+            <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
+              {isActive ? "Default Neural Core" : "Secondary Proxy Node"}
             </p>
           </div>
         </div>
         <motion.div
-          className="flex items-center gap-2"
-          animate={{ rotate: isExpanded ? 90 : 0 }}
-          transition={{ duration: 0.3 }}
+          animate={{ rotate: isExpanded ? 45 : 0 }}
+          className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isExpanded ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-white/10 group-hover:border-white/10'}`}
         >
-          {isActive && (
-            <span className="px-2 py-1 bg-var-color-primary-button text-white text-xs rounded-full">
-              Active
-            </span>
-          )}
-          <FaTimes className="text-var-color-disabled" />
+          <FaPlus size={14} />
         </motion.div>
       </motion.button>
 
-      {/* Expanded Content */}
+      {/* Content Section */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            className="p-6 border-t border-var-color-borders"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4 }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="overflow-hidden border-t border-white/5"
           >
-            {isEditing ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-var-color-secondary-text mb-2">
-                    Persona Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FaUser className="text-var-color-disabled w-4 h-4" />
-                    </div>
-                    <motion.input
-                      type="text"
+            <div className="p-8 space-y-8">
+              {isEditing ? (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Identity Signature</label>
+                    <input
                       value={personaName}
                       onChange={(e) => setPersonaName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-var-color-primary-background border border-var-color-borders rounded-lg focus:ring-2 focus:ring-var-color-primary-button focus:border-transparent text-var-color-primary-text"
-                      whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
-                      transition={{ duration: 0.2 }}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none focus:border-purple-500/50 transition-all font-bold"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-var-color-secondary-text mb-2">
-                    Personality Description
-                  </label>
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 pointer-events-none">
-                      <FaInfo className="text-var-color-disabled w-4 h-4" />
-                    </div>
-                    <motion.textarea
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Behavioral Logic Matrix</label>
+                    <textarea
                       value={persona}
                       onChange={(e) => setPersona(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 bg-var-color-primary-background border border-var-color-borders rounded-lg focus:ring-2 focus:ring-var-color-primary-button focus:border-transparent text-var-color-primary-text resize-none"
-                      rows={6}
-                      whileFocus={{ scale: 1.02, boxShadow: "0 0 10px rgba(0, 196, 179, 0.3)" }}
-                      transition={{ duration: 0.2 }}
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none focus:border-purple-500/50 transition-all font-medium resize-none text-sm leading-relaxed"
+                      rows={5}
                     />
                   </div>
-                </div>
-
-                <div className="flex gap-2 justify-end">
-                  <motion.button
-                    onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 border border-var-color-borders text-var-color-secondary-text rounded-lg hover:bg-var-color-borders transition-colors"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    Cancel
-                  </motion.button>
-                  <motion.button
-                    onClick={save}
-                    className="px-4 py-2 bg-var-color-primary-button text-white rounded-lg hover:bg-var-color-primary-hover-state transition-colors flex items-center gap-2"
-                    whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 196, 179, 0.3)" }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <FaCheck className="w-4 h-4" />
-                    Save Changes
-                  </motion.button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-var-color-secondary-text mb-2">
-                    Personality Description
-                  </h4>
-                  <p className="text-var-color-primary-text bg-var-color-primary-background border border-var-color-borders rounded-lg p-4 whitespace-pre-wrap">
-                    {persona}
-                  </p>
-                </div>
-
-                <div className="flex gap-2 justify-between">
-                  <div className="flex gap-2">
-                    <motion.button
-                      onClick={() => setIsEditing(true)}
-                      className="px-4 py-2 border border-var-color-borders text-var-color-secondary-text rounded-lg hover:bg-var-color-borders transition-colors flex items-center gap-2"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button
+                      onClick={() => setIsEditing(false)}
+                      className="px-6 py-3 border border-white/5 text-white/30 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/5 transition-all"
                     >
-                      <FaEdit className="w-4 h-4" />
-                      Edit
-                    </motion.button>
-                    <motion.button
-                      onClick={deletePersona}
-                      className="px-4 py-2 border border-var-color-error text-var-color-error rounded-lg hover:bg-var-color-error hover:text-white transition-colors flex items-center gap-2"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      Abort
+                    </button>
+                    <button
+                      onClick={save}
+                      className="px-6 py-3 bg-white text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2"
                     >
-                      <FaTrash className="w-4 h-4" />
-                      Delete
-                    </motion.button>
+                      <FaCheck /> Confirm Edit
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  <div className="space-y-3">
+                    <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 flex items-center gap-2">
+                      <FaInfo size={10} className="text-purple-500" /> Behavioral Manifest
+                    </h4>
+                    <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 text-white/60 text-sm leading-relaxed italic font-medium">
+                      "{persona}"
+                    </div>
                   </div>
 
-                  <motion.button
-                    onClick={usePersona}
-                    disabled={isActive}
-                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${isActive
-                      ? 'bg-var-color-primary-button text-white cursor-default'
-                      : 'bg-var-color-secondary-button text-white hover:bg-var-color-secondary-hover-state'
-                      }`}
-                    whileHover={!isActive ? { scale: 1.05, boxShadow: "0 10px 20px rgba(164, 95, 255, 0.3)" } : {}}
-                    whileTap={!isActive ? { scale: 0.95 } : {}}
-                  >
-                    <FaCheck className="w-4 h-4" />
-                    {isActive ? 'Currently Active' : 'Set as Default'}
-                  </motion.button>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex gap-2 flex-1">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+                      >
+                        <FaEdit className="text-purple-400" /> Edit
+                      </button>
+                      <button
+                        onClick={deletePersona}
+                        className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/40 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all"
+                      >
+                        <FaTrash /> Purge
+                      </button>
+                    </div>
+                    <button
+                      onClick={usePersona}
+                      disabled={isActive}
+                      className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all ${isActive ? 'bg-primary text-black cursor-default' : 'bg-white text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
+                    >
+                      {isActive ? (
+                        <>
+                          <div className="w-2 h-2 rounded-full bg-black animate-pulse" /> Linked
+                        </>
+                      ) : (
+                        <>Establish Neural Link</>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

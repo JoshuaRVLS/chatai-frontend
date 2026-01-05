@@ -886,7 +886,7 @@ const ChatInput = React.memo(({
   const [message, setMessage] = useState("");
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 768) {
       e.preventDefault();
       handleInternalSubmit();
     }
