@@ -17,6 +17,12 @@ export const POST = async (req: Request) => {
       },
     });
 
+    // Touch chat updatedAt
+    await db.chat.update({
+      where: { id: chatId },
+      data: { updatedAt: new Date() }
+    });
+
     return NextResponse.json({ success: true, data: message }, { status: 201 });
   } catch (error) {
     console.log(error);

@@ -22,6 +22,7 @@ export const POST = async (req: Request) => {
     const lorebooks: string[] = JSON.parse(
       form.get("lorebooks") as string || "[]"
     );
+    const isNsfw = form.get("isNsfw") === "true";
 
     const isNewImage = image instanceof File;
     const isEditing = !!characterId && characterId !== "undefined";
@@ -41,6 +42,7 @@ export const POST = async (req: Request) => {
         lorebooks: {
           set: lorebooks.map((id) => ({ id })),
         },
+        isNsfw: isNsfw,
       };
 
       if (isNewImage) {
@@ -87,6 +89,7 @@ export const POST = async (req: Request) => {
         lorebooks: {
           connect: lorebooks.map((id) => ({ id })),
         },
+        isNsfw: isNsfw,
       };
 
       if (isNewImage) {

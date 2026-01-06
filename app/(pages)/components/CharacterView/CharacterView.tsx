@@ -19,6 +19,9 @@ import { AuthContext } from "../../providers/AuthProvider";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
 import Comments from "../Comments/Comments";
+import { useSettings } from "@/app/hooks/useSettings";
+import { FiEye } from "react-icons/fi";
+import { useQueryClient } from "@tanstack/react-query";
 
 const CharacterView = ({ id }: { id: string }) => {
   const { isPending, error, data } = useQuery<
@@ -37,6 +40,11 @@ const CharacterView = ({ id }: { id: string }) => {
 
   const { user } = useContext(AuthContext);
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const { settings } = useSettings();
+  const [tempUnblur, setTempUnblur] = useState(false);
+  const shouldBlur = data?.isNsfw && settings?.blurNsfw && !tempUnblur;
+
   const [expandedSections, setExpandedSections] = useState({
     biography: true,
     scenario: false,
@@ -53,6 +61,10 @@ const CharacterView = ({ id }: { id: string }) => {
       });
       if (!res.ok) return;
       const { chat } = await res.json();
+
+      // Invalidate history cache to ensure new chat appears
+      queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
+
       router.push(`/chat/${chat.id}`);
     } catch (e) {
       console.error(e);
@@ -90,16 +102,42 @@ const CharacterView = ({ id }: { id: string }) => {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl group"
+              onClick={() => shouldBlur && setTempUnblur(true)}
+              className={`relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl group ${shouldBlur ? 'cursor-pointer' : ''}`}
             >
               <Image
                 src={`/api/image/${data.id}`}
                 alt={data.name}
                 fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                className={`object-cover transition-transform duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-3xl scale-110' : ''}`}
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent" />
+
+              {/* NSFW Blur Overlay */}
+              <AnimatePresence>
+                {shouldBlur && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-colors group-hover:bg-black/60"
+                  >
+                    <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                      <FiEye className="text-white/60 text-2xl" />
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                      <p className="text-xs font-black text-white uppercase tracking-[0.2em]">Sensitive Content</p>
+                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Click to Reveal Visual</p>
+                    </div>
+
+                    <div className="absolute top-6 left-6 px-4 py-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30">
+                      <span className="text-[10px] font-black text-orange-500 uppercase tracking-widest">NSFW</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent pointer-events-none" />
 
               <div className="absolute bottom-6 left-6 right-6">
                 <div className="flex items-center gap-2 mb-2">

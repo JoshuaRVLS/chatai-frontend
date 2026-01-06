@@ -5,13 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "../../providers/AuthProvider";
 import { User } from "@/app/generated/prisma";
 import {
-  FiLock,
   FiUser,
   FiTrash2,
-  FiCamera,
   FiCpu,
   FiShield,
   FiChevronRight,
+  FiLock,
 } from "react-icons/fi";
 import { Image } from "@/@types/type";
 import { motion, AnimatePresence } from "motion/react";
@@ -21,6 +20,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import DeleteConfirmation from "./DeleteConfirmation";
 import AiSettings from "./AiSettings";
+import Safety from "./Safety";
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -28,7 +28,7 @@ const Settings = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const router = useRouter();
 
-  const { data, isPending, error } = useQuery<User & { profileImage: Image }>({
+  const { data, isPending, error } = useQuery<User & { profileImage: Image; userSettings: any }>({
     queryKey: ["settingsData"],
     queryFn: () =>
       fetch(`/api/users/${user?.id}`).then((res) =>
@@ -58,7 +58,8 @@ const Settings = () => {
   const tabs = [
     { id: "profile", label: "Profile", icon: <FiUser />, description: "Public details and bio" },
     { id: "ai-settings", label: "AI Engine", icon: <FiCpu />, description: "Models and API keys" },
-    { id: "security", label: "Security", icon: <FiShield />, description: "Password and safety" },
+    { id: "safety", label: "Safety", icon: <FiShield />, description: "Content filtering" },
+    { id: "security", label: "Security", icon: <FiLock />, description: "Password and safety" },
   ];
 
   if (isPending) {
@@ -106,8 +107,8 @@ const Settings = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left group ${activeTab === tab.id
-                      ? "bg-primary/10 border border-primary/20 text-primary"
-                      : "hover:bg-white/5 border border-transparent text-white/50"
+                    ? "bg-primary/10 border border-primary/20 text-primary"
+                    : "hover:bg-white/5 border border-transparent text-white/50"
                     }`}
                 >
                   <div className={`text-xl transition-transform duration-300 ${activeTab === tab.id ? "scale-110" : "group-hover:scale-110"}`}>
@@ -149,6 +150,7 @@ const Settings = () => {
               >
                 {activeTab === "profile" && <Profile data={data!} />}
                 {activeTab === "ai-settings" && <AiSettings data={data!} />}
+                {activeTab === "safety" && <Safety data={data!} />}
                 {activeTab === "security" && <Security />}
               </motion.div>
             </AnimatePresence>

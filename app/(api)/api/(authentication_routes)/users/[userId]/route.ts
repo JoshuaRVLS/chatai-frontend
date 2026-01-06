@@ -5,7 +5,13 @@ export const GET =
   async (req: Request, { params }: { params: Promise<{ userId: string }> }) => {
     const userId = (await params).userId;
     const user = await db.user.findUnique(
-      { where: { id: userId }, include: { profileImage: true } });
+      {
+        where: { id: userId },
+        include: {
+          profileImage: true,
+          userSettings: true
+        }
+      });
     if (!user) {
       return NextResponse.json(
         { success: false, message: 'User not found' }, { status: 404 });
@@ -14,6 +20,7 @@ export const GET =
   };
 
 export const DELETE =
+  // ... (previous delete implementation remains unchanged)
   async (req: Request, { params }: { params: Promise<{ userId: string }> }) => {
     const userId = (await params).userId;
     await db.user.delete({
@@ -23,7 +30,8 @@ export const DELETE =
         charCreated: true,
         chats: true,
         comments: true,
-        personas: true
+        personas: true,
+        userSettings: true
       }
     });
     return NextResponse.json({ success: true }, { status: 200 })
@@ -33,14 +41,34 @@ export const PATCH =
   async (req: Request, { params }: { params: Promise<{ userId: string }> }) => {
     try {
       const userId = (await params).userId;
-      const { username, email } = await req.json();
+      const { username, email, showNsfw, blurNsfw } = await req.json();
+
+      const updateData: any = {};
+      if (username !== undefined) updateData.username = username;
+      if (email !== undefined) updateData.email = email;
+
+      if (showNsfw !== undefined || blurNsfw !== undefined) {
+        updateData.userSettings = {
+          upsert: {
+            create: {
+              showNsfw: showNsfw ?? false,
+              blurNsfw: blurNsfw ?? true
+            },
+            update: {
+              ...(showNsfw !== undefined && { showNsfw }),
+              ...(blurNsfw !== undefined && { blurNsfw })
+            }
+          }
+        };
+      }
 
       const user = await db.user.update({
         where: { id: userId },
-        data: {
-          username,
-          email,
-        },
+        data: updateData,
+        include: {
+          profileImage: true,
+          userSettings: true
+        }
       });
 
       return NextResponse.json({ success: true, data: user }, { status: 200 });

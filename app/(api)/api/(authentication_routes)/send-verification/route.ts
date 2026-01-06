@@ -2,10 +2,22 @@ import { db } from "@/app/utils/prisma";
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import { rateLimit } from "@/app/utils/rateLimit";
+import { headers } from "next/headers";
 
 export const POST = async (req: Request) => {
+  const headerPayload = await headers();
+  const ip = headerPayload.get("x-forwarded-for") || "unknown";
+
+  const limitResult = await rateLimit(ip, { limit: 2, windowMs: 300000 }); // 2 emails per 5 mins
+  if (!limitResult.success) {
+    return NextResponse.json(
+      { success: false, message: "Terlalu banyak permintaan verifikasi. Silakan coba lagi nanti." },
+      { status: 429 }
+    );
+  }
+
   const { email, verificationToken } = await req.json();
-  console.log("MASUK KE SEND VERIFICATION");
 
   const transporter = nodemailer.createTransport({
     host: process.env.EMAIL_SERVER_HOST as string,

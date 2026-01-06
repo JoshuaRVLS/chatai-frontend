@@ -17,7 +17,8 @@ import {
   FiZap,
   FiPlus,
   FiHash,
-  FiBook
+  FiBook,
+  FiAlertTriangle
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -37,6 +38,7 @@ const CreateCharacterPage: React.FC = () => {
   const [initialMessage, setInitialMessage] = useState("");
   const [selectedOptions, setSelectedOptions] = useState<TagOption[]>([]);
   const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
+  const [isNsfw, setIsNsfw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const { data: lorebooks } = useQuery<any[]>({
@@ -67,6 +69,7 @@ const CreateCharacterPage: React.FC = () => {
     formData.append("userId", user?.id || "");
     formData.append("tags", JSON.stringify(selectedOptions));
     formData.append("lorebooks", JSON.stringify(selectedLorebooks));
+    formData.append("isNsfw", isNsfw.toString());
 
     try {
       const response = await fetch("/api/characters", {
@@ -102,7 +105,7 @@ const CreateCharacterPage: React.FC = () => {
             <div className="flex items-center gap-4">
               <div className="w-1.5 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
               <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
-                Initialize Entity
+                New Character
               </h1>
             </div>
             <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
@@ -192,6 +195,27 @@ const CreateCharacterPage: React.FC = () => {
                       placeholder="Brief history for the central archives..."
                     />
                   </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group transition-all hover:border-orange-500/20">
+                    <div className="flex items-center gap-3">
+                      <FiAlertTriangle className={`transition-colors ${isNsfw ? "text-orange-500" : "text-white/20"}`} />
+                      <div>
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Mature Content</p>
+                        <p className="text-[9px] text-white/20 font-bold uppercase tracking-tighter mt-1">Mark character as NSFW</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsNsfw(!isNsfw)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-orange-500" : "bg-white/10 border border-white/5"}`}
+                    >
+                      <motion.div
+                        animate={{ x: isNsfw ? 26 : 2 }}
+                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-white" : "bg-white/20"}`}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -200,7 +224,7 @@ const CreateCharacterPage: React.FC = () => {
             <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FiHash className="text-primary" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Classification Tags</h3>
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Tags</h3>
               </div>
               <CharacterTags
                 selectedOptions={selectedOptions}
@@ -212,7 +236,7 @@ const CreateCharacterPage: React.FC = () => {
             <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FiBook className="text-primary" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Knowledge Integration</h3>
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
               <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
                 Link existing information modules to provide this entity with persistent world knowledge.
@@ -230,8 +254,8 @@ const CreateCharacterPage: React.FC = () => {
                         );
                       }}
                       className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
-                          ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                          : "bg-white/5 text-white/40 border-white/10 hover:border-white/20"
+                        ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                        : "bg-white/5 text-white/40 border-white/10 hover:border-white/20"
                         }`}
                     >
                       {lb.name}
@@ -320,7 +344,7 @@ const CreateCharacterPage: React.FC = () => {
                 ) : (
                   <>
                     <FiPlus className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">Initialize Entity</span>
+                    <span className="font-black uppercase tracking-widest text-xs">New Character</span>
                   </>
                 )}
               </button>
@@ -340,6 +364,7 @@ const CreateCharacterPage: React.FC = () => {
                   characterName={characterName || "New Identity"}
                   image={imagePreview}
                   characterBio={characterBio || "Draft your character to see it reflected here..."}
+                  isNsfw={isNsfw}
                   tags={selectedOptions.map(opt => ({ name: opt.label, id: opt.value }))}
                 />
               </div>
@@ -379,7 +404,7 @@ const CreateCharacterPage: React.FC = () => {
                 ) : (
                   <>
                     <FiPlus className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">Initialize Entity</span>
+                    <span className="font-black uppercase tracking-widest text-xs">New Character</span>
                   </>
                 )}
               </button>

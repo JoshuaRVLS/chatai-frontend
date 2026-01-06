@@ -2,6 +2,8 @@ import { db } from "@/app/utils/prisma";
 import { z } from "zod";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { rateLimit } from "@/app/utils/rateLimit";
+import { headers } from "next/headers";
 
 const userSchema = z.object({
   username: z.string(),
@@ -10,6 +12,17 @@ const userSchema = z.object({
 
 export const POST = async (req: Request) => {
   try {
+    const headerPayload = await headers();
+    const ip = headerPayload.get("x-forwarded-for") || "unknown";
+
+    const limitResult = await rateLimit(ip, { limit: 5, windowMs: 60000 }); // 5 attempts per minute
+    if (!limitResult.success) {
+      return NextResponse.json(
+        { success: false, message: "Terlalu banyak percobaan login. Silakan coba lagi nanti." },
+        { status: 429 }
+      );
+    }
+
     const { username, password } = await userSchema.parseAsync(
       await req.json()
     );
@@ -25,13 +38,13 @@ export const POST = async (req: Request) => {
     });
     if (!user) {
       return NextResponse.json(
-        { success: false, message: "User belum terdaftar" },
+        { success: false, message: "Username atau password salah" },
         { status: 200 }
       );
     }
     if (!(await bcrypt.compare(password, user.password))) {
       return NextResponse.json(
-        { success: false, message: "Password salah" },
+        { success: false, message: "Username atau password salah" },
         { status: 200 }
       );
     }

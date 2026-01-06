@@ -37,6 +37,8 @@ model UserSettings {
   user User @relation(fields: [userId], references: [id])
   userId String @unique
   chatSettings Json?
+  showNsfw Boolean @default(false)
+  blurNsfw Boolean @default(true)
 }
 
 model UserPersona {
@@ -63,6 +65,7 @@ model Character {
   scenario String
   introMessage String
   exampleConversations String?
+  isNsfw Boolean @default(false)
   author User @relation(fields: [authorId], references: [id])
   authorId String
   chats Chat[]
@@ -84,7 +87,7 @@ model Lorebook {
   characterIds String[]
   characters Character[] @relation(fields: [characterIds], references: [id])
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model LoreEntry {
@@ -95,7 +98,7 @@ model LoreEntry {
   content String // Information to inject
   enabled Boolean @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 
@@ -107,7 +110,7 @@ model Comment {
   character Character @relation(fields: [characterId], references: [id])
   characterId String
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model CharacterTag {
@@ -138,7 +141,7 @@ model Chat {
   personaId String?
   chatSettings Json?
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Message {

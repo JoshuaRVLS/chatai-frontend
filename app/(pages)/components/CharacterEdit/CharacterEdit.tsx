@@ -22,7 +22,8 @@ import {
   FiHash,
   FiZap,
   FiChevronLeft,
-  FiBook
+  FiBook,
+  FiAlertTriangle
 } from "react-icons/fi";
 import Link from "next/link";
 
@@ -41,6 +42,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     { label: string; value: string }[]
   >([]);
   const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
+  const [isNsfw, setIsNsfw] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useContext(AuthContext);
@@ -81,6 +83,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
         data.tags.map((tag) => ({ label: tag.name, value: tag.id }))
       );
       setSelectedLorebooks(data.lorebooks.map(lb => lb.id));
+      setIsNsfw(data.isNsfw);
     }
   }, [data]);
 
@@ -104,6 +107,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     formData.append("userId", user?.id as string);
     formData.append("tags", JSON.stringify(selectedOptions));
     formData.append("lorebooks", JSON.stringify(selectedLorebooks));
+    formData.append("isNsfw", isNsfw.toString());
 
     try {
       const response = await fetch("/api/characters", {
@@ -304,6 +308,27 @@ const CharacterEdit = ({ id }: { id: string }) => {
                       placeholder="Public description for the central archives..."
                     />
                   </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group transition-all hover:border-orange-500/20">
+                    <div className="flex items-center gap-3">
+                      <FiAlertTriangle className={`transition-colors ${isNsfw ? "text-orange-500" : "text-white/20"}`} />
+                      <div>
+                        <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Mature Content</p>
+                        <p className="text-[9px] text-white/20 font-bold uppercase tracking-tighter mt-1">Mark character as NSFW</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsNsfw(!isNsfw)}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-orange-500" : "bg-white/10 border border-white/5"}`}
+                    >
+                      <motion.div
+                        animate={{ x: isNsfw ? 26 : 2 }}
+                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-white" : "bg-white/20"}`}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -324,7 +349,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
             <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FiBook className="text-primary" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Knowledge Integration</h3>
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
               <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
                 Link existing information modules to provide this entity with persistent world knowledge.
@@ -472,6 +497,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
                   characterName={characterName || "New Character"}
                   image={imagePreview}
                   characterBio={characterBio || "Describe your entity to see it reflected here..."}
+                  isNsfw={isNsfw}
                   tags={selectedOptions.map(opt => ({ name: opt.label, id: opt.value }))}
                 />
               </div>

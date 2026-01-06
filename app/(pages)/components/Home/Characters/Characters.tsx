@@ -6,6 +6,7 @@ import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
 import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch } from "react-icons/fi";
 import SearchBar from "../SearchBar";
+import { useSettings } from "@/app/hooks/useSettings";
 
 const Characters = ({
   searchQuery,
@@ -16,6 +17,7 @@ const Characters = ({
   onSearch: (q: string) => void;
   allCharacters: any[];
 }) => {
+  const { settings } = useSettings();
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
@@ -48,6 +50,9 @@ const Characters = ({
       char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesTag = !selectedTag || char.tags.some((tag: any) => tag.name === selectedTag);
+
+    // NSFW Filtering
+    if (!settings?.showNsfw && char.isNsfw) return false;
 
     return matchesSearch && matchesTag;
   });
@@ -152,6 +157,7 @@ const Characters = ({
                 characterId={character.id}
                 characterBio={character.bio}
                 authorName={character.author.username}
+                isNsfw={character.isNsfw}
                 tags={character.tags}
               />
             </motion.div>

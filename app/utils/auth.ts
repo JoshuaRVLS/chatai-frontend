@@ -1,5 +1,7 @@
 import Credentials from "next-auth/providers/credentials";
 import { NextAuthOptions } from "next-auth";
+import { db } from "./prisma";
+import bcrypt from "bcryptjs";
 
 type UserInput = {
   username: string;
@@ -11,33 +13,42 @@ export const authOptions: NextAuthOptions = {
     Credentials({
       credentials: {},
       authorize: async (credentials) => {
-        const { username, password } = credentials as UserInput;
+        const creds = credentials as Record<string, string> | undefined;
+        if (!creds?.username || !creds?.password) {
+          throw new Error("Username and password required");
+        }
 
         try {
-          const response = await fetch(
-            `${process.env.NEXTAUTH_URL}/api/users/validate`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ username, password }),
-            }
-          );
+          const user = await db.user.findFirst({
+            where: {
+              OR: [
+                { username: creds.username },
+                { email: creds.username },
+              ],
+            },
+            include: {
+              profileImage: true,
+            },
+          });
 
-          const data = await response.json();
-
-          if (!data.success) {
-            console.log(data);
-            throw new Error(data.message);
+          if (!user) {
+            throw new Error("Invalid username or password");
           }
 
-          console.log("Logged in");
+          const isValid = await bcrypt.compare(creds.password, user.password);
+          if (!isValid) {
+            throw new Error("Invalid username or password");
+          }
+
+          if (!user.verified) {
+            throw new Error("Please activate your account first");
+          }
+
           return {
-            id: data.userId as string,
-            name: data.username as string,
-            username: data.username as string,
-            image: data.hasPicture ? `/api/users/picture/${data.userId}` : null,
+            id: user.id,
+            name: user.username,
+            username: user.username,
+            image: user.profileImage ? `/api/users/picture/${user.id}` : null,
           };
         } catch (error) {
           if (error instanceof Error) {

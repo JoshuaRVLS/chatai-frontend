@@ -13,7 +13,8 @@ import {
   FiX,
   FiUsers,
   FiCpu,
-  FiBookOpen
+  FiBookOpen,
+  FiSettings
 } from "react-icons/fi";
 import { signOut, useSession } from "next-auth/react";
 
@@ -43,13 +44,17 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
-  const navLinks = [
-    { name: "Home", href: "/", icon: <FiHome /> },
+  const navLinks: any[] = [];
+
+  const dropdownLinks = [
     { name: "Create", href: "/create_character", icon: <FiPlusSquare /> },
-    { name: "Lore", href: "/lorebooks", icon: <FiBookOpen /> },
-    { name: "Characters", href: "/my_characters", icon: <FiUsers /> },
-    { name: "Personas", href: "/my_personas", icon: <FiCpu /> },
+    { name: "My Lorebooks", href: "/lorebooks", icon: <FiBookOpen /> },
+    { name: "My Characters", href: "/my_characters", icon: <FiUsers /> },
+    { name: "My Personas", href: "/my_personas", icon: <FiCpu /> },
+    { name: "Settings", href: "/settings", icon: <FiSettings /> },
   ];
+
+  const [isProfileHovered, setIsProfileHovered] = useState(false);
 
   if (pathname.startsWith("/chat/")) return null;
 
@@ -102,19 +107,61 @@ const Navbar = () => {
 
             <div className="flex items-center gap-6">
               {session ? (
-                <Link href="/settings" className="flex items-center gap-4 transition-opacity hover:opacity-80">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-[11px] font-black text-white uppercase tracking-tight italic">{session.user?.name}</p>
-                    <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">Member</p>
-                  </div>
-                  <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-                    {session.user?.image ? (
-                      <img src={session.user.image} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <FiUser className="text-white/20" />
+                <div
+                  className="relative group"
+                  onMouseEnter={() => setIsProfileHovered(true)}
+                  onMouseLeave={() => setIsProfileHovered(false)}
+                >
+                  <Link href="/settings" className="flex items-center gap-4 transition-opacity hover:opacity-80">
+                    <div className="text-right hidden sm:block">
+                      <p className="text-[11px] font-black text-white uppercase tracking-tight italic">{session.user?.name}</p>
+                      <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">Member</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                      {session.user?.image ? (
+                        <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <FiUser className="text-white/20" />
+                      )}
+                    </div>
+                  </Link>
+
+                  <AnimatePresence>
+                    {isProfileHovered && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute right-0 top-full pt-4 w-64 z-[60]"
+                      >
+                        <div className="bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-3 shadow-2xl">
+                          <div className="flex flex-col gap-1">
+                            {dropdownLinks.map((link) => (
+                              <Link
+                                key={link.href}
+                                href={link.href}
+                                onClick={() => setIsProfileHovered(false)}
+                                className="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-white/5 text-white/40 hover:text-primary group/item"
+                              >
+                                <span className="text-lg transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest">{link.name}</span>
+                              </Link>
+                            ))}
+                            <div className="h-px bg-white/5 my-1" />
+                            <button
+                              onClick={() => signOut()}
+                              className="flex items-center gap-3 p-3 rounded-2xl transition-all hover:bg-red-500/10 text-red-500/40 hover:text-red-500 group/item"
+                            >
+                              <FiLogOut className="text-lg transition-transform group-hover/item:scale-110" />
+                              <span className="text-[10px] font-black uppercase tracking-widest">Sign Out</span>
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
                     )}
-                  </div>
-                </Link>
+                  </AnimatePresence>
+                </div>
               ) : (
                 <Link href="/login" className="px-6 py-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-slate-950 transition-all">
                   Sign In
@@ -140,9 +187,16 @@ const Navbar = () => {
             exit={{ opacity: 0, x: 20 }}
             className="fixed inset-0 z-[60] bg-[#020617] backdrop-blur-2xl flex flex-col p-8 pt-32 gap-10 md:hidden"
           >
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="absolute top-8 right-8 p-3 rounded-2xl bg-white/5 text-white/40 hover:text-primary transition-colors"
+            >
+              <FiX size={24} />
+            </button>
+
             <div className="flex flex-col gap-4">
-              <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20 px-4">Menu</p>
-              {navLinks.map((link) => (
+              <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20 px-4">Features</p>
+              {dropdownLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}

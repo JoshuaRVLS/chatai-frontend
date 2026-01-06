@@ -109,8 +109,9 @@ const History = () => {
             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
             <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.4em]">Continue your journey</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic">
+          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic flex items-baseline gap-4">
             Chat History
+            <span className="text-xl text-primary/30 not-italic font-black opacity-50">{data.length} {data.length === 1 ? "Record" : "Records"}</span>
           </h2>
         </div>
 
@@ -174,7 +175,7 @@ const History = () => {
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-2 text-[9px] text-primary/60 uppercase tracking-widest font-black">
                     <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-                    {chat._count?.messages || chat.messages.length} Packets
+                    {(chat._count?.messages || chat.messages.length)} {(chat._count?.messages || chat.messages.length) === 1 ? "Message" : "Messages"}
                   </div>
                   <div className="flex items-center gap-2">
                     <button

@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { FiUser, FiMoreHorizontal } from "react-icons/fi";
-import { motion } from "motion/react";
-import React from "react";
+import { FiUser, FiMoreHorizontal, FiEye, FiAlertCircle } from "react-icons/fi";
+import { motion, AnimatePresence } from "motion/react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSettings } from "@/app/hooks/useSettings";
 
 interface CharacterCardProps {
   characterName: string;
@@ -12,6 +13,7 @@ interface CharacterCardProps {
   characterBio: string;
   authorName: string;
   characterId?: string;
+  isNsfw?: boolean;
   tags?: { name: string; id: string }[];
 }
 
@@ -21,11 +23,23 @@ const CharacterCard = ({
   characterBio,
   authorName,
   characterId,
+  isNsfw,
   tags,
 }: CharacterCardProps) => {
   const router = useRouter();
+  const { settings } = useSettings();
+  const [tempUnblur, setTempUnblur] = useState(false);
 
-  const handleNavigate = () => {
+  const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
+
+  const handleNavigate = (e: React.MouseEvent) => {
+    // If blurred, first click unblurs
+    if (shouldBlur) {
+      e.stopPropagation();
+      setTempUnblur(true);
+      return;
+    }
+
     if (characterId) {
       router.push(`/character/${characterId}`);
     }
@@ -42,13 +56,40 @@ const CharacterCard = ({
       {/* Image Container */}
       <div className="relative h-[60%] w-full overflow-hidden">
         {image ? (
-          <Image
-            src={image}
-            fill
-            className="object-cover transition-all duration-700 group-hover:scale-105"
-            alt={characterName}
-            sizes="(max-width: 768px) 50vw, 20vw"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={image}
+              fill
+              className={`object-cover transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-2xl scale-110 grayscale-[0.5]' : ''}`}
+              alt={characterName}
+              sizes="(max-width: 768px) 50vw, 20vw"
+            />
+
+            {/* NSFW Blur Overlay */}
+            <AnimatePresence>
+              {shouldBlur && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-colors group-hover:bg-black/60"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-500">
+                    <FiEye className="text-white/60 text-xl" />
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Sensitive Content</p>
+                    <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Click to Reveal</p>
+                  </div>
+
+                  {/* Small NSFW Badge in Blur Overlay */}
+                  <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-orange-500/20 border border-orange-500/30">
+                    <span className="text-[8px] font-black text-orange-500 uppercase tracking-tighter">NSFW</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         ) : (
           <div className="flex items-center justify-center h-full bg-white/5">
             <FiUser className="text-white/10 w-12 h-12" />

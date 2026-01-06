@@ -10,14 +10,16 @@ import toast from "react-hot-toast";
 import { motion, Variants } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 import { CharactersData } from "@/@types/type"; // adjust the import path to your type definitions
+import { useSettings } from "@/app/hooks/useSettings";
 
 const MyCharacters: React.FC = () => {
   const { user } = useContext(AuthContext);
+  const { settings } = useSettings();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isManageMode, setIsManageMode] = useState(false);
   const [page, setPage] = useState(1);
-  const pageSize = 20;
+  const pageSize = 10;
   const confirm = useConfirm();
 
   const { isPending, data, error } = useQuery<CharactersData>({
@@ -30,10 +32,15 @@ const MyCharacters: React.FC = () => {
     enabled: !!user?.id,
   });
 
-  const filteredCharacters = data?.filter((char) =>
-    char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    char.tags.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredCharacters = data?.filter((char) => {
+    const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      char.tags.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    // NSFW Filtering
+    if (!settings?.showNsfw && char.isNsfw) return false;
+
+    return matchesSearch;
+  });
 
   useEffect(() => {
     if (data && !hasAnimated) setHasAnimated(true);
@@ -230,6 +237,7 @@ const MyCharacters: React.FC = () => {
                         characterId={character.id}
                         characterBio={character.bio}
                         authorName={character.author.username}
+                        isNsfw={character.isNsfw}
                         tags={character.tags}
                       />
                     </div>
