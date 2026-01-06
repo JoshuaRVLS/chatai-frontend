@@ -12,9 +12,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack } from "react-icons/fa";
-import ChatSettingsModal from "./ChatSettingsModal";
 import ChatNavbar from "./ChatNavbar";
-import BrainPanel from "./BrainPanel";
+import dynamic from "next/dynamic";
+const ChatSettingsModal = dynamic(() => import("./ChatSettingsModal"), { ssr: false });
+const BrainPanel = dynamic(() => import("./BrainPanel"), { ssr: false });
 import { useRouter } from "next/navigation";
 import MarkDown from "../MarkDown/MarkDown";
 import { bytesToBase64 } from "@/app/utils/image";
@@ -70,14 +71,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
   });
 
   const userImage = useMemo(
-    () =>
-      data?.user?.profileImage ? bytesToBase64(data.user.profileImage) : null,
-    [data?.user?.profileImage]
+    () => data?.user?.id ? `/api/api/authentication_routes/users/picture/${data.user.id}` : null,
+    [data?.user?.id]
   );
 
   const characterImage = useMemo(
-    () => (data?.character?.photo ? bytesToBase64(data.character.photo) : null),
-    [data?.character?.photo]
+    () => data?.character?.id ? `/api/image/${data.character.id}` : null,
+    [data?.character?.id]
   );
 
   const scrollToBottom = useCallback(() => {
@@ -133,8 +133,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
   useEffect(() => {
     if (data) {
       // 1. Model priority: Chat-specific > Global User Settings > Default
-      if (data.chatSettings && (data.chatSettings as any).model) {
-        setSelectedModel((data.chatSettings as any).model);
+      const chatSettings = (data as any).chatSettings;
+      if (chatSettings && chatSettings.model) {
+        setSelectedModel(chatSettings.model);
       } else if (data.user.userSettings?.chatSettings) {
         const globalModel = (data.user.userSettings.chatSettings as any).model;
         if (globalModel) setSelectedModel(globalModel);
@@ -671,7 +672,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         memory={data.memory}
         onClearMemory={handleClearMemory}
         onUpdateMemory={handleUpdateMemory}
-        pinnedMessages={data.messages.filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
+        pinnedMessages={(data.messages || []).filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
         onUnpin={(id) => handleTogglePin(id, true)}
       />
     </div>
@@ -747,7 +748,6 @@ const MessageBubble = React.memo(
               height={40}
               alt={altText}
               className="w-10 h-10 rounded-full border border-white/10 object-cover"
-              priority
             />
           </button>
         ) : (
@@ -757,7 +757,6 @@ const MessageBubble = React.memo(
             height={40}
             alt={altText}
             className="w-10 h-10 rounded-full border border-white/10 object-cover flex-shrink-0"
-            priority
           />
         )}
 

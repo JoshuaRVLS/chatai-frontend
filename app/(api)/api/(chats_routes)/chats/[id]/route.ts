@@ -11,9 +11,33 @@ export const GET = async (
     const chat = await db.chat.findUnique({
       where: { id: chatId },
       include: {
-        character: { include: { photo: true } },
+        character: {
+          include: {
+            photo: {
+              select: {
+                id: true,
+                charId: true,
+                mimetype: true,
+                name: true,
+                // data: false (Excluded to reduce payload size)
+              }
+            }
+          }
+        },
         messages: { orderBy: { id: 'asc' } },
-        user: { include: { profileImage: true, userSettings: true } },
+        user: {
+          include: {
+            profileImage: {
+              select: {
+                id: true,
+                userId: true,
+                mimetype: true,
+                // data: false (Excluded to reduce payload size)
+              }
+            },
+            userSettings: true
+          }
+        },
       },
     });
 

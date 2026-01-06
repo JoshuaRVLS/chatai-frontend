@@ -93,7 +93,7 @@ const CharacterView = ({ id }: { id: string }) => {
               className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl group"
             >
               <Image
-                src={bytesToBase64(data.photo)}
+                src={`/api/image/${data.id}`}
                 alt={data.name}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"

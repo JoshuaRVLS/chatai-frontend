@@ -1,9 +1,10 @@
 // Remove sharp import and server-side code
 // Keep only client-compatible utilities
 
+/** @deprecated Use direct API URLs like /api/image/${id} instead of sending bytes over JSON */
 export const bytesToBase64 = (photo: any): string => {
-  return `data:${photo.mimetype};base64,${
-      Buffer.from(Object.values(photo.data)).toString('base64')}`;
+  if (!photo || !photo.data) return '';
+  return `data:${photo.mimetype};base64,${Buffer.from(Object.values(photo.data)).toString('base64')}`;
 };
 
 // Client-side image generation
@@ -30,8 +31,8 @@ export const generateProfileImage = (alphabet: string) => {
 
   // If you have a base64 string (from canvas.toDataURL())
   const base64String =
-      canvas.toDataURL('image/png')
-          .split(',')[1];  // Remove "data:image/png;base64," prefix
+    canvas.toDataURL('image/png')
+      .split(',')[1];  // Remove "data:image/png;base64," prefix
   const binaryString = atob(base64String);
   const bytes = new Uint8Array(binaryString.length);
   for (let i = 0; i < binaryString.length; i++) {

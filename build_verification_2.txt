@@ -1,0 +1,80 @@
+
+> ai-frontend@0.1.0 build
+> prisma generate && next build
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.19.1) to .\app\generated\prisma in 83ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+
+   ▲ Next.js 15.3.8
+   - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 8.0s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/24) ...
+   Generating static pages (6/24) 
+   Generating static pages (12/24) 
+   Generating static pages (18/24) 
+ ✓ Generating static pages (24/24)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    7.18 kB         180 kB
+├ ○ /_not-found                            979 B         103 kB
+├ ƒ /api/ai                                240 B         102 kB
+├ ƒ /api/auth/[...nextauth]                240 B         102 kB
+├ ƒ /api/character-name/[id]               240 B         102 kB
+├ ƒ /api/characters                        240 B         102 kB
+├ ƒ /api/characters/[id]                   240 B         102 kB
+├ ƒ /api/chats                             240 B         102 kB
+├ ƒ /api/chats/[id]                        240 B         102 kB
+├ ƒ /api/comments                          240 B         102 kB
+├ ƒ /api/comments/[id]                     240 B         102 kB
+├ ƒ /api/history/[userId]                  240 B         102 kB
+├ ƒ /api/image/[id]                        240 B         102 kB
+├ ƒ /api/messages                          240 B         102 kB
+├ ƒ /api/messages/[id]                     240 B         102 kB
+├ ƒ /api/messages/ai                       240 B         102 kB
+├ ƒ /api/messages/regenerate               240 B         102 kB
+├ ƒ /api/my-characters/[id]                240 B         102 kB
+├ ƒ /api/persona-used                      240 B         102 kB
+├ ƒ /api/persona-used/[userId]             240 B         102 kB
+├ ƒ /api/persona/[userId]                  240 B         102 kB
+├ ƒ /api/send-verification                 240 B         102 kB
+├ ƒ /api/tags                              240 B         102 kB
+├ ƒ /api/users/[userId]                    240 B         102 kB
+├ ƒ /api/users/change-password/[userId]    240 B         102 kB
+├ ƒ /api/users/picture/[userId]            240 B         102 kB
+├ ƒ /api/users/register                    240 B         102 kB
+├ ƒ /api/users/validate                    240 B         102 kB
+├ ƒ /api/verify-email                      240 B         102 kB
+├ ƒ /character/[id]                      8.23 kB         189 kB
+├ ƒ /chat/[id]                           44.1 kB         217 kB
+├ ○ /create_character                       5 kB         204 kB
+├ ƒ /edit_character/[id]                 6.06 kB         217 kB
+├ ○ /login                               1.83 kB         161 kB
+├ ƒ /my_characters                       4.54 kB         196 kB
+├ ƒ /my_personas                          5.3 kB         180 kB
+├ ○ /register                            2.12 kB         152 kB
+├ ƒ /settings                            4.43 kB         175 kB
+└ ○ /verify-email                          859 B         108 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/5033-2da3ada66dbbb75f.js      46.7 kB
+  ├ chunks/7bc284d1-b4c5dbd4b76c1988.js  53.2 kB
+  └ other shared chunks (total)          2.04 kB
+
+
+ƒ Middleware                             54.5 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
