@@ -95,7 +95,7 @@ const Comments = ({ characterId }: { characterId: string }) => {
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-black italic tracking-tighter uppercase text-white/90 flex items-center gap-4">
           <span className="w-8 h-1 bg-primary rounded-full" />
-          Neural Logs
+          Public Feedback
           <span className="text-sm font-medium normal-case tracking-normal text-white/20 ml-2">
             {isPending ? "Syncing..." : `${data?.length || 0} Comments`}
           </span>

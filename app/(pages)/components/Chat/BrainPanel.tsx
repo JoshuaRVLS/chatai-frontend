@@ -66,7 +66,7 @@ const BrainPanel = ({
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-xl font-black text-white italic tracking-tighter uppercase leading-none">Neural Brain</h3>
+                                    <h3 className="text-xl font-black text-white italic tracking-tighter uppercase leading-none">Character Brain</h3>
                                     <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mt-1.5">Persistent Context Engaged</p>
                                 </div>
                             </div>
@@ -197,7 +197,7 @@ const BrainPanel = ({
                                     </div>
                                     <div>
                                         <h5 className="text-[10px] font-black text-white uppercase tracking-widest">Permanent Awareness</h5>
-                                        <p className="text-[9px] text-white/40 font-bold mt-0.5">These inputs are sent with every neural query.</p>
+                                        <p className="text-[9px] text-white/40 font-bold mt-0.5">These inputs are sent with every message to maintain context.</p>
                                     </div>
                                 </div>
                             </div>

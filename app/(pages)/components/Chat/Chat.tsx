@@ -357,7 +357,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleClearHistory = useCallback(async () => {
     if (!(await confirm({
-      title: "Clear Neural History",
+      title: "Clear Chat History",
       message: "Are you sure you want to clear the entire chat history? This cannot be undone and will reset the conversation state.",
       confirmLabel: "Clear History",
       variant: "danger"
@@ -407,7 +407,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleClearMemory = useCallback(async () => {
     if (!(await confirm({
-      title: "Reset Neural Brain",
+      title: "Reset Brain & Memory",
       message: "Are you sure you want to clear all learned facts and long-term memories? This will make the character 'forget' specific details they learned about you.",
       confirmLabel: "Reset Memory",
       variant: "danger"

@@ -17,6 +17,12 @@ const Characters = ({
   allCharacters: any[];
 }) => {
   const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+  const [page, setPage] = React.useState(1);
+  const pageSize = 20;
+
+  React.useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedTag]);
 
   const { isPending, error, data, refetch } = useQuery<any[]>({
     queryKey: ["characters"],
@@ -46,13 +52,19 @@ const Characters = ({
     return matchesSearch && matchesTag;
   });
 
+  const totalPages = Math.ceil((filteredData?.length || 0) / pageSize);
+  const paginatedData = filteredData?.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
   if (isPending) {
     return (
       <div className="flex flex-col gap-10 w-full px-6 md:px-12">
         <div className="h-8 w-48 bg-white/5 rounded-xl shimmer" />
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-[450px] rounded-[2rem] bg-white/5 shimmer border border-white/5" />
+            <div key={i} className="h-[340px] rounded-[1.5rem] bg-white/5 shimmer border border-white/5" />
           ))}
         </div>
       </div>
@@ -78,48 +90,54 @@ const Characters = ({
 
   return (
     <div className="flex flex-col gap-10 w-full px-6 md:px-12">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b border-white/5 pb-10">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
-            <h2 className="text-3xl sm:text-4xl font-black uppercase tracking-tighter text-white italic">
-              {searchQuery ? "Search Results" : "Community Characters"}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-white/5 pb-16 relative">
+        <div className="absolute -bottom-px left-0 w-1/3 h-px bg-gradient-to-r from-primary/50 to-transparent" />
+
+        <div className="space-y-8 flex-1">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-6 bg-primary/20 rounded-full" />
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Character Directory</span>
+            </div>
+            <h2 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
+              {searchQuery ? "Signal results" : "Community Characters"}
             </h2>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <button
               onClick={() => setSelectedTag(null)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === null
-                ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(56,189,248,0.2)]"
-                : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+              className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === null
+                ? "bg-white text-slate-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
                 }`}
             >
-              <FiGrid size={12} /> All
+              All Signals
             </button>
             {allTags.map(tag => (
               <button
                 key={tag}
                 onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === tag
-                  ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(56,189,248,0.2)]"
-                  : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+                className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === tag
+                  ? "bg-primary text-slate-950 border-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]"
+                  : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
                   }`}
               >
-                <FiHash size={12} /> {tag}
+                {tag}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="w-full lg:max-w-md">
+        <div className="w-full lg:max-w-md relative group">
+          <div className="absolute -inset-4 bg-primary/5 blur-2xl rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity" />
           <SearchBar characters={allCharacters} onSearch={onSearch} />
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         <AnimatePresence mode="popLayout">
-          {filteredData?.map((character, index) => (
+          {paginatedData?.map((character, index) => (
             <motion.div
               key={character.id}
               layout
@@ -140,6 +158,29 @@ const Characters = ({
           ))}
         </AnimatePresence>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-12 flex items-center justify-center gap-6">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+          >
+            Prev Cycle
+          </button>
+          <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">
+            Module <span className="text-primary italic">{page}</span> / <span className="text-white/60">{totalPages}</span>
+          </span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+          >
+            Next Cycle
+          </button>
+        </div>
+      )}
 
       {filteredData?.length === 0 && (
         <div className="py-20 text-center space-y-4">

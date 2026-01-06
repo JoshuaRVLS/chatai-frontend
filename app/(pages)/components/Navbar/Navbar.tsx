@@ -12,7 +12,8 @@ import {
   FiMenu,
   FiX,
   FiUsers,
-  FiCpu
+  FiCpu,
+  FiBookOpen
 } from "react-icons/fi";
 import { signOut, useSession } from "next-auth/react";
 
@@ -45,6 +46,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", href: "/", icon: <FiHome /> },
     { name: "Create", href: "/create_character", icon: <FiPlusSquare /> },
+    { name: "Lore", href: "/lorebooks", icon: <FiBookOpen /> },
     { name: "Characters", href: "/my_characters", icon: <FiUsers /> },
     { name: "Personas", href: "/my_personas", icon: <FiCpu /> },
   ];

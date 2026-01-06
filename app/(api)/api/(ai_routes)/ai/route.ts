@@ -12,7 +12,17 @@ export const POST = async (req: Request) => {
     include: {
       user: true,
       messages: true,
-      character: true,
+      character: {
+        include: {
+          lorebooks: {
+            include: {
+              entries: {
+                where: { enabled: true }
+              }
+            }
+          }
+        }
+      },
     },
   });
 
@@ -138,6 +148,27 @@ Provide the NEW COMPLETE memory list.`
     }
   }
 
+  // --- LOREBOOK INJECTION LOGIC ---
+  let loreContext = "";
+  const lorebooks = chat?.character.lorebooks || [];
+  const allEntries = lorebooks.flatMap(lb => lb.entries);
+
+  if (allEntries.length > 0) {
+    const triggeredEntries: string[] = [];
+    const combinedText = (content + " " + previousMessages.slice(-5).map(m => m.content).join(" ")).toLowerCase();
+
+    for (const entry of allEntries) {
+      const hasKeyword = entry.keywords.some(kw => combinedText.includes(kw.toLowerCase()));
+      if (hasKeyword) {
+        triggeredEntries.push(`[LORE: ${entry.keywords[0]}]: ${entry.content}`);
+      }
+    }
+
+    if (triggeredEntries.length > 0) {
+      loreContext = triggeredEntries.join("\n");
+    }
+  }
+
   const estimateTokens = (text: string): number => {
     return Math.ceil(text.length / 4);
   };
@@ -160,6 +191,7 @@ ${chat?.character.exampleConversations ? `[DIALOGUE EXAMPLES]\n${chat?.character
 ${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${contextSummary}` : ''}
 ${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${contextMemory}` : ''}
 ${pinnedMessages ? `[PINNED IMPORTANT CONTEXT]\n${pinnedMessages}` : ''}
+${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${loreContext}` : ''}
  
 [IMPORTANT RULES]
 1. MATURITY & GRAVITAS: Act with the maturity appropriate to your age and profession. Avoid theatrical, overly dramatic, or generic AI over-reactions.

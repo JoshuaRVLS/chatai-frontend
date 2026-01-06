@@ -11,7 +11,19 @@ export const GET = async (
       where: {
         authorId: id,
       },
-      include: { author: true, photo: true },
+      include: {
+        author: true,
+        photo: {
+          select: {
+            id: true,
+            charId: true,
+            mimetype: true,
+            name: true,
+            // data omitted
+          }
+        },
+        tags: true
+      },
     });
     return NextResponse.json({ success: true, data: characters });
   } catch (error) {

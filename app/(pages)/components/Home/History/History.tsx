@@ -100,29 +100,36 @@ const History = () => {
   if (!data || data.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-8 px-6 md:px-12 py-8 relative group/history">
-      <div className="flex items-center justify-between">
-        <h2 className="text-4xl font-black uppercase tracking-tighter text-white/90 italic flex items-center gap-4">
-          <span className="w-12 h-1 bg-primary rounded-full" />
-          Chat History
-        </h2>
+    <div className="flex flex-col gap-10 px-6 md:px-12 relative group/history">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
+        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-gradient-to-r from-primary/30 to-transparent" />
 
-        <div className="hidden md:flex items-center gap-2">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+            <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.4em]">Continue your journey</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic">
+            Chat History
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-3">
           <button
             onClick={() => scroll("left")}
             disabled={!showLeftArrow}
-            className={`p-2 rounded-xl bg-white/5 border border-white/10 text-white transition-all ${showLeftArrow ? "opacity-100 hover:bg-primary hover:text-slate-950 hover:border-primary" : "opacity-0 pointer-events-none"
+            className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-white flex items-center justify-center transition-all ${showLeftArrow ? "opacity-100 hover:bg-white hover:text-slate-950 hover:border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" : "opacity-0 pointer-events-none"
               }`}
           >
-            <FiChevronLeft size={16} />
+            <FiChevronLeft size={20} />
           </button>
           <button
             onClick={() => scroll("right")}
             disabled={!showRightArrow}
-            className={`p-2 rounded-xl bg-white/5 border border-white/10 text-white transition-all ${showRightArrow ? "opacity-100 hover:bg-primary hover:text-slate-950 hover:border-primary" : "opacity-0 pointer-events-none"
+            className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-white flex items-center justify-center transition-all ${showRightArrow ? "opacity-100 hover:bg-white hover:text-slate-950 hover:border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]" : "opacity-0 pointer-events-none"
               }`}
           >
-            <FiChevronRight size={16} />
+            <FiChevronRight size={20} />
           </button>
         </div>
       </div>

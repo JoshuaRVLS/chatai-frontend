@@ -22,7 +22,10 @@ export const GET =
               // data: false (Excluded to reduce payload size)
             }
           },
-          tags: true
+          tags: true,
+          lorebooks: {
+            select: { id: true }
+          }
         },
       });
       return NextResponse.json({ success: true, data: character }, { status: 200 });

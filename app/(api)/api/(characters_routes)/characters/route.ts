@@ -19,6 +19,9 @@ export const POST = async (req: Request) => {
     const tags: { label: string; value: string }[] = JSON.parse(
       form.get("tags") as string
     );
+    const lorebooks: string[] = JSON.parse(
+      form.get("lorebooks") as string || "[]"
+    );
 
     const isNewImage = image instanceof File;
     const isEditing = !!characterId && characterId !== "undefined";
@@ -34,6 +37,9 @@ export const POST = async (req: Request) => {
         exampleConversations: exampleConversations,
         tags: {
           set: tags.map((tag) => ({ id: tag.value })),
+        },
+        lorebooks: {
+          set: lorebooks.map((id) => ({ id })),
         },
       };
 
@@ -78,6 +84,9 @@ export const POST = async (req: Request) => {
         tags: {
           connect: tags.map((tag) => ({ id: tag.value })),
         },
+        lorebooks: {
+          connect: lorebooks.map((id) => ({ id })),
+        },
       };
 
       if (isNewImage) {
@@ -115,7 +124,19 @@ export const POST = async (req: Request) => {
 export const GET = async (req: Request) => {
   try {
     const characters = await db.character.findMany({
-      include: { author: true, photo: true, tags: true },
+      include: {
+        author: true,
+        photo: {
+          select: {
+            id: true,
+            charId: true,
+            mimetype: true,
+            name: true,
+            // data omitted
+          }
+        },
+        tags: true
+      },
     });
     return NextResponse.json({ success: true, data: characters });
   } catch (error) {

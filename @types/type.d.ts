@@ -1,6 +1,7 @@
 import {
   Character,
   CharacterImage,
+  CharacterTag,
   Chat,
   Message,
   User,
@@ -8,7 +9,7 @@ import {
 
 export type CharactersData = (Character & {
   author: User;
-  photo: { data: Uint8Array; mimetype: string; name: string };
+  photo: { id: string; charId: string; mimetype: string; name: string; data?: Uint8Array };
   tags: CharacterTag[];
 })[];
 

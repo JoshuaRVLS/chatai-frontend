@@ -56,7 +56,7 @@ const AiSettings = ({ data }: { data: any }) => {
           <FiCpu />
         </div>
         <div>
-          <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase">AI Neural Engine</h3>
+          <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase">AI Configuration</h3>
           <p className="text-white/40 text-[10px] mt-1 uppercase tracking-[0.2em] font-black">Configure your conversation intelligence.</p>
         </div>
       </div>

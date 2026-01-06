@@ -118,7 +118,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
               {personaName}
             </h3>
             <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
-              {isActive ? "Default Neural Core" : "Secondary Proxy Node"}
+              {isActive ? "Primary Identity" : "Secondary Identity"}
             </p>
           </div>
         </div>
@@ -210,7 +210,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
                           <div className="w-2 h-2 rounded-full bg-black animate-pulse" /> Linked
                         </>
                       ) : (
-                        <>Establish Neural Link</>
+                        <>Use Identity</>
                       )}
                     </button>
                   </div>

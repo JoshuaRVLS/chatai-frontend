@@ -29,6 +29,7 @@ model User {
   personaUsed String?
   personas UserPersona[]
   userSettings UserSettings?
+  lorebooks Lorebook[]
 }
 
 model UserSettings {
@@ -69,7 +70,34 @@ model Character {
   tags CharacterTag[] @relation(fields: [tagIds], references: [id])
   tagIds String[] 
   comments Comment[]
+  lorebookIds String[]
+  lorebooks Lorebook[] @relation(fields: [lorebookIds], references: [id])
 }
+
+model Lorebook {
+  id String @id @default(cuid()) @map("_id")
+  name String
+  description String?
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  entries LoreEntry[]
+  characterIds String[]
+  characters Character[] @relation(fields: [characterIds], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model LoreEntry {
+  id String @id @default(cuid()) @map("_id")
+  lorebookId String
+  lorebook Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+  keywords String[] // Triggers for this entry
+  content String // Information to inject
+  enabled Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
 
 model Comment {
   id String @id @default(cuid()) @map("_id")

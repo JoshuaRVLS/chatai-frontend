@@ -16,9 +16,11 @@ import {
   FiMessageSquare,
   FiZap,
   FiPlus,
-  FiHash
+  FiHash,
+  FiBook
 } from "react-icons/fi";
 import Image from "next/image";
+import { useQuery } from "@tanstack/react-query";
 
 type TagOption = { label: string; value: string };
 
@@ -34,7 +36,14 @@ const CreateCharacterPage: React.FC = () => {
   const [scenario, setScenario] = useState("");
   const [initialMessage, setInitialMessage] = useState("");
   const [selectedOptions, setSelectedOptions] = useState<TagOption[]>([]);
+  const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const { data: lorebooks } = useQuery<any[]>({
+    queryKey: ["lorebooks"],
+    queryFn: () => fetch("/api/lorebooks").then(res => res.json().then(d => d.data)),
+    enabled: !!user?.id,
+  });
 
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
   const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage);
@@ -57,6 +66,7 @@ const CreateCharacterPage: React.FC = () => {
     formData.append("initialMessage", initialMessage);
     formData.append("userId", user?.id || "");
     formData.append("tags", JSON.stringify(selectedOptions));
+    formData.append("lorebooks", JSON.stringify(selectedLorebooks));
 
     try {
       const response = await fetch("/api/characters", {
@@ -196,6 +206,43 @@ const CreateCharacterPage: React.FC = () => {
                 selectedOptions={selectedOptions}
                 setSelectedOptions={setSelectedOptions}
               />
+            </section>
+
+            {/* Lorebooks Section */}
+            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <FiBook className="text-primary" />
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Knowledge Integration</h3>
+              </div>
+              <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
+                Link existing information modules to provide this entity with persistent world knowledge.
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {lorebooks && lorebooks.length > 0 ? (
+                  lorebooks.map(lb => (
+                    <button
+                      key={lb.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLorebooks(prev =>
+                          prev.includes(lb.id) ? prev.filter(id => id !== lb.id) : [...prev, lb.id]
+                        );
+                      }}
+                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
+                          ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                          : "bg-white/5 text-white/40 border-white/10 hover:border-white/20"
+                        }`}
+                    >
+                      {lb.name}
+                    </button>
+                  ))
+                ) : (
+                  <p className="text-[10px] text-white/10 uppercase tracking-widest font-black py-4 italic">
+                    No modules detected in your local archive.
+                  </p>
+                )}
+              </div>
             </section>
 
             {/* Intelligence Configuration */}

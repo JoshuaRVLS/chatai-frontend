@@ -16,6 +16,8 @@ const MyCharacters: React.FC = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isManageMode, setIsManageMode] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
   const confirm = useConfirm();
 
   const { isPending, data, error } = useQuery<CharactersData>({
@@ -36,6 +38,16 @@ const MyCharacters: React.FC = () => {
   useEffect(() => {
     if (data && !hasAnimated) setHasAnimated(true);
   }, [data, hasAnimated]);
+
+  const totalPages = Math.ceil((filteredCharacters?.length || 0) / pageSize);
+  const paginatedCharacters = filteredCharacters?.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
 
   const deleteChar = async (characterId: string, characterName: string) => {
     if (
@@ -97,7 +109,7 @@ const MyCharacters: React.FC = () => {
   if (error)
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#020617] pt-20 px-6">
-        <p className="text-red-400 text-lg font-black uppercase tracking-widest">Error syncing neural data</p>
+        <p className="text-red-400 text-lg font-black uppercase tracking-widest">Error syncing data</p>
       </div>
     );
 
@@ -125,7 +137,7 @@ const MyCharacters: React.FC = () => {
               </h1>
             </div>
             <p className="text-white/30 text-xs sm:text-sm font-black uppercase tracking-[0.3em] ml-5 leading-loose">
-              Neural Entities • Control Center • {data?.length || 0} Records Found
+              My Characters • Control Center • {data?.length || 0} Records Found
             </p>
           </div>
 
@@ -201,7 +213,7 @@ const MyCharacters: React.FC = () => {
                 animate="show"
                 className="grid grid-cols-1 sm:grid-cols-2 gap-6"
               >
-                {filteredCharacters.map((character) => (
+                {paginatedCharacters?.map((character) => (
                   <motion.div
                     key={character.id}
                     variants={cardVariants}
@@ -211,10 +223,8 @@ const MyCharacters: React.FC = () => {
                       <CharacterCard
                         characterName={character.name}
                         image={
-                          character.photo?.data
-                            ? `data:${character.photo.mimetype};base64,${Buffer.from(
-                              Object.values(character.photo.data)
-                            ).toString("base64")}`
+                          character.photo?.id
+                            ? `/api/image/${character.id}`
                             : null
                         }
                         characterId={character.id}
@@ -262,11 +272,34 @@ const MyCharacters: React.FC = () => {
                       Database Empty
                     </h3>
                     <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
-                      No neural entities matching your current search parameters.
+                      No characters matching your current search parameters.
                     </p>
                   </div>
                 </div>
               </motion.div>
+            )}
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-12 flex items-center justify-center gap-6">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                >
+                  Previous Archive
+                </button>
+                <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">
+                  Page <span className="text-primary italic">{page}</span> of <span className="text-white/60">{totalPages}</span>
+                </span>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                >
+                  Next Archive
+                </button>
+              </div>
             )}
           </div>
         </div>

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
-import SearchBar from "./components/Home/SearchBar";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
@@ -22,20 +21,31 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col w-full gap-16 pt-32 pb-32">
+      <div className="max-w-7xl mx-auto w-full space-y-16">
+        {session?.user && !searchQuery && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="px-6"
+          >
+            <History />
+          </motion.section>
+        )}
 
-      {session?.user && !searchQuery && (
-        <section className="px-6 md:px-0">
-          <History />
-        </section>
-      )}
-
-      <section className="px-4 md:px-0">
-        <Characters
-          searchQuery={searchQuery}
-          onSearch={setSearchQuery}
-          allCharacters={characters}
-        />
-      </section>
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="px-4"
+        >
+          <Characters
+            searchQuery={searchQuery}
+            onSearch={setSearchQuery}
+            allCharacters={characters}
+          />
+        </motion.section>
+      </div>
     </div>
   );
 };

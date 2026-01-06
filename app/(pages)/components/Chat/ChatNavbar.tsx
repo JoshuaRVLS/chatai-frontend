@@ -60,7 +60,7 @@ const ChatNavbar = ({
                 <button
                     onClick={onShowBrain}
                     className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                    title="Neural brain & memories"
+                    title="Brain & memories"
                 >
                     <motion.div
                         animate={{ opacity: [0.6, 1, 0.6] }}

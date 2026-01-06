@@ -253,10 +253,10 @@ const Persona: React.FC = () => {
                 </div>
                 <div className="space-y-4">
                   <h4 className="text-2xl font-black text-white italic tracking-tight uppercase">
-                    Neural Overlay Protocol
+                    Identity Protocol
                   </h4>
                   <p className="text-white/40 text-sm leading-relaxed font-semibold max-w-3xl">
-                    Persona profiles serve as the semantic foundation for all AI interactions. Each identity encapsulates specific behavioral logic and contextual memory, allowing the neural networks to adapt their response parameters to match your designated status.
+                    Persona profiles serve as the semantic foundation for all AI interactions. Each identity encapsulates specific behavioral logic and contextual memory, allowing the AI systems to adapt their response parameters to match your designated status.
                   </p>
                 </div>
               </div>
