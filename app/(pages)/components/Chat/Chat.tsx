@@ -13,6 +13,8 @@ import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack } from "react-icons/fa";
 import ChatNavbar from "./ChatNavbar";
+import { useSettings } from "@/app/hooks/useSettings";
+import { FiEye } from "react-icons/fi";
 import dynamic from "next/dynamic";
 const ChatSettingsModal = dynamic(() => import("./ChatSettingsModal"), { ssr: false });
 const BrainPanel = dynamic(() => import("./BrainPanel"), { ssr: false });
@@ -59,6 +61,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const confirm = useConfirm();
+  const { settings } = useSettings();
+  const [tempUnblurMessages, setTempUnblurMessages] = useState<{ [key: string]: boolean }>({});
+  const [tempUnblurModal, setTempUnblurModal] = useState(false);
 
   const { data, isLoading, error } = useQuery<ChatData>({
     queryKey: ["chat", chatId],
@@ -533,6 +538,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
                 <h3 className="text-xl font-black text-white italic tracking-tighter uppercase">
                   {data.character.name}
+                  {data.character.isNsfw && (
+                    <span className="ml-3 px-2 py-0.5 text-[8px] font-black bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-md vertical-middle">NSFW</span>
+                  )}
                 </h3>
               </div>
               <button
@@ -542,13 +550,34 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 <FaTimes size={14} />
               </button>
             </div>
-            <div className="relative aspect-square w-full">
+            <div
+              className={`relative aspect-square w-full ${data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'cursor-pointer' : ''}`}
+              onClick={() => {
+                if (data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal) {
+                  setTempUnblurModal(true);
+                }
+              }}
+            >
               <Image
                 src={characterImage || "/default-character.png"}
                 alt={data.character.name}
                 fill
-                className="object-cover"
+                className={`object-cover transition-all ${data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'blur-3xl scale-110 grayscale-[0.5]' : ''}`}
               />
+              <AnimatePresence>
+                {data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm"
+                  >
+                    <FiEye className="text-white/60 text-3xl mb-4" />
+                    <p className="text-xs font-black text-white uppercase tracking-widest">Sensitive Visual</p>
+                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">Click to Unblur</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 to-transparent" />
             </div>
             <div className="p-6">
@@ -570,6 +599,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         <ChatNavbar
           characterName={data.character.name}
           characterImage={characterImage}
+          isNsfw={data.character.isNsfw}
           onProfileClick={handleProfileClick}
           onUndo={handleUndo}
           onClearHistory={handleClearHistory}
@@ -593,7 +623,11 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   message={msg}
                   userImage={userImage}
                   characterImage={characterImage}
+                  isNsfw={data.character.isNsfw}
                   isUserMessage={msg.fromUser}
+                  isBlurEnabled={settings?.blurNsfw ?? true}
+                  tempUnblur={tempUnblurMessages[msg.id] || false}
+                  onUnblur={() => setTempUnblurMessages(prev => ({ ...prev, [msg.id]: true }))}
                   isOptimistic={msg.id.startsWith("temp-")}
                   onProfileClick={handleProfileClick}
                   onEdit={handleEdit}
@@ -621,6 +655,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   message={{ content: streamingMessage, id: "streaming" } as any}
                   userImage={userImage}
                   characterImage={characterImage}
+                  isNsfw={data.character.isNsfw}
+                  isBlurEnabled={settings?.blurNsfw ?? true}
+                  tempUnblur={tempUnblurMessages["streaming"] || false}
+                  onUnblur={() => setTempUnblurMessages(prev => ({ ...prev, ["streaming"]: true }))}
                   isUserMessage={false}
                   isOptimistic={true}
                   onProfileClick={handleProfileClick}
@@ -684,6 +722,10 @@ const MessageBubble = React.memo(
     message,
     userImage,
     characterImage,
+    isNsfw,
+    isBlurEnabled,
+    tempUnblur,
+    onUnblur,
     isUserMessage,
     isOptimistic = false,
     onProfileClick,
@@ -701,6 +743,10 @@ const MessageBubble = React.memo(
     message: Message;
     userImage: string | null;
     characterImage: string | null;
+    isNsfw?: boolean;
+    isBlurEnabled?: boolean;
+    tempUnblur?: boolean;
+    onUnblur?: () => void;
     isUserMessage: boolean;
     isOptimistic?: boolean;
     onProfileClick: (e: React.MouseEvent) => void;
@@ -739,16 +785,35 @@ const MessageBubble = React.memo(
       >
         {!isUserMessage ? (
           <button
-            onClick={onProfileClick}
-            className="relative hover:scale-105 transition-transform flex-shrink-0"
+            onClick={(e) => {
+              const shouldBlur = isNsfw && isBlurEnabled && !tempUnblur;
+              if (shouldBlur) {
+                onUnblur?.();
+              } else {
+                onProfileClick(e);
+              }
+            }}
+            className="relative hover:scale-105 transition-transform flex-shrink-0 group/avatar"
           >
             <Image
               src={imageSrc}
               width={40}
               height={40}
               alt={altText}
-              className="w-10 h-10 rounded-full border border-white/10 object-cover"
+              className={`w-10 h-10 rounded-full border border-white/10 object-cover transition-all ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''}`}
             />
+            <AnimatePresence>
+              {isNsfw && isBlurEnabled && !tempUnblur && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 rounded-full"
+                >
+                  <FiEye className="text-white/60 text-[10px]" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         ) : (
           <Image

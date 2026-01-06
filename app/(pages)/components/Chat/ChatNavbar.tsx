@@ -4,11 +4,14 @@ import React from "react";
 import Image from "next/image";
 import { FaUndo, FaCog, FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { useSettings } from "@/app/hooks/useSettings";
+import { FiEye } from "react-icons/fi";
 
 interface ChatNavbarProps {
     characterName: string;
     characterImage: string | null;
+    isNsfw?: boolean;
     onProfileClick: (e: React.MouseEvent) => void;
     onUndo: () => void;
     onClearHistory: () => void;
@@ -20,6 +23,7 @@ interface ChatNavbarProps {
 const ChatNavbar = ({
     characterName,
     characterImage,
+    isNsfw,
     onProfileClick,
     onUndo,
     onClearHistory,
@@ -28,12 +32,21 @@ const ChatNavbar = ({
     hasUndo,
 }: ChatNavbarProps) => {
     const router = useRouter();
+    const { settings } = useSettings();
+    const [tempUnblur, setTempUnblur] = React.useState(false);
+    const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
 
     return (
         <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-6 border-b border-white/5 bg-slate-950/40 backdrop-blur-xl z-20">
             <div className="flex items-center gap-4 sm:gap-5">
                 <button
-                    onClick={onProfileClick}
+                    onClick={(e) => {
+                        if (shouldBlur) {
+                            setTempUnblur(true);
+                        } else {
+                            onProfileClick(e);
+                        }
+                    }}
                     className="relative group group-active:scale-95 transition-all"
                 >
                     <div className="absolute -inset-1.5 bg-gradient-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
@@ -42,8 +55,20 @@ const ChatNavbar = ({
                         width={56}
                         height={56}
                         alt={characterName}
-                        className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 object-cover"
+                        className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 object-cover transition-all ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
                     />
+                    <AnimatePresence>
+                        {shouldBlur && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 rounded-full"
+                            >
+                                <FiEye className="text-white/60 text-xs" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </button>
                 <div>
                     <h2 className="text-xl sm:text-2xl font-black text-white italic tracking-tighter uppercase leading-none">

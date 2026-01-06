@@ -18,7 +18,8 @@ import {
   FiPlus,
   FiHash,
   FiBook,
-  FiAlertTriangle
+  FiAlertTriangle,
+  FiGlobe
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -40,6 +41,8 @@ const CreateCharacterPage: React.FC = () => {
   const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
   const [isNsfw, setIsNsfw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
 
   const { data: lorebooks } = useQuery<any[]>({
     queryKey: ["lorebooks"],
@@ -49,6 +52,52 @@ const CreateCharacterPage: React.FC = () => {
 
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
   const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage);
+
+  const handleChubImport = async () => {
+    if (!importUrl) {
+      toast.error("Please enter a Chub.ai URL");
+      return;
+    }
+
+    setIsImporting(true);
+    const id = toast.loading("Scraping Chub.ai database...");
+
+    try {
+      const response = await fetch("/api/import/chub", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: importUrl }),
+      });
+
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error);
+
+      const { data } = result;
+      setCharacterName(data.name);
+      setCharacterBio(data.bio);
+      setCharacterPersona(data.persona);
+      setScenario(data.scenario);
+      setInitialMessage(data.introMessage);
+      setIsNsfw(data.isNsfw);
+
+      if (data.avatarBase64) {
+        setImagePreview(data.avatarBase64);
+        // Convert base64 to File
+        const res = await fetch(data.avatarBase64);
+        const blob = await res.blob();
+        const file = new File([blob], "chub_import.png", { type: "image/png" });
+        setImage(file);
+      }
+
+      toast.success("Intelligence data synchronized", { id });
+      setImportUrl("");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Failed to import from Chub.ai", { id });
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -127,6 +176,47 @@ const CreateCharacterPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Main Editing Column */}
           <div className="lg:col-span-8 space-y-10">
+            {/* Quick Import Section */}
+            <section className="bg-gradient-to-tr from-primary/10 to-purple-500/10 border border-primary/20 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FiGlobe className="text-primary" />
+                  <div>
+                    <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Intelligence Sync</h3>
+                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Import from external databases (Chub.ai)</p>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-primary/20 rounded-full border border-primary/30">
+                  <p className="text-[8px] font-black text-primary uppercase">Alpha Feature</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="relative flex-1 group">
+                  <input
+                    value={importUrl}
+                    onChange={(e) => setImportUrl(e.target.value)}
+                    placeholder="https://chub.ai/characters/creator/slug..."
+                    className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-primary/50 transition-all text-xs font-bold"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleChubImport}
+                  disabled={isImporting}
+                  className="px-8 py-4 bg-primary text-black rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isImporting ? (
+                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <FiZap /> Sync
+                    </>
+                  )}
+                </button>
+              </div>
+            </section>
+
             {/* Image & Identity Section */}
             <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">

@@ -14,6 +14,8 @@ import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
+import { useSettings } from "@/app/hooks/useSettings";
+import { FiEye } from "react-icons/fi";
 
 const History = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -21,6 +23,8 @@ const History = () => {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const queryClient = useQueryClient();
   const confirm = useConfirm();
+  const { settings } = useSettings();
+  const [tempUnblur, setTempUnblur] = useState<{ [key: string]: boolean }>({});
 
   const { isPending, data, error } = useQuery<any[]>({
     queryKey: ["chatsHistory"],
@@ -143,6 +147,13 @@ const History = () => {
           <Link
             key={chat.id}
             href={`/chat/${chat.id}`}
+            onClick={(e) => {
+              const shouldBlur = chat.character.isNsfw && settings?.blurNsfw && !tempUnblur[chat.id];
+              if (shouldBlur) {
+                e.preventDefault();
+                setTempUnblur(prev => ({ ...prev, [chat.id]: true }));
+              }
+            }}
             className="group flex-shrink-0 w-[340px] snap-start"
           >
             <motion.div
@@ -152,13 +163,33 @@ const History = () => {
               transition={{ delay: index * 0.05 }}
             >
               <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5 shadow-xl">
-                <Image
-                  src={`/api/image/${chat.character.id}`}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt={chat.character.name}
-                  sizes="112px"
-                />
+                {(() => {
+                  const shouldBlur = chat.character.isNsfw && settings?.blurNsfw && !tempUnblur[chat.id];
+                  return (
+                    <>
+                      <Image
+                        src={`/api/image/${chat.character.id}`}
+                        fill
+                        className={`object-cover transition-transform duration-700 group-hover:scale-110 ${shouldBlur ? 'blur-xl grayscale-[0.5]' : ''}`}
+                        alt={chat.character.name}
+                        sizes="112px"
+                      />
+                      <AnimatePresence>
+                        {shouldBlur && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-colors group-hover:bg-black/60"
+                          >
+                            <FiEye className="text-white/60 text-lg mb-1" />
+                            <p className="text-[8px] font-black text-white uppercase tracking-widest text-center px-2">Reveal Content</p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </>
+                  );
+                })()}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/40 to-transparent" />
               </div>
 

@@ -127,6 +127,9 @@ export const POST = async (req: Request) => {
 export const GET = async (req: Request) => {
   try {
     const characters = await db.character.findMany({
+      orderBy: {
+        createdAt: 'desc'
+      },
       include: {
         author: true,
         photo: {
@@ -135,7 +138,6 @@ export const GET = async (req: Request) => {
             charId: true,
             mimetype: true,
             name: true,
-            // data omitted
           }
         },
         tags: true

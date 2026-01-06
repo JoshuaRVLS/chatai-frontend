@@ -98,7 +98,7 @@ const Characters = ({
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-white/5 pb-16 relative">
         <div className="absolute -bottom-px left-0 w-1/3 h-px bg-gradient-to-r from-primary/50 to-transparent" />
 
-        <div className="space-y-8 flex-1">
+        <div className="space-y-8 flex-1 min-w-0 overflow-hidden">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-1 h-6 bg-primary/20 rounded-full" />
@@ -109,28 +109,39 @@ const Characters = ({
             </h2>
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
-            <button
-              onClick={() => setSelectedTag(null)}
-              className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === null
-                ? "bg-white text-slate-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-                }`}
-            >
-              All Signals
-            </button>
-            {allTags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedTag === tag
-                  ? "bg-primary text-slate-950 border-primary shadow-[0_0_20px_rgba(56,189,248,0.2)]"
-                  : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-                  }`}
-              >
-                {tag}
-              </button>
-            ))}
+          <div className="flex items-center gap-4 pt-2 relative">
+            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 text-white/20 flex items-center justify-center shrink-0 shadow-2xl">
+              <FiHash size={16} />
+            </div>
+
+            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide no-scrollbar">
+              <div className="flex items-center gap-2 py-2 pr-8">
+                <button
+                  onClick={() => setSelectedTag(null)}
+                  className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${selectedTag === null
+                    ? "bg-white text-slate-950 border-white shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+                    : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
+                    }`}
+                >
+                  All Signals
+                </button>
+                {allTags.map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                    className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${selectedTag === tag
+                      ? "bg-primary text-slate-950 border-primary shadow-[0_4px_20px_rgba(56,189,248,0.2)]"
+                      : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
+                      }`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Fade Overlay */}
+            <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-[#020617] to-transparent pointer-events-none" />
           </div>
         </div>
 

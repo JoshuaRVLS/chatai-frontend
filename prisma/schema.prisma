@@ -75,6 +75,8 @@ model Character {
   comments Comment[]
   lorebookIds String[]
   lorebooks Lorebook[] @relation(fields: [lorebookIds], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Lorebook {
@@ -115,7 +117,7 @@ model Comment {
 
 model CharacterTag {
   id String @id @default(cuid()) @map("_id")
-  name String
+  name String @unique
   charIds String[]
   chars Character[] @relation(fields: [charIds], references: [id])
 }

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FiSearch, FiX, FiTrendingUp, FiUser, FiHash } from "react-icons/fi";
+import { FiSearch, FiX, FiTrendingUp, FiUser, FiHash, FiEye } from "react-icons/fi";
 import { useRouter } from "next/navigation";
+import { useSettings } from "@/app/hooks/useSettings";
 
 interface SearchBarProps {
     characters: any[];
@@ -16,6 +17,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
     const [isOpen, setIsOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const { settings } = useSettings();
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -30,10 +32,15 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
     useEffect(() => {
         if (query.trim().length > 0) {
             const filtered = characters
-                .filter((char) =>
-                    char.name.toLowerCase().includes(query.toLowerCase()) ||
-                    char.tags.some((tag: any) => tag.name.toLowerCase().includes(query.toLowerCase()))
-                )
+                .filter((char) => {
+                    const matchesSearch = char.name.toLowerCase().includes(query.toLowerCase()) ||
+                        char.tags.some((tag: any) => tag.name.toLowerCase().includes(query.toLowerCase()));
+
+                    // NSFW Filtering
+                    if (!settings?.showNsfw && char.isNsfw) return false;
+
+                    return matchesSearch;
+                })
                 .slice(0, 6);
             setSuggestions(filtered);
             setIsOpen(true);
@@ -118,15 +125,32 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                                         onClick={() => handleSelect(char.id)}
                                         className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/[0.03] rounded-2xl sm:rounded-[1.75rem] transition-all group"
                                     >
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
-                                            <img
-                                                src={`/api/image/${char.id}`}
-                                                alt={char.name}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                            />
+                                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
+                                            {(() => {
+                                                const shouldBlur = char.isNsfw && settings?.blurNsfw;
+                                                return (
+                                                    <>
+                                                        <img
+                                                            src={`/api/image/${char.id}`}
+                                                            alt={char.name}
+                                                            className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
+                                                        />
+                                                        {shouldBlur && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                                                <FiEye className="text-white/60 text-[10px]" />
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                );
+                                            })()}
                                         </div>
                                         <div className="flex-1 text-left">
-                                            <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic">{char.name}</p>
+                                            <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic flex items-center gap-2">
+                                                {char.name}
+                                                {char.isNsfw && (
+                                                    <span className="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-500 border border-orange-500/20">NSFW</span>
+                                                )}
+                                            </p>
                                             <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
                                                 <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author.username}</span>
                                                 <div className="hidden xs:flex gap-1.5">
