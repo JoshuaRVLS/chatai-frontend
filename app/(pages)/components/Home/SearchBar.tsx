@@ -11,6 +11,75 @@ interface SearchBarProps {
     onSearch: (query: string) => void;
 }
 
+const SearchSuggestionItem = ({
+    char,
+    settings,
+    onSelect
+}: {
+    char: any;
+    settings: any;
+    onSelect: (id: string) => void;
+}) => {
+    const [tempUnblur, setTempUnblur] = useState(false);
+    const shouldBlur = char.isNsfw && settings?.blurNsfw && !tempUnblur;
+
+    const handleClick = (e: React.MouseEvent) => {
+        if (shouldBlur) {
+            e.preventDefault();
+            e.stopPropagation();
+            setTempUnblur(true);
+            return;
+        }
+        onSelect(char.id);
+    };
+
+    return (
+        <button
+            onClick={handleClick}
+            className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/[0.03] rounded-2xl sm:rounded-[1.75rem] transition-all group"
+        >
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
+                <img
+                    src={`/api/image/${char.id}`}
+                    alt={char.name}
+                    className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
+                />
+                <AnimatePresence>
+                    {shouldBlur && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+                        >
+                            <FiEye className="text-white/60 text-[10px]" />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+            <div className="flex-1 text-left">
+                <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic flex items-center gap-2">
+                    {char.name}
+                    {char.isNsfw && (
+                        <span className="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-500 border border-orange-500/20">NSFW</span>
+                    )}
+                </p>
+                <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                    <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author.username}</span>
+                    <div className="hidden xs:flex gap-1.5">
+                        {char.tags.slice(0, 1).map((tag: any) => (
+                            <span key={tag.id} className="text-[8px] sm:text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
+                <FiSearch className="w-3 h-3 sm:w-[14px] sm:h-[14px]" />
+            </div>
+        </button>
+    );
+};
+
 const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<any[]>([]);
@@ -48,7 +117,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
             setSuggestions([]);
             setIsOpen(false);
         }
-    }, [query, characters]);
+    }, [query, characters, settings?.showNsfw]);
 
     const handleSelect = (charId: string) => {
         router.push(`/character/${charId}`);
@@ -93,13 +162,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                             </motion.button>
                         )}
                     </AnimatePresence>
-
-                    <button
-                        type="submit"
-                        className="bg-primary hover:scale-[1.02] active:scale-[0.98] text-slate-950 font-black text-[9px] sm:text-[10px] uppercase tracking-widest px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-[1.25rem] transition-all duration-300 shadow-[0_0_30px_rgba(56,189,248,0.2)]"
-                    >
-                        Query
-                    </button>
                 </div>
             </form>
 
@@ -119,51 +181,13 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                             </p>
 
                             <div className="space-y-1">
-                                {suggestions.map((char, index) => (
-                                    <button
+                                {suggestions.map((char) => (
+                                    <SearchSuggestionItem
                                         key={char.id}
-                                        onClick={() => handleSelect(char.id)}
-                                        className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/[0.03] rounded-2xl sm:rounded-[1.75rem] transition-all group"
-                                    >
-                                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
-                                            {(() => {
-                                                const shouldBlur = char.isNsfw && settings?.blurNsfw;
-                                                return (
-                                                    <>
-                                                        <img
-                                                            src={`/api/image/${char.id}`}
-                                                            alt={char.name}
-                                                            className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-700 ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
-                                                        />
-                                                        {shouldBlur && (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                                                <FiEye className="text-white/60 text-[10px]" />
-                                                            </div>
-                                                        )}
-                                                    </>
-                                                );
-                                            })()}
-                                        </div>
-                                        <div className="flex-1 text-left">
-                                            <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic flex items-center gap-2">
-                                                {char.name}
-                                                {char.isNsfw && (
-                                                    <span className="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-500 border border-orange-500/20">NSFW</span>
-                                                )}
-                                            </p>
-                                            <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                                                <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author.username}</span>
-                                                <div className="hidden xs:flex gap-1.5">
-                                                    {char.tags.slice(0, 1).map((tag: any) => (
-                                                        <span key={tag.id} className="text-[8px] sm:text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
-                                            <FiSearch className="w-3 h-3 sm:w-[14px] sm:h-[14px]" />
-                                        </div>
-                                    </button>
+                                        char={char}
+                                        settings={settings}
+                                        onSelect={handleSelect}
+                                    />
                                 ))}
                             </div>
                         </div>

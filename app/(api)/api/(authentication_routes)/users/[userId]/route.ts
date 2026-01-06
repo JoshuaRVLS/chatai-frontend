@@ -41,11 +41,26 @@ export const PATCH =
   async (req: Request, { params }: { params: Promise<{ userId: string }> }) => {
     try {
       const userId = (await params).userId;
-      const { username, email, showNsfw, blurNsfw } = await req.json();
+      const { username, email, showNsfw, blurNsfw, profileImage } = await req.json();
 
       const updateData: any = {};
       if (username !== undefined) updateData.username = username;
       if (email !== undefined) updateData.email = email;
+
+      if (profileImage && profileImage.data && profileImage.mimetype) {
+        updateData.profileImage = {
+          upsert: {
+            create: {
+              data: Buffer.from(profileImage.data, 'base64'),
+              mimetype: profileImage.mimetype
+            },
+            update: {
+              data: Buffer.from(profileImage.data, 'base64'),
+              mimetype: profileImage.mimetype
+            }
+          }
+        };
+      }
 
       if (showNsfw !== undefined || blurNsfw !== undefined) {
         updateData.userSettings = {

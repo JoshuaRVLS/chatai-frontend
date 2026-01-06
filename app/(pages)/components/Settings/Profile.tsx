@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { Image } from "@/@types/type";
 import { User } from "@/app/generated/prisma";
-import { FiUser, FiMail, FiSave, FiLoader } from "react-icons/fi";
+import { FiUser, FiMail, FiSave, FiLoader, FiCamera } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -12,6 +12,9 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
   const [username, setUsername] = useState(data?.username || "");
   const [email, setEmail] = useState(data?.email || "");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [profileImage, setProfileImage] = useState<{ data: string; mimetype: string } | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -26,12 +29,17 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
       const response = await fetch(`/api/users/${data.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email }),
+        body: JSON.stringify({
+          username,
+          email,
+          ...(profileImage && { profileImage })
+        }),
       });
 
       if (response.ok) {
         toast.success("Profile updated successfully");
         queryClient.invalidateQueries({ queryKey: ["settingsData"] });
+        setProfileImage(null);
       } else {
         const errorData = await response.json();
         toast.error(errorData.message || "Failed to update profile");
@@ -44,6 +52,26 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image size must be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      const dataStr = base64String.split(",")[1];
+      const mimetype = file.type;
+      setProfileImage({ data: dataStr, mimetype });
+      setImagePreview(base64String);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-8 p-4">
       <div className="flex items-center gap-4 mb-8">
@@ -54,6 +82,46 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
           <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase">Profile Identity</h3>
           <p className="text-white/40 text-[10px] mt-1 uppercase tracking-[0.2em] font-black">Update your public profile information.</p>
         </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-6 pb-6 border-b border-white/5">
+        <div className="relative group">
+          <div
+            className="w-32 h-32 rounded-[2rem] bg-white/5 border border-white/10 overflow-hidden cursor-pointer relative transition-all group-hover:border-primary/50 group-hover:scale-[1.02]"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imagePreview ? (
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+            ) : data.id ? (
+              <img
+                src={`/api/users/picture/${data.id}?t=${Date.now()}`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${data.username}&background=random`;
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-white/10">
+                <FiUser size={48} />
+              </div>
+            )}
+
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+              <FiCamera className="text-primary text-2xl" />
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/70">Change Photo</span>
+            </div>
+          </div>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+        <p className="text-[10px] text-white/20 uppercase tracking-widest font-black">Recommended: 400x400 JPG or PNG</p>
       </div>
 
       <form onSubmit={handleUpdateProfile} className="space-y-6">
