@@ -150,7 +150,7 @@ const Characters = ({
               <div className="w-1 h-6 bg-primary/20 rounded-full" />
               <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Character Directory</span>
             </div>
-            <h2 className="text-5xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
+            <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
               {searchQuery ? "Signal results" : "Community Characters"}
             </h2>
           </div>
