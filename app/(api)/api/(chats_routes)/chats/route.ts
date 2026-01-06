@@ -20,7 +20,7 @@ export const GET = async (req: Request) => {
         },
         messages: {
           take: 1,
-          orderBy: { id: "desc" },
+          orderBy: { createdAt: "desc" },
         },
       },
       orderBy: { updatedAt: "desc" },
@@ -37,7 +37,7 @@ export const GET = async (req: Request) => {
         },
         messages: {
           take: 1,
-          orderBy: { id: "desc" },
+          orderBy: { createdAt: "desc" },
         },
       },
       orderBy: { updatedAt: "desc" },

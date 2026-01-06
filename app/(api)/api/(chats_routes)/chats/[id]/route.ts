@@ -24,7 +24,10 @@ export const GET = async (
             }
           }
         },
-        messages: { orderBy: { id: 'asc' } },
+        messages: {
+          orderBy: { createdAt: 'asc' },
+          take: 50 // Fetch latest 50 messages initially
+        },
         user: {
           include: {
             profileImage: {

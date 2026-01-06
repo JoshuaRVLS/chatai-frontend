@@ -8,7 +8,7 @@ import React, {
   useRef,
   useEffect,
 } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
 import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack } from "react-icons/fa";
@@ -65,7 +65,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const [tempUnblurMessages, setTempUnblurMessages] = useState<{ [key: string]: boolean }>({});
   const [tempUnblurModal, setTempUnblurModal] = useState(false);
 
-  const { data, isLoading, error } = useQuery<ChatData>({
+  const { data: chat, isLoading: isChatLoading, error: chatError } = useQuery<ChatData>({
     queryKey: ["chat", chatId],
     queryFn: async () => {
       const res = await fetch(`/api/chats/${chatId}`);
@@ -75,14 +75,76 @@ const Chat = ({ chatId }: { chatId: string }) => {
     staleTime: 1000 * 60 * 5,
   });
 
+  const {
+    data: infiniteMessages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isMessagesLoading,
+  } = useInfiniteQuery({
+    queryKey: ["messages", chatId],
+    queryFn: async ({ pageParam }) => {
+      const res = await fetch(`/api/messages?chatId=${chatId}&cursor=${pageParam || ""}`);
+      if (!res.ok) throw new Error("Failed to fetch messages");
+      return res.json();
+    },
+    initialPageParam: null,
+    getNextPageParam: (lastPage: any) => lastPage.nextCursor || undefined,
+  });
+
+  const allMessages = useMemo(() => {
+    // Collect all messages from all pages
+    const messages = infiniteMessages?.pages.flatMap((page) => page.data) || [];
+    // The API returns desc (newest first). We want to show them chronologically (oldest first).
+    return [...messages].reverse();
+  }, [infiniteMessages]);
+
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollPositionRef = useRef<number>(0);
+
+  // Intersection Observer for loading more
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          // Store current scroll height before loading more
+          if (scrollContainerRef.current) {
+            scrollPositionRef.current = scrollContainerRef.current.scrollHeight;
+          }
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Maintain scroll position after prepending messages
+  useEffect(() => {
+    if (isFetchingNextPage) return;
+    if (scrollContainerRef.current && scrollPositionRef.current > 0) {
+      const newScrollHeight = scrollContainerRef.current.scrollHeight;
+      const heightDiff = newScrollHeight - scrollPositionRef.current;
+      if (heightDiff > 0) {
+        scrollContainerRef.current.scrollTop += heightDiff;
+        scrollPositionRef.current = 0; // Reset
+      }
+    }
+  }, [allMessages, isFetchingNextPage]);
+
   const userImage = useMemo(
-    () => data?.user?.id ? `/api/api/authentication_routes/users/picture/${data.user.id}` : null,
-    [data?.user?.id]
+    () => chat?.user?.id ? `/api/api/authentication_routes/users/picture/${chat.user.id}` : null,
+    [chat?.user?.id]
   );
 
   const characterImage = useMemo(
-    () => data?.character?.id ? `/api/image/${data.character.id}` : null,
-    [data?.character?.id]
+    () => chat?.character?.id ? `/api/image/${chat.character.id}` : null,
+    [chat?.character?.id]
   );
 
   const scrollToBottom = useCallback(() => {
@@ -129,45 +191,54 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   // Scroll to bottom on initial load
   useEffect(() => {
-    if (data?.messages && !isLoading) {
+    if (allMessages.length > 0 && !isChatLoading && !isMessagesLoading) {
       scrollToBottom();
     }
-  }, [data?.messages.length, isLoading, scrollToBottom]);
+  }, [allMessages.length, isChatLoading, isMessagesLoading, scrollToBottom]);
 
   // Synchronize local settings with chat data
   useEffect(() => {
-    if (data) {
+    if (chat) {
       // 1. Model priority: Chat-specific > Global User Settings > Default
-      const chatSettings = (data as any).chatSettings;
+      const chatSettings = (chat as any).chatSettings;
       if (chatSettings && chatSettings.model) {
         setSelectedModel(chatSettings.model);
-      } else if (data.user.userSettings?.chatSettings) {
-        const globalModel = (data.user.userSettings.chatSettings as any).model;
+      } else if (chat.user.userSettings?.chatSettings) {
+        const globalModel = (chat.user.userSettings.chatSettings as any).model;
         if (globalModel) setSelectedModel(globalModel);
       }
 
       // 2. Persona priority: Chat-specific > User's Active Persona
-      if (data.personaId) {
-        setSelectedPersonaId(data.personaId);
+      if (chat.personaId) {
+        setSelectedPersonaId(chat.personaId);
       } else {
-        setSelectedPersonaId(data.user.personaUsed || null);
+        setSelectedPersonaId(chat.user.personaUsed || null);
       }
     }
-  }, [data]);
+  }, [chat]);
 
   const pushToUndoStack = useCallback(() => {
-    if (data?.messages) {
-      setUndoStack((prev) => [...prev.slice(-9), data.messages]);
+    if (allMessages.length > 0) {
+      setUndoStack((prev) => [...prev.slice(-9), allMessages]);
     }
-  }, [data?.messages]);
+  }, [allMessages]);
 
   const handleUndo = useCallback(async () => {
     if (undoStack.length === 0) return;
     const previousMessages = undoStack[undoStack.length - 1];
     setUndoStack((prev) => prev.slice(0, -1));
-    queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
-      if (!oldData) return oldData;
-      return { ...oldData, messages: previousMessages };
+
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      // This is a bit tricky with pages, we'll just put all previous into first page for now
+      // or invalidate. Invalidation is safer for undo in infinite lists.
+      return {
+        ...old,
+        pages: [{
+          ...old.pages[0],
+          data: [...previousMessages].reverse() // back to desc
+        }, ...old.pages.slice(1)]
+      };
     });
   }, [undoStack, chatId, queryClient]);
 
@@ -199,8 +270,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
             if (dataStr === "[DONE]") break;
 
             try {
-              const data = JSON.parse(dataStr);
-              const delta = data.choices[0]?.delta?.content || "";
+              const parsed = JSON.parse(dataStr);
+              const delta = parsed.choices[0]?.delta?.content || "";
               fullContent += delta;
               setStreamingMessage(fullContent);
               scrollToBottom();
@@ -218,7 +289,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         body: JSON.stringify({ chatId, content: fullContent }),
       });
 
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     } catch (err) {
       console.error(err);
       throw err;
@@ -233,17 +304,25 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
     setIsSubmitting(true);
 
+    const now = new Date();
     const optimisticMessage: Message = {
       id: `temp-${Date.now()}`,
       content: content.trim(),
       fromUser: true,
       pinned: false,
       chatId,
+      createdAt: now,
+      updatedAt: now,
     };
 
-    queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
-      if (!oldData) return oldData;
-      return { ...oldData, messages: [...oldData.messages, optimisticMessage] };
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      const newPages = [...old.pages];
+      newPages[0] = {
+        ...newPages[0],
+        data: [optimisticMessage, ...newPages[0].data]
+      };
+      return { ...old, pages: newPages };
     });
 
     scrollToBottom();
@@ -266,14 +345,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
       await startStreaming(content.trim());
     } catch (err) {
       console.error(err);
-      queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          messages: oldData.messages.filter(
-            (m) => m.id !== optimisticMessage.id
-          ),
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
+        const newPages = [...old.pages];
+        newPages[0] = {
+          ...newPages[0],
+          data: newPages[0].data.filter((m: any) => m.id !== optimisticMessage.id)
         };
+        return { ...old, pages: newPages };
       });
       setIsSubmitting(false);
       throw err; // Propagate to ChatInput to restore message
@@ -316,40 +395,43 @@ const Chat = ({ chatId }: { chatId: string }) => {
     pushToUndoStack();
     const cascade = isUserMessage ? "?cascade=true" : "";
     await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-  }, [chatId, queryClient, pushToUndoStack]);
+    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+  }, [chatId, queryClient, pushToUndoStack, confirm]);
 
   const handleUserRegenerate = useCallback(async (messageId: string) => {
-    if (isSubmitting || !data) return;
-    const msgIndex = data.messages.findIndex((m) => m.id === messageId);
+    if (isSubmitting || !chat) return;
+    const msgIndex = allMessages.findIndex((m) => m.id === messageId);
     if (msgIndex === -1) return;
-    const userMsg = data.messages[msgIndex];
+    const userMsg = allMessages[msgIndex];
     if (!userMsg.fromUser) return;
 
     pushToUndoStack();
     const cascade = "?cascade=true";
     await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-  }, [isSubmitting, data, chatId, queryClient, pushToUndoStack]);
+    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+  }, [isSubmitting, allMessages, chatId, queryClient, pushToUndoStack]);
 
   const handleRegenerate = useCallback(async (messageId: string) => {
-    if (isSubmitting || !data) return;
+    if (isSubmitting || !chat) return;
 
-    const msgIndex = data.messages.findIndex((m) => m.id === messageId);
+    const msgIndex = allMessages.findIndex((m) => m.id === messageId);
     if (msgIndex === -1) return;
 
-    const lastUserMsg = data.messages[msgIndex - 1];
+    const lastUserMsg = allMessages[msgIndex - 1];
     if (!lastUserMsg || !lastUserMsg.fromUser) return;
 
     setIsSubmitting(true);
 
     try {
       await fetch(`/api/messages/${messageId}`, { method: "DELETE" });
-      queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
-        if (!oldData) return oldData;
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
         return {
-          ...oldData,
-          messages: oldData.messages.filter((m) => m.id !== messageId),
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: page.data.filter((m: any) => m.id !== messageId)
+          }))
         };
       });
 
@@ -358,7 +440,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       console.error(err);
       setIsSubmitting(false);
     }
-  }, [isSubmitting, data, chatId, queryClient, startStreaming]);
+  }, [isSubmitting, allMessages, chatId, queryClient, startStreaming]);
 
   const handleClearHistory = useCallback(async () => {
     if (!(await confirm({
@@ -373,6 +455,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("History cleared");
+        await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
         await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
       } else {
         toast.error("Failed to clear history");
@@ -383,17 +466,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [chatId, queryClient]);
+  }, [chatId, queryClient, confirm]);
 
 
   const handleTogglePin = useCallback(async (messageId: string, currentStatus: boolean) => {
     try {
       // Optimistic update
-      queryClient.setQueryData<ChatData>(["chat", chatId], (oldData) => {
-        if (!oldData) return oldData;
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
         return {
-          ...oldData,
-          messages: oldData.messages.map(m => m.id === messageId ? { ...m, pinned: !currentStatus } : m)
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: page.data.map((m: any) => m.id === messageId ? { ...m, pinned: !currentStatus } : m)
+          }))
         };
       });
 
@@ -406,7 +492,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       if (!res.ok) throw new Error();
     } catch (err) {
       toast.error("Failed to update pin status");
-      await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     }
   }, [chatId, queryClient]);
 
@@ -431,7 +517,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
     } catch (err) {
       toast.error("Failed to reset memory");
     }
-  }, [chatId, queryClient]);
+  }, [chatId, queryClient, confirm]);
 
   const handleUpdateChatSettings = useCallback(async (model: string, personaId: string | null) => {
     setSelectedModel(model);
@@ -477,7 +563,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   // UI
   // ───────────────────────────────
 
-  if (isLoading)
+  if (isChatLoading || isMessagesLoading)
     return (
       <motion.div
         className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-cyan-900"
@@ -494,14 +580,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
       </motion.div>
     );
 
-  if (error)
+  if (chatError)
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black text-red-400">
-        Error: {error.message}
+        Error: {(chatError as any).message}
       </div>
     );
 
-  if (!data)
+  if (!chat)
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-400">
         No chat data found.
@@ -537,8 +623,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)]" />
                 <h3 className="text-xl font-black text-white italic tracking-tighter uppercase">
-                  {data.character.name}
-                  {data.character.isNsfw && (
+                  {chat.character.name}
+                  {chat.character.isNsfw && (
                     <span className="ml-3 px-2 py-0.5 text-[8px] font-black bg-orange-500/10 text-orange-500 border border-orange-500/20 rounded-md vertical-middle">NSFW</span>
                   )}
                 </h3>
@@ -551,21 +637,21 @@ const Chat = ({ chatId }: { chatId: string }) => {
               </button>
             </div>
             <div
-              className={`relative aspect-square w-full ${data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'cursor-pointer' : ''}`}
+              className={`relative aspect-square w-full ${chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'cursor-pointer' : ''}`}
               onClick={() => {
-                if (data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal) {
+                if (chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal) {
                   setTempUnblurModal(true);
                 }
               }}
             >
               <Image
                 src={characterImage || "/default-character.png"}
-                alt={data.character.name}
+                alt={chat.character.name}
                 fill
-                className={`object-cover transition-all ${data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'blur-3xl scale-110 grayscale-[0.5]' : ''}`}
+                className={`object-cover transition-all ${chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'blur-3xl scale-110 grayscale-[0.5]' : ''}`}
               />
               <AnimatePresence>
-                {data.character.isNsfw && settings?.blurNsfw && !tempUnblurModal && (
+                {chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -582,7 +668,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
             </div>
             <div className="p-6">
               <p className="text-white/40 text-[10px] uppercase font-black tracking-widest leading-relaxed line-clamp-4">
-                {data.character.bio}
+                {chat.character.bio}
               </p>
             </div>
           </motion.div>
@@ -597,9 +683,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
       >
         {/* Header */}
         <ChatNavbar
-          characterName={data.character.name}
+          characterName={chat.character.name}
           characterImage={characterImage}
-          isNsfw={data.character.isNsfw}
+          isNsfw={chat.character.isNsfw}
           onProfileClick={handleProfileClick}
           onUndo={handleUndo}
           onClearHistory={handleClearHistory}
@@ -609,9 +695,21 @@ const Chat = ({ chatId }: { chatId: string }) => {
         />
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-8 pt-8 space-y-8 scrollbar-hide">
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto px-8 pt-8 space-y-8 scrollbar-hide"
+        >
+          {/* Load More Sentinel */}
+          <div ref={loadMoreRef} className="h-4 flex items-center justify-center">
+            {isFetchingNextPage && (
+              <div className="text-[10px] text-white/20 uppercase tracking-[0.2em] animate-pulse">
+                Retrieving previous logs...
+              </div>
+            )}
+          </div>
+
           <AnimatePresence initial={false}>
-            {data.messages.map((msg) => (
+            {allMessages.map((msg) => (
               <motion.div
                 key={msg.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -623,7 +721,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   message={msg}
                   userImage={userImage}
                   characterImage={characterImage}
-                  isNsfw={data.character.isNsfw}
+                  isNsfw={chat.character.isNsfw}
                   isUserMessage={msg.fromUser}
                   isBlurEnabled={settings?.blurNsfw ?? true}
                   tempUnblur={tempUnblurMessages[msg.id] || false}
@@ -655,7 +753,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   message={{ content: streamingMessage, id: "streaming" } as any}
                   userImage={userImage}
                   characterImage={characterImage}
-                  isNsfw={data.character.isNsfw}
+                  isNsfw={chat.character.isNsfw}
                   isBlurEnabled={settings?.blurNsfw ?? true}
                   tempUnblur={tempUnblurMessages["streaming"] || false}
                   onUnblur={() => setTempUnblurMessages(prev => ({ ...prev, ["streaming"]: true }))}
@@ -707,10 +805,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
       <BrainPanel
         isOpen={showBrainPanel}
         onClose={() => setShowBrainPanel(false)}
-        memory={data.memory}
+        memory={chat.memory}
         onClearMemory={handleClearMemory}
         onUpdateMemory={handleUpdateMemory}
-        pinnedMessages={(data.messages || []).filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
+        pinnedMessages={(allMessages || []).filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
         onUnpin={(id) => handleTogglePin(id, true)}
       />
     </div>

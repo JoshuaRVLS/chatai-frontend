@@ -153,5 +153,7 @@ model Message {
   pinned Boolean @default(false)
   chat Chat @relation(fields: [chatId], references: [id])
   chatId String 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
