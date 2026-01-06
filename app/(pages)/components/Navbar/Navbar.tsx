@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -82,8 +83,14 @@ const Navbar = () => {
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-primary/50 group-hover:bg-primary/5">
-              <span className="text-white font-black text-xl italic leading-none group-hover:text-primary transition-colors">J</span>
+            <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-primary/50 group-hover:bg-primary/5 overflow-hidden">
+              <Image
+                src="/jchatai-icon.png"
+                alt="JChatAI"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-sm font-black tracking-[0.2em] text-white leading-none">CHATAi</span>

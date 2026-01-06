@@ -30,6 +30,11 @@ const raleway = Raleway({
 export const metadata: Metadata = {
   title: "JChatAI - Premium AI Conversations",
   description: "Experience the next level of AI interaction with JChatAI. Modern, fast, and secure.",
+  icons: {
+    icon: "/jchatai-icon.png",
+    shortcut: "/jchatai-icon.png",
+    apple: "/jchatai-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
