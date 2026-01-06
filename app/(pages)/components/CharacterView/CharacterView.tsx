@@ -22,6 +22,7 @@ import Comments from "../Comments/Comments";
 import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
 import { useQueryClient } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
 
 const CharacterView = ({ id }: { id: string }) => {
   const { isPending, error, data } = useQuery<
@@ -137,9 +138,9 @@ const CharacterView = ({ id }: { id: string }) => {
                 )}
               </AnimatePresence>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent pointer-events-none z-20" />
 
-              <div className="absolute bottom-6 left-6 right-6">
+              <div className="absolute bottom-6 left-6 right-6 z-20">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Active Intelligence</span>
@@ -197,9 +198,9 @@ const CharacterView = ({ id }: { id: string }) => {
                 isOpen={expandedSections.biography}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, biography: !prev.biography }))}
               >
-                <p className="text-lg text-white/70 leading-relaxed font-medium">
-                  {data.bio}
-                </p>
+                <div className="prose prose-invert prose-sm max-w-none prose-p:text-white/70 prose-p:leading-relaxed prose-headings:text-white prose-strong:text-white prose-em:text-white/80">
+                  <ReactMarkdown>{data.bio}</ReactMarkdown>
+                </div>
               </CollapsibleSection>
 
               <CollapsibleSection
@@ -208,7 +209,9 @@ const CharacterView = ({ id }: { id: string }) => {
                 isOpen={expandedSections.scenario}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, scenario: !prev.scenario }))}
               >
-                <p className="text-sm text-white/50 leading-loose">{data.scenario}</p>
+                <div className="prose prose-invert prose-sm max-w-none prose-p:text-white/50 prose-p:leading-loose prose-headings:text-white prose-strong:text-white/70">
+                  <ReactMarkdown>{data.scenario}</ReactMarkdown>
+                </div>
               </CollapsibleSection>
 
               <CollapsibleSection
@@ -217,7 +220,9 @@ const CharacterView = ({ id }: { id: string }) => {
                 isOpen={expandedSections.persona}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, persona: !prev.persona }))}
               >
-                <p className="text-sm text-white/50 leading-loose">{data.persona}</p>
+                <div className="prose prose-invert prose-sm max-w-none prose-p:text-white/50 prose-p:leading-loose prose-headings:text-white prose-strong:text-white/70">
+                  <ReactMarkdown>{data.persona}</ReactMarkdown>
+                </div>
               </CollapsibleSection>
 
               <CollapsibleSection
@@ -226,8 +231,8 @@ const CharacterView = ({ id }: { id: string }) => {
                 isOpen={expandedSections.intro}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, intro: !prev.intro }))}
               >
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                  <p className="text-sm font-medium text-white/80 leading-relaxed italic">"{data.introMessage}"</p>
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 prose prose-invert prose-sm max-w-none prose-p:text-white/80 prose-p:leading-relaxed prose-p:italic prose-headings:text-white">
+                  <ReactMarkdown>{data.introMessage}</ReactMarkdown>
                 </div>
               </CollapsibleSection>
             </div>

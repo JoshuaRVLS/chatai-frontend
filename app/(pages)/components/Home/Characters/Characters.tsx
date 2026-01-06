@@ -4,7 +4,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
-import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch } from "react-icons/fi";
+import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown } from "react-icons/fi";
 import SearchBar from "../SearchBar";
 import { useSettings } from "@/app/hooks/useSettings";
 
@@ -18,13 +18,36 @@ const Characters = ({
   allCharacters: any[];
 }) => {
   const { settings } = useSettings();
-  const [selectedTag, setSelectedTag] = React.useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const [tagSearchQuery, setTagSearchQuery] = React.useState("");
+  const [debouncedTagSearch, setDebouncedTagSearch] = React.useState("");
+  const [showTagDropdown, setShowTagDropdown] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
 
+  // Debounce tag search for performance
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedTagSearch(tagSearchQuery);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [tagSearchQuery]);
+
   React.useEffect(() => {
     setPage(1);
-  }, [searchQuery, selectedTag]);
+  }, [searchQuery, selectedTags]);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowTagDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { isPending, error, data, refetch } = useQuery<any[]>({
     queryKey: ["characters"],
@@ -34,7 +57,7 @@ const Characters = ({
       ),
   });
 
-  // Extract unique tags
+  // Extract unique tags - memoized
   const allTags = React.useMemo(() => {
     if (!data) return [];
     const tags = new Set<string>();
@@ -44,17 +67,39 @@ const Characters = ({
     return Array.from(tags).sort();
   }, [data]);
 
+  // Filter tags based on debounced search - memoized
+  const filteredTags = React.useMemo(() => {
+    const search = debouncedTagSearch.toLowerCase();
+    return allTags.filter(tag =>
+      tag.toLowerCase().includes(search) &&
+      !selectedTags.includes(tag)
+    );
+  }, [allTags, debouncedTagSearch, selectedTags]);
+
+  const handleAddTag = (tag: string) => {
+    setSelectedTags(prev => [...prev, tag]);
+    setTagSearchQuery("");
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag));
+  };
+
   const filteredData = data?.filter((char) => {
     const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       char.tags.some((tag: any) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesTag = !selectedTag || char.tags.some((tag: any) => tag.name === selectedTag);
+    // Multi-tag filter: character must have ALL selected tags
+    const matchesTags = selectedTags.length === 0 ||
+      selectedTags.every(selectedTag =>
+        char.tags.some((tag: any) => tag.name === selectedTag)
+      );
 
     // NSFW Filtering
     if (!settings?.showNsfw && char.isNsfw) return false;
 
-    return matchesSearch && matchesTag;
+    return matchesSearch && matchesTags;
   });
 
   const totalPages = Math.ceil((filteredData?.length || 0) / pageSize);
@@ -98,7 +143,7 @@ const Characters = ({
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-white/5 pb-16 relative">
         <div className="absolute -bottom-px left-0 w-1/3 h-px bg-gradient-to-r from-primary/50 to-transparent" />
 
-        <div className="space-y-8 flex-1 min-w-0 overflow-hidden">
+        <div className="space-y-8 flex-1 min-w-0">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <div className="w-1 h-6 bg-primary/20 rounded-full" />
@@ -114,34 +159,90 @@ const Characters = ({
               <FiHash size={16} />
             </div>
 
-            <div className="flex-1 min-w-0 overflow-x-auto scrollbar-hide no-scrollbar">
-              <div className="flex items-center gap-2 py-2 pr-8">
-                <button
-                  onClick={() => setSelectedTag(null)}
-                  className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${selectedTag === null
-                    ? "bg-white text-slate-950 border-white shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
-                    : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-                    }`}
+            {/* Multi-Select Tags Filter */}
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2" ref={dropdownRef}>
+              {/* Selected Tags */}
+              {selectedTags.map(tag => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase tracking-widest"
                 >
-                  All Signals
-                </button>
-                {allTags.map(tag => (
+                  {tag}
                   <button
-                    key={tag}
-                    onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
-                    className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shrink-0 ${selectedTag === tag
-                      ? "bg-primary text-slate-950 border-primary shadow-[0_4px_20px_rgba(56,189,248,0.2)]"
-                      : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
-                      }`}
+                    onClick={() => handleRemoveTag(tag)}
+                    className="hover:bg-primary/30 rounded-full p-0.5 transition-colors"
+                    aria-label={`Remove ${tag} filter`}
                   >
-                    {tag}
+                    <FiX size={12} />
                   </button>
-                ))}
-              </div>
-            </div>
+                </span>
+              ))}
 
-            {/* Fade Overlay */}
-            <div className="absolute top-0 right-0 w-20 h-full bg-gradient-to-l from-[#020617] to-transparent pointer-events-none" />
+              {/* Tag Search Input */}
+              <div className="relative">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={tagSearchQuery}
+                    onChange={(e) => {
+                      setTagSearchQuery(e.target.value);
+                      setShowTagDropdown(true);
+                    }}
+                    onFocus={() => setShowTagDropdown(true)}
+                    placeholder={selectedTags.length > 0 ? "Add more tags..." : "Filter by tags..."}
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 w-48 transition-colors"
+                  />
+                  <button
+                    onClick={() => setShowTagDropdown(!showTagDropdown)}
+                    className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                    aria-label="Toggle tag dropdown"
+                  >
+                    <FiChevronDown size={16} className={`transition-transform ${showTagDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+
+                {/* Dropdown */}
+                <AnimatePresence>
+                  {showTagDropdown && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-full left-0 mt-2 w-64 max-h-64 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50"
+                    >
+                      {filteredTags.length > 0 ? (
+                        filteredTags.slice(0, 20).map(tag => (
+                          <button
+                            key={tag}
+                            onClick={() => {
+                              handleAddTag(tag);
+                              setShowTagDropdown(false);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors first:rounded-t-2xl last:rounded-b-2xl"
+                          >
+                            {tag}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-sm text-white/30 text-center">
+                          {tagSearchQuery ? "No matching tags" : "All tags selected"}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Clear All Button */}
+              {selectedTags.length > 0 && (
+                <button
+                  onClick={() => setSelectedTags([])}
+                  className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white hover:border-white/20 transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -168,6 +269,7 @@ const Characters = ({
                 characterId={character.id}
                 characterBio={character.bio}
                 authorName={character.author.username}
+                authorId={character.authorId}
                 isNsfw={character.isNsfw}
                 tags={character.tags}
               />

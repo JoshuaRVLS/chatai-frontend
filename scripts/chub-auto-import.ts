@@ -27,18 +27,113 @@ const stripHtml = (html: string): string => {
         .trim();
 };
 
+async function importSingleCharacter(charPath: string) {
+    try {
+        const detailUrl = `${CHUB_GATEWAY_API}/characters/${charPath}?full=true`;
+        console.log(`📡 Fetching: ${detailUrl}`);
+
+        const detailRes = await fetch(detailUrl, {
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept": "application/json",
+                "Referer": "https://chub.ai/"
+            }
+        });
+
+        if (!detailRes.ok) {
+            console.error(`❌ Failed to fetch: ${detailRes.statusText}`);
+            return;
+        }
+
+        const detail = (await detailRes.json()).node;
+        const { definition } = detail;
+        const topics = detail.topics || [];
+
+        // Handle Tags
+        const tagIds: string[] = [];
+        for (const topicName of topics) {
+            const tag = await prisma.characterTag.upsert({
+                where: { name: topicName },
+                update: {},
+                create: { name: topicName }
+            });
+            tagIds.push(tag.id);
+        }
+
+        // Create Character
+        const introMessage = definition.first_message || definition.first_mes || "";
+        const exampleConvo = definition.example_dialogs || definition.mes_example || "";
+        const newChar = await prisma.character.create({
+            data: {
+                name: detail.name,
+                bio: stripHtml(detail.description || detail.tagline || ""),
+                persona: stripHtml(definition.personality || definition.description || ""),
+                scenario: stripHtml(definition.scenario || ""),
+                introMessage: stripHtml(introMessage),
+                exampleConversations: stripHtml(exampleConvo),
+                isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature"),
+                authorId: DEFAULT_USER_ID,
+                tagIds: tagIds
+            }
+        });
+
+        // Handle Image - Use max_res_url for high quality, fallback to avatar
+        const imageUrl = detail.max_res_url || definition.avatar;
+        if (imageUrl) {
+            try {
+                const imgRes = await fetch(imageUrl);
+                if (imgRes.ok) {
+                    const buffer = await imgRes.arrayBuffer();
+                    await prisma.characterImage.create({
+                        data: {
+                            charId: newChar.id,
+                            name: `${detail.name}_avatar`,
+                            mimetype: imgRes.headers.get("content-type") || "image/png",
+                            data: Buffer.from(buffer)
+                        }
+                    });
+                    console.log(`✅ Imported: ${detail.name} (with HD visuals)`);
+                } else {
+                    console.log(`✅ Imported: ${detail.name} (no visuals)`);
+                }
+            } catch {
+                console.log(`✅ Imported: ${detail.name} (visual error)`);
+            }
+        } else {
+            console.log(`✅ Imported: ${detail.name}`);
+        }
+    } catch (e: any) {
+        console.error(`❌ Failed to import:`, e.message);
+    }
+}
+
 async function main() {
     const args = process.argv.slice(2);
     const searchIndex = args.indexOf('--search');
     const pagesIndex = args.indexOf('--pages');
     const tagsIndex = args.indexOf('--tags');
     const sortIndex = args.indexOf('--sort');
+    const idIndex = args.indexOf('--id');
+
+    // If --id is provided, import that specific character and exit
+    if (idIndex !== -1) {
+        const charId = args[idIndex + 1];
+        if (!charId) {
+            console.error("❌ Please provide a character ID, e.g.: --id Anonymous/furina-5e0e2c07");
+            return;
+        }
+        console.log(`\n🎯 Importing specific character: ${charId}`);
+        console.log(`👤 Target Author ID: ${DEFAULT_USER_ID}\n`);
+        await importSingleCharacter(charId);
+        return;
+    }
 
     // Map user-friendly sort names to API values
     const sortMap: Record<string, string> = {
         'popular': 'star_count',
         'newest': 'created_at',
         'downloads': 'download_count',
+        'rating': 'rating',
         'default': 'default'
     };
 
@@ -146,10 +241,11 @@ async function main() {
                         }
                     });
 
-                    // 4. Handle Image
-                    if (definition.avatar) {
+                    // 4. Handle Image - Use max_res_url for high quality
+                    const imageUrl = detail.max_res_url || definition.avatar;
+                    if (imageUrl) {
                         try {
-                            const imgRes = await fetch(definition.avatar);
+                            const imgRes = await fetch(imageUrl);
                             if (imgRes.ok) {
                                 const buffer = await imgRes.arrayBuffer();
                                 await prisma.characterImage.create({
@@ -160,7 +256,7 @@ async function main() {
                                         data: Buffer.from(buffer)
                                     }
                                 });
-                                console.log(`   ✅ Integrated: ${detail.name} (with visuals)`);
+                                console.log(`   ✅ Integrated: ${detail.name} (with HD visuals)`);
                             } else {
                                 console.log(`   ✅ Integrated: ${detail.name} (no visuals)`);
                             }
