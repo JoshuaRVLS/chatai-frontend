@@ -182,7 +182,7 @@ const CharacterView = ({ id }: { id: string }) => {
               className="space-y-6"
             >
               <div className="flex flex-wrap gap-2">
-                {data.tags.map(tag => (
+                {Array.from(new Map(data.tags.map(tag => [tag.id, tag])).values()).map(tag => (
                   <span key={tag.id} className="px-3 py-1.5 rounded-xl border border-white/5 bg-white/[0.03] text-[10px] font-black text-primary/60 uppercase tracking-widest">
                     #{tag.name}
                   </span>

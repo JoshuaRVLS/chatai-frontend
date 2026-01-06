@@ -58,6 +58,10 @@ const CharacterCard = ({
     if (!isOwner) return;
     e.preventDefault();
     e.stopPropagation();
+
+    // Close any other open context menus globally
+    window.dispatchEvent(new CustomEvent("close-context-menus", { detail: { id: characterId } }));
+
     setContextMenuPos({ x: e.clientX, y: e.clientY });
     setShowContextMenu(true);
   };
@@ -84,14 +88,37 @@ const CharacterCard = ({
     }
   };
 
-  // Close context menu when clicking outside
+  // Global menu closure handlers
   React.useEffect(() => {
+    const handleCloseAll = (e: any) => {
+      // If the event was triggered by another card, close this one
+      if (e.detail?.id !== characterId) {
+        setShowContextMenu(false);
+      }
+    };
+
     const handleClick = () => setShowContextMenu(false);
+
+    // Close on any right click elsewhere on the window
+    const handleWindowContextMenu = (e: MouseEvent) => {
+      // If we're right-clicking outside of any card context, close open ones
+      // This is partially handled by handleContextMenu preventing bubble,
+      // but this ensures background right-clicks also clear menus.
+      setShowContextMenu(false);
+    };
+
+    window.addEventListener("close-context-menus", handleCloseAll);
     if (showContextMenu) {
       document.addEventListener("click", handleClick);
-      return () => document.removeEventListener("click", handleClick);
+      window.addEventListener("contextmenu", handleWindowContextMenu);
     }
-  }, [showContextMenu]);
+
+    return () => {
+      window.removeEventListener("close-context-menus", handleCloseAll);
+      document.removeEventListener("click", handleClick);
+      window.removeEventListener("contextmenu", handleWindowContextMenu);
+    };
+  }, [showContextMenu, characterId]);
 
   return (
     <>
@@ -173,7 +200,7 @@ const CharacterCard = ({
 
           <div className="space-y-3">
             <div className="flex flex-wrap gap-1 pt-1">
-              {tags?.slice(0, 2).map((tag) => (
+              {Array.from(new Map(tags?.map(tag => [tag.id, tag])).values()).slice(0, 2).map((tag) => (
                 <span
                   key={tag.id}
                   className="px-2 py-0.5 text-[8px] font-black rounded-md border border-white/5 bg-white/5 text-primary/60 uppercase tracking-widest"

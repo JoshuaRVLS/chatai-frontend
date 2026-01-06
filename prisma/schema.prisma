@@ -60,6 +60,7 @@ model UserProfileImage {
 model Character {
   id String @id @default(cuid()) @map("_id")
   name String 
+  chubId String? @unique
   persona String 
   bio String
   scenario String
