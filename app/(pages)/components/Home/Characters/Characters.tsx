@@ -23,6 +23,7 @@ const Characters = ({
   const [debouncedTagSearch, setDebouncedTagSearch] = React.useState("");
   const [showTagDropdown, setShowTagDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const gridRef = React.useRef<HTMLDivElement>(null);
   const [page, setPage] = React.useState(1);
   const pageSize = 20;
 
@@ -252,7 +253,7 @@ const Characters = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         <AnimatePresence mode="popLayout">
           {paginatedData?.map((character, index) => (
             <motion.div
@@ -283,7 +284,10 @@ const Characters = ({
         <div className="mt-12 flex items-center justify-center gap-6">
           <button
             disabled={page === 1}
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => {
+              setPage(p => Math.max(1, p - 1));
+              setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }}
             className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
             Prev Cycle
@@ -293,7 +297,10 @@ const Characters = ({
           </span>
           <button
             disabled={page === totalPages}
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => {
+              setPage(p => Math.min(totalPages, p + 1));
+              setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+            }}
             className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
             Next Cycle
