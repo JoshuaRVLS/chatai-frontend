@@ -9,7 +9,7 @@ import fs from 'fs';
 import path from 'path';
 
 const prisma = new PrismaClient();
-const DEFAULT_USER_ID = "cmdgxw4200000ua60gmk4m351";
+const DEFAULT_USER_ID = "cmk3aq9vi0000vmksfjul6xnc";
 
 async function main() {
     const args = process.argv.slice(2);
@@ -34,16 +34,16 @@ async function main() {
     for (const char of characters) {
         try {
             // 1. Handle Tags
-            const tagIds: string[] = [];
+            const tags: any[] = [];
             const topics = char.topics || [];
 
             for (const topicName of topics) {
                 const tag = await prisma.characterTag.upsert({
-                    where: { name: topicName } as any, // Simple check, might need 'name' to be unique in schema
+                    where: { name: topicName },
                     update: {},
                     create: { name: topicName }
                 });
-                tagIds.push(tag.id);
+                tags.push(tag);
             }
 
             // 2. Create Character
@@ -57,7 +57,9 @@ async function main() {
                     exampleConversations: char.definition?.mes_example || "",
                     isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature"),
                     authorId: DEFAULT_USER_ID,
-                    tagIds: tagIds
+                    tags: {
+                        connect: tags.map(t => ({ id: t.id }))
+                    }
                 }
             });
 

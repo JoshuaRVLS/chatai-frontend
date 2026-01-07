@@ -43,12 +43,12 @@ export default function RegisterPage() {
 
       const data = await response.json();
       if (!data.success) {
-        toast.error(data.message);
+        toast.error(data.message || "Failed to register account");
         setLoading(false);
         return;
       }
 
-      toast.success("Account created successfully!");
+      toast.success("Account created! Please check your email for verification.");
       router.push("/login");
     } catch {
       toast.error("Something went wrong");

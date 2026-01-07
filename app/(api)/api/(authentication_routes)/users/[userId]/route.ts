@@ -16,6 +16,15 @@ export const GET =
       return NextResponse.json(
         { success: false, message: 'User not found' }, { status: 404 });
     }
+
+    // Provide default settings if missing
+    if (!user.userSettings) {
+      user.userSettings = {
+        showNsfw: false,
+        blurNsfw: true,
+      } as any;
+    }
+
     return NextResponse.json({ success: true, data: user }, { status: 200 });
   };
 

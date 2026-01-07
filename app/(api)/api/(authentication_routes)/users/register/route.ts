@@ -1,4 +1,3 @@
-import { generateProfileImage } from '@/app/utils/image';
 import { db } from '@/app/utils/prisma';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -48,33 +47,33 @@ export const POST = async (req: Request) => {
       // Actually, standard security practice for PUBLIC registration is to not leak presence, 
       // but typical apps DO leak it for better UX. I'll stick to a slightly better worded error.
       return NextResponse.json(
-        { success: false, message: 'Username atau email sudah digunakan' }, { status: 400 });
+        { success: false, message: 'Username atau email sudah digunakan' },
+        { status: 400 }
+      );
     }
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
     const verificationTokenExpires =
       new Date(Date.now() + 24 * 60 * 60 * 1000);  // 24 hours\
 
-    const profileImageBuffer =
-      generateProfileImage(userData.username.substring(0, 2));
-
     const userCreated = await db.user.create({
       data: {
         username: userData.username,
         email: userData.email,
-        profileImage: {
-          create: {
-            data: Buffer.from(profileImageBuffer),
-            mimetype: 'image/png',
-          },
-        },
         password: await bcrypt.hash(userData.password, 10),
         verificationToken,
         verificationTokenExpires,
+        userSettings: {
+          create: {
+            showNsfw: false,
+            blurNsfw: true,
+          }
+        }
       },
     });
 
-    await fetch(`${process.env.NEXTAUTH_URL}/api/send-verification`, {
+    const baseUrl = new URL(req.url).origin;
+    await fetch(`${baseUrl}/api/send-verification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -94,9 +93,16 @@ export const POST = async (req: Request) => {
       },
       { status: 200 });
   } catch (error) {
-    console.log(error);
+    console.error("Registration error:", error);
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.issues }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: error.issues[0].message, errors: error.issues },
+        { status: 400 }
+      );
     }
+    return NextResponse.json(
+      { success: false, message: "Terjadi kesalahan saat mendaftar" },
+      { status: 500 }
+    );
   }
 };

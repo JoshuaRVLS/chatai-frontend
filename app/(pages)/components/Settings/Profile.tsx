@@ -7,6 +7,7 @@ import { User } from "@/app/generated/prisma";
 import { FiUser, FiMail, FiSave, FiLoader, FiCamera } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import UserAvatar from "../Common/UserAvatar";
 
 const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
   const [username, setUsername] = useState(data?.username || "");
@@ -87,27 +88,16 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
       <div className="flex flex-col items-center gap-6 pb-6 border-b border-white/5">
         <div className="relative group">
           <div
-            className="w-32 h-32 rounded-[2rem] bg-white/5 border border-white/10 overflow-hidden cursor-pointer relative transition-all group-hover:border-primary/50 group-hover:scale-[1.02]"
+            className="cursor-pointer relative transition-all group-hover:scale-[1.02]"
             onClick={() => fileInputRef.current?.click()}
           >
-            {imagePreview ? (
-              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-            ) : data.id ? (
-              <img
-                src={`/api/users/picture/${data.id}?t=${Date.now()}`}
-                alt="Profile"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${data.username}&background=random`;
-                }}
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-white/10">
-                <FiUser size={48} />
-              </div>
-            )}
+            <UserAvatar
+              name={username}
+              image={imagePreview || (data.id ? `/api/users/picture/${data.id}?t=${Date.now()}` : null)}
+              size="xl"
+            />
 
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-2xl">
               <FiCamera className="text-primary text-2xl" />
               <span className="text-[8px] font-black uppercase tracking-widest text-white/70">Change Photo</span>
             </div>

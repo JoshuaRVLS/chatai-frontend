@@ -29,9 +29,15 @@ export const POST = async (req: Request) => {
     },
   } as SMTPTransport.Options);
 
-  const verificationLink = `${process.env.NEXTAUTH_URL}/verify-email?token=${verificationToken}`;
+  const baseUrl = new URL(req.url).origin;
+  const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
 
+  console.log(`📧 Attempting to send verification email to: ${email}`);
   try {
+    // Verify SMTP connection
+    await transporter.verify();
+    console.log("✅ SMTP connection verified");
+
     await transporter.sendMail({
       from: `"JCorp" <${process.env.BREVO_EMAIL}>`,
       to: email,
@@ -130,6 +136,7 @@ export const POST = async (req: Request) => {
       `,
     });
 
+    console.log(`✅ Verification email sent successfully to: ${email}`);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error sending verification email:", error);

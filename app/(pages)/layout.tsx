@@ -8,6 +8,7 @@ import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
 import { ConfirmationProvider } from "./providers/ConfirmationProvider";
 import { Analytics } from "@vercel/analytics/next";
+import Footer from "./components/Footer/Footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,6 +75,7 @@ export default function RootLayout({
                 <main className="relative min-h-screen">
                   {children}
                 </main>
+                <Footer />
               </ConfirmationProvider>
             </AuthProvider>
           </ScrollProvider>

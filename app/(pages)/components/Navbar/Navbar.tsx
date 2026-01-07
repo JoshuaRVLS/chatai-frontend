@@ -18,6 +18,7 @@ import {
   FiSettings
 } from "react-icons/fi";
 import { signOut, useSession } from "next-auth/react";
+import UserAvatar from "../Common/UserAvatar";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,14 +83,25 @@ const Navbar = () => {
           }`}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3 group">
+          <Link
+            href="/"
+            className="flex items-center gap-3 group"
+            onClick={(e) => {
+              // Ensure full refresh if navigation gets stuck
+              if (pathname === '/') {
+                e.preventDefault();
+                window.location.reload();
+              }
+            }}
+          >
             <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-primary/50 group-hover:bg-primary/5 overflow-hidden">
               <Image
                 src="/jchatai-icon.png"
                 alt="JChatAI"
-                width={32}
-                height={32}
-                className="object-contain"
+                width={40}
+                height={40}
+                className="object-contain mix-blend-screen scale-125"
+                priority
               />
             </div>
             <div className="flex flex-col">
@@ -121,16 +133,14 @@ const Navbar = () => {
                 >
                   <Link href="/settings" className="flex items-center gap-4 transition-opacity hover:opacity-80">
                     <div className="text-right hidden sm:block">
-                      <p className="text-[11px] font-black text-white uppercase tracking-tight italic">{session.user?.name}</p>
+                      <p className="text-[11px] font-black text-white uppercase tracking-tight italic">{session.user?.name || (session.user as any)?.username}</p>
                       <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">Member</p>
                     </div>
-                    <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
-                      {session.user?.image ? (
-                        <img src={session.user.image} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <FiUser className="text-white/20" />
-                      )}
-                    </div>
+                    <UserAvatar
+                      name={session.user?.name || (session.user as any)?.username}
+                      image={session.user?.image}
+                      size="md"
+                    />
                   </Link>
 
                   <AnimatePresence>

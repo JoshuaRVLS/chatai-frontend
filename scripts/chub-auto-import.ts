@@ -9,7 +9,7 @@
 import { PrismaClient } from '../app/generated/prisma';
 
 const prisma = new PrismaClient();
-const DEFAULT_USER_ID = "cmdgxw4200000ua60gmk4m351";
+const DEFAULT_USER_ID = "cmk3aq9vi0000vmksfjul6xnc";
 const CHUB_GATEWAY_API = "https://gateway.chub.ai/api";
 const CHUB_GATEWAY_SEARCH = "https://gateway.chub.ai/search";
 
@@ -36,7 +36,7 @@ async function importSingleCharacter(charPath: string) {
 
         if (existing) {
             console.log(`⏩ Skipping: ${charPath} (Already in archive)`);
-            return;
+            return { success: true, skipped: true };
         }
 
         const detailUrl = `${CHUB_GATEWAY_API}/characters/${charPath}?full=true`;
@@ -52,7 +52,7 @@ async function importSingleCharacter(charPath: string) {
 
         if (!detailRes.ok) {
             console.error(`❌ Failed to fetch: ${detailRes.statusText}`);
-            return;
+            return { success: false };
         }
 
         const detail = (await detailRes.json()).node;
@@ -60,14 +60,14 @@ async function importSingleCharacter(charPath: string) {
         const topics = detail.topics || [];
 
         // Handle Tags
-        const tagIds: string[] = [];
+        const tags: any[] = [];
         for (const topicName of topics) {
             const tag = await prisma.characterTag.upsert({
                 where: { name: topicName },
                 update: {},
                 create: { name: topicName }
             });
-            tagIds.push(tag.id);
+            tags.push(tag);
         }
 
         // Create Character
@@ -84,7 +84,9 @@ async function importSingleCharacter(charPath: string) {
                 exampleConversations: stripHtml(exampleConvo),
                 isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature"),
                 authorId: DEFAULT_USER_ID,
-                tagIds: tagIds
+                tags: {
+                    connect: tags.map(t => ({ id: t.id }))
+                }
             }
         });
 
@@ -113,10 +115,10 @@ async function importSingleCharacter(charPath: string) {
         } else {
             console.log(`   ✅ Integrated: ${detail.name}`);
         }
-        return true;
+        return { success: true, isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature") };
     } catch (e: any) {
         console.error(`❌ Failed to import:`, e.message);
-        return false;
+        return { success: false };
     }
 }
 
@@ -165,6 +167,8 @@ async function main() {
     console.log(`👤 Target Author ID: ${DEFAULT_USER_ID}\n`);
 
     let totalImported = 0;
+    let nsfwCount = 0;
+    let cleanCount = 0;
 
     for (let page = 1; page <= maxPages; page++) {
         console.log(`📄 Processing Page ${page}...`);
@@ -210,8 +214,12 @@ async function main() {
                 const creator = node.fullPath.split('/')[0];
                 console.log(`🔍 [${node.id}] ${node.name} by ${creator}`);
 
-                const success = await importSingleCharacter(node.fullPath);
-                if (success) totalImported++;
+                const result = await importSingleCharacter(node.fullPath);
+                if (result.success && !result.skipped) {
+                    totalImported++;
+                    if (result.isNsfw) nsfwCount++;
+                    else cleanCount++;
+                }
             }
         } catch (error: any) {
             console.error(`❌ Global error on page ${page}:`, error.message);
@@ -219,7 +227,9 @@ async function main() {
     }
 
     console.log(`\n🎉 Automatic synchronization completed!`);
-    console.log(`🚀 Total characters integrated into archive: ${totalImported}\n`);
+    console.log(`🚀 Total Integrated: ${totalImported}`);
+    console.log(`🌶️  NSFW Integrated : ${nsfwCount}`);
+    console.log(`🛡️  Clean Integrated: ${cleanCount}\n`);
 }
 
 main()
