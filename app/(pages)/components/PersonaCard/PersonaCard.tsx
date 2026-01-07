@@ -85,48 +85,48 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
 
   return (
     <motion.div
-      className={`relative rounded-[2.5rem] overflow-hidden border transition-all duration-500 ${isActive ? 'bg-white/[0.05] border-purple-500/50 shadow-[0_20px_60px_rgba(168,85,247,0.15)]' : 'bg-white/[0.02] border-white/10 hover:border-white/20'}`}
-      initial={{ opacity: 0, y: 20 }}
+      className={`relative rounded-3xl overflow-hidden border transition-all duration-500 ${isActive ? 'bg-white/5 border-white/20 shadow-2xl' : 'bg-white/1 border-white/5 hover:border-white/10'}`}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      {/* Background Glow for Active Card */}
+      {/* Subtle Background Glow for Active Card */}
       {isActive && (
-        <div className="absolute inset-0 bg-gradient-to-tr from-purple-600/10 via-transparent to-blue-600/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-white/1 pointer-events-none" />
       )}
 
       {/* Header Button */}
       <motion.button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-8 flex items-center justify-between text-left group"
+        className="w-full p-6 flex items-center justify-between text-left group"
         whileTap={{ scale: 0.98 }}
       >
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           <div className="relative">
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-purple-600 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)]' : 'bg-white/5 text-white/30 group-hover:bg-white/10'}`}>
-              <FaUser size={20} />
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10'}`}>
+              <FaUser size={16} />
             </div>
             {isActive && (
               <motion.div
-                className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full border-2 border-[#020617] shadow-[0_0_10px_rgba(34,211,238,0.5)]"
-                animate={{ scale: [1, 1.2, 1] }}
+                className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-[#09090b]"
+                animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               />
             )}
           </div>
-          <div>
-            <h3 className="text-xl font-black text-white italic tracking-tight uppercase leading-tight group-hover:text-primary transition-colors">
+          <div className="space-y-0.5">
+            <h3 className="text-lg font-black text-white italic tracking-tight uppercase leading-none group-hover:text-zinc-300 transition-colors">
               {personaName}
             </h3>
-            <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] mt-1">
+            <p className="text-zinc-600 text-[9px] font-black uppercase tracking-widest leading-none">
               {isActive ? "Primary Identity" : "Secondary Identity"}
             </p>
           </div>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 45 : 0 }}
-          className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isExpanded ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-white/10 group-hover:border-white/10'}`}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${isExpanded ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-zinc-800 group-hover:border-white/10 group-hover:text-zinc-500'}`}
         >
-          <FaPlus size={14} />
+          <FaPlus size={10} />
         </motion.div>
       </motion.button>
 
@@ -139,75 +139,75 @@ const PersonaCard = ({ initialPersona }: { initialPersona: UserPersona }) => {
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden border-t border-white/5"
           >
-            <div className="p-8 space-y-8">
+            <div className="p-6 space-y-6">
               {isEditing ? (
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Identity Signature</label>
+                <div className="grid grid-cols-1 gap-5">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Signature</label>
                     <input
                       value={personaName}
                       onChange={(e) => setPersonaName(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none focus:border-purple-500/50 transition-all font-bold"
+                      className="input-modern w-full font-bold text-sm h-10"
                     />
                   </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2">Behavioral Logic Matrix</label>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Behavioral Logic Matrix</label>
                     <textarea
                       value={persona}
                       onChange={(e) => setPersona(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white outline-none focus:border-purple-500/50 transition-all font-medium resize-none text-sm leading-relaxed"
+                      className="input-modern w-full min-h-[100px] text-xs py-3 leading-relaxed"
                       rows={5}
                     />
                   </div>
-                  <div className="flex justify-end gap-3 pt-4">
+                  <div className="flex justify-end gap-2 pt-2">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-6 py-3 border border-white/5 text-white/30 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-white/5 transition-all"
+                      className="px-4 py-2 border border-white/5 text-zinc-600 rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-white/5 transition-all"
                     >
                       Abort
                     </button>
                     <button
                       onClick={save}
-                      className="px-6 py-3 bg-white text-black rounded-xl font-black uppercase tracking-widest text-[10px] flex items-center gap-2"
+                      className="px-6 py-2 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center gap-2 shadow-lg"
                     >
-                      <FaCheck /> Confirm Edit
+                      <FaCheck size={10} /> Confirm Edit
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-8">
-                  <div className="space-y-3">
-                    <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 flex items-center gap-2">
-                      <FaInfo size={10} className="text-purple-500" /> Behavioral Manifest
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1 flex items-center gap-2 leading-none">
+                      <FaInfo size={8} className="text-zinc-500" /> Behavioral Manifest
                     </h4>
-                    <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-6 text-white/60 text-sm leading-relaxed italic font-medium">
+                    <div className="bg-white/1 border border-white/5 rounded-2xl p-5 text-zinc-500 text-xs leading-relaxed italic font-medium">
                       "{persona}"
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <div className="flex gap-2 flex-1">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-white/10 transition-all"
+                        className="flex-1 h-10 bg-white/5 border border-white/5 rounded-lg text-zinc-500 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all"
                       >
-                        <FaEdit className="text-purple-400" /> Edit
+                        <FaEdit size={10} /> Edit
                       </button>
                       <button
                         onClick={deletePersona}
-                        className="flex-1 px-5 py-4 bg-white/5 border border-white/10 rounded-2xl text-white/40 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all"
+                        className="flex-1 h-10 bg-white/5 border border-white/5 rounded-lg text-zinc-800 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-zinc-900/50 hover:text-zinc-600 transition-all"
                       >
-                        <FaTrash /> Purge
+                        <FaTrash size={10} /> Purge
                       </button>
                     </div>
                     <button
                       onClick={usePersona}
                       disabled={isActive}
-                      className={`px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center justify-center gap-3 transition-all ${isActive ? 'bg-primary text-black cursor-default' : 'bg-white text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]'}`}
+                      className={`px-6 h-10 rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all shadow-xl ${isActive ? 'bg-white text-zinc-950 cursor-default px-8' : 'bg-white/10 text-white hover:bg-white/20'}`}
                     >
                       {isActive ? (
                         <>
-                          <div className="w-2 h-2 rounded-full bg-black animate-pulse" /> Linked
+                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-950 animate-pulse" /> Linked
                         </>
                       ) : (
                         <>Use Identity</>

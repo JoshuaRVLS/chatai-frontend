@@ -38,7 +38,7 @@ const Characters = ({
   );
   const [isEditingPage, setIsEditingPage] = React.useState(false);
   const [inputPage, setInputPage] = React.useState(page.toString());
-  const pageSize = 21;
+  const pageSize = 32;
 
   // Helper to update specific parameters in the URL
   const handleUpdateParams = React.useCallback(
@@ -164,11 +164,11 @@ const Characters = ({
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-10 w-full px-6 md:px-12">
-        <div className="h-8 w-48 bg-white/5 rounded-xl shimmer" />
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6">
-          {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-[280px] rounded-2xl bg-white/5 shimmer border border-white/5" />
+      <div className="flex flex-col gap-6 w-full px-6 md:px-8">
+        <div className="h-6 w-32 bg-white/5 rounded-lg shimmer" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4 md:gap-6">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <div key={i} className="h-[240px] rounded-xl bg-white/5 shimmer border border-white/5" />
           ))}
         </div>
       </div>
@@ -182,8 +182,8 @@ const Characters = ({
           <FiAlertTriangle className="text-error w-8 h-8" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-black uppercase tracking-tighter text-white italic">Node Connectivity Lost</h3>
-          <p className="text-white/40 text-sm max-w-xs mx-auto">Unable to establish connection with the central character database.</p>
+          <h3 className="text-xl font-black uppercase tracking-tighter text-white">Database Link Severed</h3>
+          <p className="text-zinc-500 text-xs max-w-xs mx-auto">Unable to establish connection with the central character database.</p>
         </div>
         <button onClick={() => refetch()} className="btn-primary px-8 py-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
           <FiRefreshCw /> Initialize Reconnect
@@ -193,18 +193,18 @@ const Characters = ({
   }
 
   return (
-    <div ref={sectionRef} className="flex flex-col gap-10 w-full px-6 md:px-12">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-white/5 pb-16 relative">
-        <div className="absolute -bottom-px left-0 w-1/3 h-px bg-linear-to-r from-primary/50 to-transparent" />
+    <div ref={sectionRef} className="flex flex-col gap-8 w-full px-6 md:px-8">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
+        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-white/10" />
 
         <div className="space-y-8 flex-1 min-w-0">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="w-1 h-6 bg-primary/20 rounded-full" />
-              <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em]">Character Directory</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 bg-white/10 rounded-full" />
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Character Hub</span>
             </div>
-            <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter text-white italic leading-none">
-              {searchQuery ? "Signal results" : "Community Characters"}
+            <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
+              {searchQuery ? "Search Results" : "Community Feed"}
             </h2>
           </div>
 
@@ -219,7 +219,7 @@ const Characters = ({
               {selectedTags.map(tag => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/20 border border-primary/30 text-[10px] font-black text-primary uppercase tracking-widest"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-white/60 uppercase tracking-wider"
                 >
                   {tag}
                   <button
@@ -304,19 +304,18 @@ const Characters = ({
         </div>
 
         <div className="w-full lg:max-w-md relative group">
-          <div className="absolute -inset-4 bg-primary/5 blur-2xl rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity" />
           <SearchBar characters={allCharacters} onSearch={onSearch} />
         </div>
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
-        <AnimatePresence mode="popLayout">
+      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4 md:gap-6">
+        <AnimatePresence>
           {paginatedData?.map((character, index) => (
             <motion.div
               key={character.id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
               <CharacterCard
@@ -344,10 +343,10 @@ const Characters = ({
               handleUpdateParams({ p: "1" });
               setTimeout(scrollToSection, 100);
             }}
-            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
             title="First Cycle"
           >
-            <FiChevronsLeft size={16} />
+            FIRST
           </button>
 
           <button
@@ -358,10 +357,9 @@ const Characters = ({
               handleUpdateParams({ p: newPage.toString() });
               setTimeout(scrollToSection, 100);
             }}
-            className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            <span className="hidden md:inline">Prev Cycle</span>
-            <span className="md:hidden">Prev</span>
+            Prev
           </button>
 
           <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
@@ -417,10 +415,9 @@ const Characters = ({
               handleUpdateParams({ p: newPage.toString() });
               setTimeout(scrollToSection, 100);
             }}
-            className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            <span className="hidden md:inline">Next Cycle</span>
-            <span className="md:hidden">Next</span>
+            Next
           </button>
 
           <button
@@ -430,10 +427,10 @@ const Characters = ({
               handleUpdateParams({ p: totalPages.toString() });
               setTimeout(scrollToSection, 100);
             }}
-            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
             title="Last Cycle"
           >
-            <FiChevronsRight size={16} />
+            LAST
           </button>
         </div>
       )}

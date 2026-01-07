@@ -22,7 +22,7 @@ const MyCharacters: React.FC = () => {
   const [page, setPage] = useState(1);
   const [isEditingPage, setIsEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState("1");
-  const pageSize = 21;
+  const pageSize = 32;
   const confirm = useConfirm();
   const gridRef = React.useRef<HTMLDivElement>(null);
 
@@ -117,13 +117,12 @@ const MyCharacters: React.FC = () => {
 
   if (isPending)
     return (
-      <div className="min-h-screen bg-[#020617] pt-32 px-6">
-        <div className="w-full space-y-8 animate-pulse">
-          <div className="h-12 bg-white/5 rounded-2xl w-1/4" />
-          <div className="h-64 bg-white/5 rounded-[2.5rem]" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-[280px] bg-white/5 rounded-2xl" />
+      <div className="min-h-screen bg-[#09090b] pt-24 px-6">
+        <div className="w-full space-y-6 animate-pulse">
+          <div className="h-10 bg-white/5 rounded-xl w-48" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="h-[240px] bg-white/5 rounded-xl" />
             ))}
           </div>
         </div>
@@ -132,60 +131,58 @@ const MyCharacters: React.FC = () => {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#020617] pt-20 px-6">
-        <p className="text-red-400 text-lg font-black uppercase tracking-widest">Error syncing data</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#09090b] pt-20 px-6">
+        <p className="text-zinc-500 text-sm font-black uppercase tracking-widest">Error syncing archival data</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[#020617] pt-32 pb-20 px-6 sm:px-12 relative overflow-hidden">
-      {/* Background Blobs */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-[#09090b] pt-24 pb-16 px-6 md:px-8 relative overflow-hidden">
+      {/* Subtle Monochrome Grain/Blur */}
+      <div className="fixed inset-0 pointer-events-none opacity-20">
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-white/2 blur-[100px]" />
       </div>
 
       <motion.div
         key="characters-page"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-7xl mx-auto relative z-10"
+        className="relative z-10"
         ref={gridRef}
       >
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-1.5 h-8 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
-              <h1 className="text-5xl sm:text-7xl font-black text-white italic tracking-tighter uppercase leading-none">
-                My Characters
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-5 bg-white/10 rounded-full" />
+              <h1 className="text-3xl sm:text-5xl font-black text-white italic tracking-tight uppercase leading-none">
+                Archives
               </h1>
             </div>
-            <p className="text-white/30 text-xs sm:text-sm font-black uppercase tracking-[0.3em] ml-5 leading-loose">
-              My Characters • Control Center • {data?.length || 0} Records Found
+            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-3 leading-none">
+              Control Center • {data?.length || 0} Entities Indexed
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setIsManageMode(!isManageMode)}
-              className={`px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${isManageMode
-                ? "bg-purple-500/20 text-purple-400 border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]"
-                : "bg-white/5 text-white/30 border-white/5 hover:border-white/10"
+              className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${isManageMode
+                ? "bg-white text-zinc-950 border-white shadow-xl"
+                : "bg-white/5 text-zinc-500 border-white/5 hover:border-white/10 hover:text-white"
                 }`}
             >
-              <FaPencilAlt size={12} />
-              {isManageMode ? "Exit Management" : "Manage Entities"}
+              <FaPencilAlt size={10} />
+              {isManageMode ? "Finish Editing" : "Manage"}
             </button>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/create_character"
-                className="group relative px-8 py-5 bg-primary text-slate-950 rounded-[1.5rem] font-black uppercase tracking-widest text-xs flex items-center gap-3 overflow-hidden transition-all hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]"
+                className="px-5 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-xl hover:bg-zinc-200"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                <FaPlus className="relative z-10" />
-                <span className="relative z-10">Deploy New Entity</span>
+                <FaPlus />
+                <span>Deploy New</span>
               </Link>
             </motion.div>
           </div>
@@ -194,36 +191,26 @@ const MyCharacters: React.FC = () => {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           {/* Stats & Search Column */}
-          <div className="lg:col-span-3 space-y-6">
-            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl">
-              <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6">Search Database</p>
+          <div className="lg:col-span-3 space-y-4">
+            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Search Database</p>
               <div className="relative group">
                 <input
                   type="text"
-                  placeholder="Enter character name..."
+                  placeholder="Enter name..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-primary/50 focus:bg-white/10 transition-all text-sm"
+                  className="input-modern"
                 />
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-white/10 group-focus-within:text-primary transition-colors">
-                  <FaRobot />
-                </div>
               </div>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl">
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-6">Archive Statistics</p>
-              <div className="space-y-6">
+            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Archive Stats</p>
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-black text-white/40 uppercase">Total Entities</span>
-                  <span className="text-2xl font-black text-white italic tracking-tighter">{data?.length || 0}</span>
-                </div>
-                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    className="h-full bg-primary shadow-[0_0_10px_rgba(34,211,238,0.5)]"
-                  />
+                  <span className="text-[10px] font-black text-zinc-500 uppercase">Entities</span>
+                  <span className="text-xl font-black text-white italic tracking-tight">{data?.length || 0}</span>
                 </div>
               </div>
             </div>
@@ -236,7 +223,7 @@ const MyCharacters: React.FC = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-6"
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4"
               >
                 {paginatedCharacters?.map((character) => (
                   <motion.div
@@ -261,21 +248,22 @@ const MyCharacters: React.FC = () => {
                     </div>
 
                     {/* Quick Controls overlay */}
+                    <div className="absolute inset-0 bg-white/1 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
                     <div className={`absolute top-4 right-4 z-20 flex gap-2 transition-all ${isManageMode
                       ? "opacity-100 translate-y-0"
                       : "opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
                       }`}>
                       <Link
                         href={`/edit_character/${character.id}`}
-                        className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/80 hover:text-primary hover:border-primary/40 transition-all shadow-xl"
-                        title="Modify DNA"
+                        className="w-8 h-8 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all shadow-xl"
+                        title="Modify"
                       >
                         <FaPencilAlt size={14} />
                       </Link>
                       <button
                         onClick={() => deleteChar(character.id, character.name)}
-                        className="w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl flex items-center justify-center text-white/80 hover:text-red-400 hover:border-red-400/40 transition-all shadow-xl"
-                        title="Terminate Entity"
+                        className="w-8 h-8 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-all shadow-xl"
+                        title="Terminate"
                       >
                         <FaTrash size={14} />
                       </button>
@@ -285,20 +273,20 @@ const MyCharacters: React.FC = () => {
               </motion.div>
             ) : (
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="h-full flex items-center justify-center bg-white/[0.02] border border-dashed border-white/10 rounded-[3rem] p-12 text-center"
+                className="h-full flex items-center justify-center bg-white/1 border border-dashed border-white/5 rounded-2xl p-8 text-center"
               >
-                <div className="max-w-xs space-y-6">
-                  <div className="w-20 h-20 mx-auto bg-white/5 border border-white/10 rounded-[2rem] flex items-center justify-center">
-                    <FaRobot className="text-white/10 text-3xl" />
+                <div className="max-w-xs space-y-4">
+                  <div className="w-12 h-12 mx-auto bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
+                    <FaRobot className="text-zinc-800 text-xl" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-white italic tracking-tighter uppercase mb-2">
-                      Database Empty
+                    <h3 className="text-lg font-black text-white italic tracking-tight uppercase mb-1">
+                      Archive Null
                     </h3>
-                    <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.2em] leading-relaxed">
-                      No characters matching your current search parameters.
+                    <p className="text-zinc-700 text-[8px] font-black uppercase tracking-widest leading-relaxed">
+                      No matching entities within the current sector parameters.
                     </p>
                   </div>
                 </div>
@@ -307,68 +295,45 @@ const MyCharacters: React.FC = () => {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-6">
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
                 <button
                   disabled={page === 1}
-                  onClick={() => {
-                    setPage(1);
-                    setTimeout(scrollToSection, 100);
-                  }}
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
-                  title="First Archive"
+                  onClick={() => { setPage(1); setTimeout(scrollToSection, 100); }}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  <FiChevronsLeft size={16} />
+                  FIRST
                 </button>
-
                 <button
                   disabled={page === 1}
-                  onClick={() => {
-                    setPage(p => Math.max(1, p - 1));
-                    setTimeout(scrollToSection, 100);
-                  }}
-                  className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  onClick={() => { setPage(p => Math.max(1, p - 1)); setTimeout(scrollToSection, 100); }}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  <span className="hidden md:inline">Previous Archive</span>
-                  <span className="md:hidden">Prev</span>
+                  PREV
                 </button>
 
-                <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-                  <span className="hidden sm:inline">Page</span>
+                <div className="flex items-center gap-2 text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-white/5 px-4 py-1.5 rounded-lg border border-white/5">
+                  <span>Page</span>
                   {isEditingPage ? (
                     <input
                       type="text"
                       autoFocus
                       value={inputPage}
                       onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
-                      onBlur={() => {
-                        setIsEditingPage(false);
-                        setInputPage(page.toString());
-                      }}
+                      onBlur={() => { setIsEditingPage(false); setInputPage(page.toString()); }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           const newPage = parseInt(inputPage, 10);
                           if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
-                            setPage(newPage);
-                            setIsEditingPage(false);
-                            setTimeout(scrollToSection, 100);
-                          } else {
-                            setInputPage(page.toString());
-                            setIsEditingPage(false);
-                          }
-                        } else if (e.key === "Escape") {
-                          setIsEditingPage(false);
-                          setInputPage(page.toString());
-                        }
+                            setPage(newPage); setIsEditingPage(false); setTimeout(scrollToSection, 100);
+                          } else { setInputPage(page.toString()); setIsEditingPage(false); }
+                        } else if (e.key === "Escape") { setIsEditingPage(false); setInputPage(page.toString()); }
                       }}
-                      className="w-10 bg-primary/20 border border-primary/30 rounded-lg px-1 py-0.5 text-primary text-center focus:outline-none focus:border-primary transition-all"
+                      className="bg-white/2 border border-white/5 rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 w-48 transition-colors"
                     />
                   ) : (
                     <button
-                      onClick={() => {
-                        setIsEditingPage(true);
-                        setInputPage(page.toString());
-                      }}
-                      className="text-primary hover:scale-110 transition-transform cursor-pointer italic px-1"
+                      onClick={() => { setIsEditingPage(true); setInputPage(page.toString()); }}
+                      className="text-white hover:scale-110 transition-transform cursor-pointer italic px-1 font-black"
                     >
                       {page}
                     </button>
@@ -378,26 +343,17 @@ const MyCharacters: React.FC = () => {
 
                 <button
                   disabled={page === totalPages}
-                  onClick={() => {
-                    setPage(p => Math.min(totalPages, p + 1));
-                    setTimeout(scrollToSection, 100);
-                  }}
-                  className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); setTimeout(scrollToSection, 100); }}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  <span className="hidden md:inline">Next Archive</span>
-                  <span className="md:hidden">Next</span>
+                  NEXT
                 </button>
-
                 <button
                   disabled={page === totalPages}
-                  onClick={() => {
-                    setPage(totalPages);
-                    setTimeout(scrollToSection, 100);
-                  }}
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
-                  title="Last Archive"
+                  onClick={() => { setPage(totalPages); setTimeout(scrollToSection, 100); }}
+                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  <FiChevronsRight size={16} />
+                  LAST
                 </button>
               </div>
             )}

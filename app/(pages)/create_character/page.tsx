@@ -140,11 +140,11 @@ const CreateCharacterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
-      {/* Background Blobs */}
+    <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
+      {/* Background Blobs - Monochrome */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/1 blur-[100px] rounded-full" />
       </div>
 
       <div className="w-full relative z-10">
@@ -163,11 +163,11 @@ const CreateCharacterPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-3 backdrop-blur-xl">
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Estimated Density</p>
+            <div className="bg-white/3 border border-white/5 rounded-2xl px-6 py-3 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Estimated Density</p>
               <div className="flex items-center gap-2">
-                <FiZap className="text-primary animate-pulse" />
-                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-white/20 not-italic">Tokens</span></span>
+                <FiZap className="text-white/40" />
+                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-zinc-600 not-italic">Tokens</span></span>
               </div>
             </div>
           </div>
@@ -177,17 +177,17 @@ const CreateCharacterPage: React.FC = () => {
           {/* Main Editing Column */}
           <div className="lg:col-span-8 space-y-10">
             {/* Quick Import Section */}
-            <section className="bg-gradient-to-tr from-primary/10 to-purple-500/10 border border-primary/20 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/2 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <FiGlobe className="text-primary" />
+                  <FiGlobe className="text-white/60" />
                   <div>
                     <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Intelligence Sync</h3>
-                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Import from external databases (Chub.ai)</p>
+                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Import from external databases (Chub.ai)</p>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-primary/20 rounded-full border border-primary/30">
-                  <p className="text-[8px] font-black text-primary uppercase">Alpha Feature</p>
+                <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5">
+                  <p className="text-[8px] font-black text-zinc-500 uppercase">External Sync</p>
                 </div>
               </div>
 
@@ -197,17 +197,17 @@ const CreateCharacterPage: React.FC = () => {
                     value={importUrl}
                     onChange={(e) => setImportUrl(e.target.value)}
                     placeholder="https://chub.ai/characters/creator/slug..."
-                    className="w-full bg-slate-950/50 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-primary/50 transition-all text-xs font-bold"
+                    className="bg-white/2 border border-white/5 rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 w-48 transition-colors"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={handleChubImport}
                   disabled={isImporting}
-                  className="px-8 py-4 bg-primary text-black rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 bg-white text-zinc-950 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isImporting ? (
-                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                   ) : (
                     <>
                       <FiZap /> Sync
@@ -220,13 +220,13 @@ const CreateCharacterPage: React.FC = () => {
             {/* Image & Identity Section */}
             <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiInfo className="text-primary" />
+                <FiInfo className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>
               </div>
 
               <div className="flex flex-col md:flex-row gap-10">
                 <div className="w-full md:w-1/3 space-y-4">
-                  <div className="relative aspect-square rounded-[2rem] overflow-hidden border border-white/10 bg-white/5 group">
+                  <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/5 bg-white/5 group">
                     {imagePreview ? (
                       <Image src={imagePreview} fill className="object-cover" alt="Preview" />
                     ) : (
@@ -297,11 +297,11 @@ const CreateCharacterPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsNsfw(!isNsfw)}
-                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-orange-500" : "bg-white/10 border border-white/5"}`}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-white" : "bg-white/5 border border-white/5"}`}
                     >
                       <motion.div
                         animate={{ x: isNsfw ? 26 : 2 }}
-                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-white" : "bg-white/20"}`}
+                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-zinc-950" : "bg-white/20"}`}
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     </button>
@@ -311,9 +311,9 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Tags Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiHash className="text-primary" />
+                <FiHash className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Tags</h3>
               </div>
               <CharacterTags
@@ -323,9 +323,9 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Lorebooks Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiBook className="text-primary" />
+                <FiBook className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
               <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
@@ -344,8 +344,8 @@ const CreateCharacterPage: React.FC = () => {
                         );
                       }}
                       className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
-                        ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                        : "bg-white/5 text-white/40 border-white/10 hover:border-white/20"
+                        ? "bg-white text-zinc-950 border-white"
+                        : "bg-white/5 text-zinc-600 border-white/5 hover:border-white/20"
                         }`}
                     >
                       {lb.name}
@@ -360,17 +360,17 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Intelligence Configuration */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiCpu className="text-primary" />
+                <FiCpu className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">AI Configuration</h3>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Character Persona</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Character Persona</label>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
                   </div>
                   <textarea
                     required
@@ -393,6 +393,10 @@ const CreateCharacterPage: React.FC = () => {
                     <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
                   </div>
                   <div className="relative">
+                    <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                      <div className="p-1 px-2 rounded-md bg-white/5 border border-white/10 text-[8px] font-black text-white/40 uppercase tracking-widest backdrop-blur-md">ENTITY</div>
+                    </div>
+                    <div className="absolute inset-0 bg-white/1 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
                     <FiMap className="absolute right-6 top-6 text-white/10" />
                     <textarea
                       value={scenario}
@@ -427,14 +431,14 @@ const CreateCharacterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 group transition-all"
+                className="w-full py-5 rounded-3xl bg-white text-zinc-950 flex items-center justify-center gap-3 group transition-all font-black uppercase tracking-widest text-[10px]"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                 ) : (
                   <>
                     <FiPlus className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">New Character</span>
+                    <span>New Character</span>
                   </>
                 )}
               </button>
@@ -460,22 +464,22 @@ const CreateCharacterPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <div className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3">
-                <FiZap className="text-primary" />
+                <FiZap className="text-white/40" />
                 <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deployment Stats</h3>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between text-[11px] font-black uppercase tracking-tight">
-                  <span className="text-white/30">Total Tokens</span>
+                  <span className="text-zinc-600">Total Tokens</span>
                   <span className="text-white">{totalTokens}/2048</span>
                 </div>
                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min((totalTokens / 2048) * 100, 100)}%` }}
-                    className={`h-full transition-all duration-500 shadow-[0_0_10px_rgba(34,211,238,0.5)] ${totalTokens > 1500 ? 'bg-orange-500' : 'bg-primary'
+                    className={`h-full transition-all duration-500 bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)] ${totalTokens > 1500 ? 'bg-zinc-400' : 'bg-white'
                       }`}
                   />
                 </div>
@@ -487,14 +491,14 @@ const CreateCharacterPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-2xl flex items-center justify-center gap-3 group mt-6 shadow-[0_0_30px_rgba(34,211,238,0.2)]"
+                className="w-full py-5 rounded-2xl bg-white text-zinc-950 flex items-center justify-center gap-3 group mt-6 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-200 transition-all"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                 ) : (
                   <>
                     <FiPlus className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">New Character</span>
+                    <span>New Character</span>
                   </>
                 )}
               </button>

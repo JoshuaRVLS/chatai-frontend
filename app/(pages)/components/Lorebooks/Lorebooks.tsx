@@ -62,12 +62,12 @@ const Lorebooks: React.FC = () => {
 
     if (isPending)
         return (
-            <div className="min-h-screen pt-32 px-6 bg-[#020617]">
-                <div className="max-w-6xl mx-auto space-y-8 animate-pulse">
-                    <div className="h-12 bg-white/5 rounded-2xl w-1/4" />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="min-h-screen pt-24 px-6 bg-[#09090b]">
+                <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
+                    <div className="h-8 bg-white/5 rounded-xl w-32" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="h-48 bg-white/5 rounded-[2rem]" />
+                            <div key={i} className="h-40 bg-white/5 rounded-2xl" />
                         ))}
                     </div>
                 </div>
@@ -76,17 +76,16 @@ const Lorebooks: React.FC = () => {
 
     if (error)
         return (
-            <div className="min-h-screen pt-24 bg-[#020617] flex items-center justify-center text-center">
-                <p className="text-red-400 font-bold uppercase tracking-widest italic">Database Link Failure: {error.message}</p>
+            <div className="min-h-screen pt-24 bg-[#09090b] flex items-center justify-center text-center">
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Archival Failure: {error.message}</p>
             </div>
         );
 
     return (
-        <div className="min-h-screen bg-[#020617] pt-32 pb-20 px-4 sm:px-8 relative overflow-hidden">
+        <div className="min-h-screen bg-[#09090b] pt-24 pb-16 px-4 sm:px-8 relative overflow-hidden">
             {/* Background Decor */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-cyan-600/10 blur-[150px] rounded-full" />
-                <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-emerald-600/10 blur-[150px] rounded-full" />
+            <div className="fixed inset-0 pointer-events-none opacity-20">
+                <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-white/2 blur-[100px]" />
             </div>
 
             <motion.div
@@ -97,29 +96,29 @@ const Lorebooks: React.FC = () => {
             >
                 {/* Header Section */}
                 <motion.div
-                    className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-20"
+                    className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
                     variants={item}
                 >
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <div className="w-2 h-10 bg-gradient-to-b from-cyan-500 to-emerald-500 rounded-full" />
-                            <h1 className="text-6xl sm:text-8xl font-black text-white italic tracking-tighter uppercase leading-none">
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-5 bg-white/10 rounded-full" />
+                            <h1 className="text-3xl sm:text-5xl font-black text-white italic tracking-tight uppercase leading-none">
                                 Lorebooks
                             </h1>
                         </div>
-                        <p className="text-white/40 text-sm font-bold uppercase tracking-[0.4em] ml-6 opacity-70">
-                            World Information • {data?.length || 0} Modules Integrated
+                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-3 leading-none">
+                            Knowledge Base • {data?.length || 0} Modules Indexed
                         </p>
                     </div>
 
                     {!isCreating && (
                         <motion.button
                             onClick={() => setIsCreating(true)}
-                            whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(34,211,238,0.3)" }}
-                            whileTap={{ scale: 0.95 }}
-                            className="px-10 py-5 bg-white backdrop-blur-xl border border-white/20 text-black rounded-3xl font-black uppercase tracking-widest text-xs flex items-center gap-3 transition-all"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl"
                         >
-                            <FaPlus className="text-cyan-600" /> New Module
+                            <FaPlus size={10} /> Create Module
                         </motion.button>
                     )}
                 </motion.div>
@@ -128,63 +127,57 @@ const Lorebooks: React.FC = () => {
                 <AnimatePresence>
                     {isCreating && (
                         <motion.div
-                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                            initial={{ opacity: 0, y: 15, scale: 0.98 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-                            className="max-w-4xl mx-auto mb-20"
+                            exit={{ opacity: 0, y: 15, scale: 0.98 }}
+                            className="max-w-2xl mx-auto mb-16"
                         >
-                            <div className="relative p-[1px] rounded-[3rem] overflow-hidden bg-gradient-to-br from-white/20 to-transparent">
-                                <div className="relative bg-white/[0.03] backdrop-blur-[60px] rounded-[3rem] p-10 sm:p-14 border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.5)]">
-                                    <div className="flex items-center justify-between mb-12">
-                                        <div>
-                                            <h3 className="text-3xl font-black text-white italic tracking-tight uppercase">
-                                                Construct Module
-                                            </h3>
-                                            <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">World-Building Protocol L-01</p>
-                                        </div>
-                                        <button
-                                            onClick={() => setIsCreating(false)}
-                                            className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/30 hover:text-white hover:bg-white/10 transition-all border border-white/5"
-                                        >
-                                            <FaTimes />
-                                        </button>
+                            <div className="bg-white/1 rounded-2xl p-8 border border-white/5 shadow-2xl">
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="space-y-1">
+                                        <h3 className="text-xl font-black text-white italic tracking-tight uppercase leading-none">
+                                            Constructing...
+                                        </h3>
+                                        <p className="text-zinc-600 text-[8px] font-bold uppercase tracking-widest">Protocol L-01 Engaged</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsCreating(false)}
+                                        className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-zinc-500 hover:text-white transition-all border border-white/5"
+                                    >
+                                        <FaTimes size={10} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Module Label</label>
+                                        <input
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            className="input-modern w-full font-bold text-sm h-12"
+                                            placeholder="e.g. World of Aethelgard"
+                                        />
                                     </div>
 
-                                    <div className="grid grid-cols-1 gap-10">
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] ml-2">Lorebook Name</label>
-                                            <input
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                className="w-full bg-white/[0.04] border border-white/10 rounded-2xl px-8 py-5 text-white placeholder:text-white/10 outline-none focus:border-cyan-500/50 focus:bg-white/[0.08] transition-all font-bold tracking-tight text-lg"
-                                                placeholder="e.g. World of Aethelgard"
-                                            />
-                                        </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Archive Summary</label>
+                                        <textarea
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            className="input-modern w-full min-h-[80px] py-3 text-xs leading-relaxed"
+                                            placeholder="What is this lorebook about?"
+                                        />
+                                    </div>
 
-                                        <div className="space-y-4">
-                                            <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em] ml-2">Description (Optional)</label>
-                                            <textarea
-                                                value={description}
-                                                onChange={(e) => setDescription(e.target.value)}
-                                                className="w-full bg-white/[0.04] border border-white/10 rounded-3xl px-8 py-6 text-white placeholder:text-white/10 outline-none focus:border-cyan-500/50 focus:bg-white/[0.08] transition-all font-medium resize-none text-base leading-relaxed"
-                                                rows={3}
-                                                placeholder="What is this lorebook about?"
-                                            />
-                                        </div>
-
-                                        <div className="flex justify-end pt-6">
-                                            <motion.button
-                                                onClick={handleSave}
-                                                whileHover={{ scale: 1.02 }}
-                                                whileTap={{ scale: 0.98 }}
-                                                className="group relative px-12 py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest text-xs flex items-center gap-4 transition-all overflow-hidden"
-                                            >
-                                                <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-emerald-600 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                                                <span className="relative group-hover:text-white transition-colors z-10 flex items-center gap-3">
-                                                    <FaCheck className="text-cyan-600 group-hover:text-white transition-colors" /> Initialize Module
-                                                </span>
-                                            </motion.button>
-                                        </div>
+                                    <div className="flex justify-end pt-4">
+                                        <motion.button
+                                            onClick={handleSave}
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="px-8 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl"
+                                        >
+                                            <FaCheck size={10} /> Commit Module
+                                        </motion.button>
                                     </div>
                                 </div>
                             </div>
@@ -194,41 +187,40 @@ const Lorebooks: React.FC = () => {
 
                 {/* Grid Section */}
                 <motion.div
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                     variants={container}
                 >
                     {data && data.length > 0 ? (
-                        data.map((lb) => (
+                        data.map((lb) => (lb && (
                             <motion.div key={lb.id} variants={item}>
                                 <LorebookCard lorebook={lb} onUpdate={refetch} />
                             </motion.div>
-                        ))
+                        )))
                     ) : !isCreating && (
                         <motion.div
-                            className="col-span-full py-28 relative group"
+                            className="col-span-full py-20 relative group"
                             variants={item}
                         >
-                            <div className="absolute inset-0 bg-white/[0.01] border-[2px] border-dashed border-white/10 rounded-[4rem] group-hover:bg-white/[0.02] group-hover:border-white/20 transition-all duration-700" />
-                            <div className="max-w-sm mx-auto space-y-10 text-center relative">
-                                <div className="w-28 h-28 mx-auto bg-white/5 border border-white/10 rounded-[3rem] flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-transform duration-700">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                                    <FiBookOpen className="text-white/20 text-5xl group-hover:text-white transition-colors duration-700" />
+                            <div className="absolute inset-0 bg-white/1 border border-dashed border-white/5 rounded-2xl group-hover:bg-white/2 transition-all duration-700" />
+                            <div className="max-w-sm mx-auto space-y-6 text-center relative">
+                                <div className="w-16 h-16 mx-auto bg-white/5 border border-white/10 rounded-xl flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                                    <FiBookOpen className="text-zinc-800 text-3xl group-hover:text-zinc-500 transition-colors duration-700" />
                                 </div>
-                                <div className="space-y-4">
-                                    <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase whitespace-nowrap">
-                                        No Lore Found
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-white italic tracking-tight uppercase">
+                                        Archive Empty
                                     </h3>
-                                    <p className="text-white/30 text-[11px] font-bold uppercase tracking-[0.25em] leading-loose">
-                                        Your world is a blank slate. Create a lorebook to define languages, locations, and history that your characters will remember.
+                                    <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest leading-relaxed">
+                                        Create a lorebook to define languages, locations, and history for your entities.
                                     </p>
                                 </div>
                                 <motion.button
                                     onClick={() => setIsCreating(true)}
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className="px-10 py-5 bg-gradient-to-r from-cyan-600 to-emerald-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl shadow-[0_20px_40px_rgba(34,211,238,0.25)]"
+                                    className="px-8 py-3 bg-white text-zinc-950 font-black uppercase tracking-widest text-[10px] rounded-lg shadow-xl"
                                 >
-                                    <FaPlus className="inline mr-2" /> Start World Building
+                                    <FaPlus className="inline mr-2" size={10} /> Start Building
                                 </motion.button>
                             </div>
                         </motion.div>
@@ -238,23 +230,19 @@ const Lorebooks: React.FC = () => {
                 {/* Info Module */}
                 {data && data.length > 0 && (
                     <motion.div
-                        className="mt-24 relative p-[1px] rounded-[3rem] overflow-hidden"
+                        className="mt-16"
                         variants={item}
                     >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent" />
-                        <div className="relative bg-white/[0.02] backdrop-blur-3xl rounded-[3rem] p-12 overflow-hidden">
-                            <div className="absolute top-0 right-0 p-10 text-white/5 pointer-events-none group-hover:text-white/10 transition-colors duration-1000">
-                                <FaBook size={160} />
-                            </div>
-                            <div className="flex flex-col sm:flex-row items-start gap-8 relative z-10">
-                                <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/30 to-emerald-500/30 rounded-2xl flex items-center justify-center text-white border border-white/10 shadow-2xl">
-                                    <FaInfo className="text-xl" />
+                        <div className="relative bg-white/1 border border-white/5 rounded-2xl p-8 overflow-hidden">
+                            <div className="flex flex-col sm:flex-row items-start gap-6 relative z-10">
+                                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center text-zinc-400 border border-white/10 shadow-xl shrink-0">
+                                    <FaInfo className="text-lg" />
                                 </div>
-                                <div className="space-y-4">
-                                    <h4 className="text-2xl font-black text-white italic tracking-tight uppercase">
-                                        Advanced World Logic
+                                <div className="space-y-2">
+                                    <h4 className="text-xl font-black text-white italic tracking-tight uppercase leading-none">
+                                        Logic Stream
                                     </h4>
-                                    <p className="text-white/40 text-sm leading-relaxed font-semibold max-w-3xl">
+                                    <p className="text-zinc-600 text-[10px] leading-relaxed font-bold max-w-2xl uppercase tracking-tighter">
                                         Lorebooks enable persistent world-state across different characters. By defining entries with triggers (keywords), you ensure the AI only accesses information when it becomes relevant to the current conversation focus.
                                     </p>
                                 </div>

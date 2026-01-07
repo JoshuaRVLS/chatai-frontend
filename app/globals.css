@@ -1,34 +1,34 @@
 @import "tailwindcss";
 
 body {
-  background-color: #05070a !important;
+  background-color: #09090b !important;
 }
 
 :root {
-  /* Ultra-Modern Base Palette */
-  --background-hex: #020617;
-  --background-gradient: radial-gradient(circle at 100% 0%, #1e1b4b 0%, #0f172a 35%, #020617 100%);
-  --foreground: #f8fafc;
+  /* Monochrome Zinc Palette */
+  --background-hex: #09090b;
+  --background-gradient: radial-gradient(circle at 50% 0%, #18181b 0%, #09090b 100%);
+  --foreground: #fafafa;
 
-  /* Refined Accent Colors */
-  --color-primary: #38bdf8;
-  --color-primary-glow: rgba(56, 189, 248, 0.25);
-  --color-secondary: #818cf8;
-  --color-accent: #f472b6;
-  
-  /* Aurora Colors */
-  --aurora-1: rgba(56, 189, 248, 0.15);
-  --aurora-2: rgba(129, 140, 248, 0.1);
-  --aurora-3: rgba(244, 114, 182, 0.05);
+  /* Refined Monochrome Tokens */
+  --color-primary: #fafafa;
+  --color-primary-glow: rgba(255, 255, 255, 0.1);
+  --color-secondary: #a1a1aa;
+  --color-accent: #71717a;
 
-  /* Simplified Surfaces */
-  --color-surface: rgba(15, 23, 42, 0.4);
-  --color-surface-hover: rgba(30, 41, 59, 0.6);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-glow: rgba(56, 189, 248, 0.15);
+  /* Aurora Colors - Desaturated */
+  --aurora-1: rgba(255, 255, 255, 0.03);
+  --aurora-2: rgba(255, 255, 255, 0.02);
+  --aurora-3: rgba(255, 255, 255, 0.01);
+
+  /* Simplified Monochrome Surfaces */
+  --color-surface: rgba(24, 24, 27, 0.6);
+  --color-surface-hover: rgba(39, 39, 42, 0.8);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-glow: rgba(255, 255, 255, 0.1);
   --color-background-custom: var(--background-hex);
 
-  /* Status Tokens */
+  /* Status Tokens - Slightly muted */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -38,15 +38,15 @@ body {
 }
 
 @theme {
-  --color-primary: #38bdf8;
-  --color-secondary: #818cf8;
-  --color-accent: #f472b6;
-  --color-surface: rgba(15, 23, 42, 0.6);
+  --color-primary: #fafafa;
+  --color-secondary: #a1a1aa;
+  --color-accent: #71717a;
+  --color-surface: rgba(24, 24, 27, 0.8);
   --font-inter: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 body {
-  @apply font-inter antialiased min-h-screen selection:bg-primary/30;
+  @apply font-inter antialiased min-h-screen selection:bg-white/10;
   background: var(--background-gradient);
   background-attachment: fixed;
   margin: 0;
@@ -54,57 +54,43 @@ body {
   color: var(--foreground);
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Utilities - More subtle */
 .glass {
-  @apply backdrop-blur-xl bg-white/5 border border-white/10;
+  @apply backdrop-blur-md bg-white/[0.03] border border-white/10;
 }
 
 .glass-morphism {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Component Utilities */
+/* Compact Component Utilities */
 .btn-primary {
-  @apply relative overflow-hidden px-6 py-2.5 rounded-xl font-medium transition-all duration-300 bg-primary text-slate-950 hover:scale-[1.02] active:scale-[0.98];
-  /* Use plain CSS for boxes with spaces to avoid Tailwind 4 @apply parsing issues */
-  box-shadow: 0 0 20px rgba(34, 211, 238, 0.3);
-}
-
-.btn-primary:hover {
-  box-shadow: 0 0 30px rgba(34, 211, 238, 0.5);
+  @apply relative overflow-hidden px-5 py-2 rounded-lg font-bold transition-all duration-200 bg-white text-zinc-950 hover:bg-zinc-200 active:scale-[0.98] text-xs uppercase tracking-wider;
 }
 
 .btn-secondary {
-  @apply px-6 py-2.5 rounded-xl font-medium transition-all duration-300 border border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm;
+  @apply px-5 py-2 rounded-lg font-bold transition-all duration-200 border border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm text-xs uppercase tracking-wider;
 }
 
 .input-modern {
-  @apply w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all outline-none placeholder:text-white/20 text-white;
+  @apply w-full px-3 py-2 rounded-lg bg-zinc-900/50 border border-white/5 focus:border-white/20 focus:ring-1 focus:ring-white/10 transition-all outline-none placeholder:text-zinc-600 text-sm;
 }
 
 .input-modern.has-icon {
-  @apply pl-12;
+  @apply pl-10;
 }
 
 .card-premium {
-  @apply rounded-3xl p-8 transition-all duration-700;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 10px 40px -10px rgba(0, 0, 0, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  @apply rounded-2xl p-6 transition-all duration-300;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .card-premium:hover {
-  @apply border-white/20;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
-  box-shadow: 
-    0 20px 60px -15px rgba(0, 0, 0, 0.6),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  @apply border-white/10;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
 }
 
 .aurora-bg {
@@ -112,31 +98,43 @@ body {
   inset: 0;
   overflow: hidden;
   z-index: -1;
+  opacity: 0.3;
 }
 
 .aurora-blob {
   position: absolute;
-  filter: blur(80px);
-  opacity: 0.4;
+  filter: blur(100px);
+  opacity: 0.2;
   border-radius: 50%;
-  animation: aurora-float 20s infinite alternate;
+  animation: aurora-float 25s infinite alternate;
 }
 
 @keyframes aurora-float {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(10%, 15%) scale(1.1); }
-  66% { transform: translate(-5%, 10%) scale(0.9); }
-  100% { transform: translate(5%, -5%) scale(1.05); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(5%, 10%) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-3%, 5%) scale(0.95);
+  }
+
+  100% {
+    transform: translate(3%, -3%) scale(1.02);
+  }
 }
 
-/* Shimmer Effect */
+/* Shimmer Effect - More subtle */
 .shimmer {
   background: linear-gradient(90deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.02) 50%,
       rgba(255, 255, 255, 0) 100%);
   background-size: 200% 100%;
-  animation: shimmer-anim 2s infinite linear;
+  animation: shimmer-anim 3s infinite linear;
 }
 
 @keyframes shimmer-anim {
@@ -158,18 +156,18 @@ body {
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
 }
 
 .animate-float {
-  animation: float 5s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
-/* Modern Scrollbar Redesign */
+/* Compact Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -177,19 +175,18 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.3);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 /* Responsiveness helpers */

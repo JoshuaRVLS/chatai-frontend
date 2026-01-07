@@ -74,10 +74,10 @@ const CharacterView = ({ id }: { id: string }) => {
 
   if (isPending) {
     return (
-      <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-          <p className="text-white/40 font-medium tracking-widest text-[10px] uppercase">Initializing Profile...</p>
+      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border border-white/10 border-t-white rounded-full animate-spin" />
+          <p className="text-zinc-600 font-bold tracking-widest text-[8px] uppercase">Initializing...</p>
         </div>
       </div>
     );
@@ -91,24 +91,25 @@ const CharacterView = ({ id }: { id: string }) => {
     );
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 selection:bg-primary/20">
+    <div className="min-h-screen bg-[#09090b] text-zinc-300 selection:bg-white/10">
       {/* Dynamic Header Background */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 
-      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-32 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
           {/* Left Sidebar - Visuals & Actions */}
           <div className="lg:col-span-4 space-y-8">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => shouldBlur && setTempUnblur(true)}
-              className={`relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl group ${shouldBlur ? 'cursor-pointer' : ''}`}
+              className={`relative w-full aspect-3/4 max-w-sm mx-auto overflow-hidden rounded-3xl border border-white/10 group shadow-2xl ${shouldBlur ? 'cursor-pointer' : ''}`}
             >
+              <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <Image
-                src={`/api/image/${data.id}`}
-                alt={data.name}
+                src={`/api/image/${id}`}
+                alt={data?.name || 'Character image'}
                 fill
                 className={`object-cover transition-transform duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-3xl scale-110' : ''}`}
                 priority
@@ -126,9 +127,13 @@ const CharacterView = ({ id }: { id: string }) => {
                     <div className="w-16 h-16 rounded-3xl bg-white/10 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
                       <FiEye className="text-white/60 text-2xl" />
                     </div>
-                    <div className="flex flex-col items-center gap-2">
-                      <p className="text-xs font-black text-white uppercase tracking-[0.2em]">Sensitive Content</p>
-                      <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Click to Reveal Visual</p>
+                    <div className="p-5 flex flex-col gap-5">
+                      <div className="space-y-2">
+                        <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Archive Entry</p>
+                        <div className="mb-4 p-4 rounded-xl bg-white/1 border border-white/5 space-y-3 text-[11px] leading-relaxed text-zinc-400 font-medium italic">
+                          &ldquo;{data?.bio}&rdquo;
+                        </div>
+                      </div>
                     </div>
 
                     <div className="absolute top-6 left-6 px-4 py-1.5 rounded-xl bg-orange-500/20 border border-orange-500/30">
@@ -138,37 +143,37 @@ const CharacterView = ({ id }: { id: string }) => {
                 )}
               </AnimatePresence>
 
-              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-transparent pointer-events-none z-20" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-b from-transparent to-zinc-950/90 z-10 pointer-events-none" />
 
-              <div className="absolute bottom-6 left-6 right-6 z-20">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                  <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Active Intelligence</span>
+              <div className="absolute bottom-4 left-4 right-4 z-20">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Active System</span>
                 </div>
-                <h1 className="text-5xl font-black text-white tracking-tighter uppercase italic">{data.name}</h1>
+                <h1 className="text-3xl font-black text-white tracking-tight uppercase italic leadning-none">{data?.name}</h1>
               </div>
             </motion.div>
 
             <motion.button
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.1 }}
               onClick={startChat}
-              className="w-full py-5 bg-primary text-slate-950 font-black text-sm uppercase tracking-[0.2em] rounded-2xl shadow-[0_0_30px_rgba(56,189,248,0.2)] hover:shadow-[0_0_40px_rgba(56,189,248,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+              className="w-full py-4 bg-white text-zinc-950 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-zinc-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl"
             >
-              <FiMessageCircle size={18} />
-              Begin Conversation
+              <FiMessageCircle size={14} />
+              Protocol Start
             </motion.button>
 
-            <div className="p-6 rounded-3xl border border-white/5 bg-white/[0.02] space-y-4">
-              <h4 className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Architect</h4>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
-                  <FiUser className="text-primary" />
+            <div className="bg-white/1 p-4 rounded-xl border border-white/5 space-y-3">
+              <h4 className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Architect</h4>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+                  <FiUser className="text-zinc-400 text-sm" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white tracking-tight">{data.author.username}</p>
-                  <p className="text-[10px] text-white/30 uppercase font-black">Verified Creator</p>
+                  <p className="text-xs font-bold text-white tracking-tight">{data?.author.username}</p>
+                  <p className="text-[8px] text-zinc-600 uppercase font-black tracking-tighter">Verified Creator</p>
                 </div>
               </div>
             </div>
@@ -177,16 +182,19 @@ const CharacterView = ({ id }: { id: string }) => {
           {/* Right Content - Details */}
           <div className="lg:col-span-8 space-y-6">
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
-              className="space-y-6"
+              className="space-y-4"
             >
-              <div className="flex flex-wrap gap-2">
-                {Array.from(new Map(data.tags.map(tag => [tag.id, tag])).values()).map(tag => (
-                  <span key={tag.id} className="px-3 py-1.5 rounded-xl border border-white/5 bg-white/[0.03] text-[10px] font-black text-primary/60 uppercase tracking-widest">
-                    #{tag.name}
-                  </span>
-                ))}
+              <div className="flex flex-col gap-2">
+                <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Classification Tags</p>
+                <div className="flex flex-wrap gap-1.5 p-3 rounded-xl bg-white/2 border border-white/5">
+                  {data?.tags?.map((tag: any) => (
+                    <span key={tag.id} className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[8px] font-black text-zinc-500 uppercase tracking-wider hover:text-white transition-colors cursor-default">
+                      {tag.name}
+                    </span>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
@@ -231,18 +239,18 @@ const CharacterView = ({ id }: { id: string }) => {
                 isOpen={expandedSections.intro}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, intro: !prev.intro }))}
               >
-                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 prose prose-invert prose-sm max-w-none prose-p:text-white/80 prose-p:leading-relaxed prose-p:italic prose-headings:text-white">
+                <div className="p-4 rounded-xl bg-white/2 border border-white/5 prose prose-invert prose-sm max-w-none prose-p:text-white/80 prose-p:leading-relaxed prose-p:italic prose-headings:text-white">
                   <ReactMarkdown>{data.introMessage}</ReactMarkdown>
                 </div>
               </CollapsibleSection>
             </div>
 
             {/* Feedback Section */}
-            <div className="pt-8 border-t border-white/5">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-3xl font-black text-white tracking-tighter uppercase italic">Community Logs</h3>
-                <div className="flex items-center gap-2 text-[10px] font-black text-white/20 uppercase tracking-widest">
-                  <FiStar className="text-yellow-500" /> Interaction Quality
+            <div className="pt-6 border-t border-white/5">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-black text-white tracking-tight uppercase italic">Feedback Logs</h3>
+                <div className="flex items-center gap-1.5 text-[8px] font-black text-zinc-600 uppercase tracking-widest">
+                  <FiStar className="text-zinc-400" /> Interaction Quality
                 </div>
               </div>
               <Comments characterId={id} />
@@ -262,23 +270,23 @@ const CollapsibleSection = ({ title, icon, children, isOpen, onToggle }: {
   onToggle: () => void;
 }) => {
   return (
-    <div className="border border-white/5 rounded-[2rem] bg-white/[0.01] overflow-hidden transition-all duration-300 hover:border-white/10">
+    <div className="border border-white/5 rounded-2xl bg-white/1 overflow-hidden transition-all duration-300 hover:border-white/10">
       <button
         onClick={onToggle}
-        className="w-full p-6 flex items-center justify-between group"
+        className="w-full p-4 flex items-center justify-between group"
       >
-        <div className="flex items-center gap-4">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${isOpen ? "bg-primary text-slate-950" : "bg-white/5 text-primary/40 group-hover:bg-white/10"
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isOpen ? "bg-white text-zinc-950" : "bg-white/5 text-zinc-500 group-hover:bg-white/10"
             }`}>
             {icon}
           </div>
-          <span className={`text-sm font-black uppercase tracking-[0.2em] transition-colors ${isOpen ? "text-white" : "text-white/30 group-hover:text-white/50"
+          <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isOpen ? "text-white" : "text-zinc-500 group-hover:text-zinc-400"
             }`}>
             {title}
           </span>
         </div>
-        <div className={`transition-transform duration-500 ${isOpen ? "rotate-180 text-primary" : "text-white/10"}`}>
-          <FiChevronDown size={20} />
+        <div className={`transition-transform duration-500 ${isOpen ? "rotate-180 text-white" : "text-zinc-800"}`}>
+          <FiChevronDown size={14} />
         </div>
       </button>
       <AnimatePresence>
@@ -289,7 +297,7 @@ const CollapsibleSection = ({ title, icon, children, isOpen, onToggle }: {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
           >
-            <div className="px-6 pb-6 pt-2 border-t border-white/5">
+            <div className="px-4 pb-4 pt-1 border-t border-white/5">
               <motion.div
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}

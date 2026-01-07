@@ -59,16 +59,16 @@ async function importSingleCharacter(charPath: string) {
         const { definition } = detail;
         const topics = detail.topics || [];
 
-        // Handle Tags
-        const tags: any[] = [];
-        for (const topicName of topics) {
-            const tag = await prisma.characterTag.upsert({
-                where: { name: topicName },
-                update: {},
-                create: { name: topicName }
-            });
-            tags.push(tag);
-        }
+        // Handle Tags in parallel
+        const tags = await Promise.all(
+            topics.map((topicName: string) =>
+                prisma.characterTag.upsert({
+                    where: { name: topicName },
+                    update: {},
+                    create: { name: topicName }
+                })
+            )
+        );
 
         // Create Character
         const introMessage = definition.first_message || definition.first_mes || "";
@@ -85,7 +85,7 @@ async function importSingleCharacter(charPath: string) {
                 isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature"),
                 authorId: DEFAULT_USER_ID,
                 tags: {
-                    connect: tags.map(t => ({ id: t.id }))
+                    connect: tags.map((t: any) => ({ id: t.id }))
                 }
             }
         });
@@ -117,7 +117,7 @@ async function importSingleCharacter(charPath: string) {
         }
         return { success: true, isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature") };
     } catch (e: any) {
-        console.error(`❌ Failed to import:`, e.message);
+        console.error(`❌ Failed to import ${charPath}:`, e.message);
         return { success: false };
     }
 }
@@ -129,21 +129,18 @@ async function main() {
     const tagsIndex = args.indexOf('--tags');
     const sortIndex = args.indexOf('--sort');
     const idIndex = args.indexOf('--id');
+    const concurrencyIndex = args.indexOf('--concurrency');
 
-    // If --id is provided, import that specific character and exit
     if (idIndex !== -1) {
         const charId = args[idIndex + 1];
         if (!charId) {
             console.error("❌ Please provide a character ID, e.g.: --id Anonymous/furina-5e0e2c07");
             return;
         }
-        console.log(`\n🎯 Importing specific character: ${charId}`);
-        console.log(`👤 Target Author ID: ${DEFAULT_USER_ID}\n`);
         await importSingleCharacter(charId);
         return;
     }
 
-    // Map user-friendly sort names to API values
     const sortMap: Record<string, string> = {
         'popular': 'star_count',
         'newest': 'created_at',
@@ -152,7 +149,6 @@ async function main() {
         'default': 'default'
     };
 
-    // Handle empty or missing search - use empty string for browsing
     let query = searchIndex !== -1 ? (args[searchIndex + 1] || '') : '';
     if (query === '""' || query === "''") query = '';
 
@@ -160,8 +156,11 @@ async function main() {
     const tagsInput = tagsIndex !== -1 ? args[tagsIndex + 1] : '';
     const sortInput = sortIndex !== -1 ? args[sortIndex + 1]?.toLowerCase() : 'default';
     const sort = sortMap[sortInput] || sortInput;
+    const concurrency = concurrencyIndex !== -1 ? parseInt(args[concurrencyIndex + 1]) : 5;
 
-    console.log(`\n🚀 Starting Automatic Intelligence Sync${query ? ` for: "${query}"` : ''} (${maxPages} pages)`);
+    console.log(`\n🚀 Starting Multi-threaded Intelligence Sync${query ? ` for: "${query}"` : ''}`);
+    console.log(`📄 Scope: ${maxPages} pages`);
+    console.log(`⚡ Concurrency: ${concurrency}`);
     if (tagsInput) console.log(`🏷️  Filtered by Topics: ${tagsInput}`);
     console.log(`📈 Sort Order: ${sort}`);
     console.log(`👤 Target Author ID: ${DEFAULT_USER_ID}\n`);
@@ -170,10 +169,11 @@ async function main() {
     let nsfwCount = 0;
     let cleanCount = 0;
 
+    const startTime = Date.now();
+
     for (let page = 1; page <= maxPages; page++) {
-        console.log(`📄 Processing Page ${page}...`);
+        console.log(`📄 Fetching Page ${page}...`);
         try {
-            // Build search URL - use 'topics' parameter for tag filtering
             const params = new URLSearchParams({
                 first: '20',
                 page: page.toString(),
@@ -188,7 +188,6 @@ async function main() {
             if (tagsInput) params.set('topics', tagsInput);
 
             const searchUrl = `${CHUB_GATEWAY_SEARCH}?${params.toString()}`;
-
             const response = await fetch(searchUrl, {
                 headers: {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -210,15 +209,27 @@ async function main() {
                 break;
             }
 
-            for (const node of characterNodes) {
-                const creator = node.fullPath.split('/')[0];
-                console.log(`🔍 [${node.id}] ${node.name} by ${creator}`);
+            // Parallel Import with Concurrency Control
+            const queue = [...characterNodes];
+            const activePromises: Promise<void>[] = [];
 
-                const result = await importSingleCharacter(node.fullPath);
-                if (result.success && !result.skipped) {
-                    totalImported++;
-                    if (result.isNsfw) nsfwCount++;
-                    else cleanCount++;
+            while (queue.length > 0 || activePromises.length > 0) {
+                while (activePromises.length < concurrency && queue.length > 0) {
+                    const node = queue.shift()!;
+                    const promise = (async () => {
+                        const result = await importSingleCharacter(node.fullPath);
+                        if (result.success && !result.skipped) {
+                            totalImported++;
+                            if (result.isNsfw) nsfwCount++;
+                            else cleanCount++;
+                        }
+                    })().finally(() => {
+                        activePromises.splice(activePromises.indexOf(promise), 1);
+                    });
+                    activePromises.push(promise);
+                }
+                if (activePromises.length > 0) {
+                    await Promise.race(activePromises);
                 }
             }
         } catch (error: any) {
@@ -226,7 +237,8 @@ async function main() {
         }
     }
 
-    console.log(`\n🎉 Automatic synchronization completed!`);
+    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    console.log(`\n🎉 Multi-threaded sync completed in ${duration}s!`);
     console.log(`🚀 Total Integrated: ${totalImported}`);
     console.log(`🌶️  NSFW Integrated : ${nsfwCount}`);
     console.log(`🛡️  Clean Integrated: ${cleanCount}\n`);

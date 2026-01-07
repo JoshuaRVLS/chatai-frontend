@@ -125,11 +125,12 @@ const CharacterCard = React.memo(function CharacterCard({
       <motion.div
         onClick={handleNavigate}
         onContextMenu={handleContextMenu}
-        className="group relative h-[280px] flex flex-col cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-[#0f172a]/60 transition-[border-color,box-shadow,transform] duration-300 hover:border-primary/30 hover:shadow-lg will-change-transform"
-        style={{ contentVisibility: 'auto', containIntrinsicSize: '0 280px' } as any}
-        whileHover={{ y: -8 }}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
+        className="group relative h-[240px] flex flex-col cursor-pointer overflow-hidden rounded-xl border border-white/5 bg-zinc-900/40 transition-[border-color,box-shadow,transform] duration-300 hover:border-white/20 hover:shadow-lg will-change-transform"
+        style={{ contentVisibility: 'auto', containIntrinsicSize: '0 240px' } as any}
+        whileHover={{ y: -4 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
       >
         {/* Image Container */}
         <div className="relative h-[55%] w-full overflow-hidden">
@@ -150,18 +151,18 @@ const CharacterCard = React.memo(function CharacterCard({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-colors group-hover:bg-black/60"
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md"
                   >
-                    <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-500">
-                      <FiEye className="text-white/60 text-xl" />
+                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
+                      <FiEye className="text-white/40 text-lg" />
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <p className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Sensitive Content</p>
-                      <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Click to Reveal</p>
+                    <div className="flex flex-col items-center gap-0.5">
+                      <p className="text-[8px] font-black text-white/80 uppercase tracking-widest">Sensitive</p>
+                      <p className="text-[7px] font-bold text-white/30 uppercase tracking-tighter">Click to Reveal</p>
                     </div>
 
-                    <div className="absolute top-3 left-3 px-2 py-0.5 rounded-md bg-orange-500/20 border border-orange-500/30">
-                      <span className="text-[8px] font-black text-orange-500 uppercase tracking-tighter">NSFW</span>
+                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-zinc-800 border border-white/5">
+                      <span className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">NSFW</span>
                     </div>
                   </motion.div>
                 )}
@@ -176,47 +177,47 @@ const CharacterCard = React.memo(function CharacterCard({
           <div className="absolute inset-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
 
           {/* Floating Badge */}
-          <div className="absolute top-3 right-3 bg-white/10 border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[8px] font-black text-white/70 uppercase tracking-widest">Active</span>
+          <div className="absolute top-2 right-2 bg-black/50 border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+            <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
+            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">Linked</span>
           </div>
         </div>
 
-        {/* Info Content - z-20 to appear above any overlays */}
-        <div className="relative z-20 flex-1 p-3 flex flex-col justify-between -mt-6 bg-[#020617]/95">
-          <div className="space-y-2">
+        {/* Info Content - removed z-20 for better batching, removed backdrop-blur */}
+        <div className="relative flex-1 p-2.5 flex flex-col justify-between -mt-4 bg-zinc-950/95">
+          <div className="space-y-1">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-black text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 tracking-tighter italic uppercase">
+              <h3 className="text-xs font-black text-white group-hover:text-zinc-400 transition-colors leading-tight line-clamp-1 tracking-tight uppercase">
                 {characterName}
               </h3>
-              <div className="p-1 px-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 text-[10px]">
+              <div className="p-1 rounded-md bg-white/5 border border-white/5 text-white/20 text-[9px]">
                 <FiMoreHorizontal />
               </div>
             </div>
 
-            <p className="text-[10px] text-white/40 line-clamp-2 leading-relaxed font-medium">
+            <p className="text-[9px] text-zinc-500 line-clamp-2 leading-snug font-medium">
               {characterBio}
             </p>
           </div>
 
           <div className="space-y-3">
-            <div className="flex flex-wrap gap-1 pt-1">
+            <div className="flex flex-wrap gap-1 pt-0.5">
               {Array.from(new Map(tags?.map(tag => [tag.id, tag])).values()).slice(0, 2).map((tag) => (
                 <span
                   key={tag.id}
-                  className="px-2 py-0.5 text-[8px] font-black rounded-md border border-white/5 bg-white/5 text-primary/60 uppercase tracking-widest"
+                  className="px-1.5 py-0.5 text-[7px] font-black rounded-sm border border-white/5 bg-white/5 text-zinc-500 uppercase tracking-wider"
                 >
                   {tag.name}
                 </span>
               ))}
             </div>
 
-            <div className="flex items-center justify-between border-t border-white/5 pt-3">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[7px] font-black text-white/30 uppercase tracking-tighter">
+            <div className="flex items-center justify-between border-t border-white/5 pt-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-4 h-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[6px] font-black text-white/20 uppercase tracking-tighter">
                   {authorName.slice(0, 2)}
                 </div>
-                <span className="text-[9px] font-bold text-white/60 group-hover:text-primary transition-colors truncate max-w-[80px]">{authorName}</span>
+                <span className="text-[8px] font-bold text-zinc-500 group-hover:text-white transition-colors truncate max-w-[80px]">{authorName}</span>
               </div>
             </div>
           </div>
@@ -227,11 +228,12 @@ const CharacterCard = React.memo(function CharacterCard({
       <AnimatePresence>
         {showContextMenu && isOwner && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
-            className="fixed z-100 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
+            className="fixed z-100 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden min-w-[120px]"
           >
             <button
               onClick={handleEdit}

@@ -218,26 +218,26 @@ const CharacterEdit = ({ id }: { id: string }) => {
   const totalTokens = permanentTokens + getTokenCount(initialMessage);
 
   if (isPending) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="w-12 h-12 border-4 border-white/5 border-t-white rounded-full animate-spin" />
         <p className="text-white/20 font-black uppercase tracking-[0.3em] text-[10px]">Loading Character Data...</p>
       </div>
     </div>
   );
 
   if (error) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
       <p className="text-red-400 font-black uppercase tracking-widest">{error.message}</p>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
-      {/* Background Blobs */}
+    <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
+      {/* Background Blobs - Monochrome */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/1 blur-[100px] rounded-full" />
       </div>
 
       <div className="w-full relative z-10">
@@ -262,11 +262,11 @@ const CharacterEdit = ({ id }: { id: string }) => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-3 backdrop-blur-xl">
-              <p className="text-[10px] font-black text-white/20 uppercase tracking-widest mb-1">Token Usage</p>
+            <div className="bg-white/3 border border-white/5 rounded-2xl px-6 py-3 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Token Usage</p>
               <div className="flex items-center gap-2">
-                <FiZap className="text-primary animate-pulse" />
-                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-white/20 not-italic">Tokens</span></span>
+                <FiZap className="text-white/40" />
+                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-zinc-600 not-italic">Tokens</span></span>
               </div>
             </div>
           </div>
@@ -276,17 +276,17 @@ const CharacterEdit = ({ id }: { id: string }) => {
           {/* Main Editing Column */}
           <div className="lg:col-span-8 space-y-10">
             {/* Quick Import Section */}
-            <section className="bg-gradient-to-tr from-primary/10 to-purple-500/10 border border-primary/20 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/2 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <FiGlobe className="text-primary" />
+                  <FiGlobe className="text-white/60" />
                   <div>
                     <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Intelligence Sync</h3>
-                    <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">Update from external databases (Chub.ai)</p>
+                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Update from external databases (Chub.ai)</p>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-primary/20 rounded-full border border-primary/30">
-                  <p className="text-[8px] font-black text-primary uppercase">Alpha Feature</p>
+                <div className="px-3 py-1 bg-white/5 rounded-full border border-white/5">
+                  <p className="text-[8px] font-black text-zinc-500 uppercase">External Sync</p>
                 </div>
               </div>
 
@@ -303,10 +303,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
                   type="button"
                   onClick={handleChubImport}
                   disabled={isImporting}
-                  className="px-8 py-4 bg-primary text-black rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 hover:shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-4 bg-white text-zinc-950 rounded-2xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 hover:bg-zinc-200 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isImporting ? (
-                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                   ) : (
                     <>
                       <FiZap /> Sync
@@ -317,15 +317,15 @@ const CharacterEdit = ({ id }: { id: string }) => {
             </section>
 
             {/* Image & Identity Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiInfo className="text-primary" />
+                <FiInfo className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>
               </div>
 
               <div className="flex flex-col md:flex-row gap-10">
                 <div className="w-full md:w-1/3 space-y-4">
-                  <div className="relative aspect-square rounded-[2rem] overflow-hidden border border-white/10 bg-white/5 group">
+                  <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/5 bg-white/5 group">
                     {imagePreview ? (
                       <Image src={imagePreview} fill className="object-cover" alt="Preview" />
                     ) : (
@@ -359,14 +359,14 @@ const CharacterEdit = ({ id }: { id: string }) => {
                     type="button"
                     onClick={handleGenerateImage}
                     disabled={isGeneratingImage || !characterName || !characterBio}
-                    className="w-full py-3 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center gap-3 text-primary hover:bg-primary/20 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-white/10 border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white hover:bg-white/20 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isGeneratingImage ? (
-                      <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <FiZap className="group-hover:scale-110 transition-transform" />
+                      <FiZap className="group-hover:scale-110 transition-transform text-white/40" />
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-widest">Magic Generate</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Magic Generate</span>
                   </button>
 
                   <p className="text-[9px] text-white/20 uppercase tracking-wider text-center px-4 font-bold leading-relaxed">
@@ -425,9 +425,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
             </section>
 
             {/* Tags Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiHash className="text-primary" />
+                <FiHash className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Character Tags</h3>
               </div>
               <CharacterTags
@@ -437,9 +437,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
             </section>
 
             {/* Lorebooks Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiBook className="text-primary" />
+                <FiBook className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
               <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
@@ -458,8 +458,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
                         );
                       }}
                       className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
-                        ? "bg-primary text-slate-950 border-primary shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                        : "bg-white/5 text-white/40 border-white/10 hover:border-white/20"
+                        ? "bg-white text-zinc-950 border-white"
+                        : "bg-white/5 text-zinc-600 border-white/5 hover:border-white/20"
                         }`}
                     >
                       {lb.name}
@@ -474,17 +474,17 @@ const CharacterEdit = ({ id }: { id: string }) => {
             </section>
 
             {/* Intelligence Configuration */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiCpu className="text-primary" />
+                <FiCpu className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">AI configuration</h3>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Character Persona</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Character Persona</label>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
                   </div>
                   <textarea
                     required
@@ -503,8 +503,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Environmental Scenario</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Environmental Scenario</label>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
                   </div>
                   <div className="relative">
                     <FiMap className="absolute right-6 top-6 text-white/10" />
@@ -519,8 +519,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Intro Message</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(initialMessage)} Tokens</span>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Intro Message</label>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(initialMessage)} Tokens</span>
                   </div>
                   <div className="relative">
                     <FiMessageSquare className="absolute right-6 top-6 text-white/10" />
@@ -536,8 +536,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Example Conversations</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(exampleConversations)} Tokens</span>
+                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Example Conversations</label>
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(exampleConversations)} Tokens</span>
                   </div>
                   <div className="relative">
                     <textarea
@@ -561,14 +561,14 @@ const CharacterEdit = ({ id }: { id: string }) => {
             <div className="lg:hidden">
               <button
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 group transition-all"
+                className="w-full py-5 rounded-3xl bg-white text-zinc-950 flex items-center justify-center gap-3 group transition-all font-black uppercase tracking-widest text-[10px]"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                 ) : (
                   <>
                     <FiSave className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">Save Changes</span>
+                    <span>Save Changes</span>
                   </>
                 )}
               </button>
@@ -579,8 +579,8 @@ const CharacterEdit = ({ id }: { id: string }) => {
           <div className="lg:col-span-4 lg:sticky lg:top-32 h-fit space-y-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3 px-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Preview</h3>
+                <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-pulse" />
+                <h3 className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">Preview</h3>
               </div>
               <div className="scale-95 sm:scale-100 origin-top">
                 <CharacterCard
@@ -594,22 +594,22 @@ const CharacterEdit = ({ id }: { id: string }) => {
               </div>
             </div>
 
-            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <div className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3">
-                <FiZap className="text-primary" />
+                <FiZap className="text-white/40" />
                 <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Usage</h3>
               </div>
 
               <div className="space-y-4">
                 <div className="flex justify-between text-[11px] font-black uppercase tracking-tight">
-                  <span className="text-white/30">Total Tokens</span>
+                  <span className="text-zinc-600">Total Tokens</span>
                   <span className="text-white">{totalTokens}/2048</span>
                 </div>
                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${Math.min((totalTokens / 2048) * 100, 100)}%` }}
-                    className={`h-full transition-all duration-500 shadow-[0_0_10px_rgba(34,211,238,0.5)] ${totalTokens > 1500 ? 'bg-orange-500' : 'bg-primary'
+                    className={`h-full transition-all duration-500 bg-white shadow-[0_0_15px_rgba(255,255,255,0.2)] ${totalTokens > 1500 ? 'bg-zinc-400' : 'bg-white'
                       }`}
                   />
                 </div>
@@ -620,14 +620,14 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
               <button
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-2xl flex items-center justify-center gap-3 group mt-6"
+                className="w-full py-5 rounded-2xl bg-white text-zinc-950 flex items-center justify-center gap-3 group mt-6 font-black uppercase tracking-widest text-[10px] hover:bg-zinc-200 transition-all"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
                 ) : (
                   <>
                     <FiSave className="group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">Commit Changes</span>
+                    <span>Commit Changes</span>
                   </>
                 )}
               </button>
