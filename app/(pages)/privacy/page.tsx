@@ -160,7 +160,7 @@ const PrivacyPolicy: React.FC = () => {
     const currentContent = content[language];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black pt-24 pb-20 px-6">
+        <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black pt-24 pb-20 px-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="mb-12">
@@ -174,8 +174,8 @@ const PrivacyPolicy: React.FC = () => {
                             <button
                                 onClick={() => setLanguage("en")}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${language === "en"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                        : "text-white/40 hover:text-white/60"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    : "text-white/40 hover:text-white/60"
                                     }`}
                             >
                                 🇬🇧 EN
@@ -183,8 +183,8 @@ const PrivacyPolicy: React.FC = () => {
                             <button
                                 onClick={() => setLanguage("id")}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${language === "id"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                        : "text-white/40 hover:text-white/60"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    : "text-white/40 hover:text-white/60"
                                     }`}
                             >
                                 🇮🇩 ID
@@ -229,7 +229,7 @@ const PrivacyPolicy: React.FC = () => {
                 {/* Footer Note */}
                 <div className="mt-12 p-6 bg-primary/10 border border-primary/20 rounded-2xl">
                     <div className="flex items-start gap-3">
-                        <FiGlobe className="text-primary mt-1 flex-shrink-0" size={20} />
+                        <FiGlobe className="text-primary mt-1 shrink-0" size={20} />
                         <p className="text-white/60 text-sm leading-relaxed">
                             {language === "en"
                                 ? "By using JChatAI, you acknowledge that you have read and understood this Privacy Policy and agree to its terms."

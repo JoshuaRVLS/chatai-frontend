@@ -204,7 +204,7 @@ const TermsOfService: React.FC = () => {
     const currentContent = content[language];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black pt-24 pb-20 px-6">
+        <div className="min-h-screen bg-linear-to-br from-zinc-950 via-zinc-900 to-black pt-24 pb-20 px-6">
             <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="mb-12">
@@ -218,8 +218,8 @@ const TermsOfService: React.FC = () => {
                             <button
                                 onClick={() => setLanguage("en")}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${language === "en"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                        : "text-white/40 hover:text-white/60"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    : "text-white/40 hover:text-white/60"
                                     }`}
                             >
                                 🇬🇧 EN
@@ -227,8 +227,8 @@ const TermsOfService: React.FC = () => {
                             <button
                                 onClick={() => setLanguage("id")}
                                 className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${language === "id"
-                                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                        : "text-white/40 hover:text-white/60"
+                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                    : "text-white/40 hover:text-white/60"
                                     }`}
                             >
                                 🇮🇩 ID
@@ -243,7 +243,7 @@ const TermsOfService: React.FC = () => {
                 {/* Important Notice */}
                 <div className="mb-8 p-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
                     <div className="flex items-start gap-3">
-                        <FiAlertCircle className="text-amber-500 mt-1 flex-shrink-0" size={20} />
+                        <FiAlertCircle className="text-amber-500 mt-1 shrink-0" size={20} />
                         <div>
                             <h3 className="text-amber-500 font-bold mb-2">
                                 {language === "en" ? "Important Notice" : "Pemberitahuan Penting"}

@@ -192,7 +192,7 @@ const MyCharacters: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           {/* Stats & Search Column */}
           <div className="lg:col-span-3 space-y-4">
-            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+            <div className="bg-white/1 border border-white/5 rounded-2xl p-6">
               <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Search Database</p>
               <div className="relative group">
                 <input
@@ -205,7 +205,7 @@ const MyCharacters: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white/[0.01] border border-white/5 rounded-2xl p-6">
+            <div className="bg-white/1 border border-white/5 rounded-2xl p-6">
               <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Archive Stats</p>
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -220,6 +220,7 @@ const MyCharacters: React.FC = () => {
           <div className="lg:col-span-9">
             {filteredCharacters && filteredCharacters.length > 0 ? (
               <motion.div
+                key={`page-${page}`}
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
