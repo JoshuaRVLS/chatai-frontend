@@ -11,7 +11,7 @@ import React, {
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack } from "react-icons/fa";
+import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack, FaMagic } from "react-icons/fa";
 import ChatNavbar from "./ChatNavbar";
 import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
@@ -242,13 +242,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
     });
   }, [undoStack, chatId, queryClient]);
 
-  const startStreaming = async (content: string, isRegenerate = false) => {
+  const startStreaming = async (content: string, isRegenerate = false, isContinue = false) => {
     try {
       setStreamingMessage("");
       const aiRes = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId, content, model: selectedModel, regenerate: isRegenerate }),
+        body: JSON.stringify({ chatId, content, model: selectedModel, regenerate: isRegenerate, continue: isContinue }),
       });
 
       if (!aiRes.ok || !aiRes.body) throw new Error("AI streaming failed");
@@ -298,6 +298,17 @@ const Chat = ({ chatId }: { chatId: string }) => {
       setIsSubmitting(false);
     }
   };
+
+  const handleContinue = useCallback(async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await startStreaming("", false, true);
+    } catch (err) {
+      console.error(err);
+      setIsSubmitting(false);
+    }
+  }, [isSubmitting, startStreaming]);
 
   const handleSubmit = useCallback(async (content: string) => {
     if (!content.trim() || !user?.id || isSubmitting) return;
@@ -788,7 +799,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         </div>
 
         {/* Input area */}
-        <ChatInput onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <ChatInput onSubmit={handleSubmit} isSubmitting={isSubmitting} onContinue={handleContinue} />
         <p className="hidden sm:block text-center text-[9px] font-black text-white/10 uppercase tracking-[0.4em] mt-4 italic">Secure AI Chat Interface • Version 2.0</p>
       </motion.div>
 
@@ -1040,9 +1051,11 @@ MessageBubble.displayName = "MessageBubble";
 
 const ChatInput = React.memo(({
   onSubmit,
+  onContinue,
   isSubmitting
 }: {
   onSubmit: (content: string) => Promise<void>;
+  onContinue: () => Promise<void>;
   isSubmitting: boolean;
 }) => {
   const [message, setMessage] = useState("");
@@ -1090,6 +1103,22 @@ const ChatInput = React.memo(({
           />
           <div className="absolute top-[18px] left-3 w-1 h-5 bg-primary/40 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
         </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onContinue}
+          disabled={isSubmitting}
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+          title="Continue Story (AI Narration)"
+        >
+          <FaMagic size={18} className="relative z-10" />
+          <motion.div
+            className="absolute inset-0 bg-indigo-500/10"
+            animate={{ opacity: [0, 0.2, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.05 }}

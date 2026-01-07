@@ -84,6 +84,7 @@ export const POST = async (req: Request) => {
 
     return NextResponse.json({ success: true, chat }, { status: 201 });
   } catch (error) {
-    console.log(error);
+    console.error("Chat creation failed:", error);
+    return NextResponse.json({ error: "Failed to create chat" }, { status: 500 });
   }
 };

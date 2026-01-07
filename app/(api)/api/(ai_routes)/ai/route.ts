@@ -2,7 +2,7 @@ import { db } from '@/app/utils/prisma';
 import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
-  const { content, chatId, model, regenerate } = await req.json();
+  const { content, chatId, model, regenerate, continue: isContinue } = await req.json();
   const isRegenerate = regenerate === true;
 
   const chat = await db.chat.findFirst({
@@ -36,11 +36,23 @@ export const POST = async (req: Request) => {
   const chatSettings = chat?.chatSettings as any;
   const selectedModel = chatSettings?.model || model || 'deepseek/deepseek-chat-v3-0324';
 
+  const userName = persona?.name || chat?.user.username || 'User';
+  const charName = chat?.character.name || 'Character';
+
+  const replacePlaceholders = (text: string) => {
+    if (!text) return text;
+    return text
+      .replace(/{{user}}/gi, userName)
+      .replace(/{{char}}/gi, charName)
+      .replace(/<USER>/gi, userName)
+      .replace(/<CHAR>/gi, charName);
+  };
+
 
   const previousMessages =
     chat?.messages.map((message) => ({
       role: message.fromUser ? 'user' : 'assistant',
-      content: message.content,
+      content: replacePlaceholders(message.content),
     })) || [];
 
   const pinnedMessages = chat?.messages
@@ -139,7 +151,7 @@ Provide the NEW COMPLETE memory list.`
           contextMemory = newMemory;
           await db.chat.update({
             where: { id: chatId },
-            data: { memory: contextMemory }
+            data: { memory: replacePlaceholders(contextMemory) }
           });
         }
       }
@@ -176,22 +188,22 @@ Provide the NEW COMPLETE memory list.`
   const systemMessages = [
     {
       role: 'system',
-      content: `You are ${chat?.character.name} chatting with ${persona ? persona.name : chat?.user.username} on WhatsApp/LINE.
+      content: `You are ${chat?.character.name} chatting with ${userName} on WhatsApp/LINE.
 [CHARACTER PERSONALITY]
-${chat?.character.persona}
+${replacePlaceholders(chat?.character.persona || "")}
  
 [SCENARIO]
-${chat?.character.scenario}
+${replacePlaceholders(chat?.character.scenario || "")}
  
 [CHARACTER'S OPENING STATEMENT]
-${chat?.character.introMessage}
+${replacePlaceholders(chat?.character.introMessage || "")}
  
-${chat?.character.exampleConversations ? `[DIALOGUE EXAMPLES]\n${chat?.character.exampleConversations}` : ''}
+${chat?.character.exampleConversations ? `[DIALOGUE EXAMPLES]\n${replacePlaceholders(chat?.character.exampleConversations)}` : ''}
  
-${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${contextSummary}` : ''}
-${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${contextMemory}` : ''}
-${pinnedMessages ? `[PINNED IMPORTANT CONTEXT]\n${pinnedMessages}` : ''}
-${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${loreContext}` : ''}
+${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${replacePlaceholders(contextSummary)}` : ''}
+${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${replacePlaceholders(contextMemory)}` : ''}
+${pinnedMessages ? `[PINNED IMPORTANT CONTEXT]\n${replacePlaceholders(pinnedMessages)}` : ''}
+${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${replacePlaceholders(loreContext)}` : ''}
  
 [IMPORTANT RULES]
 1. MATURITY & GRAVITAS: Act with the maturity appropriate to your age and profession. Avoid theatrical, overly dramatic, or generic AI over-reactions.
@@ -247,10 +259,15 @@ ${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${loreContext}` : ''}
             role: 'system',
             content: '[REGENERATE] Provide a completely DIFFERENT perspective/response. Stay brief.'
           }] : []),
-          {
-            role: 'user',
-            content,
-          },
+          ...(isContinue ? [{
+            role: 'system',
+            content: '[CONTINUE NARRATION] The user is stuck. Proceed with the story, current scene, or event naturally. Focus on realistic actions, environmental details, and character-consistent dialogue. Avoid meta-commentary, repetition, or mentioning that you are continuing. Just keep the immersion going.'
+          }] : [
+            {
+              role: 'user',
+              content: replacePlaceholders(content),
+            }
+          ]),
         ],
         sort: 'price',
         allow_fallbacks: true,
