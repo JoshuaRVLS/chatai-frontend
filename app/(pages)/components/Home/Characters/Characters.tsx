@@ -6,6 +6,7 @@ import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
 import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown } from "react-icons/fi";
 import SearchBar from "../SearchBar";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
 
 const Characters = ({
@@ -18,14 +19,49 @@ const Characters = ({
   allCharacters: any[];
 }) => {
   const { settings } = useSettings();
-  const [selectedTags, setSelectedTags] = React.useState<string[]>([]);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [selectedTags, setSelectedTags] = React.useState<string[]>(
+    searchParams.get("tags")?.split(",").filter(Boolean) || []
+  );
   const [tagSearchQuery, setTagSearchQuery] = React.useState("");
   const [debouncedTagSearch, setDebouncedTagSearch] = React.useState("");
   const [showTagDropdown, setShowTagDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null);
-  const [page, setPage] = React.useState(1);
+
+  const [page, setPage] = React.useState(
+    parseInt(searchParams.get("p") || "1", 10)
+  );
   const pageSize = 20;
+
+  // Helper to update specific parameters in the URL
+  const handleUpdateParams = React.useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(window.location.search);
+      Object.entries(updates).forEach(([key, value]) => {
+        if (value === null) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
+      });
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    },
+    [router, pathname]
+  );
+
+  // Sync state FROM url (Handles "Back" button and initial load)
+  React.useEffect(() => {
+    const p = searchParams.get("p");
+    if (p) setPage(parseInt(p, 10));
+
+    const tags = searchParams.get("tags");
+    if (tags) setSelectedTags(tags.split(",").filter(Boolean));
+    else setSelectedTags([]);
+  }, [searchParams]);
 
   // Debounce tag search for performance
   React.useEffect(() => {
@@ -35,9 +71,6 @@ const Characters = ({
     return () => clearTimeout(timer);
   }, [tagSearchQuery]);
 
-  React.useEffect(() => {
-    setPage(1);
-  }, [searchQuery, selectedTags]);
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -78,12 +111,16 @@ const Characters = ({
   }, [allTags, debouncedTagSearch, selectedTags]);
 
   const handleAddTag = (tag: string) => {
-    setSelectedTags(prev => [...prev, tag]);
+    const newTags = [...selectedTags, tag];
+    setSelectedTags(newTags);
     setTagSearchQuery("");
+    handleUpdateParams({ tags: newTags.join(","), p: "1" });
   };
 
   const handleRemoveTag = (tag: string) => {
-    setSelectedTags(prev => prev.filter(t => t !== tag));
+    const newTags = selectedTags.filter(t => t !== tag);
+    setSelectedTags(newTags);
+    handleUpdateParams({ tags: newTags.length > 0 ? newTags.join(",") : null, p: "1" });
   };
 
   const filteredData = data?.filter((char) => {
@@ -237,7 +274,10 @@ const Characters = ({
               {/* Clear All Button */}
               {selectedTags.length > 0 && (
                 <button
-                  onClick={() => setSelectedTags([])}
+                  onClick={() => {
+                    setSelectedTags([]);
+                    handleUpdateParams({ tags: null, p: "1" });
+                  }}
                   className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white hover:border-white/20 transition-colors"
                 >
                   Clear All
@@ -285,7 +325,9 @@ const Characters = ({
           <button
             disabled={page === 1}
             onClick={() => {
-              setPage(p => Math.max(1, p - 1));
+              const newPage = Math.max(1, page - 1);
+              setPage(newPage);
+              handleUpdateParams({ p: newPage.toString() });
               setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
             }}
             className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
@@ -298,7 +340,9 @@ const Characters = ({
           <button
             disabled={page === totalPages}
             onClick={() => {
-              setPage(p => Math.min(totalPages, p + 1));
+              const newPage = Math.min(totalPages, page + 1);
+              setPage(newPage);
+              handleUpdateParams({ p: newPage.toString() });
               setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
             }}
             className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"

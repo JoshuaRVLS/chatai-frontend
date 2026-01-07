@@ -6,10 +6,26 @@ import History from "./components/Home/History/History";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 const HomePage = () => {
   const { data: session } = useSession();
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+
+  const handleSearch = (q: string) => {
+    setSearchQuery(q);
+    const params = new URLSearchParams(searchParams.toString());
+    if (q) params.set("q", q);
+    else params.delete("q");
+
+    // Always reset page when search changes
+    params.set("p", "1");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
 
   const { data: characters = [] } = useQuery<any[]>({
     queryKey: ["characters"],
@@ -41,7 +57,7 @@ const HomePage = () => {
         >
           <Characters
             searchQuery={searchQuery}
-            onSearch={setSearchQuery}
+            onSearch={handleSearch}
             allCharacters={characters}
           />
         </motion.section>
