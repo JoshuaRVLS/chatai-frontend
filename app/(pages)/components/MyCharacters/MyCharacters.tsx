@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import CharacterCard from "../CharacterCard/CharacterCard";
+import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown, FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { FaPencilAlt, FaTrash, FaPlus, FaUser, FaRobot } from "react-icons/fa";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -19,8 +20,24 @@ const MyCharacters: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isManageMode, setIsManageMode] = useState(false);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const [isEditingPage, setIsEditingPage] = useState(false);
+  const [inputPage, setInputPage] = useState("1");
+  const pageSize = 21;
   const confirm = useConfirm();
+  const gridRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToSection = React.useCallback(() => {
+    if (gridRef.current) {
+      const offset = 120;
+      const elementPosition = gridRef.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: "smooth"
+      });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, []);
 
   const { isPending, data, error } = useQuery<CharactersData>({
     queryKey: ["myCharacters", user?.id],
@@ -101,12 +118,12 @@ const MyCharacters: React.FC = () => {
   if (isPending)
     return (
       <div className="min-h-screen bg-[#020617] pt-32 px-6">
-        <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+        <div className="w-full space-y-8 animate-pulse">
           <div className="h-12 bg-white/5 rounded-2xl w-1/4" />
           <div className="h-64 bg-white/5 rounded-[2.5rem]" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-80 bg-white/5 rounded-[2.5rem]" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-[280px] bg-white/5 rounded-2xl" />
             ))}
           </div>
         </div>
@@ -133,6 +150,7 @@ const MyCharacters: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-7xl mx-auto relative z-10"
+        ref={gridRef}
       >
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
@@ -176,7 +194,7 @@ const MyCharacters: React.FC = () => {
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
           {/* Stats & Search Column */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl">
               <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-6">Search Database</p>
               <div className="relative group">
@@ -212,13 +230,13 @@ const MyCharacters: React.FC = () => {
           </div>
 
           {/* List Column */}
-          <div className="lg:col-span-8">
+          <div className="lg:col-span-9">
             {filteredCharacters && filteredCharacters.length > 0 ? (
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="show"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-6"
               >
                 {paginatedCharacters?.map((character) => (
                   <motion.div
@@ -289,23 +307,97 @@ const MyCharacters: React.FC = () => {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-12 flex items-center justify-center gap-6">
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-6">
                 <button
                   disabled={page === 1}
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  onClick={() => {
+                    setPage(1);
+                    setTimeout(scrollToSection, 100);
+                  }}
+                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  title="First Archive"
                 >
-                  Previous Archive
+                  <FiChevronsLeft size={16} />
                 </button>
-                <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">
-                  Page <span className="text-primary italic">{page}</span> of <span className="text-white/60">{totalPages}</span>
-                </span>
+
+                <button
+                  disabled={page === 1}
+                  onClick={() => {
+                    setPage(p => Math.max(1, p - 1));
+                    setTimeout(scrollToSection, 100);
+                  }}
+                  className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                >
+                  <span className="hidden md:inline">Previous Archive</span>
+                  <span className="md:hidden">Prev</span>
+                </button>
+
+                <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+                  <span className="hidden sm:inline">Page</span>
+                  {isEditingPage ? (
+                    <input
+                      type="text"
+                      autoFocus
+                      value={inputPage}
+                      onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
+                      onBlur={() => {
+                        setIsEditingPage(false);
+                        setInputPage(page.toString());
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const newPage = parseInt(inputPage, 10);
+                          if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                            setPage(newPage);
+                            setIsEditingPage(false);
+                            setTimeout(scrollToSection, 100);
+                          } else {
+                            setInputPage(page.toString());
+                            setIsEditingPage(false);
+                          }
+                        } else if (e.key === "Escape") {
+                          setIsEditingPage(false);
+                          setInputPage(page.toString());
+                        }
+                      }}
+                      className="w-10 bg-primary/20 border border-primary/30 rounded-lg px-1 py-0.5 text-primary text-center focus:outline-none focus:border-primary transition-all"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setIsEditingPage(true);
+                        setInputPage(page.toString());
+                      }}
+                      className="text-primary hover:scale-110 transition-transform cursor-pointer italic px-1"
+                    >
+                      {page}
+                    </button>
+                  )}
+                  <span>of {totalPages}</span>
+                </div>
+
                 <button
                   disabled={page === totalPages}
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  onClick={() => {
+                    setPage(p => Math.min(totalPages, p + 1));
+                    setTimeout(scrollToSection, 100);
+                  }}
+                  className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
                 >
-                  Next Archive
+                  <span className="hidden md:inline">Next Archive</span>
+                  <span className="md:hidden">Next</span>
+                </button>
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => {
+                    setPage(totalPages);
+                    setTimeout(scrollToSection, 100);
+                  }}
+                  className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                  title="Last Archive"
+                >
+                  <FiChevronsRight size={16} />
                 </button>
               </div>
             )}

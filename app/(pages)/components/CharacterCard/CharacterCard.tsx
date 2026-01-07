@@ -21,7 +21,7 @@ interface CharacterCardProps {
   tags?: { name: string; id: string }[];
 }
 
-const CharacterCard = ({
+const CharacterCard = React.memo(function CharacterCard({
   characterName,
   image,
   characterBio,
@@ -30,7 +30,7 @@ const CharacterCard = ({
   characterId,
   isNsfw,
   tags,
-}: CharacterCardProps) => {
+}: CharacterCardProps) {
   const router = useRouter();
   const { settings } = useSettings();
   const { user } = useContext(AuthContext);
@@ -125,13 +125,14 @@ const CharacterCard = ({
       <motion.div
         onClick={handleNavigate}
         onContextMenu={handleContextMenu}
-        className="group relative h-[340px] flex flex-col cursor-pointer overflow-hidden rounded-[1.5rem] border border-white/5 bg-[#0f172a]/40 backdrop-blur-md transition-all duration-500 hover:border-primary/30 hover:shadow-[0_0_40px_rgba(56,189,248,0.1)]"
+        className="group relative h-[280px] flex flex-col cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-[#0f172a]/60 transition-[border-color,box-shadow,transform] duration-300 hover:border-primary/30 hover:shadow-lg will-change-transform"
+        style={{ contentVisibility: 'auto', containIntrinsicSize: '0 280px' } as any}
         whileHover={{ y: -8 }}
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
         {/* Image Container */}
-        <div className="relative h-[60%] w-full overflow-hidden">
+        <div className="relative h-[55%] w-full overflow-hidden">
           {image ? (
             <div className="relative w-full h-full">
               <Image
@@ -172,23 +173,23 @@ const CharacterCard = ({
             </div>
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
 
           {/* Floating Badge */}
-          <div className="absolute top-3 right-3 backdrop-blur-xl bg-white/5 border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
+          <div className="absolute top-3 right-3 bg-white/10 border border-white/10 px-2.5 py-1 rounded-full flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[8px] font-black text-white/70 uppercase tracking-widest">Active</span>
           </div>
         </div>
 
         {/* Info Content - z-20 to appear above any overlays */}
-        <div className="relative z-20 flex-1 p-4 flex flex-col justify-between -mt-8 backdrop-blur-xl bg-gradient-to-b from-transparent to-[#020617]/90">
+        <div className="relative z-20 flex-1 p-3 flex flex-col justify-between -mt-6 bg-[#020617]/95">
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-lg font-black text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 tracking-tighter italic uppercase">
+              <h3 className="text-sm font-black text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 tracking-tighter italic uppercase">
                 {characterName}
               </h3>
-              <div className="p-1 px-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 text-xs">
+              <div className="p-1 px-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40 text-[10px]">
                 <FiMoreHorizontal />
               </div>
             </div>
@@ -212,10 +213,10 @@ const CharacterCard = ({
 
             <div className="flex items-center justify-between border-t border-white/5 pt-3">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[8px] font-black text-white/30 uppercase tracking-tighter">
+                <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[7px] font-black text-white/30 uppercase tracking-tighter">
                   {authorName.slice(0, 2)}
                 </div>
-                <span className="text-[10px] font-bold text-white/60 group-hover:text-primary transition-colors truncate max-w-[100px]">{authorName}</span>
+                <span className="text-[9px] font-bold text-white/60 group-hover:text-primary transition-colors truncate max-w-[80px]">{authorName}</span>
               </div>
             </div>
           </div>
@@ -230,7 +231,7 @@ const CharacterCard = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
-            className="fixed z-[100] bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
+            className="fixed z-100 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
           >
             <button
               onClick={handleEdit}
@@ -251,7 +252,7 @@ const CharacterCard = ({
       </AnimatePresence>
     </>
   );
-};
+});
 
 export default CharacterCard;
 

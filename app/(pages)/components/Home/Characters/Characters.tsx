@@ -4,7 +4,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
-import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown } from "react-icons/fi";
+import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown, FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import SearchBar from "../SearchBar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
@@ -31,11 +31,14 @@ const Characters = ({
   const [showTagDropdown, setShowTagDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null);
+  const sectionRef = React.useRef<HTMLDivElement>(null);
 
   const [page, setPage] = React.useState(
     parseInt(searchParams.get("p") || "1", 10)
   );
-  const pageSize = 20;
+  const [isEditingPage, setIsEditingPage] = React.useState(false);
+  const [inputPage, setInputPage] = React.useState(page.toString());
+  const pageSize = 21;
 
   // Helper to update specific parameters in the URL
   const handleUpdateParams = React.useCallback(
@@ -52,6 +55,17 @@ const Characters = ({
     },
     [router, pathname]
   );
+
+  const scrollToSection = React.useCallback(() => {
+    if (gridRef.current) {
+      const offset = 120;
+      const elementPosition = gridRef.current.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: "smooth"
+      });
+    }
+  }, []);
 
   // Sync state FROM url (Handles "Back" button and initial load)
   React.useEffect(() => {
@@ -123,22 +137,24 @@ const Characters = ({
     handleUpdateParams({ tags: newTags.length > 0 ? newTags.join(",") : null, p: "1" });
   };
 
-  const filteredData = data?.filter((char) => {
-    const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      char.tags.some((tag: any) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredData = React.useMemo(() => {
+    return data?.filter((char) => {
+      const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        char.tags.some((tag: any) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // Multi-tag filter: character must have ALL selected tags
-    const matchesTags = selectedTags.length === 0 ||
-      selectedTags.every(selectedTag =>
-        char.tags.some((tag: any) => tag.name === selectedTag)
-      );
+      // Multi-tag filter: character must have ALL selected tags
+      const matchesTags = selectedTags.length === 0 ||
+        selectedTags.every(selectedTag =>
+          char.tags.some((tag: any) => tag.name === selectedTag)
+        );
 
-    // NSFW Filtering
-    if (!settings?.showNsfw && char.isNsfw) return false;
+      // NSFW Filtering
+      if (!settings?.showNsfw && char.isNsfw) return false;
 
-    return matchesSearch && matchesTags;
-  });
+      return matchesSearch && matchesTags;
+    });
+  }, [data, searchQuery, selectedTags, settings?.showNsfw]);
 
   const totalPages = Math.ceil((filteredData?.length || 0) / pageSize);
   const paginatedData = filteredData?.slice(
@@ -150,9 +166,9 @@ const Characters = ({
     return (
       <div className="flex flex-col gap-10 w-full px-6 md:px-12">
         <div className="h-8 w-48 bg-white/5 rounded-xl shimmer" />
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6">
           {Array.from({ length: 10 }).map((_, i) => (
-            <div key={i} className="h-[340px] rounded-[1.5rem] bg-white/5 shimmer border border-white/5" />
+            <div key={i} className="h-[280px] rounded-2xl bg-white/5 shimmer border border-white/5" />
           ))}
         </div>
       </div>
@@ -177,9 +193,9 @@ const Characters = ({
   }
 
   return (
-    <div className="flex flex-col gap-10 w-full px-6 md:px-12">
+    <div ref={sectionRef} className="flex flex-col gap-10 w-full px-6 md:px-12">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 border-b border-white/5 pb-16 relative">
-        <div className="absolute -bottom-px left-0 w-1/3 h-px bg-gradient-to-r from-primary/50 to-transparent" />
+        <div className="absolute -bottom-px left-0 w-1/3 h-px bg-linear-to-r from-primary/50 to-transparent" />
 
         <div className="space-y-8 flex-1 min-w-0">
           <div className="space-y-2">
@@ -293,12 +309,11 @@ const Characters = ({
         </div>
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-4 md:gap-6">
         <AnimatePresence mode="popLayout">
           {paginatedData?.map((character, index) => (
             <motion.div
               key={character.id}
-              layout
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
@@ -321,33 +336,104 @@ const Characters = ({
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="mt-12 flex items-center justify-center gap-6">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-6">
+          <button
+            disabled={page === 1}
+            onClick={() => {
+              setPage(1);
+              handleUpdateParams({ p: "1" });
+              setTimeout(scrollToSection, 100);
+            }}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            title="First Cycle"
+          >
+            <FiChevronsLeft size={16} />
+          </button>
+
           <button
             disabled={page === 1}
             onClick={() => {
               const newPage = Math.max(1, page - 1);
               setPage(newPage);
               handleUpdateParams({ p: newPage.toString() });
-              setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+              setTimeout(scrollToSection, 100);
             }}
-            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            Prev Cycle
+            <span className="hidden md:inline">Prev Cycle</span>
+            <span className="md:hidden">Prev</span>
           </button>
-          <span className="text-[11px] font-black text-white/40 uppercase tracking-widest">
-            Module <span className="text-primary italic">{page}</span> / <span className="text-white/60">{totalPages}</span>
-          </span>
+
+          <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+            <span className="hidden sm:inline">Module</span>
+            {isEditingPage ? (
+              <input
+                type="text"
+                autoFocus
+                value={inputPage}
+                onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
+                onBlur={() => {
+                  setIsEditingPage(false);
+                  setInputPage(page.toString());
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    const newPage = parseInt(inputPage, 10);
+                    if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                      setPage(newPage);
+                      handleUpdateParams({ p: newPage.toString() });
+                      setIsEditingPage(false);
+                      setTimeout(scrollToSection, 100);
+                    } else {
+                      setInputPage(page.toString());
+                      setIsEditingPage(false);
+                    }
+                  } else if (e.key === "Escape") {
+                    setIsEditingPage(false);
+                    setInputPage(page.toString());
+                  }
+                }}
+                className="w-10 bg-primary/20 border border-primary/30 rounded-lg px-1 py-0.5 text-primary text-center focus:outline-none focus:border-primary transition-all"
+              />
+            ) : (
+              <button
+                onClick={() => {
+                  setIsEditingPage(true);
+                  setInputPage(page.toString());
+                }}
+                className="text-primary hover:scale-110 transition-transform cursor-pointer italic px-1"
+              >
+                {page}
+              </button>
+            )}
+            <span>/ {totalPages}</span>
+          </div>
+
           <button
             disabled={page === totalPages}
             onClick={() => {
               const newPage = Math.min(totalPages, page + 1);
               setPage(newPage);
               handleUpdateParams({ p: newPage.toString() });
-              setTimeout(() => gridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+              setTimeout(scrollToSection, 100);
             }}
-            className="px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            className="px-4 md:px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            Next Cycle
+            <span className="hidden md:inline">Next Cycle</span>
+            <span className="md:hidden">Next</span>
+          </button>
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => {
+              setPage(totalPages);
+              handleUpdateParams({ p: totalPages.toString() });
+              setTimeout(scrollToSection, 100);
+            }}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            title="Last Cycle"
+          >
+            <FiChevronsRight size={16} />
           </button>
         </div>
       )}

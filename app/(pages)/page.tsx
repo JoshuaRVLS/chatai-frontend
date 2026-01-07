@@ -37,7 +37,7 @@ const HomePage = () => {
 
   return (
     <div className="flex flex-col w-full gap-16 pt-32 pb-32">
-      <div className="max-w-7xl mx-auto w-full space-y-16">
+      <div className="w-full space-y-16">
         {session?.user && !searchQuery && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}

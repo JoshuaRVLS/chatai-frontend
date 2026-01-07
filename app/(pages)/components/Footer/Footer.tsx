@@ -4,13 +4,17 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { FiGithub, FiTwitter, FiMail, FiHeart } from "react-icons/fi";
+import { usePathname } from "next/navigation";
 
 const Footer: React.FC = () => {
     const currentYear = new Date().getFullYear();
+    const pathname = usePathname();
+
+    if (pathname.startsWith("/chat/")) return null;
 
     return (
         <footer className="relative mt-20 border-t border-white/5 bg-black/20 backdrop-blur-xl">
-            <div className="max-w-7xl mx-auto px-6 py-12">
+            <div className="w-full px-6 py-12">
                 <div className="flex flex-col items-center text-center space-y-8">
                     {/* Brand Section */}
                     <div className="flex flex-col items-center">
