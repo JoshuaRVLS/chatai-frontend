@@ -37,7 +37,9 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
-  const navLinks: any[] = [];
+  const navLinks: any[] = [
+    { name: "Repository", href: "/lorebooks-repository" },
+  ];
 
   const dropdownLinks = [
     { name: "Create", href: "/create_character", icon: <FiPlusSquare /> },

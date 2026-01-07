@@ -9,6 +9,7 @@ import { bytesToBase64 } from "@/app/utils/image";
 import { AuthContext } from "../../providers/AuthProvider";
 import toast from "react-hot-toast";
 import CharacterTags from "../CharacterTags/CharacterTags";
+import LorebookSelector from "../LorebookSelector/LorebookSelector";
 import CharacterCard from "../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -42,7 +43,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
   const [selectedOptions, setSelectedOptions] = useState<
     { label: string; value: string }[]
   >([]);
-  const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
+  const [selectedLorebooks, setSelectedLorebooks] = useState<{ label: string; value: string }[]>([]);
   const [isNsfw, setIsNsfw] = useState<boolean>(false);
   const [importUrl, setImportUrl] = useState<string>("");
   const [isImporting, setIsImporting] = useState<boolean>(false);
@@ -55,7 +56,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
       author: User;
       photo: { id: string; mimetype: string; name: string };
       tags: CharacterTag[];
-      lorebooks: { id: string }[];
+      lorebooks: { id: string; name: string }[];
     }
   >({
     queryKey: ["character", id],
@@ -85,7 +86,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
       setSelectedOptions(
         data.tags.map((tag) => ({ label: tag.name, value: tag.id }))
       );
-      setSelectedLorebooks(data.lorebooks.map(lb => lb.id));
+      setSelectedLorebooks(
+        data.lorebooks.map(lb => ({ label: lb.name || `Lorebook ${lb.id.slice(0, 8)}`, value: lb.id }))
+      );
       setIsNsfw(data.isNsfw);
     }
   }, [data]);
@@ -156,7 +159,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     formData.append("exampleConversations", exampleConversations);
     formData.append("userId", user?.id as string);
     formData.append("tags", JSON.stringify(selectedOptions));
-    formData.append("lorebooks", JSON.stringify(selectedLorebooks));
+    formData.append("lorebooks", JSON.stringify(selectedLorebooks.map(lb => lb.value)));
     formData.append("isNsfw", isNsfw.toString());
 
     try {
@@ -443,34 +446,13 @@ const CharacterEdit = ({ id }: { id: string }) => {
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
               <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
-                Link existing information modules to provide this entity with persistent world knowledge.
+                Link existing information modules to provide this entity with persistent world knowledge. Search and select from your collection.
               </p>
 
-              <div className="flex flex-wrap gap-2">
-                {userLorebooks && userLorebooks.length > 0 ? (
-                  userLorebooks.map(lb => (
-                    <button
-                      key={lb.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedLorebooks(prev =>
-                          prev.includes(lb.id) ? prev.filter(id => id !== lb.id) : [...prev, lb.id]
-                        );
-                      }}
-                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
-                        ? "bg-white text-zinc-950 border-white"
-                        : "bg-white/5 text-zinc-600 border-white/5 hover:border-white/20"
-                        }`}
-                    >
-                      {lb.name}
-                    </button>
-                  ))
-                ) : (
-                  <p className="text-[10px] text-white/10 uppercase tracking-widest font-black py-4 italic">
-                    No modules detected in your local archive.
-                  </p>
-                )}
-              </div>
+              <LorebookSelector
+                selectedLorebooks={selectedLorebooks}
+                setSelectedLorebooks={setSelectedLorebooks}
+              />
             </section>
 
             {/* Intelligence Configuration */}

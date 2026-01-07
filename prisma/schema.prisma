@@ -80,15 +80,38 @@ model Character {
 }
 
 model Lorebook {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  userId      String
-  user        User        @relation(fields: [userId], references: [id])
-  entries     LoreEntry[]
-  characters  Character[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                 String          @id @default(cuid())
+  name               String
+  description        String?
+  chubId             String?         @unique // ChubAI lorebook ID for duplicate prevention
+  scanDepth          Int             @default(4) // How deep to scan context
+  tokenBudget        Int             @default(512) // Max tokens for lorebook
+  recursiveScanning  Boolean         @default(false) // Enable recursive scanning
+  userId             String
+  user               User            @relation(fields: [userId], references: [id])
+  entries            LoreEntry[]
+  characters         Character[]
+  tags               LorebookTag[]
+  image              LorebookImage?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model LorebookImage {
+  id         String   @id @default(cuid())
+  lorebookId String   @unique
+  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+  name       String
+  mimetype   String
+  data       Bytes
+  createdAt  DateTime @default(now())
+}
+
+model LorebookTag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  lorebooks Lorebook[]
+  createdAt DateTime   @default(now())
 }
 
 model LoreEntry {
