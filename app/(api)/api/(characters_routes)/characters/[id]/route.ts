@@ -70,23 +70,26 @@ export const DELETE =
       });
 
 
-      await db.characterTag.updateMany({
-        where: { charIds: { has: characterId } },
-        data: {
-          charIds: {
-            set:
-              await db.characterTag
-                .findMany({ where: { charIds: { has: characterId } } })
-                .then(tags => tags.map(tag => ({
-                  ...tag,
-                  charIds: tag.charIds.filter(
-                    id => id !== characterId)
-                })))
-                .then(
-                  updatedTags => updatedTags.map(tag => tag.charIds).flat())
+      // Disconnect this character from all tags (many-to-many relationship)
+      const characterTags = await db.characterTag.findMany({
+        where: {
+          chars: {
+            some: { id: characterId }
           }
-        }
+        },
+        select: { id: true }
       });
+
+      for (const tag of characterTags) {
+        await db.characterTag.update({
+          where: { id: tag.id },
+          data: {
+            chars: {
+              disconnect: { id: characterId }
+            }
+          }
+        });
+      }
 
 
       await db.characterImage.deleteMany({
