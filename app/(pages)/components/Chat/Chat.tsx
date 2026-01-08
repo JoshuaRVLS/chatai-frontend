@@ -114,13 +114,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
     },
     initialPageParam: null,
     getNextPageParam: (lastPage: any) => lastPage.nextCursor || undefined,
+    staleTime: 5000, // 5s buffer to prevent accidental refetch wipes during generation
   });
 
   const allMessages = useMemo(() => {
-    // Collect all messages from all pages
-    const messages = infiniteMessages?.pages.flatMap((page) => page.data) || [];
-    // The API returns desc (newest first). We want to show them chronologically (oldest first).
-    return [...messages].reverse();
+    if (!infiniteMessages) return [];
+    // Collect and reverse only once
+    const messages: Message[] = [];
+    for (let i = infiniteMessages.pages.length - 1; i >= 0; i--) {
+      const page = infiniteMessages.pages[i];
+      for (let j = page.data.length - 1; j >= 0; j--) {
+        messages.push(page.data[j]);
+      }
+    }
+    return messages;
   }, [infiniteMessages]);
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -168,7 +175,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       console.warn("Safety trigger: Clearing stuck processing state");
       setIsSubmitting(false);
       setStreamingMessage(null);
-    }, 25000); // 25s global fail-safe
+    }, 15000); // 15s global fail-safe
     return () => clearTimeout(timer);
   }, [isSubmitting]);
 
@@ -204,6 +211,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
     () => chat?.character?.id ? `/api/image/${chat.character.id}` : null,
     [chat?.character?.id]
   );
+
+  const fetchWithTimeout = async (url: string, options: RequestInit & { timeout?: number } = {}) => {
+    const { timeout = 10000, ...rest } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { ...rest, signal: controller.signal });
+      clearTimeout(id);
+      return response;
+    } catch (error) {
+      clearTimeout(id);
+      throw error;
+    }
+  };
 
   const handleProfileClick = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -326,7 +347,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const startStreaming = async (content: string, isRegenerate = false, isContinue = false) => {
     try {
       const controller = new AbortController();
-      const totalTimeout = setTimeout(() => controller.abort(), 120000); // 2 min hard cap
+      const totalTimeout = setTimeout(() => controller.abort(), 30000); // 30s hard cap for connection
 
       const aiRes = await fetch("/api/ai", {
         method: "POST",
@@ -436,7 +457,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       setIsSubmitting(false);
       setTimeout(() => scrollToBottom(), 100);
 
-      // Background Save (Non-blocking)
+      // Background Save (Non-blocking but Surgical)
       (async () => {
         try {
           const res = await fetch("/api/messages/ai", {
@@ -446,15 +467,47 @@ const Chat = ({ chatId }: { chatId: string }) => {
           });
 
           if (res.ok) {
-            queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
-          }
+            const { data: savedMsg } = await res.json();
 
-          fetch("/api/background", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chatId })
-          }).catch(() => { });
-        } catch (e) { }
+            // SURGICAL SWAP: Replace temp message with real one in cache
+            queryClient.setQueryData(["messages", chatId], (old: any) => {
+              if (!old) return old;
+              return {
+                ...old,
+                pages: old.pages.map((page: any, i: number) => {
+                  if (i !== 0) return page;
+                  return {
+                    ...page,
+                    data: page.data.map((m: any) =>
+                      m.id === aiOptimisticId ? { ...savedMsg, id: savedMsg.id } : m
+                    )
+                  };
+                })
+              };
+            });
+
+            // Background summarization
+            fetch("/api/background", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ chatId })
+            }).catch(() => { });
+          }
+        } catch (e) {
+          console.error("Failed to save AI message surgically:", e);
+          // Rollback optimistic message if save failed
+          queryClient.setQueryData(["messages", chatId], (old: any) => {
+            if (!old) return old;
+            return {
+              ...old,
+              pages: old.pages.map((page: any) => ({
+                ...page,
+                data: page.data.filter((m: any) => m.id !== aiOptimisticId)
+              }))
+            };
+          });
+          toast.error("Failed to save response to history");
+        }
       })();
     } catch (err) {
       console.error(err);
@@ -512,9 +565,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
     try {
       // 1. Save user message with timeout
-      const controller = new AbortController();
-      const saveTimeout = setTimeout(() => controller.abort(), 10000);
-      const saveRes = await fetch("/api/messages", {
+      const saveRes = await fetchWithTimeout("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -523,11 +574,26 @@ const Chat = ({ chatId }: { chatId: string }) => {
           userId: user.id,
           fromUser: true,
         }),
-        signal: controller.signal
+        timeout: 10000
       });
-      clearTimeout(saveTimeout);
 
       if (!saveRes.ok) throw new Error("Failed to send message");
+      const { data: savedUserMsg } = await saveRes.json();
+
+      // SURGICAL SWAP: Replace temp user message with real one in cache
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any, i: number) => {
+            if (i !== 0) return page;
+            return {
+              ...page,
+              data: page.data.map((m: any) => m.id === optimisticMessage.id ? savedUserMsg : m)
+            };
+          })
+        };
+      });
 
       // 2. Start streaming AI response
       await startStreaming(content.trim());
@@ -582,10 +648,34 @@ const Chat = ({ chatId }: { chatId: string }) => {
       confirmLabel: "Delete",
       variant: "danger"
     }))) return;
+
     pushToUndoStack();
-    const cascade = isUserMessage ? "?cascade=true" : "";
-    await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+
+    // Optimistic Delete
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          data: page.data.filter((m: any) => m.id !== messageId)
+        }))
+      };
+    });
+
+    try {
+      const cascade = isUserMessage ? "?cascade=true" : "";
+      await fetchWithTimeout(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+
+      // Settle delay for invalidation
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      }, 1000);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete message");
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+    }
   }, [chatId, queryClient, pushToUndoStack, confirm]);
 
   const handleRegenerate = useCallback(async (messageId: string) => {
@@ -600,18 +690,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
     setIsSubmitting(true);
     setShouldAutoScroll(true);
 
+    // Optimistic Delete
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          data: page.data.filter((m: any) => m.id !== messageId)
+        }))
+      };
+    });
+
     try {
-      await fetch(`/api/messages/${messageId}`, { method: "DELETE" });
-      queryClient.setQueryData(["messages", chatId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          pages: old.pages.map((page: any) => ({
-            ...page,
-            data: page.data.filter((m: any) => m.id !== messageId)
-          }))
-        };
-      });
+      await fetchWithTimeout(`/api/messages/${messageId}`, { method: "DELETE" });
 
       if (hasUserMessage) {
         await startStreaming(lastUserMsg.content, true);
@@ -619,7 +711,11 @@ const Chat = ({ chatId }: { chatId: string }) => {
         await startStreaming("", false, true);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Regenerate failed:", err);
+      toast.error("Failed to regenerate");
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      }, 1000);
     } finally {
       setIsSubmitting(false);
       setStreamingMessage(null);
@@ -636,13 +732,33 @@ const Chat = ({ chatId }: { chatId: string }) => {
     pushToUndoStack();
     setIsSubmitting(true);
     setShouldAutoScroll(true);
-    const cascade = "?cascade=true";
+
+    // Optimistic Delete
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          data: page.data.filter((m: any) => m.id !== messageId)
+        }))
+      };
+    });
+
     try {
-      await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      const cascade = "?cascade=true";
+      await fetchWithTimeout(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+
+      // Settle delay for invalidation
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      }, 1000);
+
       await startStreaming(userMsg.content, true);
     } catch (err) {
-      console.error(err);
+      console.error("User regenerate failed:", err);
+      toast.error("Failed to redo message");
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     } finally {
       setIsSubmitting(false);
       setStreamingMessage(null);
@@ -948,7 +1064,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   isBlurEnabled={settings?.blurNsfw ?? true}
                   tempUnblur={tempUnblurMessages[msg.id] || false}
                   onUnblur={() => setTempUnblurMessages(prev => ({ ...prev, [msg.id]: true }))}
-                  isOptimistic={msg.id.startsWith("temp-")}
+                  isOptimistic={msg.id.startsWith("temp-") || msg.id.startsWith("ai-temp-")}
                   onProfileClick={handleProfileClick}
                   onEdit={handleEdit}
                   onDelete={(id) => handleDelete(id, msg.fromUser)}
@@ -996,7 +1112,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
           {isSubmitting && (
             <motion.div
-              className="flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl w-fit"
+              className="group flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/5 rounded-2xl w-fit"
               animate={{ opacity: [0.4, 1, 0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
@@ -1006,6 +1122,19 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 <div className="w-1 h-1 rounded-full bg-primary animate-bounce" />
               </div>
               <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Processing response</span>
+
+              {/* Emergency Stop Button */}
+              <button
+                onClick={() => {
+                  setIsSubmitting(false);
+                  setStreamingMessage(null);
+                  toast.success("Generation stopped");
+                }}
+                className="ml-1 p-1 hover:bg-white/10 rounded-lg text-white/10 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                title="Stop generation"
+              >
+                <FaTimes size={10} />
+              </button>
             </motion.div>
           )}
           <div ref={messagesEndRef} />
