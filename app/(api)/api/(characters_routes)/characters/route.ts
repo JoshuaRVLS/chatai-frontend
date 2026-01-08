@@ -126,25 +126,86 @@ export const POST = async (req: Request) => {
 
 export const GET = async (req: Request) => {
   try {
-    const characters = await db.character.findMany({
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        author: true,
-        photo: {
-          select: {
-            id: true,
-            charId: true,
-            mimetype: true,
-            name: true,
-          }
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const pageSize = parseInt(searchParams.get("pageSize") || "32");
+    const searchQuery = searchParams.get("search") || "";
+    const tagsParam = searchParams.get("tags") || "";
+    const selectedTags = tagsParam ? tagsParam.split(",") : [];
+    const showAll = searchParams.get("showAll") === "true";
+
+    const skip = (page - 1) * pageSize;
+
+    const where: any = {
+      AND: [
+        {
+          OR: [
+            { name: { contains: searchQuery, mode: 'insensitive' } },
+            { bio: { contains: searchQuery, mode: 'insensitive' } },
+            { author: { username: { contains: searchQuery, mode: 'insensitive' } } },
+            { tags: { some: { name: { contains: searchQuery, mode: 'insensitive' } } } }
+          ]
+        }
+      ]
+    };
+
+    if (selectedTags.length > 0) {
+      // Character must have ALL selected tags
+      selectedTags.forEach(tag => {
+        where.AND.push({
+          tags: { some: { name: tag } }
+        });
+      });
+    }
+
+    if (!showAll) {
+      where.isNsfw = false;
+    }
+
+    const [characters, totalCount, allTags] = await Promise.all([
+      db.character.findMany({
+        where,
+        orderBy: {
+          createdAt: 'desc'
         },
-        tags: true
-      },
+        include: {
+          author: true,
+          photo: {
+            select: {
+              id: true,
+              charId: true,
+              mimetype: true,
+              name: true,
+            }
+          },
+          tags: true
+        },
+        skip,
+        take: pageSize,
+      }),
+      db.character.count({ where }),
+      db.characterTag.findMany({
+        orderBy: { name: 'asc' }
+      })
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      data: characters,
+      meta: {
+        totalCount,
+        page,
+        pageSize,
+        totalPages: Math.ceil(totalCount / pageSize),
+        hasMore: page * pageSize < totalCount,
+        allTags: allTags.map(t => t.name)
+      }
     });
-    return NextResponse.json({ success: true, data: characters });
   } catch (error) {
-    console.log(error);
+    console.error("Characters GET error:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to fetch characters" },
+      { status: 500 }
+    );
   }
 };
