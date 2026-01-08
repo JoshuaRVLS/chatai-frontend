@@ -770,7 +770,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-5xl flex flex-col h-full bg-white/2 border-x border-t sm:border border-white/10 rounded-t-4xl sm:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-sm"
+        className="relative w-full max-w-6xl flex flex-col h-full bg-white/2 border-x border-t sm:border border-white/10 rounded-t-2xl sm:rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-sm"
       >
         {/* Header */}
         <ChatNavbar

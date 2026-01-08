@@ -70,7 +70,7 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 20 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-lg bg-slate-950/95 border border-white/10 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-3xl"
+                    className="w-full max-w-lg bg-slate-950/95 border border-white/10 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-3xl"
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-white/5">
@@ -88,7 +88,7 @@ const ChatSettingsModal: React.FC<ChatSettingsModalProps> = ({
                         </button>
                     </div>
 
-                    <div className="p-6 space-y-8 max-h-[70vh] overflow-y-auto">
+                    <div className="p-6 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-hide">
                         {/* Model Selection */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2">
