@@ -53,44 +53,15 @@ export const POST = async (req: Request) => {
         let didSummarize = false;
         let didExtractMemory = false;
 
-        // --- SUMMARIZATION LOGIC ---
+        // --- SUMMARIZATION DISABLED in favor of 45-msg Sliding Window ---
+        /*
         if (messagesToSummarize >= 10) {
-            try {
-                const oldMessages = previousMessages.slice(0, messagesToSummarize);
-                const summaryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: 'openai/gpt-3.5-turbo', // Use a fast, cheap model for summarization
-                        messages: [
-                            {
-                                role: 'system',
-                                content: `You are a conversation summarizer. Provide a concise, cumulative summary of the chat history so far, including these new events. Current summary: "${contextSummary}". New messages to incorporate into the summary: ${JSON.stringify(oldMessages)}`
-                            }
-                        ],
-                    }),
-                });
-
-                if (summaryRes.ok) {
-                    const summaryData = await summaryRes.json();
-                    contextSummary = summaryData.choices[0]?.message?.content || contextSummary;
-
-                    await db.chat.update({
-                        where: { id: chatId },
-                        data: { summary: contextSummary }
-                    });
-                    didSummarize = true;
-                }
-            } catch (err) {
-                console.error("Background summarization failed:", err);
-            }
+            ...
         }
+        */
 
-        // --- MEMORY EXTRACTION LOGIC ---
-        if (previousMessages.length > 0 && previousMessages.length % 5 === 0) {
+        // --- FACT-BASED MEMORY EXTRACTION ---
+        if (previousMessages.length > 0 && previousMessages.length % 10 === 0) {
             try {
                 const memoryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
@@ -99,17 +70,19 @@ export const POST = async (req: Request) => {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: 'openai/gpt-3.5-turbo', // Use a fast, cheap model for memory extraction
+                        model: 'openai/gpt-3.5-turbo',
                         messages: [
                             {
                                 role: 'system',
-                                content: `You are a memory extractor. Analyze the conversation and extract ONLY key long-term facts about ${persona ? persona.name : chat?.user.username} (e.g., family, job, preferences, shared history). 
-Update the existing memory list elegantly. If a fact is already there, don't duplicate. Keep it in a bulleted list format.
+                                content: `You are a memory extractor. Analyze the conversation and extract ONLY key LONG-TERM facts about ${persona ? persona.name : chat?.user.username} (e.g., family, job, preferences, deep history). 
+DO NOT summarize the story or current events. Focus strictly on static facts that should never be forgotten.
+Update the existing memory list elegantly. Keep it in a bulleted list format.
+
 CURRENT MEMORIES:
 ${contextMemory || "None yet."}
 
 RECENT MESSAGES:
-${JSON.stringify(previousMessages.slice(-10))}
+${JSON.stringify(previousMessages.slice(-15))}
 
 Provide the NEW COMPLETE memory list.`
                             }
