@@ -2,6 +2,10 @@ import { db } from '@/app/utils/prisma';
 import { NextResponse } from 'next/server';
 
 export const POST = async (req: Request) => {
+  const estimateTokens = (text: string): number => {
+    return Math.ceil(text.length / 4);
+  };
+
   const { content, chatId, model, regenerate, continue: isContinue } = await req.json();
   const isRegenerate = regenerate === true;
 
@@ -67,12 +71,7 @@ export const POST = async (req: Request) => {
   const messagesToSummarize = previousMessages.length - recentMessagesCount;
 
   if (messagesToSummarize > 0) {
-    // We have more than 15 messages, let's summarize the old ones
     const oldMessages = previousMessages.slice(0, messagesToSummarize);
-    const recentMessages = previousMessages.slice(messagesToSummarize);
-
-    // Only summarize if we haven't summarized these specific messages yet
-    // Or if the current message count is significantly high (e.g. every 10 messages)
     if (messagesToSummarize >= 10) {
       try {
         const summaryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -95,8 +94,6 @@ export const POST = async (req: Request) => {
         if (summaryRes.ok) {
           const summaryData = await summaryRes.json();
           contextSummary = summaryData.choices[0]?.message?.content || contextSummary;
-
-          // Save new summary and delete summarized messages (except last 15)
           const messageIdsToDelete = chat?.messages.slice(0, messagesToSummarize).map(m => m.id) || [];
 
           await db.$transaction([
@@ -116,7 +113,6 @@ export const POST = async (req: Request) => {
   }
 
   // --- MEMORY EXTRACTION LOGIC ---
-  // Every 5 messages, we run a memory extraction to keep the "Learned Facts" updated
   if (previousMessages.length > 0 && previousMessages.length % 5 === 0) {
     try {
       const memoryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -161,29 +157,84 @@ Provide the NEW COMPLETE memory list.`
   }
 
   // --- LOREBOOK INJECTION LOGIC ---
+  const feedbackMessages = chat?.messages.filter(m => m.feedback !== 'NONE').slice(-10) || [];
+  let feedbackSteering = "";
+  if (feedbackMessages.length > 0) {
+    feedbackSteering = "\n[USER PREFERENCES & FEEDBACK]\n" +
+      feedbackMessages.map(m => `- The user ${m.feedback === 'LIKE' ? 'LIKED' : 'DISLIKED'} this response style: "${m.content.substring(0, 150)}${m.content.length > 150 ? '...' : ''}"`).join('\n') +
+      "\nBased on this feedback, adapt your tone, length, and content to match what the user likes and avoid what they dislike.";
+  }
+
+  const correctedMessages = chat?.messages.filter(m => !m.fromUser && m.originalContent).slice(-5) || [];
+  if (correctedMessages.length > 0) {
+    feedbackSteering += "\n\n[USER CORRECTION HISTORY]\n" +
+      correctedMessages.map(m => `* ORIGINAL: "${m.originalContent?.substring(0, 150)}..."\n  CORRECTED BY USER TO: "${m.content.substring(0, 150)}..."`).join('\n') +
+      "\nStudy these corrections carefully to understand how the user wants you to speak or what information was incorrect.";
+  }
+
   let loreContext = "";
   const lorebooks = chat?.character.lorebooks || [];
-  const allEntries = lorebooks.flatMap(lb => lb.entries);
 
-  if (allEntries.length > 0) {
+  if (lorebooks.length > 0) {
     const triggeredEntries: string[] = [];
-    const combinedText = (content + " " + previousMessages.slice(-5).map(m => m.content).join(" ")).toLowerCase();
+    const usedEntryIds = new Set<string>();
 
-    for (const entry of allEntries) {
-      const hasKeyword = entry.keywords.some(kw => combinedText.includes(kw.toLowerCase()));
-      if (hasKeyword) {
-        triggeredEntries.push(`[LORE: ${entry.keywords[0]}]: ${entry.content}`);
+    for (const lb of lorebooks) {
+      const entries = lb.entries.filter(e => e.enabled);
+      if (entries.length === 0) continue;
+
+      const scanDepth = lb.scanDepth || 4;
+      const scanHistory = previousMessages.slice(-scanDepth).map(m => m.content).join(" ");
+      const scanText = (content + " " + scanHistory).toLowerCase();
+
+      const currentLbTriggered: any[] = [];
+      for (const entry of entries) {
+        if (entry.keywords.some(kw => scanText.includes(kw.toLowerCase()))) {
+          currentLbTriggered.push(entry);
+          usedEntryIds.add(entry.id);
+        }
+      }
+
+      if (lb.recursiveScanning && currentLbTriggered.length > 0) {
+        let newTriggersFound = true;
+        let recursiveDepth = 0;
+        const maxRecursiveDepth = 3;
+
+        while (newTriggersFound && recursiveDepth < maxRecursiveDepth) {
+          newTriggersFound = false;
+          recursiveDepth++;
+          const currentContextContent = currentLbTriggered.map(e => e.content).join(" ").toLowerCase();
+          for (const entry of entries) {
+            if (!usedEntryIds.has(entry.id)) {
+              if (entry.keywords.some(kw => currentContextContent.includes(kw.toLowerCase()))) {
+                currentLbTriggered.push(entry);
+                usedEntryIds.add(entry.id);
+                newTriggersFound = true;
+              }
+            }
+          }
+        }
+      }
+
+      const lbBudget = lb.tokenBudget || 512;
+      let lbCurrentUsage = 0;
+      for (const entry of currentLbTriggered) {
+        const entryText = `[LORE: ${entry.keywords[0]}]: ${entry.content}\n`;
+        const entryTokens = estimateTokens(entryText);
+
+        if (lbCurrentUsage + entryTokens <= lbBudget) {
+          triggeredEntries.push(entryText);
+          lbCurrentUsage += entryTokens;
+        } else {
+          break;
+        }
       }
     }
 
     if (triggeredEntries.length > 0) {
-      loreContext = triggeredEntries.join("\n");
+      loreContext = triggeredEntries.join("");
     }
   }
-
-  const estimateTokens = (text: string): number => {
-    return Math.ceil(text.length / 4);
-  };
 
   const systemMessages = [
     {
@@ -204,6 +255,7 @@ ${contextSummary ? `[PREVIOUS CONTEXT SUMMARY]\n${replacePlaceholders(contextSum
 ${contextMemory ? `[LEARNED MEMORIES ABOUT YOU]\n${replacePlaceholders(contextMemory)}` : ''}
 ${pinnedMessages ? `[PINNED IMPORTANT CONTEXT]\n${replacePlaceholders(pinnedMessages)}` : ''}
 ${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${replacePlaceholders(loreContext)}` : ''}
+${feedbackSteering ? `[USER PREFERENCES & STEERING]\n${feedbackSteering}` : ''}
  
 [IMPORTANT RULES]
 1. MATURITY & GRAVITAS: Act with the maturity appropriate to your age and profession. Avoid theatrical, overly dramatic, or generic AI over-reactions.
@@ -224,9 +276,9 @@ ${loreContext ? `[RELEVANT LORE/WORLD INFO]\n${replacePlaceholders(loreContext)}
   };
 
   let totalTokens =
-    systemMessages.reduce((sum, msg) => sum + estimateTokens(msg.content), 0) + estimateTokens(finalConstraint.content);
+    systemMessages.reduce((sum, msg: any) => sum + estimateTokens(msg.content), 0) + estimateTokens(finalConstraint.content);
 
-  totalTokens += estimateTokens(content);
+  totalTokens += estimateTokens(content || "");
 
   const limitedMessages: any[] = [];
   const contextMessages = previousMessages.slice(-recentMessagesCount);

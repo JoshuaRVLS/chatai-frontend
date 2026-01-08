@@ -57,9 +57,19 @@ export const PUT = async (
     const { content } = await req.json();
 
     try {
+        const message = await db.message.findUnique({ where: { id: messageId } });
+        if (!message) return NextResponse.json({ success: false, message: "Message not found" }, { status: 404 });
+
+        const data: any = { content };
+
+        // If it's an AI message being edited for the first time, save the current content as originalContent
+        if (!message.fromUser && !message.originalContent && message.content !== content) {
+            data.originalContent = message.content;
+        }
+
         const updatedMessage = await db.message.update({
             where: { id: messageId },
-            data: { content },
+            data,
         });
 
         return NextResponse.json(

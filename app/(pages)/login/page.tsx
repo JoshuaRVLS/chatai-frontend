@@ -24,7 +24,11 @@ export default function LoginPage() {
       });
 
       if (!response?.ok) {
-        toast.error((response?.error as string) || "Invalid credentials");
+        let errorMessage = (response?.error as string) || "Invalid credentials";
+        if (errorMessage === "ACCOUNT_NOT_VERIFIED") {
+          errorMessage = "Please verify your account first!";
+        }
+        toast.error(errorMessage);
         setLoading(false);
         return;
       }

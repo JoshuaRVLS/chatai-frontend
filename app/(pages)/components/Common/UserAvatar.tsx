@@ -10,6 +10,8 @@ interface UserAvatarProps {
 }
 
 const UserAvatar: React.FC<UserAvatarProps> = ({ name, image, size = "md", className = "" }) => {
+    const [imageError, setImageError] = React.useState(false);
+
     const initials = useMemo(() => {
         const displayName = name || "";
         if (!displayName) return "?";
@@ -52,10 +54,15 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ name, image, size = "md", class
 
     const containerClasses = `relative rounded-2xl flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl transition-all ${sizeClasses[size]} ${className}`;
 
-    if (image) {
+    if (image && !imageError) {
         return (
             <div className={containerClasses}>
-                <img src={image} alt={name || "User"} className="w-full h-full object-cover" />
+                <img
+                    src={image}
+                    alt={name || "User"}
+                    className="w-full h-full object-cover"
+                    onError={() => setImageError(true)}
+                />
             </div>
         );
     }

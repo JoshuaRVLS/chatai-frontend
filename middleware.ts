@@ -1,12 +1,10 @@
 
-import {getToken} from 'next-auth/jwt';
-import {NextResponse} from 'next/server';
-import type {NextRequest} from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const {pathname} = request.nextUrl;
-
-  console.log('🛠️ Middleware executing for path:', pathname);
+  const { pathname } = request.nextUrl;
 
   try {
     const token = await getToken({
@@ -15,46 +13,25 @@ export async function middleware(request: NextRequest) {
       secureCookie: process.env.NODE_ENV === 'production'
     });
 
-    console.log('🔐 Token found:', !!token);
-    console.log('🔑 Token content:', token);
+    const publicAuthRoutes = ['/login', '/register'];
+    const protectedRoutes = ['/', '/create_character', '/my_characters', '/edit_character', '/settings', '/create_lorebook', '/lorebooks-repository'];
 
-
-    const publicRoutes = ['/login', '/register', '/api/auth'];
-
-
-    const protectedRoutes =
-        ['/', '/create_character', '/my_characters', '/edit_character'];
-
-
-    const isProtectedRoute = protectedRoutes.some(
-        route => pathname === route || pathname.startsWith(route + '/'));
-
-
-    const isPublicAuthRoute = publicRoutes.some(
-        route => pathname === route || pathname.startsWith(route));
-
+    const isProtectedRoute = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
+    const isPublicAuthRoute = publicAuthRoutes.some(route => pathname === route);
 
     if (!token && isProtectedRoute) {
-      console.log(
-          '🚫 Unauthenticated access to protected route, redirecting to login');
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-
     if (token && isPublicAuthRoute) {
-      console.log(
-          '✅ Authenticated user accessing auth route, redirecting to home');
       return NextResponse.redirect(new URL('/', request.url));
     }
 
-    console.log('✅ Allowing access to:', pathname);
     return NextResponse.next();
-
   } catch (error) {
-    console.error('❌ Middleware error:', error);
-
+    console.error('[MIDDLEWARE_ERROR]', error);
     return NextResponse.next();
   }
 }

@@ -10,6 +10,7 @@ import {
   FaUserPlus,
 } from "react-icons/fa";
 import { FaGear } from "react-icons/fa6";
+import { FiPlusSquare } from "react-icons/fi";
 import Link from "next/link";
 import { motion, Variants } from "motion/react";
 
@@ -51,9 +52,15 @@ const OpenMenu = () => {
       icon: <FaUserPlus />,
       label: "Create Character",
     },
+    {
+      href: "/create_lorebook",
+      icon: <FiPlusSquare />,
+      label: "Create Lorebook",
+    },
     { href: "/my_characters", icon: <FaUserFriends />, label: "My Characters" },
     { href: "#", icon: <FaLine />, label: "My Chats" },
     { href: "/my_personas", icon: <FaMask />, label: "My Personas" },
+    { href: "/lorebooks-repository", icon: <FaLine />, label: "Lorebooks" },
     { href: "/settings", icon: <FaGear />, label: "Settings" },
   ];
 
@@ -69,7 +76,7 @@ const OpenMenu = () => {
       <motion.div className="relative overflow-hidden rounded-2xl border border-[rgba(0,255,200,0.25)] bg-[#0b0f0f]/80 backdrop-blur-xl shadow-[0_0_20px_rgba(0,255,200,0.15)] p-4 min-w-[220px]">
         {/* Animated gradient glow */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-transparent via-[rgba(0,255,200,0.05)] to-transparent"
+          className="absolute inset-0 bg-linear-to-br from-transparent via-[rgba(0,255,200,0.05)] to-transparent"
           animate={{
             backgroundPosition: ["0% 0%", "100% 100%"],
           }}

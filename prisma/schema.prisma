@@ -167,13 +167,21 @@ model Chat {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  fromUser  Boolean
-  pinned    Boolean  @default(false)
-  chat      Chat     @relation(fields: [chatId], references: [id])
-  chatId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  content         String
+  originalContent String? // Tracks the original AI response before user correction
+  fromUser        Boolean
+  pinned          Boolean  @default(false)
+  feedback        Feedback @default(NONE)
+  chat            Chat     @relation(fields: [chatId], references: [id])
+  chatId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum Feedback {
+  NONE
+  LIKE
+  DISLIKE
 }
 

@@ -13,10 +13,10 @@ const MarkDown = ({ children }: { children: React.ReactNode }) => {
             />
           ),
           strong: ({ node, ...props }) => (
-            <strong className="font-black text-white" {...props} />
+            <strong className="font-black" {...props} />
           ),
           em: ({ node, ...props }) => (
-            <em className="italic opacity-60" {...props} />
+            <em className="italic opacity-80 decoration-primary/30" {...props} />
           ),
         } as Components
       }

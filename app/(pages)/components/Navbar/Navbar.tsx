@@ -37,12 +37,12 @@ const Navbar = () => {
     };
   }, [isMobileMenuOpen]);
 
-  const navLinks: any[] = [
-    { name: "Repository", href: "/lorebooks-repository" },
-  ];
+  const navLinks: any[] = [];
 
   const dropdownLinks = [
-    { name: "Create", href: "/create_character", icon: <FiPlusSquare /> },
+    { name: "Create Character", href: "/create_character", icon: <FiPlusSquare /> },
+    { name: "Create Lorebook", href: "/create_lorebook", icon: <FiPlusSquare /> },
+    { name: "Lorebooks", href: "/lorebooks-repository", icon: <FiBookOpen /> },
     { name: "My Lorebooks", href: "/lorebooks", icon: <FiBookOpen /> },
     { name: "My Characters", href: "/my_characters", icon: <FiUsers /> },
     { name: "My Personas", href: "/my_personas", icon: <FiCpu /> },

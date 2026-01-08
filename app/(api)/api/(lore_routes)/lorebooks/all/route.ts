@@ -13,6 +13,7 @@ export const GET = async () => {
                         username: true,
                     },
                 },
+                tags: true,
             },
             orderBy: { createdAt: "desc" },
         });

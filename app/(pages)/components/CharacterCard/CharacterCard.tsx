@@ -139,7 +139,8 @@ const CharacterCard = React.memo(function CharacterCard({
               <Image
                 src={image}
                 fill
-                className={`object-cover object-top transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-2xl scale-110 grayscale-[0.5]' : ''}`}
+                className={`object-cover object-top transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-xl scale-110 grayscale-[0.5]' : ''}`}
+                style={shouldBlur ? { willChange: 'filter' } : {}}
                 alt={characterName}
                 sizes="(max-width: 768px) 50vw, 20vw"
               />
@@ -151,7 +152,7 @@ const CharacterCard = React.memo(function CharacterCard({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md"
+                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/60"
                   >
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                       <FiEye className="text-white/40 text-lg" />

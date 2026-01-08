@@ -11,7 +11,7 @@ import React, {
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
-import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack, FaMagic } from "react-icons/fa";
+import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack, FaMagic, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import ChatNavbar from "./ChatNavbar";
 import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
@@ -138,8 +138,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
   }, [allMessages, isFetchingNextPage]);
 
   const userImage = useMemo(
-    () => chat?.user?.id ? `/api/api/authentication_routes/users/picture/${chat.user.id}` : null,
-    [chat?.user?.id]
+    () => chat?.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null,
+    [chat?.user?.id, chat?.user?.profileImage]
   );
 
   const characterImage = useMemo(
@@ -321,6 +321,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
       content: content.trim(),
       fromUser: true,
       pinned: false,
+      feedback: 'NONE',
+      originalContent: null,
       chatId,
       createdAt: now,
       updatedAt: now,
@@ -409,19 +411,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
   }, [chatId, queryClient, pushToUndoStack, confirm]);
 
-  const handleUserRegenerate = useCallback(async (messageId: string) => {
-    if (isSubmitting || !chat) return;
-    const msgIndex = allMessages.findIndex((m) => m.id === messageId);
-    if (msgIndex === -1) return;
-    const userMsg = allMessages[msgIndex];
-    if (!userMsg.fromUser) return;
-
-    pushToUndoStack();
-    const cascade = "?cascade=true";
-    await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
-  }, [isSubmitting, allMessages, chatId, queryClient, pushToUndoStack]);
-
   const handleRegenerate = useCallback(async (messageId: string) => {
     if (isSubmitting || !chat) return;
 
@@ -451,7 +440,49 @@ const Chat = ({ chatId }: { chatId: string }) => {
       console.error(err);
       setIsSubmitting(false);
     }
-  }, [isSubmitting, allMessages, chatId, queryClient, startStreaming]);
+  }, [isSubmitting, allMessages, chat, chatId, queryClient, startStreaming]);
+
+  const handleUserRegenerate = useCallback(async (messageId: string) => {
+    if (isSubmitting || !chat) return;
+    const msgIndex = allMessages.findIndex((m) => m.id === messageId);
+    if (msgIndex === -1) return;
+    const userMsg = allMessages[msgIndex];
+    if (!userMsg.fromUser) return;
+
+    pushToUndoStack();
+    const cascade = "?cascade=true";
+    await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+    await startStreaming(userMsg.content, true);
+  }, [isSubmitting, allMessages, chat, chatId, queryClient, pushToUndoStack, startStreaming]);
+
+  const handleFeedback = useCallback(async (messageId: string, feedback: "LIKE" | "DISLIKE" | "NONE") => {
+    try {
+      // Optimistic update
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: page.data.map((m: any) => m.id === messageId ? { ...m, feedback } : m)
+          }))
+        };
+      });
+
+      const res = await fetch(`/api/messages/${messageId}/feedback`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ feedback }),
+      });
+
+      if (!res.ok) throw new Error();
+      toast.success(feedback === "LIKE" ? "Response Liked" : feedback === "DISLIKE" ? "Response Disliked" : "Feedback cleared");
+    } catch (err) {
+      toast.error("Failed to submit feedback");
+      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+    }
+  }, [chatId, queryClient]);
 
   const handleClearHistory = useCallback(async () => {
     if (!(await confirm({
@@ -478,7 +509,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
       setIsSubmitting(false);
     }
   }, [chatId, queryClient, confirm]);
-
 
   const handleTogglePin = useCallback(async (messageId: string, currentStatus: boolean) => {
     try {
@@ -566,7 +596,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
       }
     } catch (err) {
-      toast.error("Failed to update brain");
+      toast.error("Failed to update memory");
     }
   }, [chatId, queryClient]);
 
@@ -577,7 +607,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   if (isChatLoading || isMessagesLoading)
     return (
       <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-black via-slate-900 to-cyan-900"
+        className="fixed inset-0 flex items-center justify-center bg-linear-to-br from-black via-slate-900 to-cyan-900"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
@@ -675,7 +705,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-slate-950 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-slate-950 to-transparent" />
             </div>
             <div className="p-6">
               <p className="text-white/40 text-[10px] uppercase font-black tracking-widest leading-relaxed line-clamp-4">
@@ -690,7 +720,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="relative w-full max-w-5xl flex flex-col h-[calc(100vh-120px)] sm:h-[calc(100vh-120px)] h-full bg-white/[0.02] border-x border-t sm:border border-white/10 rounded-t-[2rem] sm:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-sm"
+        className="relative w-full max-w-5xl flex flex-col h-full bg-white/2 border-x border-t sm:border border-white/10 rounded-t-4xl sm:rounded-[2.5rem] overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.5)] backdrop-blur-sm"
       >
         {/* Header */}
         <ChatNavbar
@@ -749,6 +779,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   onSaveEdit={handleSaveEdit}
                   onCancelEdit={handleCancelEdit}
                   onTogglePin={handleTogglePin}
+                  onFeedback={handleFeedback}
                 />
               </motion.div>
             ))}
@@ -776,6 +807,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   onRegenerate={() => { }}
                   onUserRegenerate={() => { }}
                   onTogglePin={() => { }}
+                  onFeedback={() => { }}
                 />
               </motion.div>
             )}
@@ -848,6 +880,7 @@ const MessageBubble = React.memo(
     onSaveEdit,
     onCancelEdit,
     onTogglePin,
+    onFeedback,
   }: {
     message: Message;
     userImage: string | null;
@@ -869,6 +902,7 @@ const MessageBubble = React.memo(
     onSaveEdit?: (messageId: string) => void;
     onCancelEdit?: () => void;
     onTogglePin: (messageId: string, currentStatus: boolean) => void;
+    onFeedback: (messageId: string, feedback: "LIKE" | "DISLIKE" | "NONE") => void;
   }) => {
     const [showActions, setShowActions] = useState(false);
     const imageSrc = isUserMessage
@@ -902,7 +936,7 @@ const MessageBubble = React.memo(
                 onProfileClick(e);
               }
             }}
-            className="relative hover:scale-105 transition-transform flex-shrink-0 group/avatar"
+            className="relative hover:scale-105 transition-transform shrink-0 group/avatar"
           >
             <Image
               src={imageSrc}
@@ -930,7 +964,7 @@ const MessageBubble = React.memo(
             width={40}
             height={40}
             alt={altText}
-            className="w-10 h-10 rounded-full border border-white/10 object-cover flex-shrink-0"
+            className="w-10 h-10 rounded-full border border-white/10 object-cover shrink-0"
           />
         )}
 
@@ -940,13 +974,13 @@ const MessageBubble = React.memo(
           {/* Message Content */}
           <div
             onClick={handleTap}
-            className={`relative rounded-[2rem] px-6 py-4 transition-all duration-300 cursor-pointer ${isUserMessage
-              ? "bg-primary text-slate-950 font-medium rounded-tr-md shadow-[0_10px_30px_rgba(34,211,238,0.15)]"
-              : "bg-white/5 border border-white/10 text-white/90 rounded-tl-md backdrop-blur-sm"
+            className={`relative rounded-4xl px-6 py-4 transition-all duration-300 cursor-pointer ${isUserMessage
+              ? "bg-linear-to-br from-cyan-300 via-primary to-cyan-400 text-slate-950 font-bold shadow-[0_10px_40px_rgba(34,211,238,0.25)] ring-1 ring-white/20"
+              : "bg-white/5 border border-white/10 text-white/95 rounded-tl-md backdrop-blur-md shadow-xl"
               }`}
           >
             <div className={`absolute top-0 ${isUserMessage ? '-right-1' : '-left-1'} w-3 h-3 bg-inherit transform rotate-45`} />
-            {isEditing && isUserMessage ? (
+            {isEditing ? (
               <div className="space-y-3">
                 <textarea
                   value={editContent}
@@ -991,15 +1025,13 @@ const MessageBubble = React.memo(
               className={`flex gap-1.5 mt-3 transition-all duration-200 ${showActions ? "opacity-100" : "opacity-0 sm:group-hover:opacity-100"
                 } ${isUserMessage ? "justify-end" : "justify-start"}`}
             >
-              {isUserMessage && (
-                <button
-                  onClick={() => onEdit(message.id, message.content)}
-                  className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 transition-all text-white/60 hover:text-white"
-                  title="Edit"
-                >
-                  <FaEdit size={12} />
-                </button>
-              )}
+              <button
+                onClick={() => onEdit(message.id, message.content)}
+                className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 transition-all text-white/60 hover:text-white"
+                title="Edit"
+              >
+                <FaEdit size={12} />
+              </button>
 
               <button
                 onClick={() => onDelete(message.id)}
@@ -1039,6 +1071,31 @@ const MessageBubble = React.memo(
               >
                 <FaThumbtack size={12} className={message.pinned ? "" : "-rotate-45"} />
               </button>
+
+              {!isUserMessage && (
+                <>
+                  <button
+                    onClick={() => onFeedback(message.id, message.feedback === "LIKE" ? "NONE" : "LIKE")}
+                    className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.feedback === "LIKE"
+                      ? "bg-green-500/20 border-green-500/40 text-green-400"
+                      : "bg-white/10 border-white/10 text-white/60 hover:bg-green-500/10 hover:text-green-400"
+                      }`}
+                    title="Like response"
+                  >
+                    <FaThumbsUp size={12} />
+                  </button>
+                  <button
+                    onClick={() => onFeedback(message.id, message.feedback === "DISLIKE" ? "NONE" : "DISLIKE")}
+                    className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.feedback === "DISLIKE"
+                      ? "bg-red-500/20 border-red-500/40 text-red-400"
+                      : "bg-white/10 border-white/10 text-white/60 hover:bg-red-500/10 hover:text-red-400"
+                      }`}
+                    title="Dislike response"
+                  >
+                    <FaThumbsDown size={12} />
+                  </button>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -1098,7 +1155,7 @@ const ChatInput = React.memo(({
             rows={1}
             placeholder="Talk to character..."
             disabled={isSubmitting}
-            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-[1.5rem] sm:rounded-[2rem] px-6 sm:px-8 py-4 sm:py-5 pr-14 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-[border-color,background-color] duration-300 text-sm leading-relaxed"
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-3xl sm:rounded-4xl px-6 sm:px-8 py-4 sm:py-5 pr-14 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-[border-color,background-color] duration-300 text-sm leading-relaxed"
             style={{ height: '56px', minHeight: '56px', maxHeight: '200px', overflowY: 'auto' }}
           />
           <div className="absolute top-[18px] left-3 w-1 h-5 bg-primary/40 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
@@ -1109,7 +1166,7 @@ const ChatInput = React.memo(({
           whileTap={{ scale: 0.95 }}
           onClick={onContinue}
           disabled={isSubmitting}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl sm:rounded-4xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
           title="Continue Story (AI Narration)"
         >
           <FaMagic size={18} className="relative z-10" />
@@ -1125,7 +1182,7 @@ const ChatInput = React.memo(({
           whileTap={{ scale: 0.95 }}
           onClick={handleInternalSubmit}
           disabled={!message.trim() || isSubmitting}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-[1.5rem] sm:rounded-[2rem] bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl sm:rounded-4xl bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20"
         >
           <FaPaperPlane size={18} />
         </motion.button>

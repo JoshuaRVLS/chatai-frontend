@@ -17,6 +17,7 @@ interface Lorebook {
     user: {
         username: string;
     };
+    tags: { id: string; name: string }[];
     createdAt: string;
 }
 
@@ -24,6 +25,9 @@ const LorebooksRepository = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [minEntries, setMinEntries] = useState(0);
     const [showFilters, setShowFilters] = useState(false);
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [tagSearchQuery, setTagSearchQuery] = useState("");
+    const dropdownRef = React.useRef<HTMLDivElement>(null);
 
     const { data: lorebooks, isPending, error } = useQuery<Lorebook[]>({
         queryKey: ["all-lorebooks"],
@@ -34,6 +38,23 @@ const LorebooksRepository = () => {
             return json.data;
         },
     });
+
+    const allTags = useMemo(() => {
+        if (!lorebooks) return [];
+        const tags = new Set<string>();
+        lorebooks.forEach(lb => {
+            lb.tags?.forEach((tag) => tags.add(tag.name));
+        });
+        return Array.from(tags).sort();
+    }, [lorebooks]);
+
+    const filteredTags = useMemo(() => {
+        const search = tagSearchQuery.toLowerCase();
+        return allTags.filter(tag =>
+            tag.toLowerCase().includes(search) &&
+            !selectedTags.includes(tag)
+        );
+    }, [allTags, tagSearchQuery, selectedTags]);
 
     // Filter lorebooks
     const filteredLorebooks = useMemo(() => {
@@ -48,9 +69,14 @@ const LorebooksRepository = () => {
 
             const matchesMinEntries = lb._count.entries >= minEntries;
 
-            return matchesSearch && matchesMinEntries;
+            const matchesTags = selectedTags.length === 0 ||
+                selectedTags.every(selectedTag =>
+                    lb.tags?.some((tag) => tag.name === selectedTag)
+                );
+
+            return matchesSearch && matchesMinEntries && matchesTags;
         });
-    }, [lorebooks, searchQuery, minEntries]);
+    }, [lorebooks, searchQuery, minEntries, selectedTags]);
 
     const container = {
         hidden: { opacity: 0 },
@@ -142,38 +168,95 @@ const LorebooksRepository = () => {
                     <AnimatePresence>
                         {showFilters && (
                             <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="overflow-hidden"
+                                initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+                                animate={{
+                                    opacity: 1,
+                                    height: "auto",
+                                    transitionEnd: { overflow: "visible" }
+                                }}
+                                exit={{ opacity: 0, height: 0, overflow: "hidden" }}
                             >
                                 <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-                                    <div>
-                                        <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 block">
-                                            Minimum Entries: {minEntries}
-                                        </label>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max="50"
-                                            value={minEntries}
-                                            onChange={(e) => setMinEntries(parseInt(e.target.value))}
-                                            className="w-full accent-primary"
-                                        />
-                                        <div className="flex justify-between text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1">
-                                            <span>0</span>
-                                            <span>50+</span>
+                                    <div className="space-y-6">
+                                        <div>
+                                            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-2 block">
+                                                Minimum Entries: {minEntries}
+                                            </label>
+                                            <input
+                                                type="range"
+                                                min="0"
+                                                max="50"
+                                                value={minEntries}
+                                                onChange={(e) => setMinEntries(parseInt(e.target.value))}
+                                                className="w-full accent-primary"
+                                            />
+                                            <div className="flex justify-between text-[9px] text-white/20 font-bold uppercase tracking-widest mt-1">
+                                                <span>0</span>
+                                                <span>50+</span>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {minEntries > 0 && (
-                                        <button
-                                            onClick={() => setMinEntries(0)}
-                                            className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
-                                        >
-                                            Reset Filters
-                                        </button>
-                                    )}
+                                        {/* Tag Filtering UI */}
+                                        <div className="space-y-3">
+                                            <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest block">
+                                                Filter by Tags
+                                            </label>
+                                            <div className="flex flex-wrap gap-2 mb-3">
+                                                {selectedTags.map(tag => (
+                                                    <span
+                                                        key={tag}
+                                                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-white/60 uppercase tracking-wider"
+                                                    >
+                                                        {tag}
+                                                        <button
+                                                            onClick={() => setSelectedTags(prev => prev.filter(t => t !== tag))}
+                                                            className="hover:bg-primary/30 rounded-full p-0.5 transition-colors"
+                                                        >
+                                                            <FiX size={12} />
+                                                        </button>
+                                                    </span>
+                                                ))}
+                                            </div>
+
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    value={tagSearchQuery}
+                                                    onChange={(e) => setTagSearchQuery(e.target.value)}
+                                                    placeholder="Search tags..."
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/20 outline-none focus:border-primary/50 transition-all font-bold"
+                                                />
+                                                {tagSearchQuery && filteredTags.length > 0 && (
+                                                    <div className="absolute top-full left-0 right-0 mt-2 max-h-48 overflow-y-auto bg-zinc-900 border border-white/10 rounded-xl z-50 shadow-2xl">
+                                                        {filteredTags.map(tag => (
+                                                            <button
+                                                                key={tag}
+                                                                onClick={() => {
+                                                                    setSelectedTags(prev => [...prev, tag]);
+                                                                    setTagSearchQuery("");
+                                                                }}
+                                                                className="w-full px-4 py-2 text-left text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                                                            >
+                                                                {tag}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {(minEntries > 0 || selectedTags.length > 0) && (
+                                            <button
+                                                onClick={() => {
+                                                    setMinEntries(0);
+                                                    setSelectedTags([]);
+                                                }}
+                                                className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline"
+                                            >
+                                                Reset Filters
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
@@ -255,6 +338,25 @@ const LorebooksRepository = () => {
                                                         </span>
                                                     </div>
                                                 </div>
+
+                                                {/* Tags */}
+                                                {lorebook.tags && lorebook.tags.length > 0 && (
+                                                    <div className="flex flex-wrap gap-1.5 pt-2">
+                                                        {lorebook.tags.slice(0, 3).map(tag => (
+                                                            <span
+                                                                key={tag.id}
+                                                                className="px-1.5 py-0.5 bg-white/5 border border-white/5 rounded-md text-[8px] font-black text-white/40 uppercase tracking-tighter"
+                                                            >
+                                                                {tag.name}
+                                                            </span>
+                                                        ))}
+                                                        {lorebook.tags.length > 3 && (
+                                                            <span className="px-1.5 py-0.5 text-[8px] font-bold text-white/20 uppercase">
+                                                                +{lorebook.tags.length - 3}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Hover Glow */}
