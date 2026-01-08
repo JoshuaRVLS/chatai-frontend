@@ -12,4 +12,6 @@ jobs:
       - name: Build and Deploy
         run: |
           cd /root/web
+          git fetch origin remake
+          git reset --hard origin/remake
           bash scripts/deploy.sh

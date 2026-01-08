@@ -8,8 +8,9 @@ echo "🚀 Starting deployment..."
 
 cd $PROJECT_DIR || exit
 
-echo "📥 Pulling latest changes..."
-git pull origin remake
+echo "📥 Syncing with remote..."
+git fetch origin remake
+git reset --hard origin/remake
 
 echo "📦 Installing dependencies..."
 pnpm install
