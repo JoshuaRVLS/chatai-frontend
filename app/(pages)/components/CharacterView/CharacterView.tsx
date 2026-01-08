@@ -97,16 +97,16 @@ const CharacterView = ({ id }: { id: string }) => {
       {/* Dynamic Header Background */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="relative z-10 max-w-[1600px] mx-auto px-6 pt-24 pb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
           {/* Left Sidebar - Visuals & Actions */}
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4 xl:col-span-3 space-y-8">
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => shouldBlur && setTempUnblur(true)}
-              className={`relative w-full aspect-3/4 max-w-sm mx-auto overflow-hidden rounded-3xl border border-white/10 group shadow-2xl ${shouldBlur ? 'cursor-pointer' : ''}`}
+              className={`relative w-full aspect-3/4 overflow-hidden rounded-3xl border border-white/10 group shadow-2xl ${shouldBlur ? 'cursor-pointer' : ''}`}
             >
               <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               <Image
@@ -182,7 +182,7 @@ const CharacterView = ({ id }: { id: string }) => {
           </div>
 
           {/* Right Content - Details */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 xl:col-span-9 space-y-6">
             <motion.div
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
