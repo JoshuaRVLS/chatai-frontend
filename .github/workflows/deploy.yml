@@ -2,15 +2,14 @@ name: Deploy to VPS
 
 on:
   push:
-    branches:
-      - remake
+    branches: [ "remake" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
