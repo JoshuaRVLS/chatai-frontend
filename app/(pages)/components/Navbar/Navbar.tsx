@@ -129,9 +129,9 @@ const Navbar = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.98 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute right-0 top-full pt-2 w-56 z-60"
+                        className="absolute right-0 top-full pt-2 w-56 lg:w-72 z-60"
                       >
-                        <div className="bg-zinc-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] lg:w-72">
+                        <div className="bg-zinc-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] w-full">
                           {/* Header section in dropdown */}
                           <div className="px-4 py-3 lg:px-6 lg:py-4 border-b border-white/5 bg-white/2">
                             <p className="text-[10px] lg:text-xs font-black text-white uppercase tracking-tight truncate">{session.user.name || (session.user as any).username}</p>

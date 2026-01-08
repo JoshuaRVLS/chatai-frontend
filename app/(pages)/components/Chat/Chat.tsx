@@ -228,7 +228,18 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleProfileClick = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    setModalPosition({ x: rect.left - 100, y: rect.top - 50 });
+    const modalWidth = 400;
+    let x = rect.left - 100;
+
+    // Safety: prevent right overflow
+    if (typeof window !== "undefined") {
+      if (x + modalWidth > window.innerWidth - 20) {
+        x = window.innerWidth - modalWidth - 20;
+      }
+      if (x < 20) x = 20;
+    }
+
+    setModalPosition({ x, y: rect.top - 50 });
     setShowProfileModal(true);
   }, []);
 
