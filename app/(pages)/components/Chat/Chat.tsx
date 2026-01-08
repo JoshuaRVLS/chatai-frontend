@@ -161,6 +161,40 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   }, [allMessages, isFetchingNextPage]);
 
+  // Safety watchdog for isSubmitting state
+  useEffect(() => {
+    if (!isSubmitting) return;
+    const timer = setTimeout(() => {
+      console.warn("Safety trigger: Clearing stuck processing state");
+      setIsSubmitting(false);
+      setStreamingMessage(null);
+    }, 25000); // 25s global fail-safe
+    return () => clearTimeout(timer);
+  }, [isSubmitting]);
+
+  // Auto-scroll tracking
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
+    // If user is within 150px of bottom, enable auto-scroll
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 150;
+    setShouldAutoScroll(isAtBottom);
+  }, []);
+
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    if (shouldAutoScroll) {
+      scrollToBottom();
+    }
+  }, [allMessages.length, streamingMessage, shouldAutoScroll, scrollToBottom]);
+
   const userImage = useMemo(
     () => chat?.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null,
     [chat?.user?.id, chat?.user?.profileImage]
@@ -170,12 +204,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     () => chat?.character?.id ? `/api/image/${chat.character.id}` : null,
     [chat?.character?.id]
   );
-
-  const scrollToBottom = useCallback(() => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  }, []);
 
   const handleProfileClick = useCallback((e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -297,84 +325,137 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const startStreaming = async (content: string, isRegenerate = false, isContinue = false) => {
     try {
-      setStreamingMessage("");
+      const controller = new AbortController();
+      const totalTimeout = setTimeout(() => controller.abort(), 120000); // 2 min hard cap
+
       const aiRes = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatId, content, model: selectedModel, regenerate: isRegenerate, continue: isContinue }),
+        signal: controller.signal
       });
+
+      clearTimeout(totalTimeout);
 
       if (!aiRes.ok || !aiRes.body) throw new Error("AI streaming failed");
 
       const reader = aiRes.body.getReader();
       const decoder = new TextDecoder();
       let fullContent = "";
-
       let isDone = false;
       let buffer = "";
+      let lastActivity = Date.now();
 
-      while (!isDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      // BRUTAL WATCHDOG: Force abort if no data received for 10 seconds
+      const watchdog = setInterval(() => {
+        if (Date.now() - lastActivity > 10000) {
+          console.warn("Watchdog: Stream inactivity detected. Aborting.");
+          controller.abort();
+          clearInterval(watchdog);
+        }
+      }, 2000);
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
-
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
-
-          const dataStr = trimmedLine.slice(6).trim();
-          if (dataStr === "[DONE]") {
+      try {
+        while (!isDone) {
+          const { done, value } = await reader.read();
+          if (done) {
             isDone = true;
             break;
           }
 
-          try {
-            const parsed = JSON.parse(dataStr);
-            const delta = parsed.choices[0]?.delta?.content || "";
-            if (delta) {
-              fullContent += delta;
-              setStreamingMessage(fullContent);
-              scrollToBottom();
+          lastActivity = Date.now();
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
+
+            const dataStr = trimmedLine.slice(6).trim();
+            if (dataStr === "[DONE]") {
+              isDone = true;
+              break;
             }
-          } catch (e) {
-            // Likely partial JSON or metadata we don't need
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              const delta = parsed.choices[0]?.delta?.content || "";
+              if (delta) {
+                fullContent += delta;
+                setStreamingMessage(fullContent);
+                scrollToBottom();
+              }
+            } catch (e) { }
           }
         }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') throw err;
+      } finally {
+        clearInterval(watchdog);
       }
 
-      // Check for any remaining content in the buffer after the loop
+      // Buffer cleanup
       if (buffer.startsWith("data: ")) {
         const dataStr = buffer.slice(6).trim();
         if (dataStr !== "[DONE]") {
           try {
             const parsed = JSON.parse(dataStr);
             const delta = parsed.choices[0]?.delta?.content || "";
-            if (delta) {
-              fullContent += delta;
-              setStreamingMessage(fullContent);
-            }
+            if (delta) fullContent += delta;
           } catch (e) { }
         }
       }
 
-      // Save final AI message
-      await fetch("/api/messages/ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId, content: fullContent }),
+      // CACHE OPTIMISTIC UPDATE: Bridge the gap before clearing stream
+      const aiOptimisticId = `ai-temp-${Date.now()}`;
+      const aiOptimisticMessage: Message = {
+        id: aiOptimisticId,
+        content: fullContent,
+        fromUser: false,
+        pinned: false,
+        feedback: 'NONE',
+        originalContent: null,
+        chatId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      queryClient.setQueryData(["messages", chatId], (old: any) => {
+        if (!old) return old;
+        const newPages = [...old.pages];
+        newPages[0] = {
+          ...newPages[0],
+          data: [aiOptimisticMessage, ...newPages[0].data]
+        };
+        return { ...old, pages: newPages };
       });
 
-      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      // RESET UI IMMEDIATELY after cache is primed
+      setStreamingMessage(null);
+      setIsSubmitting(false);
+      setTimeout(() => scrollToBottom(), 100);
 
-      // Trigger background processing (summarization, memory extraction) - fire and forget
-      fetch("/api/background", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chatId }),
-      }).catch(console.error);
+      // Background Save (Non-blocking)
+      (async () => {
+        try {
+          const res = await fetch("/api/messages/ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chatId, content: fullContent }),
+          });
+
+          if (res.ok) {
+            queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+          }
+
+          fetch("/api/background", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chatId })
+          }).catch(() => { });
+        } catch (e) { }
+      })();
     } catch (err) {
       console.error(err);
       throw err;
@@ -387,11 +468,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const handleContinue = useCallback(async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
+    setShouldAutoScroll(true);
     try {
       await startStreaming("", false, true);
     } catch (err) {
       console.error(err);
+    } finally {
       setIsSubmitting(false);
+      setStreamingMessage(null);
     }
   }, [isSubmitting, startStreaming]);
 
@@ -399,6 +483,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
     if (!content.trim() || !user?.id || isSubmitting) return;
 
     setIsSubmitting(true);
+    hasScrolledToBottom.current = false; // Reset scroll lock to allow auto-scroll for new interaction
 
     const now = new Date();
     const optimisticMessage: Message = {
@@ -426,7 +511,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
     scrollToBottom();
 
     try {
-      // 1. Save user message
+      // 1. Save user message with timeout
+      const controller = new AbortController();
+      const saveTimeout = setTimeout(() => controller.abort(), 10000);
       const saveRes = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -436,7 +523,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
           userId: user.id,
           fromUser: true,
         }),
+        signal: controller.signal
       });
+      clearTimeout(saveTimeout);
+
       if (!saveRes.ok) throw new Error("Failed to send message");
 
       // 2. Start streaming AI response
@@ -452,8 +542,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
         };
         return { ...old, pages: newPages };
       });
+      throw err;
+    } finally {
       setIsSubmitting(false);
-      throw err; // Propagate to ChatInput to restore message
+      setStreamingMessage(null);
     }
   }, [user?.id, chatId, isSubmitting, queryClient, scrollToBottom, startStreaming]);
 
@@ -506,6 +598,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
     const hasUserMessage = lastUserMsg && lastUserMsg.fromUser;
 
     setIsSubmitting(true);
+    setShouldAutoScroll(true);
 
     try {
       await fetch(`/api/messages/${messageId}`, { method: "DELETE" });
@@ -521,15 +614,15 @@ const Chat = ({ chatId }: { chatId: string }) => {
       });
 
       if (hasUserMessage) {
-        // Regenerate based on user's last message
         await startStreaming(lastUserMsg.content, true);
       } else {
-        // This was a Continue-generated message, use Continue mode for regeneration
         await startStreaming("", false, true);
       }
     } catch (err) {
       console.error(err);
+    } finally {
       setIsSubmitting(false);
+      setStreamingMessage(null);
     }
   }, [isSubmitting, allMessages, chat, chatId, queryClient, startStreaming]);
 
@@ -541,10 +634,19 @@ const Chat = ({ chatId }: { chatId: string }) => {
     if (!userMsg.fromUser) return;
 
     pushToUndoStack();
+    setIsSubmitting(true);
+    setShouldAutoScroll(true);
     const cascade = "?cascade=true";
-    await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
-    await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
-    await startStreaming(userMsg.content, true);
+    try {
+      await fetch(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+      await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      await startStreaming(userMsg.content, true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+      setStreamingMessage(null);
+    }
   }, [isSubmitting, allMessages, chat, chatId, queryClient, pushToUndoStack, startStreaming]);
 
   const handleFeedback = useCallback(async (messageId: string, feedback: "LIKE" | "DISLIKE" | "NONE") => {
@@ -816,6 +918,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         {/* Messages */}
         <div
           ref={scrollContainerRef}
+          onScroll={handleScroll}
           className="flex-1 overflow-y-auto px-6 sm:px-12 pt-6 sm:pt-10 space-y-4 sm:space-y-6 scrollbar-hide"
         >
           {/* Load More Sentinel */}
