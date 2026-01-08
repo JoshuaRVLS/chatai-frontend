@@ -23,18 +23,19 @@ import AiSettings from "./AiSettings";
 import Safety from "./Safety";
 
 const Settings = () => {
-  const { user } = useContext(AuthContext);
+  const { user, status: authStatus } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("profile");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const router = useRouter();
 
-  const { data, isPending, error } = useQuery<User & { profileImage: Image; userSettings: any }>({
+  const { data, isPending, error, refetch } = useQuery<User & { profileImage: Image; userSettings: any }>({
     queryKey: ["settingsData", user?.id],
     queryFn: () =>
-      fetch(`/api/users/${user?.id}`).then((res) =>
-        res.json().then((data) => data.data)
-      ),
-    enabled: !!user?.id,
+      fetch(`/api/users/${user?.id}`).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch settings");
+        return res.json().then((data) => data.data);
+      }),
+    enabled: !!user?.id && authStatus === "authenticated",
   });
 
   const handleDeleteAccount = async () => {
@@ -62,7 +63,7 @@ const Settings = () => {
     { id: "security", label: "Security", icon: <FiLock />, description: "Password and safety" },
   ];
 
-  if (isPending) {
+  if (isPending || authStatus === "loading") {
     return (
       <div className="min-h-screen pt-32 px-6 flex justify-center">
         <div className="w-full max-w-5xl animate-pulse space-y-8">
@@ -71,6 +72,24 @@ const Settings = () => {
             <div className="h-64 bg-white/5 rounded-2xl" />
             <div className="h-[500px] bg-white/5 rounded-2xl" />
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-32 px-6 flex flex-col items-center justify-center gap-6">
+        <div className="p-8 rounded-3xl bg-error/10 border border-error/20 text-center space-y-4 max-w-md">
+          <FiShield className="text-4xl text-error mx-auto" />
+          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">System Access Interrupted</h2>
+          <p className="text-zinc-500 text-sm">We encountered a protocol error while retrieving your credentials. This may be due to a synchronization delay.</p>
+          <button
+            onClick={() => refetch()}
+            className="px-6 py-2 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-colors"
+          >
+            Retry Protocol
+          </button>
         </div>
       </div>
     );
@@ -148,9 +167,9 @@ const Settings = () => {
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 className="card-premium min-h-[500px] border border-white/5"
               >
-                {activeTab === "profile" && <Profile data={data!} />}
-                {activeTab === "ai-settings" && <AiSettings data={data!} />}
-                {activeTab === "safety" && <Safety data={data!} />}
+                {activeTab === "profile" && data && <Profile data={data} />}
+                {activeTab === "ai-settings" && data && <AiSettings data={data} />}
+                {activeTab === "safety" && data && <Safety data={data} />}
                 {activeTab === "security" && <Security />}
               </motion.div>
             </AnimatePresence>

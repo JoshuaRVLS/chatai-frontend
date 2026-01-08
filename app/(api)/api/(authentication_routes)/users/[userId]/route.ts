@@ -18,7 +18,6 @@ export const GET =
               id: true,
               mimetype: true,
               userId: true
-              // Excluding data (Bytes) for performance
             }
           }
         }
@@ -36,7 +35,13 @@ export const GET =
       } as any;
     }
 
-    return NextResponse.json({ success: true, data: user }, { status: 200 });
+    const responseData = {
+      ...user,
+      // Generic image field for components expecting it
+      image: user.profileImage ? `/api/users/picture/${user.id}` : null
+    };
+
+    return NextResponse.json({ success: true, data: responseData }, { status: 200 });
   };
 
 export const DELETE =
