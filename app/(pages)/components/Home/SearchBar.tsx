@@ -2,12 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { FiSearch, FiX, FiTrendingUp, FiUser, FiHash, FiEye } from "react-icons/fi";
+import { FiSearch, FiX, FiTrendingUp, FiEye } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
 
 interface SearchBarProps {
-    characters: any[];
     onSearch: (query: string) => void;
 }
 
@@ -65,9 +64,9 @@ const SearchSuggestionItem = ({
                     )}
                 </p>
                 <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                    <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author.username}</span>
+                    <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author?.username}</span>
                     <div className="hidden xs:flex gap-1.5">
-                        {char.tags.slice(0, 1).map((tag: any) => (
+                        {char.tags?.slice(0, 1).map((tag: any) => (
                             <span key={tag.id} className="text-[8px] sm:text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
                         ))}
                     </div>
@@ -80,10 +79,11 @@ const SearchSuggestionItem = ({
     );
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { settings } = useSettings();
@@ -99,25 +99,36 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
     }, []);
 
     useEffect(() => {
-        if (query.trim().length > 0) {
-            const filtered = characters
-                .filter((char) => {
-                    const matchesSearch = char.name.toLowerCase().includes(query.toLowerCase()) ||
-                        char.tags.some((tag: any) => tag.name.toLowerCase().includes(query.toLowerCase()));
-
-                    // NSFW Filtering
-                    if (!settings?.showNsfw && char.isNsfw) return false;
-
-                    return matchesSearch;
-                })
-                .slice(0, 6);
-            setSuggestions(filtered);
-            setIsOpen(true);
-        } else {
+        if (query.trim().length === 0) {
             setSuggestions([]);
             setIsOpen(false);
+            return;
         }
-    }, [query, characters, settings?.showNsfw]);
+
+        const fetchSuggestions = async () => {
+            setLoading(true);
+            try {
+                const params = new URLSearchParams({
+                    search: query,
+                    pageSize: "6",
+                    showAll: settings?.showNsfw ? "true" : "false"
+                });
+                const res = await fetch(`/api/characters?${params.toString()}`);
+                const data = await res.json();
+                if (data.success) {
+                    setSuggestions(data.data);
+                    setIsOpen(true);
+                }
+            } catch (error) {
+                console.error("Failed to fetch suggestions:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const timer = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(timer);
+    }, [query, settings?.showNsfw]);
 
     const handleSelect = (charId: string) => {
         router.push(`/character/${charId}`);
@@ -137,7 +148,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ characters, onSearch }) => {
                 <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
 
                 <div className="relative flex items-center bg-[#0f172a]/40 border border-white/5 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2 backdrop-blur-2xl group-focus-within:border-primary/30 transition-all duration-500 shadow-2xl">
-                    <FiSearch className="ml-3 sm:ml-5 text-white/20 group-focus-within:text-primary transition-colors text-lg sm:text-xl" />
+                    <FiSearch className={`ml-3 sm:ml-5 transition-colors text-lg sm:text-xl ${loading ? 'text-primary animate-pulse' : 'text-white/20 group-focus-within:text-primary'}`} />
 
                     <input
                         type="text"
