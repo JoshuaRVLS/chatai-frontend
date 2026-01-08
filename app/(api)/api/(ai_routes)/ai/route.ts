@@ -309,7 +309,9 @@ ${feedbackSteering ? `[USER PREFERENCES & STEERING]\n${feedbackSteering}` : ''}
           finalConstraint,
           ...(isRegenerate ? [{
             role: 'system',
-            content: '[REGENERATE] Provide a completely DIFFERENT perspective/response. Stay brief.'
+            content: `[REGENERATE REQUEST] The user wants a completely DIFFERENT response. 
+${feedbackSteering ? `CRITICAL: Review [USER PREFERENCES & STEERING] above. AVOID patterns the user DISLIKED. Lean into patterns the user LIKED.` : ''}
+Provide a fresh perspective, different tone, or different angle. Do NOT repeat the previous response structure. Stay brief but impactful.`
           }] : []),
           ...(isContinue ? [{
             role: 'user',

@@ -64,6 +64,30 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const { settings } = useSettings();
   const [tempUnblurMessages, setTempUnblurMessages] = useState<{ [key: string]: boolean }>({});
   const [tempUnblurModal, setTempUnblurModal] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+
+  const fetchSuggestions = async () => {
+    if (isGeneratingSuggestions) return;
+    setIsGeneratingSuggestions(true);
+    try {
+      const res = await fetch("/api/suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSuggestions(data.suggestions);
+      } else {
+        toast.error("Failed to get ideas");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    } finally {
+      setIsGeneratingSuggestions(false);
+    }
+  };
 
   const { data: chat, isLoading: isChatLoading, error: chatError } = useQuery<ChatData>({
     queryKey: ["chat", chatId],
@@ -166,6 +190,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
     setIsDragging(true);
   }, []);
 
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (!modalRef.current || e.touches.length !== 1) return;
+    const touch = e.touches[0];
+    const rect = modalRef.current.getBoundingClientRect();
+    setDragOffset({ x: touch.clientX - rect.left, y: touch.clientY - rect.top });
+    setIsDragging(true);
+  }, []);
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging) return;
@@ -177,17 +209,35 @@ const Chat = ({ chatId }: { chatId: string }) => {
     [isDragging, dragOffset]
   );
 
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      setModalPosition({
+        x: touch.clientX - dragOffset.x,
+        y: touch.clientY - dragOffset.y,
+      });
+    },
+    [isDragging, dragOffset]
+  );
+
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
+  const handleTouchEnd = useCallback(() => setIsDragging(false), []);
+
   useEffect(() => {
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchend", handleTouchEnd);
       return () => {
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
+        document.removeEventListener("touchmove", handleTouchMove);
+        document.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, [isDragging, handleMouseMove, handleMouseUp]);
+  }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
   // Scroll to bottom on initial load
   useEffect(() => {
@@ -418,7 +468,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
     if (msgIndex === -1) return;
 
     const lastUserMsg = allMessages[msgIndex - 1];
-    if (!lastUserMsg || !lastUserMsg.fromUser) return;
+    const hasUserMessage = lastUserMsg && lastUserMsg.fromUser;
 
     setIsSubmitting(true);
 
@@ -435,7 +485,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
         };
       });
 
-      await startStreaming(lastUserMsg.content, true);
+      if (hasUserMessage) {
+        // Regenerate based on user's last message
+        await startStreaming(lastUserMsg.content, true);
+      } else {
+        // This was a Continue-generated message, use Continue mode for regeneration
+        await startStreaming("", false, true);
+      }
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
@@ -659,6 +715,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
               cursor: isDragging ? "grabbing" : "grab",
             }}
             onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
           >
             <div className="flex items-center justify-between p-6 border-b border-white/5">
               <div className="flex items-center gap-3">
@@ -831,7 +888,17 @@ const Chat = ({ chatId }: { chatId: string }) => {
         </div>
 
         {/* Input area */}
-        <ChatInput onSubmit={handleSubmit} isSubmitting={isSubmitting} onContinue={handleContinue} />
+        <ChatInput
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          onContinue={handleContinue}
+          suggestions={suggestions}
+          isGeneratingSuggestions={isGeneratingSuggestions}
+          onGetIdeas={fetchSuggestions}
+          onSelectSuggestion={(s) => {
+            setSuggestions([]); // Clear suggestions once one is selected
+          }}
+        />
         <p className="hidden sm:block text-center text-[9px] font-black text-white/10 uppercase tracking-[0.4em] mt-4 italic">Secure AI Chat Interface • Version 2.0</p>
       </motion.div>
 
@@ -1109,11 +1176,19 @@ MessageBubble.displayName = "MessageBubble";
 const ChatInput = React.memo(({
   onSubmit,
   onContinue,
-  isSubmitting
+  isSubmitting,
+  suggestions,
+  isGeneratingSuggestions,
+  onGetIdeas,
+  onSelectSuggestion
 }: {
   onSubmit: (content: string) => Promise<void>;
   onContinue: () => Promise<void>;
   isSubmitting: boolean;
+  suggestions: string[];
+  isGeneratingSuggestions: boolean;
+  onGetIdeas: () => void;
+  onSelectSuggestion: (s: string) => void;
 }) => {
   const [message, setMessage] = useState("");
 
@@ -1144,48 +1219,108 @@ const ChatInput = React.memo(({
   };
 
   return (
-    <div className="p-4 sm:p-8 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-0 sm:pb-0">
-      <div className="relative flex items-end gap-2 sm:gap-3 max-w-4xl mx-auto">
-        <div className="relative flex-1 group">
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onInput={handleInput}
-            rows={1}
-            placeholder="Talk to character..."
+    <div className="p-4 sm:p-8 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-4 sm:pb-0">
+      <div className="max-w-4xl mx-auto">
+        {/* Suggestion Chips */}
+        <AnimatePresence>
+          {suggestions.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="flex flex-nowrap gap-2 mb-4 overflow-x-auto hide-scrollbar scroll-smooth"
+            >
+              {suggestions.map((s, i) => (
+                <motion.button
+                  key={i}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setMessage(s);
+                    onSelectSuggestion(s);
+                  }}
+                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap shrink-0"
+                >
+                  {s}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile Tool Row (Hidden on Desktop) */}
+        <div className="flex sm:hidden items-center gap-2 mb-3">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onGetIdeas}
+            disabled={isSubmitting || isGeneratingSuggestions}
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
+          >
+            <FaBrain size={14} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
+            Ideas
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onContinue}
             disabled={isSubmitting}
-            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-3xl sm:rounded-4xl px-6 sm:px-8 py-4 sm:py-5 pr-14 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-[border-color,background-color] duration-300 text-sm leading-relaxed"
-            style={{ height: '56px', minHeight: '56px', maxHeight: '200px', overflowY: 'auto' }}
-          />
-          <div className="absolute top-[18px] left-3 w-1 h-5 bg-primary/40 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity" />
+            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
+          >
+            <FaMagic size={14} />
+            Continue
+          </motion.button>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onContinue}
-          disabled={isSubmitting}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl sm:rounded-4xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
-          title="Continue Story (AI Narration)"
-        >
-          <FaMagic size={18} className="relative z-10" />
-          <motion.div
-            className="absolute inset-0 bg-indigo-500/10"
-            animate={{ opacity: [0, 0.2, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          />
-        </motion.button>
+        <div className="relative flex items-end gap-2 sm:gap-3">
+          <div className="relative flex-1 group">
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onInput={handleInput}
+              rows={1}
+              placeholder="Talk to character..."
+              disabled={isSubmitting}
+              className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-2xl sm:rounded-4xl px-5 sm:px-8 py-3.5 sm:py-5 pr-5 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-all duration-300 text-sm leading-relaxed"
+              style={{ height: '52px', minHeight: '52px', maxHeight: '200px', overflowY: 'auto' }}
+            />
+          </div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleInternalSubmit}
-          disabled={!message.trim() || isSubmitting}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl sm:rounded-4xl bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20"
-        >
-          <FaPaperPlane size={18} />
-        </motion.button>
+          {/* Desktop Tool Buttons (Hidden on Mobile) */}
+          <div className="hidden sm:flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onGetIdeas}
+              disabled={isSubmitting || isGeneratingSuggestions}
+              className="w-16 h-16 rounded-4xl bg-purple-600/20 border border-purple-500/30 text-purple-300 flex items-center justify-center hover:bg-purple-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+              title="Get Roleplay Ideas"
+            >
+              <FaBrain size={20} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={onContinue}
+              disabled={isSubmitting}
+              className="w-16 h-16 rounded-4xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+              title="Continue Story (AI Narration)"
+            >
+              <FaMagic size={20} />
+            </motion.button>
+          </div>
+
+          {/* Send Button */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleInternalSubmit}
+            disabled={!message.trim() || isSubmitting}
+            className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-4xl bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20 shrink-0"
+          >
+            <FaPaperPlane size={16} className="sm:scale-125" />
+          </motion.button>
+        </div>
       </div>
     </div>
   );
