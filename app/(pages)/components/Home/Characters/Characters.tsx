@@ -215,7 +215,7 @@ const Characters = ({
               <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Character Hub</span>
             </div>
             <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
-              {searchQuery ? "Search Results" : "PUKIMAI"}
+              {searchQuery ? "Search Results" : "Community Feed"}
             </h2>
           </div>
 
