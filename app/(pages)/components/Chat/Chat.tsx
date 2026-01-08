@@ -239,10 +239,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   }, [isDragging, handleMouseMove, handleMouseUp, handleTouchMove, handleTouchEnd]);
 
+  const hasScrolledToBottom = useRef(false);
+
   // Scroll to bottom on initial load
   useEffect(() => {
-    if (allMessages.length > 0 && !isChatLoading && !isMessagesLoading) {
+    if (allMessages.length > 0 && !isChatLoading && !isMessagesLoading && !hasScrolledToBottom.current) {
       scrollToBottom();
+      hasScrolledToBottom.current = true;
     }
   }, [allMessages.length, isChatLoading, isMessagesLoading, scrollToBottom]);
 

@@ -77,17 +77,11 @@ export const POST = async (req: Request) => {
                 if (summaryRes.ok) {
                     const summaryData = await summaryRes.json();
                     contextSummary = summaryData.choices[0]?.message?.content || contextSummary;
-                    const messageIdsToDelete = chat?.messages.slice(0, messagesToSummarize).map(m => m.id) || [];
 
-                    await db.$transaction([
-                        db.chat.update({
-                            where: { id: chatId },
-                            data: { summary: contextSummary }
-                        }),
-                        db.message.deleteMany({
-                            where: { id: { in: messageIdsToDelete } }
-                        })
-                    ]);
+                    await db.chat.update({
+                        where: { id: chatId },
+                        data: { summary: contextSummary }
+                    });
                     didSummarize = true;
                 }
             } catch (err) {
