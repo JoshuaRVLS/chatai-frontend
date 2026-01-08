@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
 import { AuthContext } from "../../providers/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 
 interface CharacterCardProps {
   characterName: string;

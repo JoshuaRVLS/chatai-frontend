@@ -15,7 +15,7 @@ import {
     FaImage
 } from "react-icons/fa";
 import { FiBookOpen, FiActivity, FiSettings, FiInfo } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import Select from "react-select";

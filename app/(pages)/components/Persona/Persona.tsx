@@ -6,7 +6,7 @@ import React, { useContext, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { FaPlus, FaUser, FaInfo, FaCheck, FaTimes } from "react-icons/fa";
 import { FiCpu } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import PersonaCard from "../PersonaCard/PersonaCard";
 import { motion, AnimatePresence } from "motion/react";
 

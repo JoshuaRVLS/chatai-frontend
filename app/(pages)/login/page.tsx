@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { motion } from "motion/react";
 import { FiUser, FiLock, FiArrowRight } from "react-icons/fi";
 

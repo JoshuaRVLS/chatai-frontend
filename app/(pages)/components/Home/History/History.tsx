@@ -12,7 +12,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
 import { useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";

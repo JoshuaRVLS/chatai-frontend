@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { FiCpu, FiGlobe, FiKey, FiSave, FiCheck, FiChevronDown, FiZap } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 
 const AiSettings = ({ data }: { data: any }) => {
   const [activeEngine, setActiveEngine] = useState<"default" | "external">("default");

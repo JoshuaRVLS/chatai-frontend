@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { Image } from "@/@types/type";
 import { User } from "@/app/generated/prisma";
 import { FiUser, FiMail, FiSave, FiLoader, FiCamera } from "react-icons/fi";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useQueryClient } from "@tanstack/react-query";
 import UserAvatar from "../Common/UserAvatar";
 

@@ -3,7 +3,7 @@
 import React, { FormEvent, useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { AuthContext } from "../providers/AuthProvider";
 import CharacterTags from "../components/CharacterTags/CharacterTags";
 import CharacterCard from "../components/CharacterCard/CharacterCard";

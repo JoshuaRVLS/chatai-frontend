@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { FaTrash } from "react-icons/fa";
 import { FiBook } from "react-icons/fi";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import Image from "next/image";
 
 interface LorebookCardProps {

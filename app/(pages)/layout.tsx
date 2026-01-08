@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display, Raleway } from "next/font/google";
 import "../globals.css";
 import AuthProvider from "./providers/AuthProvider";
-import { Toaster } from "react-hot-toast";
+import { ToastContainer } from "./components/Toast/ToastContainer";
 import Navbar from "./components/Navbar/Navbar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
@@ -57,20 +57,7 @@ export default function RootLayout({
           <ScrollProvider>
             <AuthProvider>
               <ConfirmationProvider>
-                <Toaster
-                  position="top-right"
-                  toastOptions={{
-                    className: "glass-morphism border-white/10 text-white",
-                    duration: 4000,
-                    style: {
-                      background: "rgba(17, 24, 39, 0.8)",
-                      backdropFilter: "blur(12px)",
-                      color: "#fff",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "16px",
-                    },
-                  }}
-                />
+                <ToastContainer />
                 <Navbar />
                 <main className="relative min-h-screen">
                   {children}

@@ -16,7 +16,7 @@ import { Image } from "@/@types/type";
 import { motion, AnimatePresence } from "motion/react";
 import Security from "./Security";
 import Profile from "./Profile";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useRouter } from "next/navigation";
 import DeleteConfirmation from "./DeleteConfirmation";
 import AiSettings from "./AiSettings";

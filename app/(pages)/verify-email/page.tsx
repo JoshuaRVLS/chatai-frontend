@@ -4,7 +4,7 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 
 const VerifyEmailComponent = () => {
   const searchParams = useSearchParams();

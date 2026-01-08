@@ -2,7 +2,7 @@
 
 import React, { useContext, useState } from "react";
 import { motion } from "motion/react";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { AuthContext } from "../../providers/AuthProvider";
 import { FiShield, FiLock, FiCheckCircle, FiLoader } from "react-icons/fi";
 

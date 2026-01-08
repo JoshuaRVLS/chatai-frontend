@@ -7,7 +7,7 @@ import CharacterCard from "../CharacterCard/CharacterCard";
 import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown, FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { FaPencilAlt, FaTrash, FaPlus, FaUser, FaRobot } from "react-icons/fa";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { motion, Variants } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 import { CharactersData } from "@/@types/type"; // adjust the import path to your type definitions

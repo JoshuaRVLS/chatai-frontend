@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useRouter } from "next/navigation";
 import { FiUser, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import { motion } from "motion/react";

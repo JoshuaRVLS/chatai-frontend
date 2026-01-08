@@ -7,7 +7,7 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { bytesToBase64 } from "@/app/utils/image";
 import { AuthContext } from "../../providers/AuthProvider";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import CharacterTags from "../CharacterTags/CharacterTags";
 import LorebookSelector from "../LorebookSelector/LorebookSelector";
 import CharacterCard from "../CharacterCard/CharacterCard";

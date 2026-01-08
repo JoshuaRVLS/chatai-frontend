@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { FiSearch, FiBook, FiFilter, FiX, FiBookOpen } from "react-icons/fi";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 
 interface Lorebook {
     id: string;

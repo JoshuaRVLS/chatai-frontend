@@ -4,7 +4,7 @@ import { UserPersona } from "@/app/generated/prisma";
 import React, { useContext, useState } from "react";
 import { FaUser, FaInfo, FaCheck, FaEdit, FaTrash, FaTimes, FaPlus } from "react-icons/fa";
 import { AuthContext } from "../../providers/AuthProvider";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";

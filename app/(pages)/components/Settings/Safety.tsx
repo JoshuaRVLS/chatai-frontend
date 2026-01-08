@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { FiEye, FiEyeOff, FiShield, FiAlertTriangle, FiCheck } from "react-icons/fi";
 import { motion, AnimatePresence } from "motion/react";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 
 interface SafetySettingsProps {
     data: any;

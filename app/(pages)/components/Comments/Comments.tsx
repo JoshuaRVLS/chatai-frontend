@@ -9,7 +9,7 @@ import Image from "next/image";
 import { bytesToBase64 } from "@/app/utils/image";
 import { motion, AnimatePresence } from "motion/react";
 import { formatDistanceToNow } from "date-fns";
-import toast from "react-hot-toast";
+import { toast } from '@/app/lib/toast';
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 type Author = User & {
