@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FiEye, FiEyeOff, FiShield, FiAlertTriangle, FiCheck } from "react-icons/fi";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from '@/app/lib/toast';
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SafetySettingsProps {
     data: any;
@@ -13,6 +14,7 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
     const [showNsfw, setShowNsfw] = useState(data?.userSettings?.showNsfw ?? false);
     const [blurNsfw, setBlurNsfw] = useState(data?.userSettings?.blurNsfw ?? true);
     const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     // Update local state when data changes
     useEffect(() => {
@@ -35,6 +37,8 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
 
             if (response.ok) {
                 toast.success("Settings updated successfully", { id: toastId });
+                // Invalidate query to trigger UI updates elsewhere
+                queryClient.invalidateQueries({ queryKey: ["settingsData", data.id] });
                 if (key === "showNsfw") setShowNsfw(value);
                 if (key === "blurNsfw") setBlurNsfw(value);
             } else {
