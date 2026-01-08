@@ -340,6 +340,13 @@ const Chat = ({ chatId }: { chatId: string }) => {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+
+      // Trigger background processing (summarization, memory extraction) - fire and forget
+      fetch("/api/background", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chatId }),
+      }).catch(console.error);
     } catch (err) {
       console.error(err);
       throw err;

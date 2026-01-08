@@ -64,97 +64,18 @@ export const POST = async (req: Request) => {
     .map(m => `[PINNED MEMORY - ${m.fromUser ? 'USER' : 'CHAR'}]: ${m.content}`)
     .join('\n') || "";
 
-  // --- SUMMARIZATION LOGIC ---
+  // --- SUMMARIZATION & MEMORY LOGIC ---
+  // NOTE: These are now deferred to avoid blocking the stream response.
+  // Summarization and memory extraction can be triggered via a separate background endpoint
+  // after the AI message is saved, keeping the initial Time-To-First-Token (TTFT) fast.
   let contextSummary = chat?.summary || "";
   let contextMemory = chat?.memory || "";
   const recentMessagesCount = 15;
+
+  // Check if summarization is needed (but don't block - just note it for later background processing)
   const messagesToSummarize = previousMessages.length - recentMessagesCount;
-
-  if (messagesToSummarize > 0) {
-    const oldMessages = previousMessages.slice(0, messagesToSummarize);
-    if (messagesToSummarize >= 10) {
-      try {
-        const summaryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: selectedModel,
-            messages: [
-              {
-                role: 'system',
-                content: `You are a conversation summarizer. Provide a concise, cumulative summary of the chat history so far, including these new events. Current summary: "${contextSummary}". New messages to incorporate into the summary: ${JSON.stringify(oldMessages)}`
-              }
-            ],
-          }),
-        });
-
-        if (summaryRes.ok) {
-          const summaryData = await summaryRes.json();
-          contextSummary = summaryData.choices[0]?.message?.content || contextSummary;
-          const messageIdsToDelete = chat?.messages.slice(0, messagesToSummarize).map(m => m.id) || [];
-
-          await db.$transaction([
-            db.chat.update({
-              where: { id: chatId },
-              data: { summary: contextSummary }
-            }),
-            db.message.deleteMany({
-              where: { id: { in: messageIdsToDelete } }
-            })
-          ]);
-        }
-      } catch (err) {
-        console.error("Summarization failed:", err);
-      }
-    }
-  }
-
-  // --- MEMORY EXTRACTION LOGIC ---
-  if (previousMessages.length > 0 && previousMessages.length % 5 === 0) {
-    try {
-      const memoryRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            {
-              role: 'system',
-              content: `You are a memory extractor. Analyze the conversation and extract ONLY key long-term facts about ${persona ? persona.name : chat?.user.username} (e.g., family, job, preferences, shared history). 
-Update the existing memory list elegantly. If a fact is already there, don't duplicate. Keep it in a bulleted list format.
-CURRENT MEMORIES:
-${contextMemory || "None yet."}
-
-RECENT MESSAGES:
-${JSON.stringify(previousMessages.slice(-10))}
-
-Provide the NEW COMPLETE memory list.`
-            }
-          ],
-        }),
-      });
-
-      if (memoryRes.ok) {
-        const memoryData = await memoryRes.json();
-        const newMemory = memoryData.choices[0]?.message?.content;
-        if (newMemory) {
-          contextMemory = newMemory;
-          await db.chat.update({
-            where: { id: chatId },
-            data: { memory: replacePlaceholders(contextMemory) }
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Memory extraction failed:", err);
-    }
-  }
+  const needsSummarization = messagesToSummarize >= 10;
+  const needsMemoryExtraction = previousMessages.length > 0 && previousMessages.length % 5 === 0;
 
   // --- LOREBOOK INJECTION LOGIC ---
   const feedbackMessages = chat?.messages.filter(m => m.feedback !== 'NONE').slice(-10) || [];
