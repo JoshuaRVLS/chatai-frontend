@@ -8,7 +8,6 @@ import Navbar from "./components/Navbar/Navbar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
 import { ConfirmationProvider } from "./providers/ConfirmationProvider";
-import { Analytics } from "@vercel/analytics/next";
 import Footer from "./components/Footer/Footer";
 
 const inter = Inter({
@@ -83,7 +82,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable} ${playfair.variable} ${raleway.variable}`}>
       <body className="antialiased bg-background-custom text-foreground">
-        <Analytics />
         <QueryProvider>
           <ScrollProvider>
             <AuthProvider>
