@@ -40,6 +40,27 @@ const Characters = ({
   const [inputPage, setInputPage] = React.useState(page.toString());
   const pageSize = 32;
 
+  const discoveryCategories = [
+    { name: "Cyberpunk", icon: "💎" },
+    { name: "Medieval", icon: "⚔️" },
+    { name: "Assistant", icon: "🤖" },
+    { name: "Horror", icon: "👻" },
+    { name: "Anime", icon: "🌸" },
+    { name: "Romance", icon: "❤️" },
+    { name: "Fantasy", icon: "🔮" },
+  ];
+
+  const handleCategoryToggle = (category: string) => {
+    let newTags;
+    if (selectedTags.includes(category)) {
+      newTags = selectedTags.filter(t => t !== category);
+    } else {
+      newTags = [...selectedTags, category];
+    }
+    setSelectedTags(newTags);
+    handleUpdateParams({ tags: newTags.length > 0 ? newTags.join(",") : null, p: "1" });
+  };
+
   // Helper to update specific parameters in the URL
   const handleUpdateParams = React.useCallback(
     (updates: Record<string, string | null>) => {
@@ -206,6 +227,25 @@ const Characters = ({
             <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
               {searchQuery ? "Search Results" : "Community Feed"}
             </h2>
+          </div>
+
+          {/* Quick Discovery Categories */}
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+            {discoveryCategories.map((cat) => (
+              <motion.button
+                key={cat.name}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => handleCategoryToggle(cat.name)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border transition-all duration-300 whitespace-nowrap ${selectedTags.includes(cat.name)
+                  ? "bg-primary/20 border-primary/40 text-primary shadow-[0_0_20px_rgba(34,211,238,0.2)]"
+                  : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white"
+                  }`}
+              >
+                <span className="text-sm">{cat.icon}</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{cat.name}</span>
+              </motion.button>
+            ))}
           </div>
 
           <div className="flex items-center gap-4 pt-2 relative">
