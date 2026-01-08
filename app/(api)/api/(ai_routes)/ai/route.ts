@@ -312,8 +312,8 @@ ${feedbackSteering ? `[USER PREFERENCES & STEERING]\n${feedbackSteering}` : ''}
             content: '[REGENERATE] Provide a completely DIFFERENT perspective/response. Stay brief.'
           }] : []),
           ...(isContinue ? [{
-            role: 'system',
-            content: '[CONTINUE NARRATION] The user is stuck. Proceed with the story, current scene, or event naturally. Focus on realistic actions, environmental details, and character-consistent dialogue. Avoid meta-commentary, repetition, or mentioning that you are continuing. Just keep the immersion going.'
+            role: 'user',
+            content: `[CONTINUE NARRATION AS ${charName}] Proceed with the story, current scene, or event naturally. Focus on realistic actions, environmental details, and character-consistent dialogue. Avoid meta-commentary. Keep the immersion going.`
           }] : [
             {
               role: 'user',
