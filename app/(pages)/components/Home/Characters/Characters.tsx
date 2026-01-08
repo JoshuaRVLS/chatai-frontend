@@ -41,13 +41,13 @@ const Characters = ({
   const pageSize = 32;
 
   const discoveryCategories = [
-    { name: "Cyberpunk", icon: "💎" },
-    { name: "Medieval", icon: "⚔️" },
-    { name: "Assistant", icon: "🤖" },
-    { name: "Horror", icon: "👻" },
-    { name: "Anime", icon: "🌸" },
-    { name: "Romance", icon: "❤️" },
-    { name: "Fantasy", icon: "🔮" },
+    { name: "Cyberpunk" },
+    { name: "Medieval" },
+    { name: "Assistant" },
+    { name: "Horror" },
+    { name: "Anime" },
+    { name: "Romance" },
+    { name: "Fantasy" },
   ];
 
   const handleCategoryToggle = (category: string) => {
@@ -242,7 +242,6 @@ const Characters = ({
                   : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white"
                   }`}
               >
-                <span className="text-sm">{cat.icon}</span>
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">{cat.name}</span>
               </motion.button>
             ))}
