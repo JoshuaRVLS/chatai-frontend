@@ -9,7 +9,7 @@ import React, {
   useEffect,
 } from "react";
 import { useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "react-hot-toast";
+import { toast } from "@/app/lib/toast";
 import Image from "next/image";
 import { FaPaperPlane, FaTimes, FaEdit, FaTrash, FaRedo, FaUndo, FaBrain, FaThumbtack, FaMagic, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import ChatNavbar from "./ChatNavbar";
