@@ -307,28 +307,53 @@ const Chat = ({ chatId }: { chatId: string }) => {
       const decoder = new TextDecoder();
       let fullContent = "";
 
-      while (true) {
+      let isDone = false;
+      let buffer = "";
+
+      while (!isDone) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const dataStr = line.slice(6).trim();
-            if (dataStr === "[DONE]") break;
+          const trimmedLine = line.trim();
+          if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
 
-            try {
-              const parsed = JSON.parse(dataStr);
-              const delta = parsed.choices[0]?.delta?.content || "";
+          const dataStr = trimmedLine.slice(6).trim();
+          if (dataStr === "[DONE]") {
+            isDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(dataStr);
+            const delta = parsed.choices[0]?.delta?.content || "";
+            if (delta) {
               fullContent += delta;
               setStreamingMessage(fullContent);
               scrollToBottom();
-            } catch (e) {
-              // Ignore partial JSON
             }
+          } catch (e) {
+            // Likely partial JSON or metadata we don't need
           }
+        }
+      }
+
+      // Check for any remaining content in the buffer after the loop
+      if (buffer.startsWith("data: ")) {
+        const dataStr = buffer.slice(6).trim();
+        if (dataStr !== "[DONE]") {
+          try {
+            const parsed = JSON.parse(dataStr);
+            const delta = parsed.choices[0]?.delta?.content || "";
+            if (delta) {
+              fullContent += delta;
+              setStreamingMessage(fullContent);
+            }
+          } catch (e) { }
         }
       }
 
@@ -1036,7 +1061,7 @@ const MessageBubble = React.memo(
           <div
             onClick={handleTap}
             className={`relative rounded-3xl sm:rounded-4xl px-5 py-3.5 sm:px-6 sm:py-4 transition-all duration-300 cursor-pointer ${isUserMessage
-              ? "bg-linear-to-br from-cyan-300 via-primary to-cyan-400 text-slate-950 font-bold shadow-[0_10px_30px_rgba(34,211,238,0.2)] ring-1 ring-white/10"
+              ? "bg-white/10 border border-white/20 text-white font-bold shadow-xl rounded-tr-sm"
               : "bg-white/5 border border-white/10 text-white/95 rounded-tl-sm backdrop-blur-md shadow-xl"
               }`}
           >
