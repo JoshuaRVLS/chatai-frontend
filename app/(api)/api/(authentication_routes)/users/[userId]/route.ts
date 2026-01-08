@@ -7,9 +7,20 @@ export const GET =
     const user = await db.user.findUnique(
       {
         where: { id: userId },
-        include: {
-          profileImage: true,
-          userSettings: true
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          verified: true,
+          userSettings: true,
+          profileImage: {
+            select: {
+              id: true,
+              mimetype: true,
+              userId: true
+              // Excluding data (Bytes) for performance
+            }
+          }
         }
       });
     if (!user) {
@@ -89,9 +100,19 @@ export const PATCH =
       const user = await db.user.update({
         where: { id: userId },
         data: updateData,
-        include: {
-          profileImage: true,
-          userSettings: true
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          verified: true,
+          userSettings: true,
+          profileImage: {
+            select: {
+              id: true,
+              mimetype: true,
+              userId: true
+            }
+          }
         }
       });
 
