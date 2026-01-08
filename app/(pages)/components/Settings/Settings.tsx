@@ -29,7 +29,7 @@ const Settings = () => {
   const router = useRouter();
 
   const { data, isPending, error } = useQuery<User & { profileImage: Image; userSettings: any }>({
-    queryKey: ["settingsData"],
+    queryKey: ["settingsData", user?.id],
     queryFn: () =>
       fetch(`/api/users/${user?.id}`).then((res) =>
         res.json().then((data) => data.data)

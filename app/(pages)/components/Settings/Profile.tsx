@@ -39,7 +39,7 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
 
       if (response.ok) {
         toast.success("Profile updated successfully");
-        queryClient.invalidateQueries({ queryKey: ["settingsData"] });
+        queryClient.invalidateQueries({ queryKey: ["settingsData", data.id] });
         setProfileImage(null);
       } else {
         const errorData = await response.json();
