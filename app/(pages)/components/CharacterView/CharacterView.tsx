@@ -97,7 +97,7 @@ const CharacterView = ({ id }: { id: string }) => {
       {/* Dynamic Header Background */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 
-      <main className="relative z-10 max-w-[1600px] mx-auto px-6 pt-24 pb-16">
+      <main className="relative z-10 max-w-[1600px] mx-auto px-6 pt-32 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
 
           {/* Left Sidebar - Visuals & Actions */}
