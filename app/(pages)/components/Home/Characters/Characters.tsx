@@ -58,6 +58,15 @@ const Characters = ({
     [router, pathname]
   );
 
+  // Reset page to 1 when showAll is toggled off (to avoid empty pages)
+  React.useEffect(() => {
+    if (!showAll && page > 1) {
+      setPage(1);
+      setInputPage("1");
+      handleUpdateParams({ p: "1" });
+    }
+  }, [showAll, handleUpdateParams]);
+
   const scrollToSection = React.useCallback(() => {
     if (gridRef.current) {
       const offset = 120;

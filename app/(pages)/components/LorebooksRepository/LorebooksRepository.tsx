@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "motion/react";
 import { FiSearch, FiBook, FiFilter, FiX, FiBookOpen } from "react-icons/fi";
 import Link from "next/link";
 import { toast } from '@/app/lib/toast';
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 interface Lorebook {
     id: string;
@@ -22,12 +23,52 @@ interface Lorebook {
 }
 
 const LorebooksRepository = () => {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [minEntries, setMinEntries] = useState(0);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+    const [minEntries, setMinEntries] = useState(parseInt(searchParams.get("min") || "0", 10));
     const [showFilters, setShowFilters] = useState(false);
-    const [selectedTags, setSelectedTags] = useState<string[]>([]);
+    const [selectedTags, setSelectedTags] = useState<string[]>(
+        searchParams.get("tags")?.split(",").filter(Boolean) || []
+    );
     const [tagSearchQuery, setTagSearchQuery] = useState("");
     const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+    // Helper to update specific parameters in the URL
+    const handleUpdateParams = useCallback(
+        (updates: Record<string, string | null>) => {
+            const params = new URLSearchParams(window.location.search);
+            Object.entries(updates).forEach(([key, value]) => {
+                if (value === null || value === "" || value === "0") {
+                    params.delete(key);
+                } else {
+                    params.set(key, value);
+                }
+            });
+            router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+        },
+        [router, pathname]
+    );
+
+    // Sync search query to URL (debounced)
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            handleUpdateParams({ q: searchQuery || null });
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [searchQuery, handleUpdateParams]);
+
+    // Sync tags to URL
+    useEffect(() => {
+        handleUpdateParams({ tags: selectedTags.length > 0 ? selectedTags.join(",") : null });
+    }, [selectedTags, handleUpdateParams]);
+
+    // Sync minEntries to URL
+    useEffect(() => {
+        handleUpdateParams({ min: minEntries > 0 ? minEntries.toString() : null });
+    }, [minEntries, handleUpdateParams]);
 
     const { data: lorebooks, isPending, error } = useQuery<Lorebook[]>({
         queryKey: ["all-lorebooks"],
