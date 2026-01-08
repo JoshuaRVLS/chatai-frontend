@@ -58,7 +58,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 px-6 md:px-8 py-3 bg-zinc-950/60 backdrop-blur-md border-b border-white/5 transition-colors duration-500"
+        className="fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-3 lg:py-5 bg-zinc-950/60 backdrop-blur-md border-b border-white/5 transition-all duration-500"
       >
         <div className="w-full flex items-center justify-between">
           <Link
@@ -72,19 +72,19 @@ const Navbar = () => {
               }
             }}
           >
-            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-white/20 group-hover:bg-white/5 overflow-hidden">
+            <div className="w-8 h-8 lg:w-11 lg:h-11 rounded-lg lg:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-white/20 group-hover:bg-white/5 overflow-hidden">
               <Image
                 src="/jchatai-icon.png"
                 alt="JChatAI"
-                width={40}
-                height={40}
-                className="object-contain mix-blend-screen scale-125"
+                width={48}
+                height={48}
+                className="object-contain mix-blend-screen scale-125 lg:scale-110"
                 priority
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-black tracking-[0.2em] text-white leading-none">CHATAi</span>
-              <span className="text-[8px] font-black text-white/10 uppercase tracking-widest">
+              <span className="text-xs lg:text-sm font-black tracking-[0.2em] text-white leading-none">CHATAi</span>
+              <span className="text-[8px] lg:text-[10px] font-black text-white/10 uppercase tracking-widest lg:mt-0.5">
                 AI Hub</span>
             </div>
           </Link>
@@ -95,7 +95,7 @@ const Navbar = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-[0.15em] transition-all hover:text-white flex items-center gap-2 ${pathname === link.href ? "text-white bg-white/10" : "text-zinc-500"
+                  className={`px-3 lg:px-4 py-1.5 lg:py-2 rounded-lg text-[9px] lg:text-[11px] font-black uppercase tracking-[0.15em] transition-all hover:text-white flex items-center gap-2 ${pathname === link.href ? "text-white bg-white/10" : "text-zinc-500"
                     }`}
                 >
                   {link.name}
@@ -110,15 +110,15 @@ const Navbar = () => {
                   onMouseEnter={() => setIsProfileHovered(true)}
                   onMouseLeave={() => setIsProfileHovered(false)}
                 >
-                  <Link href="/settings" className="flex items-center gap-4 transition-opacity hover:opacity-80">
+                  <Link href="/settings" className="flex items-center gap-4 lg:gap-6 transition-opacity hover:opacity-80">
                     <div className="text-right hidden sm:block">
-                      <p className="text-[10px] font-black text-white uppercase tracking-tight">{session.user?.name || (session.user as any)?.username}</p>
-                      <p className="text-[8px] text-zinc-600 uppercase tracking-widest font-black">Member</p>
+                      <p className="text-[10px] lg:text-xs font-black text-white uppercase tracking-tight">{session.user?.name || (session.user as any)?.username}</p>
+                      <p className="text-[8px] lg:text-[10px] text-zinc-600 uppercase tracking-widest font-black lg:mt-0.5">Member</p>
                     </div>
                     <UserAvatar
                       name={session.user?.name || (session.user as any)?.username}
                       image={session.user?.image}
-                      size="md"
+                      size="lg"
                     />
                   </Link>
 
@@ -131,23 +131,23 @@ const Navbar = () => {
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="absolute right-0 top-full pt-2 w-56 z-60"
                       >
-                        <div className="bg-zinc-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                        <div className="bg-zinc-950/95 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] lg:w-72">
                           {/* Header section in dropdown */}
-                          <div className="px-4 py-3 border-b border-white/5 bg-white/2">
-                            <p className="text-[10px] font-black text-white uppercase tracking-tight truncate">{session.user.name || (session.user as any).username}</p>
-                            <p className="text-[7px] text-zinc-500 uppercase tracking-widest font-black mt-0.5">Authorized Member</p>
+                          <div className="px-4 py-3 lg:px-6 lg:py-4 border-b border-white/5 bg-white/2">
+                            <p className="text-[10px] lg:text-xs font-black text-white uppercase tracking-tight truncate">{session.user.name || (session.user as any).username}</p>
+                            <p className="text-[7px] lg:text-[9px] text-zinc-500 uppercase tracking-widest font-black mt-0.5">Authorized Member</p>
                           </div>
 
-                          <div className="p-1.5 flex flex-col gap-0.5">
+                          <div className="p-1.5 lg:p-2.5 flex flex-col gap-0.5 lg:gap-1">
                             {dropdownLinks.map((link) => (
                               <Link
                                 key={link.href}
                                 href={link.href}
                                 onClick={() => setIsProfileHovered(false)}
-                                className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                                className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
                               >
-                                <span className="text-sm transition-transform group-hover/item:scale-110">{link.icon}</span>
-                                <span className="text-[9px] font-black uppercase tracking-widest leading-none">{link.name}</span>
+                                <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
                               </Link>
                             ))}
 
@@ -155,10 +155,10 @@ const Navbar = () => {
 
                             <button
                               onClick={() => signOut()}
-                              className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all hover:bg-zinc-900 text-zinc-600 hover:text-zinc-200 group/item"
+                              className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-zinc-900 text-zinc-600 hover:text-zinc-200 group/item"
                             >
-                              <FiLogOut className="text-sm transition-transform group-hover/item:scale-110" />
-                              <span className="text-[9px] font-black uppercase tracking-widest leading-none">Sign Out</span>
+                              <FiLogOut className="text-sm lg:text-base transition-transform group-hover/item:scale-110" />
+                              <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">Sign Out</span>
                             </button>
                           </div>
                         </div>

@@ -37,7 +37,7 @@ const ChatNavbar = ({
     const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
 
     return (
-        <div className="flex items-center justify-between px-6 sm:px-8 py-4 sm:py-6 border-b border-white/5 bg-slate-950/40 backdrop-blur-xl z-20">
+        <div className="flex items-center justify-between px-6 sm:px-8 py-3 sm:py-4 border-b border-white/5 bg-slate-950/40 backdrop-blur-xl z-20">
             <div className="flex items-center gap-4 sm:gap-5">
                 <button
                     onClick={(e) => {
@@ -49,13 +49,13 @@ const ChatNavbar = ({
                     }}
                     className="relative group group-active:scale-95 transition-all"
                 >
-                    <div className="absolute -inset-1.5 bg-gradient-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
+                    <div className="absolute -inset-1.5 bg-linear-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
                     <Image
                         src={characterImage || "/default-character.png"}
-                        width={56}
-                        height={56}
+                        width={48}
+                        height={48}
                         alt={characterName}
-                        className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full border border-white/20 object-cover transition-all ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
+                        className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-white/20 object-cover transition-all ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
                     />
                     <AnimatePresence>
                         {shouldBlur && (
@@ -71,27 +71,27 @@ const ChatNavbar = ({
                     </AnimatePresence>
                 </button>
                 <div>
-                    <h2 className="text-xl sm:text-2xl font-black text-white italic tracking-tighter uppercase leading-none">
+                    <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase leading-none">
                         {characterName}
                     </h2>
-                    <div className="flex items-center gap-2 mt-1 sm:mt-1.5">
-                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
-                        <span className="text-[8px] sm:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">Connected</span>
+                    <div className="flex items-center gap-2 mt-1">
+                        <div className="w-1 h-1 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                        <span className="text-[8px] sm:text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Connected</span>
                     </div>
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
                 <button
                     onClick={onShowBrain}
-                    className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
+                    className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-all border border-primary/20 shadow-[0_0_15px_rgba(34,211,238,0.2)]"
                     title="Brain & memories"
                 >
                     <motion.div
                         animate={{ opacity: [0.6, 1, 0.6] }}
                         transition={{ duration: 3, repeat: Infinity }}
                     >
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M9.5 2A1.5 1.5 0 0 0 8 3.5V6a2 2 0 0 1-2 2h-2.5a1.5 1.5 0 0 0-1.5 1.5V11a2 2 0 0 1-2 2" />
                             <path d="M14.5 2A1.5 1.5 0 0 1 16 3.5V6a2 2 0 0 0 2 2h2.5a1.5 1.5 0 0 1 1.5 1.5V11a2 2 0 0 0 2 2" />
                             <path d="M2 13a2 2 0 0 0-2 2v1.5A1.5 1.5 0 0 0 1.5 18H4a2 2 0 0 1 2 2v2.5A1.5 1.5 0 0 0 7.5 24" />
@@ -102,19 +102,19 @@ const ChatNavbar = ({
                 {hasUndo && (
                     <button
                         onClick={onUndo}
-                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
+                        className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
                         title="Undo last action"
                     >
-                        <FaUndo size={14} />
+                        <FaUndo size={12} />
                     </button>
                 )}
                 <button
                     onClick={onClearHistory}
-                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all border border-white/5"
+                    className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all border border-white/5"
                     title="Clear history"
                 >
                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                             <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -124,16 +124,16 @@ const ChatNavbar = ({
                 </button>
                 <button
                     onClick={onShowSettings}
-                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
+                    className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-primary hover:bg-white/10 transition-all border border-white/5"
                     title="Chat settings"
                 >
-                    <FaCog size={14} />
+                    <FaCog size={12} />
                 </button>
                 <button
                     onClick={() => router.push("/")}
-                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                    className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center text-white/20 hover:text-white hover:bg-white/10 transition-all border border-white/5"
                 >
-                    <FaTimes size={16} />
+                    <FaTimes size={14} />
                 </button>
             </div>
         </div>

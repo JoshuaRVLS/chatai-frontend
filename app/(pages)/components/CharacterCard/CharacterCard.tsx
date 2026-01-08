@@ -132,9 +132,9 @@ const CharacterCard = React.memo(function CharacterCard({
       <motion.div
         onClick={handleNavigate}
         onContextMenu={handleContextMenu}
-        className="group relative h-[240px] flex flex-col cursor-pointer overflow-hidden rounded-xl border border-white/5 bg-zinc-900/40 transition-[border-color,box-shadow,transform] duration-300 hover:border-white/20 hover:shadow-lg will-change-transform"
+        className="group relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-white/5 bg-zinc-900/40 transition-[border-color,box-shadow,transform] duration-300 hover:border-white/20 hover:shadow-xl will-change-transform"
         style={{ contentVisibility: 'auto', containIntrinsicSize: '0 240px' } as any}
-        whileHover={{ y: -4 }}
+        whileHover={{ y: -6 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -176,9 +176,9 @@ const CharacterCard = React.memo(function CharacterCard({
                     <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
                       <FiEye className="text-white/40 text-lg" />
                     </div>
-                    <div className="flex flex-col items-center gap-0.5">
-                      <p className="text-[8px] font-black text-white/80 uppercase tracking-widest">Sensitive</p>
-                      <p className="text-[7px] font-bold text-white/30 uppercase tracking-tighter">Click to Reveal</p>
+                    <div className="flex flex-col items-center gap-1">
+                      <p className="text-[8px] lg:text-[10px] font-black text-white/80 uppercase tracking-widest">Sensitive</p>
+                      <p className="text-[7px] lg:text-[8px] font-bold text-white/30 uppercase tracking-tighter">Click to Reveal</p>
                     </div>
 
                     <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-zinc-800 border border-white/5">
@@ -204,40 +204,40 @@ const CharacterCard = React.memo(function CharacterCard({
         </div>
 
         {/* Info Content - removed z-20 for better batching, removed backdrop-blur */}
-        <div className="relative flex-1 p-2.5 flex flex-col justify-between -mt-4 bg-zinc-950/95">
-          <div className="space-y-1">
+        <div className="relative flex-1 p-3 lg:p-4 flex flex-col justify-between -mt-4 bg-zinc-950/95">
+          <div className="space-y-1 lg:space-y-2">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs font-black text-white group-hover:text-zinc-400 transition-colors leading-tight line-clamp-1 tracking-tight uppercase">
+              <h3 className="text-xs lg:text-sm font-black text-white group-hover:text-zinc-400 transition-colors leading-tight line-clamp-1 tracking-tight uppercase">
                 {characterName}
               </h3>
-              <div className="p-1 rounded-md bg-white/5 border border-white/5 text-white/20 text-[9px]">
+              <div className="p-1 lg:p-1.5 rounded-md bg-white/5 border border-white/5 text-white/20 text-[9px] lg:text-[10px]">
                 <FiMoreHorizontal />
               </div>
             </div>
 
-            <p className="text-[9px] text-zinc-500 line-clamp-2 leading-snug font-medium">
+            <p className="text-[9px] lg:text-[11px] text-zinc-500 line-clamp-2 leading-snug font-medium">
               {characterBio}
             </p>
           </div>
 
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-1 pt-0.5">
+          <div className="space-y-3 lg:space-y-4">
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
               {Array.from(new Map(tags?.map(tag => [tag.id, tag])).values()).slice(0, 2).map((tag) => (
                 <span
                   key={tag.id}
-                  className="px-1.5 py-0.5 text-[7px] font-black rounded-sm border border-white/5 bg-white/5 text-zinc-500 uppercase tracking-wider"
+                  className="px-1.5 py-0.5 lg:px-2 lg:py-1 text-[7px] lg:text-[9px] font-black rounded-sm border border-white/5 bg-white/5 text-zinc-500 uppercase tracking-wider"
                 >
                   {tag.name}
                 </span>
               ))}
             </div>
 
-            <div className="flex items-center justify-between border-t border-white/5 pt-2">
-              <div className="flex items-center gap-1.5">
-                <div className="w-4 h-4 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[6px] font-black text-white/20 uppercase tracking-tighter">
+            <div className="flex items-center justify-between border-t border-white/5 pt-2 lg:pt-3">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[6px] lg:text-[9px] font-black text-white/20 uppercase tracking-tighter">
                   {authorName.slice(0, 2)}
                 </div>
-                <span className="text-[8px] font-bold text-zinc-500 group-hover:text-white transition-colors truncate max-w-[80px]">{authorName}</span>
+                <span className="text-[8px] lg:text-[10px] font-bold text-zinc-500 group-hover:text-white transition-colors truncate max-w-[100px] lg:max-w-[140px]">{authorName}</span>
               </div>
             </div>
           </div>

@@ -668,21 +668,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   // ───────────────────────────────
 
   if (isChatLoading || isMessagesLoading)
-    return (
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-linear-to-br from-black via-slate-900 to-cyan-900"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <motion.div
-          className="text-cyan-300 font-medium text-lg tracking-wide"
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          Loading conversation...
-        </motion.div>
-      </motion.div>
-    );
+    return <LoadingScreen />;
 
   if (chatError)
     return (
@@ -802,7 +788,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
         {/* Messages */}
         <div
           ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto px-8 pt-8 space-y-8 scrollbar-hide"
+          className="flex-1 overflow-y-auto px-6 sm:px-12 pt-6 sm:pt-10 space-y-4 sm:space-y-6 scrollbar-hide"
         >
           {/* Load More Sentinel */}
           <div ref={loadMoreRef} className="h-4 flex items-center justify-center">
@@ -986,6 +972,7 @@ const MessageBubble = React.memo(
     const altText = isUserMessage ? "User" : "Character";
 
     const handleContextMenu = (e: React.MouseEvent) => {
+      if (isOptimistic) return;
       e.preventDefault();
       setShowActions(true);
     };
@@ -996,7 +983,7 @@ const MessageBubble = React.memo(
 
     return (
       <div
-        className={`group flex items-start gap-3 ${isUserMessage ? "flex-row-reverse" : "flex-row"
+        className={`group flex items-start gap-2.5 ${isUserMessage ? "flex-row-reverse" : "flex-row"
           } ${isOptimistic ? "opacity-70" : ""}`}
         onContextMenu={handleContextMenu}
       >
@@ -1014,10 +1001,10 @@ const MessageBubble = React.memo(
           >
             <Image
               src={imageSrc}
-              width={40}
-              height={40}
+              width={32}
+              height={32}
               alt={altText}
-              className={`w-10 h-10 rounded-full border border-white/10 object-cover transition-all ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''}`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-all ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''}`}
             />
             <AnimatePresence>
               {isNsfw && isBlurEnabled && !tempUnblur && (
@@ -1035,10 +1022,10 @@ const MessageBubble = React.memo(
         ) : (
           <Image
             src={imageSrc}
-            width={40}
-            height={40}
+            width={32}
+            height={32}
             alt={altText}
-            className="w-10 h-10 rounded-full border border-white/10 object-cover shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover shrink-0"
           />
         )}
 
@@ -1048,9 +1035,9 @@ const MessageBubble = React.memo(
           {/* Message Content */}
           <div
             onClick={handleTap}
-            className={`relative rounded-4xl px-6 py-4 transition-all duration-300 cursor-pointer ${isUserMessage
-              ? "bg-linear-to-br from-cyan-300 via-primary to-cyan-400 text-slate-950 font-bold shadow-[0_10px_40px_rgba(34,211,238,0.25)] ring-1 ring-white/20"
-              : "bg-white/5 border border-white/10 text-white/95 rounded-tl-md backdrop-blur-md shadow-xl"
+            className={`relative rounded-3xl sm:rounded-4xl px-5 py-3.5 sm:px-6 sm:py-4 transition-all duration-300 cursor-pointer ${isUserMessage
+              ? "bg-linear-to-br from-cyan-300 via-primary to-cyan-400 text-slate-950 font-bold shadow-[0_10px_30px_rgba(34,211,238,0.2)] ring-1 ring-white/10"
+              : "bg-white/5 border border-white/10 text-white/95 rounded-tl-sm backdrop-blur-md shadow-xl"
               }`}
           >
             <div className={`absolute top-0 ${isUserMessage ? '-right-1' : '-left-1'} w-3 h-3 bg-inherit transform rotate-45`} />
@@ -1096,77 +1083,77 @@ const MessageBubble = React.memo(
           {/* Message Actions - Show on hover (desktop) or tap (mobile) */}
           {!isOptimistic && !isEditing && (
             <div
-              className={`flex gap-1.5 mt-3 transition-all duration-200 ${showActions ? "opacity-100" : "opacity-0 sm:group-hover:opacity-100"
+              className={`flex gap-1 mt-2 sm:mt-2.5 transition-all duration-200 ${showActions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
                 } ${isUserMessage ? "justify-end" : "justify-start"}`}
             >
               <button
                 onClick={() => onEdit(message.id, message.content)}
-                className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-white/20 transition-all text-white/60 hover:text-white"
+                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
                 title="Edit"
               >
-                <FaEdit size={12} />
+                <FaEdit size={10} />
               </button>
 
               <button
                 onClick={() => onDelete(message.id)}
-                className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-red-500/20 hover:border-red-500/30 transition-all text-white/60 hover:text-red-400"
+                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-red-500/20 hover:border-red-500/30 transition-all text-white/30 hover:text-red-400"
                 title="Delete"
               >
-                <FaTrash size={12} />
+                <FaTrash size={10} />
               </button>
 
               {!isUserMessage && (
                 <button
                   onClick={() => onRegenerate(message.id)}
-                  className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-primary/20 hover:border-primary/30 transition-all text-white/60 hover:text-primary"
+                  className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-primary/20 hover:border-primary/30 transition-all text-white/30 hover:text-primary"
                   title="Regenerate"
                 >
-                  <FaRedo size={12} />
+                  <FaRedo size={10} />
                 </button>
               )}
 
               {isUserMessage && (
                 <button
                   onClick={() => onUserRegenerate(message.id)}
-                  className="w-8 h-8 flex items-center justify-center bg-white/10 border border-white/10 rounded-xl hover:bg-purple-500/20 hover:border-purple-500/30 transition-all text-white/60 hover:text-purple-400"
+                  className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-purple-500/20 hover:border-purple-500/30 transition-all text-white/30 hover:text-purple-400"
                   title="Edit and resend"
                 >
-                  <FaRedo size={12} />
+                  <FaRedo size={10} />
                 </button>
               )}
 
               <button
                 onClick={() => onTogglePin(message.id, !!message.pinned)}
-                className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.pinned
+                className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.pinned
                   ? "bg-primary/20 border-primary/40 text-primary"
-                  : "bg-white/10 border-white/10 text-white/60 hover:bg-primary/10 hover:text-primary"
+                  : "bg-white/5 border-white/5 text-white/30 hover:bg-primary/10 hover:text-primary"
                   }`}
                 title={message.pinned ? "Unpin message" : "Pin message"}
               >
-                <FaThumbtack size={12} className={message.pinned ? "" : "-rotate-45"} />
+                <FaThumbtack size={10} className={message.pinned ? "" : "-rotate-45"} />
               </button>
 
               {!isUserMessage && (
                 <>
                   <button
                     onClick={() => onFeedback(message.id, message.feedback === "LIKE" ? "NONE" : "LIKE")}
-                    className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.feedback === "LIKE"
+                    className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "LIKE"
                       ? "bg-green-500/20 border-green-500/40 text-green-400"
-                      : "bg-white/10 border-white/10 text-white/60 hover:bg-green-500/10 hover:text-green-400"
+                      : "bg-white/5 border-white/5 text-white/30 hover:bg-green-500/10 hover:text-green-400"
                       }`}
                     title="Like response"
                   >
-                    <FaThumbsUp size={12} />
+                    <FaThumbsUp size={10} />
                   </button>
                   <button
                     onClick={() => onFeedback(message.id, message.feedback === "DISLIKE" ? "NONE" : "DISLIKE")}
-                    className={`w-8 h-8 flex items-center justify-center border rounded-xl transition-all ${message.feedback === "DISLIKE"
+                    className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "DISLIKE"
                       ? "bg-red-500/20 border-red-500/40 text-red-400"
-                      : "bg-white/10 border-white/10 text-white/60 hover:bg-red-500/10 hover:text-red-400"
+                      : "bg-white/5 border-white/5 text-white/30 hover:bg-red-500/10 hover:text-red-400"
                       }`}
                     title="Dislike response"
                   >
-                    <FaThumbsDown size={12} />
+                    <FaThumbsDown size={10} />
                   </button>
                 </>
               )}
@@ -1226,7 +1213,7 @@ const ChatInput = React.memo(({
   };
 
   return (
-    <div className="p-4 sm:p-8 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-4 sm:pb-0">
+    <div className="p-3 sm:p-6 border-t border-white/5 bg-slate-950/40 backdrop-blur-3xl pb-3 sm:pb-0">
       <div className="max-w-4xl mx-auto">
         {/* Suggestion Chips */}
         <AnimatePresence>
@@ -1246,7 +1233,7 @@ const ChatInput = React.memo(({
                     setMessage(s);
                     onSelectSuggestion(s);
                   }}
-                  className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-[11px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap shrink-0"
+                  className="px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] sm:text-[10px] font-medium text-white/70 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap shrink-0"
                 >
                   {s}
                 </motion.button>
@@ -1256,23 +1243,23 @@ const ChatInput = React.memo(({
         </AnimatePresence>
 
         {/* Mobile Tool Row (Hidden on Desktop) */}
-        <div className="flex sm:hidden items-center gap-2 mb-3">
+        <div className="flex sm:hidden items-center gap-2 mb-2.5">
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onGetIdeas}
             disabled={isSubmitting || isGeneratingSuggestions}
-            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
+            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-xl bg-purple-600/10 border border-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
           >
-            <FaBrain size={14} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
+            <FaBrain size={12} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
             Ideas
           </motion.button>
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={onContinue}
             disabled={isSubmitting}
-            className="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
+            className="flex-1 flex items-center justify-center gap-2 h-9 rounded-xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-300 text-[10px] font-bold uppercase tracking-widest disabled:opacity-30"
           >
-            <FaMagic size={14} />
+            <FaMagic size={12} />
             Continue
           </motion.button>
         </div>
@@ -1287,8 +1274,8 @@ const ChatInput = React.memo(({
               rows={1}
               placeholder="Talk to character..."
               disabled={isSubmitting}
-              className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-2xl sm:rounded-4xl px-5 sm:px-8 py-3.5 sm:py-5 pr-5 sm:pr-16 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-all duration-300 text-sm leading-relaxed"
-              style={{ height: '52px', minHeight: '52px', maxHeight: '200px', overflowY: 'auto' }}
+              className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/20 rounded-2xl sm:rounded-4xl px-5 sm:px-7 py-3 sm:py-4.5 pr-5 sm:pr-6 resize-none focus:border-primary/50 focus:bg-white/10 outline-none transition-all duration-300 text-sm sm:text-[15px] leading-relaxed"
+              style={{ height: '48px', minHeight: '48px', maxHeight: '200px', overflowY: 'auto' }}
             />
           </div>
 
@@ -1299,10 +1286,10 @@ const ChatInput = React.memo(({
               whileTap={{ scale: 0.95 }}
               onClick={onGetIdeas}
               disabled={isSubmitting || isGeneratingSuggestions}
-              className="w-16 h-16 rounded-4xl bg-purple-600/20 border border-purple-500/30 text-purple-300 flex items-center justify-center hover:bg-purple-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+              className="w-13 h-13 rounded-4xl bg-purple-600/20 border border-purple-500/30 text-purple-300 flex items-center justify-center hover:bg-purple-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
               title="Get Roleplay Ideas"
             >
-              <FaBrain size={20} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
+              <FaBrain size={18} className={isGeneratingSuggestions ? 'animate-pulse' : ''} />
             </motion.button>
 
             <motion.button
@@ -1310,10 +1297,10 @@ const ChatInput = React.memo(({
               whileTap={{ scale: 0.95 }}
               onClick={onContinue}
               disabled={isSubmitting}
-              className="w-16 h-16 rounded-4xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
+              className="w-13 h-13 rounded-4xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 flex items-center justify-center hover:bg-indigo-600/30 transition-all disabled:opacity-30 group relative overflow-hidden"
               title="Continue Story (AI Narration)"
             >
-              <FaMagic size={20} />
+              <FaMagic size={18} />
             </motion.button>
           </div>
 
@@ -1323,9 +1310,9 @@ const ChatInput = React.memo(({
             whileTap={{ scale: 0.95 }}
             onClick={handleInternalSubmit}
             disabled={!message.trim() || isSubmitting}
-            className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-4xl bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20 shrink-0"
+            className="w-11 h-11 sm:w-13 sm:h-13 rounded-xl sm:rounded-4xl bg-primary text-slate-950 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:shadow-[0_0_30px_rgba(34,211,238,0.5)] transition-all disabled:opacity-50 disabled:shadow-none disabled:bg-white/10 disabled:text-white/20 shrink-0"
           >
-            <FaPaperPlane size={16} className="sm:scale-125" />
+            <FaPaperPlane size={14} className="sm:scale-125" />
           </motion.button>
         </div>
       </div>
@@ -1334,5 +1321,137 @@ const ChatInput = React.memo(({
 });
 
 ChatInput.displayName = "ChatInput";
+
+const LoadingScreen = () => {
+  const statusMessages = [
+    "Initializing neural links...",
+    "Retrieving conversation history...",
+    "Synchronizing persona data...",
+    "Establishing secure connection...",
+    "Processing AI context..."
+  ];
+  const [statusIndex, setStatusIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStatusIndex((prev) => (prev + 1) % statusMessages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [statusMessages.length]);
+
+  return (
+    <motion.div
+      className="fixed inset-0 flex items-center justify-center bg-[#020617] overflow-hidden"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {/* Background Atmosphere */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/20 blur-[120px] rounded-full"
+        />
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            opacity: [0.2, 0.4, 0.2],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-purple-600/10 blur-[120px] rounded-full"
+        />
+      </div>
+
+      <div className="relative flex flex-col items-center">
+        {/* AI Core Pulse Animation */}
+        <div className="relative w-24 h-24 mb-12">
+          <motion.div
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.5, 0, 0.5],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+            className="absolute inset-0 rounded-full bg-primary/20 border border-primary/30"
+          />
+          <motion.div
+            animate={{
+              scale: [1, 1.2, 1],
+            }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute inset-4 rounded-full bg-linear-to-br from-primary via-cyan-400 to-purple-500 shadow-[0_0_40px_rgba(34,211,238,0.5)]"
+          />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <FaBrain size={32} className="text-slate-900" />
+          </div>
+
+          {/* Orbiting Ring */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            className="absolute inset-[-10px] border-2 border-dashed border-white/10 rounded-full"
+          />
+        </div>
+
+        {/* Status Text with Scanning Effect */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative overflow-hidden px-4 py-1">
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={statusIndex}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="block text-white text-sm font-black uppercase tracking-[0.3em] font-mono italic"
+              >
+                {statusMessages[statusIndex]}
+              </motion.span>
+            </AnimatePresence>
+            {/* Scan Line */}
+            <motion.div
+              animate={{ left: ["-100%", "200%"] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-y-0 w-1/2 bg-linear-to-r from-transparent via-primary/40 to-transparent skew-x-12"
+            />
+          </div>
+
+          {/* Animated Progress Dots */}
+          <div className="flex gap-2.5">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  scale: [1, 1.5, 1],
+                  backgroundColor: ["rgba(255,255,255,0.1)", "#22d3ee", "rgba(255,255,255,0.1)"]
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.2
+                }}
+                className="w-1.5 h-1.5 rounded-full"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Branded Versioning */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.2 }}
+          className="absolute -bottom-32 text-[9px] font-black text-white uppercase tracking-[0.5em] italic"
+        >
+          Artificial Intelligence Interface • v2.0
+        </motion.p>
+      </div>
+    </motion.div>
+  );
+};
+
+Chat.displayName = "Chat";
 
 export default Chat;
