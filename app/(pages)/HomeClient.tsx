@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
-import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -25,15 +24,6 @@ const HomeClient = () => {
         params.set("p", "1");
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
     };
-
-
-    const { data: characters = [] } = useQuery<any[]>({
-        queryKey: ["characters"],
-        queryFn: () =>
-            fetch("/api/characters").then((res) =>
-                res.json().then((data) => data.data)
-            ),
-    });
 
     return (
         <div className="flex flex-col w-full gap-16 pt-32 pb-32">
@@ -59,7 +49,6 @@ const HomeClient = () => {
                     <Characters
                         searchQuery={searchQuery}
                         onSearch={handleSearch}
-                        allCharacters={characters}
                     />
                 </motion.section>
             </div>

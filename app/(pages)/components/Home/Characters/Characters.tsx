@@ -12,11 +12,9 @@ import { useSettings } from "@/app/hooks/useSettings";
 const Characters = ({
   searchQuery,
   onSearch,
-  allCharacters
 }: {
   searchQuery: string;
   onSearch: (q: string) => void;
-  allCharacters: any[];
 }) => {
   const { settings } = useSettings();
   const searchParams = useSearchParams();
@@ -320,7 +318,7 @@ const Characters = ({
         </div>
 
         <div className="w-full lg:max-w-md relative group">
-          <SearchBar characters={allCharacters} onSearch={onSearch} />
+          <SearchBar onSearch={onSearch} />
         </div>
       </div>
 
