@@ -108,28 +108,38 @@ const Characters = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const { isPending, error, data, refetch } = useQuery<any[]>({
-    queryKey: ["characters"],
-    queryFn: () =>
-      fetch("/api/characters").then((res) =>
-        res.json().then((data) => data.data)
-      ),
+  const { isPending, error, data: apiData, refetch } = useQuery<any>({
+    queryKey: ["characters", page, searchQuery, selectedTags, showAll],
+    queryFn: () => {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        search: searchQuery,
+        tags: selectedTags.join(","),
+        showAll: showAll.toString(),
+      });
+      return fetch(`/api/characters?${params.toString()}`).then((res) => res.json());
+    },
   });
+
+  const data = apiData?.data;
+  const meta = apiData?.meta;
 
   // Extract unique tags - memoized
   const allTags = React.useMemo(() => {
+    if (meta?.allTags) return meta.allTags;
     if (!data) return [];
     const tags = new Set<string>();
-    data.forEach(char => {
+    data.forEach((char: any) => {
       char.tags.forEach((tag: any) => tags.add(tag.name));
     });
     return Array.from(tags).sort();
-  }, [data]);
+  }, [data, meta]);
 
   // Filter tags based on debounced search - memoized
   const filteredTags = React.useMemo(() => {
     const search = debouncedTagSearch.toLowerCase();
-    return allTags.filter(tag =>
+    return allTags.filter((tag: string) =>
       tag.toLowerCase().includes(search) &&
       !selectedTags.includes(tag)
     );
@@ -148,30 +158,11 @@ const Characters = ({
     handleUpdateParams({ tags: newTags.length > 0 ? newTags.join(",") : null, p: "1" });
   };
 
-  const filteredData = React.useMemo(() => {
-    return data?.filter((char) => {
-      const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        char.tags.some((tag: any) => tag.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        char.author.username.toLowerCase().includes(searchQuery.toLowerCase());
+  // Filtering is now handled on the server
+  const filteredData = data;
 
-      // Multi-tag filter: character must have ALL selected tags
-      const matchesTags = selectedTags.length === 0 ||
-        selectedTags.every(selectedTag =>
-          char.tags.some((tag: any) => tag.name === selectedTag)
-        );
-
-      // NSFW Filtering - "Show All" toggle overrides the global settings (which were effectively removed/hidden)
-      if (!showAll && char.isNsfw) return false;
-
-      return matchesSearch && matchesTags;
-    });
-  }, [data, searchQuery, selectedTags, showAll]);
-
-  const totalPages = Math.ceil((filteredData?.length || 0) / pageSize);
-  const paginatedData = filteredData?.slice(
-    (page - 1) * pageSize,
-    page * pageSize
-  );
+  const totalPages = meta?.totalPages || 1;
+  const paginatedData = data;
 
   if (isPending) {
     return (
@@ -276,7 +267,7 @@ const Characters = ({
                       className="absolute top-full left-0 mt-2 w-64 max-h-64 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50"
                     >
                       {filteredTags.length > 0 ? (
-                        filteredTags.slice(0, 20).map(tag => (
+                        filteredTags.slice(0, 20).map((tag: string) => (
                           <button
                             key={tag}
                             onClick={() => {
@@ -335,7 +326,7 @@ const Characters = ({
 
       <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4 md:gap-6">
         <AnimatePresence>
-          {paginatedData?.map((character, index) => (
+          {paginatedData?.map((character: any) => (
             <motion.div
               key={character.id}
               initial={{ opacity: 0 }}
