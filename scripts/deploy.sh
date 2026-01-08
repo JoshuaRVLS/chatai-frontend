@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-PROJECT_DIR="/home/root/jchatai.space" # Adjust this if your path is different
+PROJECT_DIR="/root/web" # Updated to match deploy.yml
 APP_NAME="jchatai" # The name of your PM2 process
 
 echo "🚀 Starting deployment..."
