@@ -23,11 +23,13 @@ import {
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 
 type TagOption = { label: string; value: string };
 
 const CreateCharacterPage: React.FC = () => {
   const { user } = useContext(AuthContext);
+  const { withAuth, isAuthenticated } = useAuthAction();
   const router = useRouter();
 
   const [image, setImage] = useState<File | null>(null);
@@ -53,7 +55,7 @@ const CreateCharacterPage: React.FC = () => {
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
   const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage);
 
-  const handleChubImport = async () => {
+  const handleChubImport = withAuth(async () => {
     if (!importUrl) {
       toast.error("Please enter a Chub.ai URL");
       return;
@@ -97,9 +99,9 @@ const CreateCharacterPage: React.FC = () => {
     } finally {
       setIsImporting(false);
     }
-  };
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = withAuth(async (e: FormEvent) => {
     e.preventDefault();
     if (!image) {
       toast.error("Please upload a character image");
@@ -137,7 +139,7 @@ const CreateCharacterPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  });
 
   return (
     <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
@@ -218,7 +220,7 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Image & Identity Section */}
-            <section className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-white/3 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
                 <FiInfo className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>

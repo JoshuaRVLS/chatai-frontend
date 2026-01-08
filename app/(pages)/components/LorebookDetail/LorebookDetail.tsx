@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import Select from "react-select";
 import Image from "next/image";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 
 interface LorebookDetailProps {
     lorebookId: string;
@@ -27,6 +28,7 @@ interface LorebookDetailProps {
 
 const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
     const { user } = useContext(AuthContext);
+    const { withAuth, isAuthenticated } = useAuthAction();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [isEditingMetadata, setIsEditingMetadata] = useState(false);
@@ -53,8 +55,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
             const json = await res.json();
             return json.data;
         },
-        enabled: !!user?.id,
     });
+
+    const isOwner = user?.id === lorebook?.userId;
 
     const { data: allTags } = useQuery<any[]>({
         queryKey: ["lorebook-tags"],
@@ -76,7 +79,7 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         }
     }, [lorebook]);
 
-    const handleUpdateMetadata = async () => {
+    const handleUpdateMetadata = withAuth(async () => {
         const formData = new FormData();
         formData.append("name", metaName);
         formData.append("description", metaDescription);
@@ -102,9 +105,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         } catch {
             toast.error("Failed to update metadata");
         }
-    };
+    });
 
-    const handleAddEntry = async () => {
+    const handleAddEntry = withAuth(async () => {
         if (!keywords.trim() || !content.trim()) {
             toast.error("Keywords and content are required");
             return;
@@ -125,9 +128,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         } catch {
             toast.error("Failed to add entry");
         }
-    };
+    });
 
-    const handleUpdateEntry = async (entryId: string) => {
+    const handleUpdateEntry = withAuth(async (entryId: string) => {
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entryId}`, {
                 method: "PATCH",
@@ -144,9 +147,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         } catch {
             toast.error("Failed to update entry");
         }
-    };
+    });
 
-    const handleDeleteEntry = async (entryId: string) => {
+    const handleDeleteEntry = withAuth(async (entryId: string) => {
         if (!confirm("Delete this entry?")) return;
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entryId}`, {
@@ -159,9 +162,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         } catch {
             toast.error("Failed to delete entry");
         }
-    };
+    });
 
-    const toggleEntry = async (entry: any) => {
+    const toggleEntry = withAuth(async (entry: any) => {
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entry.id}`, {
                 method: "PATCH",
@@ -174,7 +177,7 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
         } catch {
             toast.error("Failed to toggle entry");
         }
-    };
+    });
 
     const resetForm = () => {
         setKeywords("");
@@ -290,12 +293,14 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                     <FiBookOpen className="text-white/40" />
                                     <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Knowledge Entries</h3>
                                 </div>
-                                <button
-                                    onClick={() => setIsAddingEntry(true)}
-                                    className="px-4 py-2 bg-white text-zinc-950 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2 hover:scale-105 transition-all shadow-xl"
-                                >
-                                    <FaPlus size={10} /> Add Entry
-                                </button>
+                                {isOwner && (
+                                    <button
+                                        onClick={() => setIsAddingEntry(true)}
+                                        className="px-4 py-2 bg-white text-zinc-950 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2 hover:scale-105 transition-all shadow-xl"
+                                    >
+                                        <FaPlus size={10} /> Add Entry
+                                    </button>
+                                )}
                             </div>
 
                             <AnimatePresence>
@@ -398,17 +403,19 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                                             </span>
                                                         ))}
                                                     </div>
-                                                    <div className="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <button onClick={() => toggleEntry(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
-                                                            {entry.enabled ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
-                                                        </button>
-                                                        <button onClick={() => startEdit(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
-                                                            <FaEdit size={14} />
-                                                        </button>
-                                                        <button onClick={() => handleDeleteEntry(entry.id)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
-                                                            <FaTrash size={14} />
-                                                        </button>
-                                                    </div>
+                                                    {isOwner && (
+                                                        <div className="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={() => toggleEntry(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
+                                                                {entry.enabled ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
+                                                            </button>
+                                                            <button onClick={() => startEdit(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
+                                                                <FaEdit size={14} />
+                                                            </button>
+                                                            <button onClick={() => handleDeleteEntry(entry.id)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                                                                <FaTrash size={14} />
+                                                            </button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <p className={`text-white/60 text-sm leading-relaxed font-medium ${!entry.enabled && 'opacity-20 italic'}`}>
                                                     {entry.content}
@@ -429,12 +436,14 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                     <FiSettings className="text-white/40" />
                                     <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Module Config</h3>
                                 </div>
-                                <button
-                                    onClick={() => setIsEditingMetadata(!isEditingMetadata)}
-                                    className={`p-2 rounded-xl transition-all ${isEditingMetadata ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-white/20 hover:text-white'}`}
-                                >
-                                    <FaEdit size={14} />
-                                </button>
+                                {isOwner && (
+                                    <button
+                                        onClick={() => setIsEditingMetadata(!isEditingMetadata)}
+                                        className={`p-2 rounded-xl transition-all ${isEditingMetadata ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-white/20 hover:text-white'}`}
+                                    >
+                                        <FaEdit size={14} />
+                                    </button>
+                                )}
                             </div>
 
                             {!isEditingMetadata ? (

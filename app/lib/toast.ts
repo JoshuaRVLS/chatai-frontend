@@ -2,9 +2,18 @@ import { useToastStore, type ToastType } from '@/app/hooks/useToastStore';
 
 interface ToastOptions {
     duration?: number;
+    id?: string;
 }
 
 const createToast = (message: string, type: ToastType, options?: ToastOptions) => {
+    if (options?.id) {
+        useToastStore.getState().updateToast(options.id, {
+            message,
+            type,
+            duration: options.duration,
+        });
+        return options.id;
+    }
     return useToastStore.getState().addToast({
         message,
         type,

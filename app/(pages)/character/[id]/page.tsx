@@ -16,10 +16,34 @@ export async function generateMetadata({
     `${process.env.NEXTAUTH_URL}/api/character-name/${(await params).id}`
   ).then((res) => res.json());
 
+  const char = data;
+
   return {
-    title: `${data.name} | Character Profile`,
-    description: data.bio,
-    // other metadata...
+    title: char.name,
+    description: char.bio.slice(0, 160),
+    openGraph: {
+      title: `${char.name} | Character Profile`,
+      description: char.bio,
+      url: `https://jchatai.space/character/${(await params).id}`,
+      images: [
+        {
+          url: char.avatar || "/og-image.png",
+          width: 800,
+          height: 800,
+          alt: char.name,
+        },
+      ],
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title: char.name,
+      description: char.bio,
+      images: [char.avatar || "/og-image.png"],
+    },
+    alternates: {
+      canonical: `https://jchatai.space/character/${(await params).id}`,
+    }
   };
 }
 

@@ -19,11 +19,13 @@ import {
 } from "react-icons/fi";
 import { signOut, useSession } from "next-auth/react";
 import UserAvatar from "../Common/UserAvatar";
+import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
+  const openModal = useAuthModalStore((state) => state.openModal);
 
   // Lock scroll when mobile menu is open
   useEffect(() => {
@@ -165,9 +167,12 @@ const Navbar = () => {
                   </AnimatePresence>
                 </div>
               ) : (
-                <Link href="/login" className="px-5 py-2 rounded-lg border border-white/5 text-zinc-400 text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-zinc-950 transition-all">
+                <button
+                  onClick={() => openModal('login')}
+                  className="px-5 py-2 rounded-lg border border-white/5 text-zinc-400 text-[9px] font-black uppercase tracking-widest hover:bg-white hover:text-zinc-950 transition-all cursor-pointer"
+                >
                   Sign In
-                </Link>
+                </button>
               )}
             </div>
           </div>
@@ -229,13 +234,15 @@ const Navbar = () => {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-center p-6 rounded-2xl bg-white text-zinc-950 font-black uppercase tracking-widest text-[10px]"
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    openModal('login');
+                  }}
+                  className="flex items-center justify-center p-6 rounded-2xl bg-white text-zinc-950 font-black uppercase tracking-widest text-[10px] cursor-pointer"
                 >
                   Authorize System Access
-                </Link>
+                </button>
               )}
             </div>
           </motion.div>

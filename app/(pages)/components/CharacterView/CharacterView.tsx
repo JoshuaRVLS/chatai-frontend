@@ -23,6 +23,7 @@ import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 
 const CharacterView = ({ id }: { id: string }) => {
   const { isPending, error, data } = useQuery<
@@ -40,6 +41,7 @@ const CharacterView = ({ id }: { id: string }) => {
   });
 
   const { user } = useContext(AuthContext);
+  const { withAuth } = useAuthAction();
   const router = useRouter();
   const queryClient = useQueryClient();
   const { settings } = useSettings();
@@ -53,7 +55,7 @@ const CharacterView = ({ id }: { id: string }) => {
     intro: false,
   });
 
-  const startChat = async () => {
+  const startChat = withAuth(async () => {
     try {
       const res = await fetch("/api/chats", {
         method: "POST",
@@ -70,7 +72,7 @@ const CharacterView = ({ id }: { id: string }) => {
     } catch (e) {
       console.error(e);
     }
-  };
+  });
 
   if (isPending) {
     return (

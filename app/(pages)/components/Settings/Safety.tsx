@@ -61,51 +61,8 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
             </div>
 
             <div className="space-y-6">
-                {/* NSFW Toggle */}
-                <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/[0.04]">
-                    <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-white uppercase tracking-widest">NSFW Content</span>
-                            {showNsfw && (
-                                <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-black uppercase tracking-tighter">Mature</span>
-                            )}
-                        </div>
-                        <p className="text-white/20 text-[11px] leading-relaxed max-w-md font-medium">
-                            Toggle visibility of characters and content marked as Not Safe For Work.
-                        </p>
-                    </div>
-
-                    <div className="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5 relative">
-                        <button
-                            onClick={() => handleUpdateSetting("showNsfw", false)}
-                            className={`relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!showNsfw ? "text-slate-950" : "text-white/30 hover:text-white"
-                                }`}
-                        >
-                            SFW Only
-                        </button>
-                        <button
-                            onClick={() => handleUpdateSetting("showNsfw", true)}
-                            className={`relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${showNsfw ? "text-slate-950" : "text-white/30 hover:text-white"
-                                }`}
-                        >
-                            Show NSFW
-                        </button>
-                        <motion.div
-                            layoutId="nsfw-tab"
-                            className="absolute inset-y-1.5 bg-primary rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
-                            initial={false}
-                            animate={{
-                                x: showNsfw ? "100%" : "0%",
-                                left: showNsfw ? "-0.375rem" : "0.375rem",
-                                width: "calc(50% - 0rem)"
-                            }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        />
-                    </div>
-                </div>
-
                 {/* Blur Toggle */}
-                <div className={`bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/[0.04] ${!showNsfw ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className={`bg-white/2 border border-white/5 rounded-4xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/4 ${!showNsfw ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-black text-white uppercase tracking-widest">Image Filtering</span>
@@ -158,7 +115,7 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
                             exit={{ opacity: 0, y: 10 }}
                             className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-4 flex gap-4 items-start"
                         >
-                            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center shrink-0">
                                 <FiAlertTriangle className="text-orange-500" />
                             </div>
                             <div className="space-y-1">

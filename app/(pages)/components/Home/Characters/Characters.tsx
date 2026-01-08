@@ -33,6 +33,8 @@ const Characters = ({
   const gridRef = React.useRef<HTMLDivElement>(null);
   const sectionRef = React.useRef<HTMLDivElement>(null);
 
+  const [showAll, setShowAll] = React.useState(false);
+
   const [page, setPage] = React.useState(
     parseInt(searchParams.get("p") || "1", 10)
   );
@@ -149,12 +151,12 @@ const Characters = ({
           char.tags.some((tag: any) => tag.name === selectedTag)
         );
 
-      // NSFW Filtering
-      if (!settings?.showNsfw && char.isNsfw) return false;
+      // NSFW Filtering - "Show All" toggle overrides the global settings (which were effectively removed/hidden)
+      if (!showAll && char.isNsfw) return false;
 
       return matchesSearch && matchesTags;
     });
-  }, [data, searchQuery, selectedTags, settings?.showNsfw]);
+  }, [data, searchQuery, selectedTags, showAll]);
 
   const totalPages = Math.ceil((filteredData?.length || 0) / pageSize);
   const paginatedData = filteredData?.slice(
@@ -299,6 +301,20 @@ const Characters = ({
                   Clear All
                 </button>
               )}
+
+              {/* Show All (NSFW) Toggle */}
+              <button
+                onClick={() => setShowAll(!showAll)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300 ${showAll
+                  ? "bg-orange-500/10 border-orange-500/20 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
+                  : "bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20"
+                  }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${showAll ? "bg-orange-500 animate-pulse" : "bg-white/20"}`} />
+                <span className="text-[10px] font-black uppercase tracking-widest">
+                  {showAll ? "Showing All" : "Show All"}
+                </span>
+              </button>
             </div>
           </div>
         </div>

@@ -7,23 +7,21 @@ export const GET = async (
     req: Request,
     { params }: { params: Promise<{ id: string }> }
 ) => {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
 
     try {
-        const lorebook = await db.lorebook.findFirst({
+        const lorebook = await db.lorebook.findUnique({
             where: {
                 id,
-                userId: session.user.id
             },
             include: {
                 entries: {
                     orderBy: { createdAt: "desc" }
-                }
+                },
+                user: {
+                    select: { username: true, id: true }
+                },
+                tags: true
             }
         });
 

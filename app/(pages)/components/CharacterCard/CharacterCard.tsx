@@ -9,6 +9,7 @@ import { useSettings } from "@/app/hooks/useSettings";
 import { AuthContext } from "../../providers/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from '@/app/lib/toast';
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 
 interface CharacterCardProps {
   characterName: string;
@@ -34,18 +35,24 @@ const CharacterCard = React.memo(function CharacterCard({
   const router = useRouter();
   const { settings } = useSettings();
   const { user } = useContext(AuthContext);
+  const { withAuth } = useAuthAction();
   const queryClient = useQueryClient();
   const [tempUnblur, setTempUnblur] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
 
   const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
   const isOwner = user?.id === authorId;
 
+  const handleUnblur = withAuth(() => {
+    setTempUnblur(true);
+  });
+
   const handleNavigate = (e: React.MouseEvent) => {
     if (shouldBlur) {
       e.stopPropagation();
-      setTempUnblur(true);
+      handleUnblur();
       return;
     }
 
@@ -139,11 +146,23 @@ const CharacterCard = React.memo(function CharacterCard({
               <Image
                 src={image}
                 fill
-                className={`object-cover object-top transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-xl scale-110 grayscale-[0.5]' : ''}`}
+                className={`object-cover object-top transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-xl scale-110 grayscale-[0.5]' : ''} ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                 style={shouldBlur ? { willChange: 'filter' } : {}}
                 alt={characterName}
                 sizes="(max-width: 768px) 50vw, 20vw"
+                onLoad={() => setImageLoading(false)}
               />
+
+              {/* Shimmer Placeholder */}
+              <AnimatePresence>
+                {imageLoading && (
+                  <motion.div
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-white/5 shimmer"
+                  />
+                )}
+              </AnimatePresence>
 
               {/* NSFW Blur Overlay - only covers image area */}
               <AnimatePresence>

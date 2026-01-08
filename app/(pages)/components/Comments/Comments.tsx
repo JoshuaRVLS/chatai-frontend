@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from '@/app/lib/toast';
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 
 type Author = User & {
   profileImage: UserProfileImage | null;
@@ -20,6 +21,7 @@ type Author = User & {
 const Comments = ({ characterId }: { characterId: string }) => {
   const [commentValue, setCommentValue] = useState<string>("");
   const { user } = useContext(AuthContext);
+  const { withAuth, isAuthenticated } = useAuthAction();
   const queryClient = useQueryClient();
 
   const { isPending, data } = useQuery<(Comment & { author: Author })[]>({
@@ -80,14 +82,10 @@ const Comments = ({ characterId }: { characterId: string }) => {
     },
   });
 
-  const handlePostComment = () => {
+  const handlePostComment = withAuth(() => {
     if (!commentValue.trim()) return;
-    if (!user) {
-      toast.error("You must be logged in to comment");
-      return;
-    }
     addComment(commentValue);
-  };
+  });
 
   return (
     <div className="w-full space-y-8 py-8">
@@ -104,8 +102,8 @@ const Comments = ({ characterId }: { characterId: string }) => {
 
       {/* Input Section */}
       <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-[2rem] blur opacity-0 group-focus-within:opacity-100 transition duration-1000" />
-        <div className="relative flex items-center gap-4 p-4 bg-[#0f172a]/40 backdrop-blur-3xl border border-white/5 rounded-[2rem]">
+        <div className="absolute -inset-0.5 bg-linear-to-r from-primary/20 to-purple-500/20 rounded-4xl blur opacity-0 group-focus-within:opacity-100 transition duration-1000" />
+        <div className="relative flex items-center gap-4 p-4 bg-[#0f172a]/40 backdrop-blur-3xl border border-white/5 rounded-4xl">
           <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-white/20 shrink-0 overflow-hidden">
             {user?.image ? (
               <Image
@@ -122,13 +120,14 @@ const Comments = ({ characterId }: { characterId: string }) => {
             value={commentValue}
             onChange={(e) => setCommentValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handlePostComment()}
-            placeholder={user ? "Share your transmission..." : "Log in to post a transmission..."}
-            disabled={!user || isSubmitting}
+            placeholder={isAuthenticated ? "Share your transmission..." : "Log in to post a transmission..."}
+            disabled={isSubmitting}
+            onClick={() => !isAuthenticated && handlePostComment()}
           />
           <button
             onClick={handlePostComment}
-            disabled={!commentValue.trim() || isSubmitting || !user}
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${commentValue.trim() && !isSubmitting && user
+            disabled={(!commentValue.trim() && isAuthenticated) || isSubmitting}
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${((commentValue.trim() && !isSubmitting) || !isAuthenticated)
               ? "bg-primary text-slate-950 shadow-[0_0_20px_rgba(34,211,238,0.3)] hover:scale-110"
               : "bg-white/5 text-white/10 cursor-not-allowed"
               }`}
@@ -164,7 +163,7 @@ const Comments = ({ characterId }: { characterId: string }) => {
               transition={{ delay: index * 0.05 }}
               className="group relative flex gap-5 p-6 bg-[#0f172a]/20 border border-white/5 rounded-[2.5rem] hover:border-white/10 transition-all"
             >
-              <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5 font-black uppercase tracking-widest leading-loose">
+              <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white/5 shrink-0 border border-white/5 font-black uppercase tracking-widest leading-loose">
                 {comment.author.profileImage ? (
                   <Image
                     src={bytesToBase64(comment.author.profileImage)}

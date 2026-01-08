@@ -16,10 +16,12 @@ import {
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 import Select from "react-select";
 
 const CreateLorebookPage: React.FC = () => {
     const { user } = useContext(AuthContext);
+    const { withAuth } = useAuthAction();
     const router = useRouter();
 
     const [image, setImage] = useState<File | null>(null);
@@ -49,7 +51,7 @@ const CreateLorebookPage: React.FC = () => {
         }
     };
 
-    const handleSubmit = async (e: FormEvent) => {
+    const handleSubmit = withAuth(async (e: FormEvent) => {
         e.preventDefault();
         if (!name.trim()) {
             toast.error("Please provide a name for the lorebook");
@@ -84,7 +86,7 @@ const CreateLorebookPage: React.FC = () => {
         } finally {
             setLoading(false);
         }
-    };
+    });
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">

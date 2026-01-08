@@ -12,6 +12,7 @@ import CharacterTags from "../CharacterTags/CharacterTags";
 import LorebookSelector from "../LorebookSelector/LorebookSelector";
 import CharacterCard from "../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
+import { useAuthAction } from "@/app/hooks/useAuthAction";
 import {
   FiCamera,
   FiInfo,
@@ -50,6 +51,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
   const router = useRouter();
   const { user } = useContext(AuthContext);
+  const { withAuth } = useAuthAction();
 
   const { isPending, error, data } = useQuery<
     Character & {
@@ -93,7 +95,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     }
   }, [data]);
 
-  const handleChubImport = async () => {
+  const handleChubImport = withAuth(async () => {
     if (!importUrl) {
       toast.error("Please enter a Chub.ai URL");
       return;
@@ -138,9 +140,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
     } finally {
       setIsImporting(false);
     }
-  };
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = withAuth(async (e: FormEvent) => {
     setLoading(true);
     e.preventDefault();
 
@@ -183,9 +185,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
       console.error(error);
       toast.error("An error occurred");
     }
-  };
+  });
 
-  const handleGenerateImage = async () => {
+  const handleGenerateImage = withAuth(async () => {
     if (!characterName || !characterBio) {
       toast.error("Please provide at least a name and bio first");
       return;
@@ -214,7 +216,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     } finally {
       setIsGeneratingImage(false);
     }
-  };
+  });
 
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
   const permanentTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(exampleConversations);

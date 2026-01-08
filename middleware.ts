@@ -14,16 +14,7 @@ export async function middleware(request: NextRequest) {
     });
 
     const publicAuthRoutes = ['/login', '/register'];
-    const protectedRoutes = ['/', '/create_character', '/my_characters', '/edit_character', '/settings', '/create_lorebook', '/lorebooks-repository'];
-
-    const isProtectedRoute = protectedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'));
     const isPublicAuthRoute = publicAuthRoutes.some(route => pathname === route);
-
-    if (!token && isProtectedRoute) {
-      const loginUrl = new URL('/login', request.url);
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
 
     if (token && isPublicAuthRoute) {
       return NextResponse.redirect(new URL('/', request.url));
