@@ -27,6 +27,7 @@ const History = () => {
   const confirm = useConfirm();
   const { settings } = useSettings();
   const [tempUnblur, setTempUnblur] = useState<{ [key: string]: boolean }>({});
+  const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>({});
   const [showContextMenu, setShowContextMenu] = useState<string | null>(null);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -218,14 +219,22 @@ const History = () => {
               <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 shrink-0 border border-white/5 shadow-xl">
                 {(() => {
                   const shouldBlur = chat.character.isNsfw && settings?.blurNsfw && !tempUnblur[chat.id];
+                  const isLoading = imageLoading[chat.id] !== false;
                   return (
                     <>
+                      {isLoading && (
+                        <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                          <div className="w-5 h-5 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                        </div>
+                      )}
                       <Image
                         src={`/api/image/${chat.character.id}`}
                         fill
-                        className={`object-cover transition-transform duration-700 group-hover:scale-110 ${shouldBlur ? 'blur-xl grayscale-[0.5]' : ''}`}
+                        className={`object-cover transition-all duration-700 group-hover:scale-110 ${shouldBlur ? 'blur-xl grayscale-[0.5]' : ''} ${isLoading ? 'opacity-0' : 'opacity-100'}`}
                         alt={chat.character.name}
                         sizes="112px"
+                        onLoad={() => setImageLoading(prev => ({ ...prev, [chat.id]: false }))}
+                        onError={() => setImageLoading(prev => ({ ...prev, [chat.id]: false }))}
                       />
                       <AnimatePresence>
                         {shouldBlur && (

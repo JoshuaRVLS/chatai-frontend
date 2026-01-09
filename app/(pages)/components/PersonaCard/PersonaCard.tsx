@@ -16,6 +16,8 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(initialPersona.image ? `/api/persona/image/${initialPersona.id}?t=${Date.now()}` : null);
+  const [imageLoading, setImageLoading] = useState<boolean>(true);
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
 
   const { user } = useContext(AuthContext);
   const confirm = useConfirm();
@@ -147,13 +149,21 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
       >
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 overflow-hidden ${isActive ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10'}`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 overflow-hidden relative ${isActive ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10'}`}>
               {initialPersona.image ? (
-                <img
-                  src={`/api/persona/image/${initialPersona.id}`}
-                  alt={personaName}
-                  className="w-full h-full object-cover"
-                />
+                <>
+                  {imageLoading && (
+                    <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
+                      <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                    </div>
+                  )}
+                  <img
+                    src={`/api/persona/image/${initialPersona.id}`}
+                    alt={personaName}
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                    onLoad={() => setImageLoading(false)}
+                  />
+                </>
               ) : (
                 <FaUser size={16} />
               )}
@@ -216,11 +226,22 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                     <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Visual</label>
                     <div className="flex items-center gap-4">
                       {imagePreview ? (
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                          {previewLoading && (
+                            <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
+                              <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                            </div>
+                          )}
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className={`w-full h-full object-cover transition-opacity duration-300 ${previewLoading ? 'opacity-0' : 'opacity-100'}`}
+                            onLoad={() => setPreviewLoading(false)}
+                            onError={() => setPreviewLoading(false)}
+                          />
                           <button
                             onClick={() => { setImageFile(null); setImagePreview(null); }}
-                            className="absolute top-1 right-1 w-4 h-4 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all font-bold"
+                            className="absolute top-1 right-1 w-4 h-4 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all font-bold z-10"
                           >
                             <span className="text-[8px]">×</span>
                           </button>
@@ -237,6 +258,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                               const file = e.target.files?.[0];
                               if (file) {
                                 setImageFile(file);
+                                setPreviewLoading(true);
                                 setImagePreview(URL.createObjectURL(file));
                               }
                             }}

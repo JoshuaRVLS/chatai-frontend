@@ -42,6 +42,7 @@ const CreateCharacterPage: React.FC = () => {
   const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
   const [isNsfw, setIsNsfw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const { data: lorebooks } = useQuery<any[]>({
     queryKey: ["lorebooks"],
@@ -142,7 +143,21 @@ const CreateCharacterPage: React.FC = () => {
                 <div className="w-full md:w-1/3 space-y-4">
                   <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/5 bg-white/5 group">
                     {imagePreview ? (
-                      <Image src={imagePreview} fill className="object-cover" alt="Preview" />
+                      <>
+                        {imageLoading && (
+                          <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                            <div className="w-8 h-8 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                          </div>
+                        )}
+                        <Image
+                          src={imagePreview}
+                          fill
+                          className={`object-cover transition-opacity duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                          alt="Preview"
+                          onLoad={() => setImageLoading(false)}
+                          onError={() => setImageLoading(false)}
+                        />
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <FiCamera className="text-white/10 text-4xl" />
@@ -156,6 +171,7 @@ const CreateCharacterPage: React.FC = () => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setImage(file);
+                          setImageLoading(true);
                           setImagePreview(URL.createObjectURL(file));
                         }
                       }}

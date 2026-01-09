@@ -236,8 +236,10 @@ const CharacterCard = React.memo(function CharacterCard({
                   <motion.div
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-white/5 shimmer"
-                  />
+                    className="absolute inset-0 bg-white/5 shimmer flex items-center justify-center z-10"
+                  >
+                    <div className="w-6 h-6 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                  </motion.div>
                 )}
               </AnimatePresence>
 

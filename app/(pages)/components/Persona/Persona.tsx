@@ -18,6 +18,7 @@ const Persona: React.FC = () => {
   const [persona, setPersona] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const { isPending, data, error, refetch } = useQuery<any[]>({
     queryKey: ["personas"],
@@ -219,11 +220,22 @@ const Persona: React.FC = () => {
                     <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Visual</label>
                     <div className="flex items-center gap-4">
                       {imagePreview ? (
-                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10">
-                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                          {previewLoading && (
+                            <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
+                              <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                            </div>
+                          )}
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className={`w-full h-full object-cover transition-opacity duration-300 ${previewLoading ? 'opacity-0' : 'opacity-100'}`}
+                            onLoad={() => setPreviewLoading(false)}
+                            onError={() => setPreviewLoading(false)}
+                          />
                           <button
                             onClick={() => { setImageFile(null); setImagePreview(null); }}
-                            className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all"
+                            className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all z-10"
                           >
                             <FaTimes size={8} />
                           </button>
@@ -240,6 +252,7 @@ const Persona: React.FC = () => {
                               const file = e.target.files?.[0];
                               if (file) {
                                 setImageFile(file);
+                                setPreviewLoading(true);
                                 setImagePreview(URL.createObjectURL(file));
                               }
                             }}

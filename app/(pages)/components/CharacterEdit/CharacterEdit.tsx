@@ -45,6 +45,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
   >([]);
   const [selectedLorebooks, setSelectedLorebooks] = useState<{ label: string; value: string }[]>([]);
   const [isNsfw, setIsNsfw] = useState<boolean>(false);
+  const [imageLoading, setImageLoading] = useState<boolean>(false);
 
   const router = useRouter();
   const { user } = useContext(AuthContext);
@@ -243,7 +244,21 @@ const CharacterEdit = ({ id }: { id: string }) => {
                 <div className="w-full md:w-1/3 space-y-4">
                   <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/5 bg-white/5 group">
                     {imagePreview ? (
-                      <Image src={imagePreview} fill className="object-cover" alt="Preview" />
+                      <>
+                        {(imageLoading || isGeneratingImage) && (
+                          <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                            <div className="w-8 h-8 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                          </div>
+                        )}
+                        <Image
+                          src={imagePreview}
+                          fill
+                          className={`object-cover transition-opacity duration-500 ${imageLoading || isGeneratingImage ? 'opacity-0' : 'opacity-100'}`}
+                          alt="Preview"
+                          onLoad={() => setImageLoading(false)}
+                          onError={() => setImageLoading(false)}
+                        />
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <FiCamera className="text-white/10 text-4xl" />
@@ -257,6 +272,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
                         const file = e.target.files?.[0];
                         if (file) {
                           setImage(file);
+                          setImageLoading(true);
                           setImagePreview(URL.createObjectURL(file));
                         }
                       }}

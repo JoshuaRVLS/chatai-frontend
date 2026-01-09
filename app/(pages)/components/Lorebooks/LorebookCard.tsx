@@ -23,7 +23,9 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
     const confirm = useConfirm();
     const [showContextMenu, setShowContextMenu] = useState(false);
     const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+    const [imageLoading, setImageLoading] = useState(true);
     const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+
     const handleDelete = async (e: React.MouseEvent | React.Touch | any) => {
         if (e.preventDefault) e.preventDefault();
         if (e.stopPropagation) e.stopPropagation();
@@ -108,14 +110,18 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
             >
                 {/* Avatar Image Background with Gradient Overlay */}
                 <div className="relative h-48 lg:h-56 overflow-hidden">
+                    {imageLoading && (
+                        <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                            <div className="w-8 h-8 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                        </div>
+                    )}
                     <Image
                         src={`/api/lorebook-image/${lorebook.id}`}
                         alt={lorebook.name}
                         fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        onError={(e: any) => {
-                            e.currentTarget.style.display = 'none';
-                        }}
+                        className={`object-cover group-hover:scale-110 transition-all duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                        onLoad={() => setImageLoading(false)}
+                        onError={() => setImageLoading(false)}
                     />
                     {/* Gradient Overlay */}
                     <div className="absolute inset-0 bg-linear-to-t from-[#09090b] via-[#09090b]/60 to-transparent" />

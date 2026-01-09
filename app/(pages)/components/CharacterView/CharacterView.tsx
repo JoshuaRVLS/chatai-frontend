@@ -55,6 +55,7 @@ const CharacterView = ({ id }: { id: string }) => {
     intro: false,
   });
   const [isStartingChat, setIsStartingChat] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const startChat = withAuth(async () => {
     if (isStartingChat) return;
@@ -113,15 +114,22 @@ const CharacterView = ({ id }: { id: string }) => {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               onClick={() => shouldBlur && setTempUnblur(true)}
-              className={`relative w-full aspect-3/4 overflow-hidden rounded-3xl border border-white/10 group shadow-2xl ${shouldBlur ? 'cursor-pointer' : ''}`}
+              className={`relative w-full aspect-3/4 overflow-hidden rounded-3xl border border-white/10 group shadow-2xl ${shouldBlur ? 'cursor-pointer' : ''} bg-white/1`}
             >
               <div className="absolute inset-0 bg-linear-to-b from-white/2 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              {imageLoading && (
+                <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-20">
+                  <div className="w-12 h-12 border-4 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                </div>
+              )}
               <Image
                 src={`/api/image/${id}`}
                 alt={data?.name || 'Character image'}
                 fill
-                className={`object-cover transition-transform duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-3xl scale-110' : ''}`}
+                className={`object-cover transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-3xl scale-110' : ''} ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                 priority
+                onLoad={() => setImageLoading(false)}
+                onError={() => setImageLoading(false)}
               />
 
               {/* NSFW Blur Overlay */}

@@ -64,6 +64,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const { settings } = useSettings();
   const [tempUnblurMessages, setTempUnblurMessages] = useState<{ [key: string]: boolean }>({});
   const [tempUnblurModal, setTempUnblurModal] = useState(false);
+  const [profileModalImageLoading, setProfileModalImageLoading] = useState(true);
+  const [messageAvatarsLoading, setMessageAvatarsLoading] = useState<{ [key: string]: boolean }>({});
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
 
@@ -1073,11 +1075,18 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 }
               }}
             >
+              {profileModalImageLoading && (
+                <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+                  <div className="w-10 h-10 border-4 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                </div>
+              )}
               <Image
                 src={characterImage || "/default-character.png"}
                 alt={chat.character.name}
                 fill
-                className={`object-cover transition-all ${chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'blur-3xl scale-110 grayscale-[0.5]' : ''}`}
+                className={`object-cover transition-all duration-500 ${chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal ? 'blur-3xl scale-110 grayscale-[0.5]' : ''} ${profileModalImageLoading ? 'opacity-0' : 'opacity-100'}`}
+                onLoad={() => setProfileModalImageLoading(false)}
+                onError={() => setProfileModalImageLoading(false)}
               />
               <AnimatePresence>
                 {chat.character.isNsfw && settings?.blurNsfw && !tempUnblurModal && (
@@ -1317,6 +1326,7 @@ const MessageBubble = React.memo(
     onFeedback: (messageId: string, feedback: "LIKE" | "DISLIKE" | "NONE") => void;
   }) => {
     const [showActions, setShowActions] = useState(false);
+    const [avatarLoading, setAvatarLoading] = useState(true);
     const imageSrc = isUserMessage
       ? userImage || "/default-user.png"
       : characterImage || "/default-character.png";
@@ -1349,14 +1359,21 @@ const MessageBubble = React.memo(
                 onProfileClick(e);
               }
             }}
-            className="relative hover:scale-105 transition-transform shrink-0 group/avatar"
+            className="relative hover:scale-105 transition-transform shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9"
           >
+            {avatarLoading && (
+              <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
+                <div className="w-3 h-3 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+              </div>
+            )}
             <Image
               src={imageSrc}
               width={32}
               height={32}
               alt={altText}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-all ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''}`}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-all duration-300 ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''} ${avatarLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={() => setAvatarLoading(false)}
+              onError={() => setAvatarLoading(false)}
             />
             <AnimatePresence>
               {isNsfw && isBlurEnabled && !tempUnblur && (
@@ -1372,13 +1389,22 @@ const MessageBubble = React.memo(
             </AnimatePresence>
           </button>
         ) : (
-          <Image
-            src={imageSrc}
-            width={32}
-            height={32}
-            alt={altText}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover shrink-0"
-          />
+          <div className="relative w-8 h-8 sm:w-9 sm:h-9 shrink-0">
+            {avatarLoading && (
+              <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
+                <div className="w-3 h-3 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+              </div>
+            )}
+            <Image
+              src={imageSrc}
+              width={32}
+              height={32}
+              alt={altText}
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-opacity duration-300 ${avatarLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={() => setAvatarLoading(false)}
+              onError={() => setAvatarLoading(false)}
+            />
+          </div>
         )}
 
         <div
