@@ -18,6 +18,7 @@ export default async function Template({ children }: { children: React.ReactNode
     ]);
 
     const session = await getServerSession(authOptions);
+
     let isAdmin = false;
     let isWhitelisted = false;
     let isSuspended = false;
@@ -70,19 +71,9 @@ export default async function Template({ children }: { children: React.ReactNode
         }
     }
 
-    // Reverse Checks - Redirect back to home if condition is CLEARED
-    if (pathname === "/maintenance" && (!isMaintenanceMode || isAdmin)) {
-        shouldRedirect = true;
-        redirectPath = "/";
-    }
-    if (pathname === "/suspended" && !isSuspended) {
-        shouldRedirect = true;
-        redirectPath = "/";
-    }
-    if (pathname === "/access-denied" && (!isWhitelistMode || isWhitelisted)) {
-        shouldRedirect = true;
-        redirectPath = "/";
-    }
+    // Reverse Checks - REMOVED to prevent loops.
+    // If a user is on /suspended but not suspended, they can click "Home" manually.
+    // This prevents infinite redirection if session state inconsistent.
 
     if (shouldRedirect && redirectPath) {
         redirect(redirectPath);
