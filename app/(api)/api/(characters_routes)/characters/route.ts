@@ -1,7 +1,4 @@
 import { db } from "@/app/utils/prisma";
-import formidable from "formidable";
-import fs from "fs";
-import { NextApiRequest } from "next";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
