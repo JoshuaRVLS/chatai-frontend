@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { FiGithub, FiTwitter, FiMail, FiHeart } from "react-icons/fi";
+import { FiGithub, FiInstagram, FiMail, FiHeart } from "react-icons/fi";
 import { usePathname } from "next/navigation";
 
 const Footer: React.FC = () => {
@@ -39,13 +39,13 @@ const Footer: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <a href="#" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all">
+                        <a href="https://github.com/JoshuaRVLS" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all" title="GitHub">
                             <FiGithub size={18} />
                         </a>
-                        <a href="#" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all">
-                            <FiTwitter size={18} />
+                        <a href="https://instagram.com/bknjos" target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all" title="Instagram">
+                            <FiInstagram size={18} />
                         </a>
-                        <a href="#" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all">
+                        <a href="mailto:jravaellnew@gmail.com" className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-all" title="Email">
                             <FiMail size={18} />
                         </a>
                     </div>

@@ -21,12 +21,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     type: "website",
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "JChatAI - Premium AI Conversations",
-    description: "Chat with unique AI personalities and create your own characters on JChatAI.",
-    images: ["/og-image.png"],
-  },
+
 };
 
 export default function Page() {

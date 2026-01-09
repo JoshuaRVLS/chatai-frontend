@@ -59,13 +59,7 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "JChatAI - Premium AI Conversations",
-    description: "Experience the next level of AI interaction with JChatAI.",
-    images: ["/og-image.png"],
-    creator: "@jchatai",
-  },
+
   icons: {
     icon: "/jchatai-icon.png",
     shortcut: "/jchatai-icon.png",
