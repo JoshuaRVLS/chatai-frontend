@@ -188,4 +188,95 @@
  GET /login 200 in 118ms
  ✓ Compiled in 256ms (895 modules)
  GET /login 200 in 65ms
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         [?25h
+ ✓ Compiled /api/auth/[...nextauth] in 180ms (741 modules)
+ GET /api/auth/providers 200 in 317ms
+ GET /api/auth/csrf 200 in 4ms
+ POST /api/auth/callback/credentials 200 in 1380ms
+ GET /api/auth/session 200 in 21ms
+ GET / 200 in 132ms
+ ✓ Compiled /api/stats in 152ms (755 modules)
+ GET /api/auth/session 200 in 444ms
+ GET /api/stats 200 in 2902ms
+ ✓ Compiled /users in 390ms (760 modules)
+ GET /users 200 in 454ms
+ ✓ Compiled /api/users in 177ms (762 modules)
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 810ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1423ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1089ms
+ GET /api/auth/session 200 in 23ms
+ GET /api/auth/session 200 in 20ms
+ ✓ Compiled in 475ms (1153 modules)
+ GET /api/auth/session 200 in 167ms
+ GET /users 200 in 207ms
+ GET /characters 200 in 11ms
+ ✓ Compiled /api/characters in 268ms (764 modules)
+ GET / 200 in 22ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1962ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 2057ms
+ GET /users 200 in 9ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 2080ms
+ GET /api/stats 200 in 2493ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1204ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1412ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1019ms
+ GET /api/stats 200 in 3926ms
+ ✓ Compiled in 287ms (1155 modules)
+ GET /users 200 in 35ms
+ GET /api/auth/session 200 in 46ms
+ ✓ Compiled in 320ms (1155 modules)
+ GET /users 200 in 40ms
+ GET /api/auth/session 200 in 43ms
+ GET /characters 200 in 12ms
+ GET /lorebooks 200 in 13ms
+ ✓ Compiled /api/lorebooks in 263ms (758 modules)
+ ✓ Compiled /conversations in 267ms (763 modules)
+ GET /conversations 200 in 318ms
+ GET /conversations 200 in 6ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 2602ms
+ GET /conversations 200 in 12ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 2835ms
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 1688ms
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 1687ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 2662ms
+ ○ Compiling /api/characters/all ...
+ ✓ Compiled /api/characters/all in 568ms (1144 modules)
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 1796ms
+ GET /api/characters/all 200 in 986ms
+ GET /api/characters/all 200 in 1762ms
+ GET /api/auth/csrf 200 in 21ms
+ POST /api/auth/signout 200 in 5ms
+ GET /api/auth/session 200 in 3ms
+ GET /login 200 in 26ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 3134ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 3114ms
+ GET /api/auth/providers 200 in 21ms
+ GET /api/auth/csrf 200 in 6ms
+ POST /api/auth/callback/credentials 200 in 681ms
+ GET /api/auth/session 200 in 21ms
+ ○ Compiling / ...
+ ✓ Compiled / in 511ms (771 modules)
+ GET / 200 in 691ms
+ ✓ Compiled /api/stats in 205ms (773 modules)
+ GET /api/auth/session 200 in 548ms
+ GET /api/stats 200 in 2976ms
+ GET / 200 in 20ms
+ GET / 200 in 9ms
+ GET / 200 in 8ms
+ GET /api/auth/csrf 200 in 21ms
+ POST /api/auth/signout 200 in 5ms
+ GET /api/auth/session 200 in 4ms
+ GET /login 200 in 15ms
+ GET /login 200 in 64ms
+ GET /api/auth/session 200 in 24ms
+ GET /login 200 in 32ms
+ GET /api/auth/session 200 in 20ms
+ ✓ Compiled in 232ms (391 modules)
+ GET /login 200 in 38ms
+ ✓ Compiled in 123ms (391 modules)
+ ✓ Compiled in 108ms (391 modules)
+ GET /login 200 in 93ms
+ GET /login 200 in 15ms
+ ✓ Compiled in 329ms (895 modules)
+ GET /login 200 in 123ms
+ ✓ Compiled in 334ms (895 modules)
+ GET /login 200 in 60ms

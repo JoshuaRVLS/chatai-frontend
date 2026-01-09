@@ -7,6 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 function LoginForm() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [token, setToken] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
@@ -24,6 +25,7 @@ function LoginForm() {
             const result = await signIn('credentials', {
                 username,
                 password,
+                token,
                 redirect: false,
                 callbackUrl,
             });
@@ -31,8 +33,10 @@ function LoginForm() {
             if (result?.error) {
                 if (result.error === 'ACCESS_DENIED') {
                     setError('Access denied. Admin privileges required.');
+                } else if (result.error === 'INVALID_SECURITY_TOKEN') {
+                    setError('Invalid Security Token. Access blocked.');
                 } else {
-                    setError('Invalid username or password');
+                    setError('Invalid credentials provided.');
                 }
             } else if (result?.ok) {
                 window.location.href = callbackUrl;
@@ -94,7 +98,20 @@ function LoginForm() {
                             className="w-full px-5 py-3.5 bg-white/3 border border-white/5 rounded-2xl text-white text-xs font-bold focus:outline-none focus:border-white/10 focus:bg-white/5 transition-all placeholder:text-zinc-700 shadow-inner"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
+                            placeholder="Primary Password"
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="block text-[10px] font-black uppercase tracking-[0.15em] text-zinc-500 ml-1">Security Token</label>
+                        <input
+                            type="password"
+                            className="w-full px-5 py-3.5 bg-white/3 border border-white/5 rounded-2xl text-white text-xs font-bold focus:outline-none focus:border-white/10 focus:bg-white/5 transition-all placeholder:text-zinc-700 shadow-inner"
+                            value={token}
+                            onChange={(e) => setToken(e.target.value)}
+                            placeholder="••••••••"
                             required
                             disabled={loading}
                         />

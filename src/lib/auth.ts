@@ -34,12 +34,28 @@ export const authOptions: NextAuthOptions = {
             credentials: {
                 username: { label: "Username/Email", type: "text" },
                 password: { label: "Password", type: "password" },
+                token: { label: "Security Token", type: "text" },
             },
             authorize: async (credentials) => {
-                if (!credentials?.username || !credentials?.password) {
-                    throw new Error("Missing username or password");
+                if (!credentials?.username || !credentials?.password || !credentials?.token) {
+                    throw new Error("Missing required credentials");
                 }
 
+                // 1. Verify Security Token Layer
+                const securitySetting = await db.systemSetting.findUnique({
+                    where: { key: 'ADMIN_SECURITY_TOKEN' }
+                });
+
+                if (!securitySetting) {
+                    throw new Error("SYSTEM_UNINITIALIZED");
+                }
+
+                const isTokenValid = await bcrypt.compare(credentials.token, securitySetting.value);
+                if (!isTokenValid) {
+                    throw new Error("INVALID_SECURITY_TOKEN");
+                }
+
+                // 2. Verify User Identity
                 const user = await db.user.findFirst({
                     where: {
                         OR: [
@@ -58,7 +74,7 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Invalid credentials");
                 }
 
-                // Check if user is admin
+                // 3. Verify Admin Authorization
                 if (!user.isAdmin) {
                     throw new Error("ACCESS_DENIED");
                 }
