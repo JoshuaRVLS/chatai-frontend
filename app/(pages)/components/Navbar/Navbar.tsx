@@ -246,6 +246,12 @@ const Navbar = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-60 bg-zinc-950/95 backdrop-blur-2xl flex flex-col p-8 pt-24 md:hidden"
           >
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="absolute top-6 right-6 p-3 rounded-2xl bg-white/5 text-white/40 hover:text-primary transition-colors"
+            >
+              <FiX size={20} />
+            </button>
             <div className="flex flex-col gap-1 overflow-y-auto pr-2 scrollbar-hide">
               {/* Create Section */}
               <div className="space-y-1">
