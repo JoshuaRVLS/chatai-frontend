@@ -196,3 +196,5 @@ nohup: ignoring input
  ✓ Compiled in 107ms (386 modules)
  GET /characters 200 in 20ms
  GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 31512ms
+ ✓ Compiled in 404ms (831 modules)
+ GET /characters 200 in 113ms
