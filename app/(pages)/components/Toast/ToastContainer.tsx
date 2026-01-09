@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useToastStore } from '@/app/hooks/useToastStore';
 import { ToastItem } from './Toast';
 
@@ -9,7 +9,7 @@ export const ToastContainer = () => {
 
     return (
         <div
-            className="fixed top-6 right-6 z-9999 flex flex-col gap-3 items-end pointer-events-none"
+            className="fixed bottom-6 right-6 z-9999 flex flex-col gap-3 items-end pointer-events-none"
         >
             <div className="pointer-events-auto flex flex-col gap-3">
                 <AnimatePresence mode="popLayout">

@@ -8,6 +8,8 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiTrash2,
+  FiEdit2,
+  FiX,
 } from "react-icons/fi";
 import { motion, AnimatePresence } from "motion/react";
 import Image from "next/image";
@@ -25,6 +27,9 @@ const History = () => {
   const confirm = useConfirm();
   const { settings } = useSettings();
   const [tempUnblur, setTempUnblur] = useState<{ [key: string]: boolean }>({});
+  const [showContextMenu, setShowContextMenu] = useState<string | null>(null);
+  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const { isPending, data, error } = useQuery<any[]>({
     queryKey: ["chatsHistory"],
@@ -62,9 +67,10 @@ const History = () => {
     }
   };
 
-  const handleDeleteChat = async (e: React.MouseEvent, chatId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDeleteChat = async (e: React.MouseEvent | React.Touch | any, chatId: string) => {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    setShowContextMenu(null);
 
     if (!(await confirm({
       title: "Clear History",
@@ -94,6 +100,42 @@ const History = () => {
       queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
     }
   };
+
+  const handleTouchStart = (e: React.TouchEvent, chatId: string) => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+
+    longPressTimer.current = setTimeout(() => {
+      setContextMenuPos({ x, y });
+      setShowContextMenu(chatId);
+      if ("vibrate" in navigator) navigator.vibrate(40);
+      longPressTimer.current = null;
+    }, 600);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  useEffect(() => {
+    const handleClose = () => setShowContextMenu(null);
+    if (showContextMenu) {
+      window.addEventListener("scroll", handleClose, { passive: true });
+      window.addEventListener("click", handleClose);
+      window.addEventListener("contextmenu", handleClose);
+    }
+    return () => {
+      window.removeEventListener("scroll", handleClose);
+      window.removeEventListener("click", handleClose);
+      window.removeEventListener("contextmenu", handleClose);
+    };
+  }, [showContextMenu]);
 
   if (isPending) {
     return (
@@ -169,6 +211,9 @@ const History = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
+              onTouchStart={(e) => handleTouchStart(e, chat.id)}
+              onTouchEnd={handleTouchEnd}
+              onTouchMove={handleTouchEnd}
             >
               <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 shrink-0 border border-white/5 shadow-xl">
                 {(() => {
@@ -232,6 +277,25 @@ const History = () => {
             </motion.div>
           </Link>
         ))}
+        {showContextMenu && (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
+              className="fixed z-100 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
+            >
+              <button
+                onClick={(e) => handleDeleteChat(e, showContextMenu)}
+                className="w-full px-4 py-3 text-left text-xs font-black uppercase tracking-widest text-red-400 hover:bg-red-400/10 flex items-center gap-3 transition-colors"
+              >
+                <FiTrash2 size={14} />
+                Terminate
+              </button>
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );

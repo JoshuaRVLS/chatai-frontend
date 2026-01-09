@@ -43,6 +43,7 @@ const CharacterCard = React.memo(function CharacterCard({
   const [imageLoading, setImageLoading] = useState(true);
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
+  const longPressTimer = React.useRef<NodeJS.Timeout | null>(null);
 
   const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
   const isOwner = user?.id === authorId;
@@ -73,6 +74,32 @@ const CharacterCard = React.memo(function CharacterCard({
 
     setContextMenuPos({ x: e.clientX, y: e.clientY });
     setShowContextMenu(true);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isOwner) return;
+
+    // Clear any existing timer
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+
+    longPressTimer.current = setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("close-context-menus", { detail: { id: characterId } }));
+      setContextMenuPos({ x, y });
+      setShowContextMenu(true);
+      if ("vibrate" in navigator) navigator.vibrate(40);
+      longPressTimer.current = null;
+    }, 600); // Slightly longer for better UX
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
   };
 
   const handleEdit = () => {
@@ -128,12 +155,10 @@ const CharacterCard = React.memo(function CharacterCard({
     };
 
     const handleClick = () => setShowContextMenu(false);
+    const handleScroll = () => setShowContextMenu(false);
 
     // Close on any right click elsewhere on the window
     const handleWindowContextMenu = (e: MouseEvent) => {
-      // If we're right-clicking outside of any card context, close open ones
-      // This is partially handled by handleContextMenu preventing bubble,
-      // but this ensures background right-clicks also clear menus.
       setShowContextMenu(false);
     };
 
@@ -141,12 +166,14 @@ const CharacterCard = React.memo(function CharacterCard({
     if (showContextMenu) {
       document.addEventListener("click", handleClick);
       window.addEventListener("contextmenu", handleWindowContextMenu);
+      window.addEventListener("scroll", handleScroll, { passive: true });
     }
 
     return () => {
       window.removeEventListener("close-context-menus", handleCloseAll);
       document.removeEventListener("click", handleClick);
       window.removeEventListener("contextmenu", handleWindowContextMenu);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [showContextMenu, characterId]);
 
@@ -155,6 +182,9 @@ const CharacterCard = React.memo(function CharacterCard({
       <motion.div
         onClick={handleNavigate}
         onContextMenu={handleContextMenu}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchEnd} // Cancel on scroll
         className="group relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-white/5 bg-zinc-900/40 transition-[border-color,box-shadow,transform] duration-300 hover:border-white/20 hover:shadow-xl will-change-transform"
         style={{ contentVisibility: 'auto', containIntrinsicSize: '0 240px' } as any}
         whileHover={{ y: -6 }}
