@@ -68,9 +68,6 @@ export default function DataTable<T extends { id: string | number }>({
                                     {column.header}
                                 </th>
                             ))}
-                            <th className="px-10 py-6 text-right text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">
-                                Actions
-                            </th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -96,13 +93,6 @@ export default function DataTable<T extends { id: string | number }>({
                                             : String(item[column.key as keyof T] ?? '')}
                                     </td>
                                 ))}
-                                <td className="px-10 py-6 text-right" onClick={(e) => e.stopPropagation()}>
-                                    <button className="p-2 rounded-lg bg-white/5 border border-white/5 text-zinc-600 group-hover/row:text-white group-hover/row:border-white/10 transition-all">
-                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                        </svg>
-                                    </button>
-                                </td>
                             </tr>
                         ))}
                     </tbody>

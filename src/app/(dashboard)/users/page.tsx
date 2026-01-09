@@ -186,7 +186,7 @@ export default function UsersPage() {
         },
         {
             key: 'actions',
-            header: '',
+            header: 'Tools',
             render: (user: User) => (
                 <div className="flex justify-end pr-4">
                     <button
@@ -249,7 +249,7 @@ export default function UsersPage() {
                                 <option value="admin">Role: Admins</option>
                                 <option value="user">Role: Members</option>
                             </select>
-                            <div className="w-[1px] h-4 bg-white/5" />
+                            <div className="w-px h-4 bg-white/5" />
                             <select
                                 value={verified}
                                 onChange={(e) => setVerified(e.target.value)}
@@ -259,7 +259,7 @@ export default function UsersPage() {
                                 <option value="verified">Verified Only</option>
                                 <option value="unverified">Unverified Only</option>
                             </select>
-                            <div className="w-[1px] h-4 bg-white/5" />
+                            <div className="w-px h-4 bg-white/5" />
                             <select
                                 value={sort}
                                 onChange={(e) => setSort(e.target.value)}

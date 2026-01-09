@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import StatsCard from '@/components/StatsCard';
+import { useRouter } from 'next/navigation';
 
 interface DashboardData {
   stats: {
@@ -28,6 +29,26 @@ interface DashboardData {
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  const handleAction = (label: string) => {
+    switch (label) {
+      case 'Add User':
+        router.push('/users');
+        break;
+      case 'Add Character':
+        router.push('/characters');
+        break;
+      case 'Add Lorebook':
+        router.push('/lorebooks');
+        break;
+      case 'System Settings':
+        router.push('/settings');
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -97,7 +118,7 @@ export default function Dashboard() {
             changeType="positive"
             icon={
               <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 0 002.22 0L21 8M5 19h14a2 0 002-2V7a2 0 00-2-2H5a2 0 00-2 2v10a2 0 002 2z" />
               </svg>
             }
           />
@@ -179,12 +200,16 @@ export default function Dashboard() {
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 px-2">Quick Commands</h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
             {[
-              { label: 'Add User', desc: 'Create account', color: 'zinc', icon: 'M12 4v16m8-8H4' },
-              { label: 'Add Character', desc: 'Create AI', color: 'zinc', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-              { label: 'Add Lorebook', desc: 'Knowledge base', color: 'zinc', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
-              { label: 'System Settings', desc: 'Configure system', color: 'zinc', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
+              { label: 'Add User', desc: 'Manage access', color: 'zinc', icon: 'M12 4v16m8-8H4' },
+              { label: 'Add Character', desc: 'Moderation hub', color: 'zinc', icon: 'M17 20h5v-2a3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+              { label: 'Add Lorebook', desc: 'Control knowledge', color: 'zinc', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253' },
+              { label: 'System Settings', desc: 'Global config', color: 'zinc', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
             ].map((action, i) => (
-              <button key={i} className="card-premium flex items-center gap-5 hover:border-white/20 transition-all group group-active:scale-[0.98]">
+              <button
+                key={i}
+                onClick={() => handleAction(action.label)}
+                className="card-premium flex items-center gap-5 hover:border-white/20 transition-all group group-active:scale-[0.95]"
+              >
                 <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 group-hover:bg-white group-hover:text-zinc-950 transition-all shadow-inner">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={action.icon} />
