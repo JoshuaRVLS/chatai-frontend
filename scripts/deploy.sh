@@ -15,6 +15,9 @@ git reset --hard origin/admin
 echo "📦 Installing dependencies..."
 pnpm install
 
+echo "🗄️ Generating Prisma client..."
+pnpm prisma generate
+
 echo "🏗️ Building application..."
 pnpm build
 
