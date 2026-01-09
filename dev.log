@@ -59,3 +59,34 @@ nohup: ignoring input
  GET / 200 in 162ms
  GET / 200 in 161ms
  GET /dashboard 404 in 46ms
+ ✓ Compiled /users in 428ms (1027 modules)
+ GET /users 200 in 501ms
+ ✓ Compiled /api/users in 171ms (1029 modules)
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 483ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 564ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 156ms
+ ✓ Compiled /characters in 247ms (1036 modules)
+ GET /characters 200 in 346ms
+ ✓ Compiled /api/characters in 291ms (1038 modules)
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 975ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 977ms
+ ✓ Compiled /api/characters/picture/[id] in 183ms (1040 modules)
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 726ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 2050ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 2334ms
+ GET /characters 200 in 128ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 943ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 957ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 2095ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 2743ms
+ ✓ Compiled in 551ms (1048 modules)
+ GET / 200 in 143ms
+ GET /characters 200 in 151ms
+ ✓ Compiled /_not-found in 288ms (1038 modules)
+ GET /dashboard 404 in 334ms
+ GET /dashboard 404 in 41ms
+ ✓ Compiled in 317ms (792 modules)
+ GET /dashboard 404 in 114ms
+ GET / 200 in 162ms
+ GET /characters 200 in 199ms
+ GET /dashboard 404 in 43ms

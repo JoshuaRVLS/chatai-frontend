@@ -8,7 +8,7 @@ const navigation = [
     name: 'Dashboard',
     href: '/',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
       </svg>
     ),
@@ -17,7 +17,7 @@ const navigation = [
     name: 'Users',
     href: '/users',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m9 5.197v1" />
       </svg>
     ),
@@ -26,7 +26,7 @@ const navigation = [
     name: 'Characters',
     href: '/characters',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
     ),
@@ -35,7 +35,7 @@ const navigation = [
     name: 'Conversations',
     href: '/conversations',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
     ),
@@ -44,7 +44,7 @@ const navigation = [
     name: 'Lorebooks',
     href: '/lorebooks',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
       </svg>
     ),
@@ -53,7 +53,7 @@ const navigation = [
     name: 'Analytics',
     href: '/analytics',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     ),
@@ -62,7 +62,7 @@ const navigation = [
     name: 'Settings',
     href: '/settings',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
@@ -74,55 +74,51 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-zinc-950 border-r border-white/5 flex flex-col z-[100] hidden lg:flex overflow-hidden">
+    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-zinc-950 border-r border-white/5 flex flex-col z-[100] hidden lg:flex overflow-hidden select-none">
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all">
+      <div className="h-16 flex items-center px-6 border-b border-white/5 shrink-0">
+        <Link href="/" className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
             <span className="text-zinc-950 font-black text-sm">JC</span>
           </div>
-          <span className="font-black text-lg italic tracking-tighter uppercase leading-none">Admin</span>
+          <span className="font-black text-lg italic tracking-tighter uppercase leading-none text-white">Admin</span>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+      <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative group/item ${isActive
+              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-200 group/item min-w-0 ${isActive
                 ? 'bg-white text-zinc-950 shadow-xl'
                 : 'text-zinc-500 hover:text-white hover:bg-white/5'
                 }`}
             >
-              <span className={isActive ? 'text-zinc-950' : 'text-zinc-500 transition-colors group-hover/item:text-white'}>
-                {item.icon}
-              </span>
-              {item.name}
+              <div className="shrink-0">{item.icon}</div>
+              <span className="truncate min-w-0">{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="p-6 border-t border-white/5 relative z-[200] bg-zinc-950">
+      {/* Profile Section */}
+      <div className="p-4 border-t border-white/5 bg-zinc-950 shrink-0">
         <button
-          className="w-full h-20 flex items-center gap-4 px-4 rounded-2xl bg-white/5 hover:bg-zinc-800 border border-white/5 hover:border-white/20 transition-all cursor-pointer group text-left active:scale-90 hover:scale-[1.05] shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] hover:ring-2 hover:ring-white/10"
+          className="w-full flex items-center gap-3 px-3 py-4 rounded-2xl bg-white/5 hover:bg-zinc-800 border border-white/5 hover:border-white/20 transition-all cursor-pointer group text-left active:scale-95 shadow-lg"
         >
-          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden shrink-0">
+          <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-white/10 group-hover:border-white/30 transition-all">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
-              <span className="text-white font-black text-[10px]">A</span>
+              <span className="text-white font-black text-[11px]">A</span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-black uppercase tracking-wider truncate text-white">Admin User</p>
-            <p className="text-[9px] font-bold text-zinc-500 truncate lowercase">admin@jchatai.space</p>
+            <p className="text-[9px] font-bold text-zinc-600 truncate lowercase">admin@jchatai.space</p>
           </div>
-          <svg className="w-3 h-3 text-zinc-600 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-          </svg>
         </button>
       </div>
     </aside>
