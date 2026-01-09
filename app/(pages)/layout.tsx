@@ -84,25 +84,31 @@ export default async function RootLayout({
 
   let shouldRedirect = false;
   let isMaintenanceMode = false;
+  let isWhitelistMode = false;
   let isAdmin = false;
 
   try {
-    const setting = await db.systemSetting.findUnique({
-      where: { key: "maintenanceMode" }
-    });
+    const [maintenanceSetting, whitelistSetting] = await Promise.all([
+      db.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
+      db.systemSetting.findUnique({ where: { key: "whitelistMode" } })
+    ]);
 
-    if (setting?.value === "true") {
+    const session = await getServerSession(authOptions);
+    isAdmin = !!session?.user?.isAdmin;
+
+    if (maintenanceSetting?.value === "true") {
       isMaintenanceMode = true;
-      const session = await getServerSession(authOptions);
-      isAdmin = !!session?.user?.isAdmin;
-
       // Only redirect non-admins on non-maintenance pages
       if (!isAdmin && pathname !== "/maintenance") {
         shouldRedirect = true;
       }
     }
+
+    if (whitelistSetting?.value === "true") {
+      isWhitelistMode = true;
+    }
   } catch (error) {
-    console.error("Maintenance check failed:", error);
+    console.error("System settings check failed:", error);
   }
 
   if (shouldRedirect) {
@@ -116,11 +122,20 @@ export default async function RootLayout({
           <ScrollProvider>
             <AuthProvider>
               <ConfirmationProvider>
-                <div className="min-h-screen flex flex-col">
+                <div className={`min-h-screen flex flex-col ${((isMaintenanceMode && isAdmin) || isWhitelistMode) ? 'pt-12' : ''}`}>
+                  {/* Maintenance indicator - admin only */}
                   {isMaintenanceMode && isAdmin && (
-                    <div className="fixed top-0 left-0 right-0 z-[9999] bg-amber-500 py-2 px-4 text-center shadow-lg">
+                    <div className="fixed top-0 left-0 right-0 z-[9999] py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#f59e0b' }}>
                       <p className="text-xs uppercase tracking-widest font-bold text-black">
-                        ⚠️ Maintenance Mode Active — Admin Bypass ⚠️
+                        ⚠️ Maintenance Mode Active — Admin Bypass
+                      </p>
+                    </div>
+                  )}
+                  {/* Whitelist indicator - all users */}
+                  {isWhitelistMode && !isMaintenanceMode && (
+                    <div className="fixed top-0 left-0 right-0 z-[9999] py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#3b82f6' }}>
+                      <p className="text-xs uppercase tracking-widest font-bold text-white">
+                        🔒 Whitelist Mode Active — Restricted Access
                       </p>
                     </div>
                   )}

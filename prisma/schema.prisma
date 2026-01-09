@@ -26,6 +26,10 @@ model User {
   verified                 Boolean           @default(false)
   isAdmin                  Boolean           @default(false)
   isWhitelisted            Boolean           @default(false)
+  suspendedUntil           DateTime?
+  suspensionReason         String?
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @default(now()) @updatedAt
   charCreated              Character[]
   chats                    Chat[]
   comments                 Comment[]

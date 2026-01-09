@@ -13,27 +13,59 @@ export async function middleware(request: NextRequest) {
       secureCookie: process.env.NODE_ENV === 'production'
     });
 
+    const isAdmin = !!(token as any)?.isAdmin;
+
+    // Check maintenance mode status
+    const maintenanceMode = await checkMaintenanceMode();
+
     // Maintenance Mode Check - block non-admins from all pages except /maintenance
     if (pathname !== '/maintenance' && !pathname.startsWith('/api/')) {
-      const maintenanceMode = await checkMaintenanceMode();
-      if (maintenanceMode) {
-        const isAdmin = !!(token as any)?.isAdmin;
-        if (!isAdmin) {
-          return NextResponse.redirect(new URL('/maintenance', request.url));
-        }
+      if (maintenanceMode && !isAdmin) {
+        return NextResponse.redirect(new URL('/maintenance', request.url));
       }
     }
 
+    // REVERSE CHECK: Redirect away from /maintenance if maintenance is OFF
+    if (pathname === '/maintenance' && !maintenanceMode) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+
+    // Check whitelist mode status
+    const accessCheck = await checkWhitelistMode(token?.email as string | undefined);
+
     // Whitelist Mode Check - only whitelisted users can access the site
-    const publicRoutes = ['/login', '/register', '/access-denied', '/maintenance'];
+    const publicRoutes = ['/login', '/register', '/access-denied', '/maintenance', '/suspended'];
     const isPublicRoute = publicRoutes.some(route => pathname === route);
 
     if (!isPublicRoute && !pathname.startsWith('/api/')) {
-      const accessCheck = await checkWhitelistMode(token?.email as string | undefined);
       if (accessCheck.whitelistMode && !accessCheck.isWhitelisted) {
         // User is not whitelisted, redirect to access denied
         return NextResponse.redirect(new URL('/access-denied', request.url));
       }
+    }
+
+    // REVERSE CHECK: Redirect away from /access-denied if whitelist mode is OFF or user IS whitelisted
+    if (pathname === '/access-denied') {
+      if (!accessCheck.whitelistMode || accessCheck.isWhitelisted) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+    }
+
+    // Check suspension status
+    const suspensionCheck = token?.email
+      ? await checkSuspension(token.email as string)
+      : { isSuspended: false };
+
+    // Suspension Check - block suspended users from all pages except /suspended
+    if (!isPublicRoute && !pathname.startsWith('/api/') && token?.email) {
+      if (suspensionCheck.isSuspended) {
+        return NextResponse.redirect(new URL('/suspended', request.url));
+      }
+    }
+
+    // REVERSE CHECK: Redirect away from /suspended if user is NOT suspended
+    if (pathname === '/suspended' && !suspensionCheck.isSuspended) {
+      return NextResponse.redirect(new URL('/', request.url));
     }
 
     const publicAuthRoutes = ['/login', '/register'];
@@ -97,6 +129,22 @@ async function checkWhitelistMode(email?: string): Promise<{ whitelistMode: bool
   return { whitelistMode: false, isWhitelisted: false };
 }
 
+// Check if user is suspended
+async function checkSuspension(email: string): Promise<{ isSuspended: boolean }> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/settings/suspended?email=${encodeURIComponent(email)}`, {
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return { isSuspended: data.isSuspended === true };
+    }
+  } catch (error) {
+    console.error('[SUSPENSION_CHECK_ERROR]', error);
+  }
+  return { isSuspended: false };
+}
 
 export const config = {
   matcher: [
