@@ -74,7 +74,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] glass border-r border-white/5 flex flex-col z-[100] hidden lg:flex overflow-hidden">
+    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-zinc-950 border-r border-white/5 flex flex-col z-[100] hidden lg:flex overflow-hidden">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-white/5">
         <Link href="/" className="flex items-center gap-3 group">
@@ -94,14 +94,11 @@ export default function Sidebar() {
               key={item.name}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 relative group/item ${isActive
-                ? 'bg-white/10 text-white shadow-lg'
+                ? 'bg-white text-zinc-950 shadow-xl'
                 : 'text-zinc-500 hover:text-white hover:bg-white/5'
                 }`}
             >
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full shadow-[0_0_10px_#fff]" />
-              )}
-              <span className={isActive ? 'text-white' : 'text-zinc-500 transition-colors group-hover/item:text-white'}>
+              <span className={isActive ? 'text-zinc-950' : 'text-zinc-500 transition-colors group-hover/item:text-white'}>
                 {item.icon}
               </span>
               {item.name}
@@ -110,8 +107,11 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5 relative z-[110] bg-zinc-950/40">
-        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/10 transition-all cursor-pointer group text-left active:scale-[0.98] border border-transparent hover:border-white/10 shadow-sm hover:shadow-[0_0_20px_rgba(255,255,255,0.05)]">
+      <div className="p-4 border-t border-white/5 relative z-[150] bg-zinc-950">
+        <button
+          onClick={() => console.log('Admin Profile Clicked')}
+          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-zinc-800 border border-transparent hover:border-white/10 transition-all cursor-pointer group text-left active:scale-95 shadow-sm"
+        >
           <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden shrink-0">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
               <span className="text-white font-black text-[10px]">A</span>

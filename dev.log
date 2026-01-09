@@ -1,0 +1,47 @@
+nohup: ignoring input
+
+> admin.jchatai.space@0.1.0 dev /home/joshuarvl/Documents/admin.jchatai.space
+> next dev --port 3001
+
+   ▲ Next.js 15.3.8
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.100.3:3001
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1489ms
+ ✓ Compiled /middleware in 305ms (207 modules)
+ ○ Compiling / ...
+ ✓ Compiled / in 1341ms (776 modules)
+ GET / 200 in 1620ms
+ ○ Compiling /api/stats ...
+ ✓ Compiled /api/stats in 687ms (1028 modules)
+ GET / 200 in 63ms
+ GET /api/stats 200 in 3235ms
+ ✓ Compiled /_not-found in 297ms (1018 modules)
+ GET /dashboard 404 in 424ms
+ GET / 200 in 90ms
+ ✓ Compiled /favicon.ico in 96ms (693 modules)
+ GET /favicon.ico 200 in 121ms
+ GET /api/stats 200 in 1411ms
+ ✓ Compiled in 354ms (777 modules)
+ GET / 200 in 188ms
+ GET / 200 in 189ms
+ ✓ Compiled /_not-found in 270ms (767 modules)
+ GET /dashboard 404 in 349ms
+ GET /dashboard 404 in 47ms
+ ✓ Compiled in 308ms (781 modules)
+ GET /dashboard 404 in 60ms
+ GET / 200 in 146ms
+ GET / 200 in 148ms
+ GET /dashboard 404 in 51ms
+ ✓ Compiled in 183ms (781 modules)
+ GET / 404 in 73ms
+ GET / 404 in 80ms
+ GET /dashboard 404 in 85ms
+ GET /dashboard 404 in 34ms
+ GET / 200 in 157ms
+ GET / 200 in 158ms
+ ✓ Compiled /api/stats in 480ms (691 modules)
+ GET /api/stats 200 in 1622ms
+ GET /api/stats 200 in 1801ms
