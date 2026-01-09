@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || "";
     const sort = searchParams.get("sort") || "newest";
     const roleFilter = searchParams.get("role") || "all";
+    const verifiedFilter = searchParams.get("verified") || "all";
 
     const skip = (page - 1) * limit;
 
@@ -33,9 +34,19 @@ export async function GET(request: Request) {
         where.isAdmin = false;
     }
 
+    if (verifiedFilter === 'verified') {
+        where.verified = true;
+    } else if (verifiedFilter === 'unverified') {
+        where.verified = false;
+    }
+
     let orderBy: any = { id: 'desc' };
     if (sort === 'oldest') {
         orderBy = { id: 'asc' };
+    } else if (sort === 'most_characters') {
+        orderBy = { charCreated: { _count: 'desc' } };
+    } else if (sort === 'most_chats') {
+        orderBy = { chats: { _count: 'desc' } };
     }
 
     try {
@@ -49,7 +60,10 @@ export async function GET(request: Request) {
                     _count: {
                         select: {
                             charCreated: true,
-                            chats: true
+                            chats: true,
+                            comments: true,
+                            lorebooks: true,
+                            personas: true
                         }
                     }
                 }
@@ -58,7 +72,8 @@ export async function GET(request: Request) {
             db.user.aggregate({
                 _count: {
                     _all: true,
-                    isAdmin: true
+                    isAdmin: true,
+                    verified: true
                 },
                 where: {}
             })
@@ -70,14 +85,19 @@ export async function GET(request: Request) {
                 name: user.username,
                 email: user.email,
                 isAdmin: user.isAdmin,
+                verified: user.verified,
                 charCount: user._count.charCreated,
-                chatCount: user._count.chats
+                chatCount: user._count.chats,
+                commentCount: user._count.comments,
+                lorebookCount: user._count.lorebooks,
+                personaCount: user._count.personas
             })),
             total,
             stats: {
                 total: stats._count._all,
                 admins: stats._count.isAdmin,
-                users: stats._count._all - stats._count.isAdmin
+                users: stats._count._all - stats._count.isAdmin,
+                verified: stats._count.verified
             }
         });
     } catch (error) {

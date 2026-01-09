@@ -51,3 +51,39 @@ export async function DELETE(
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function PATCH(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user.isAdmin) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const { id: userId } = await params;
+        const body = await request.json();
+
+        // Prevent self-demotion
+        if (userId === session.user.id && body.isAdmin === false) {
+            return NextResponse.json({ error: "You cannot demote yourself from admin status" }, { status: 400 });
+        }
+
+        const user = await db.user.update({
+            where: { id: userId },
+            data: {
+                isAdmin: body.isAdmin !== undefined ? body.isAdmin : undefined,
+                verified: body.verified !== undefined ? body.verified : undefined,
+                username: body.username || undefined,
+                email: body.email || undefined,
+            }
+        });
+
+        return NextResponse.json({ message: "User updated successfully", user });
+    } catch (error) {
+        console.error("Failed to update user:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
