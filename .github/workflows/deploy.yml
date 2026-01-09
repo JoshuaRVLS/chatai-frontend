@@ -1,0 +1,17 @@
+name: Deploy Admin to VPS
+
+on:
+  push:
+    branches: [ "admin" ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: production
+    steps:
+      - name: Build and Deploy Admin
+        run: |
+          cd /root/admin
+          git fetch origin admin
+          git reset --hard origin/admin
+          bash scripts/deploy.sh

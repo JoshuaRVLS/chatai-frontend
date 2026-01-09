@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JChatAI Admin Panel
 
-## Getting Started
+Admin dashboard for managing JChatAI.space platform.
 
-First, run the development server:
+## Tech Stack
+
+- **Next.js** 15.3.8 (matching jchatai.space)
+- **React** 19.0.0
+- **Tailwind CSS** 4.x
+- **TypeScript** 5.x
+
+## Development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This admin panel is deployed from the `admin` branch of the `jchatai.space` repository.
 
-## Learn More
+### Push to Admin Branch
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# From this directory, push to the admin branch
+git init
+git remote add origin https://github.com/JoshuaRVLS/jchatai.space.git
+git checkout -b admin
+git add .
+git commit -m "Initial admin panel"
+git push -u origin admin
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### DNS Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Add an A record for `admin.jchatai.space` pointing to your VPS IP:
 
-## Deploy on Vercel
+```
+Type: A
+Host: admin
+Value: YOUR_VPS_IP
+TTL: 3600
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 2. Server Setup
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Clone from jchatai.space repo (admin branch)
+cd /root
+git clone -b admin https://github.com/JoshuaRVLS/jchatai.space.git admin
+cd admin
+
+# Install dependencies
+pnpm install
+
+# Build
+pnpm build
+
+# Start with PM2 on port 3001
+PORT=3001 pm2 start pnpm --name "jchatai-admin" -- start
+pm2 save
+```
+
+### 3. Nginx Setup
+
+```bash
+# Copy nginx config
+sudo cp nginx/admin.jchatai.space.conf /etc/nginx/sites-available/admin.jchatai.space
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/admin.jchatai.space /etc/nginx/sites-enabled/
+
+# Get SSL certificate
+sudo certbot --nginx -d admin.jchatai.space
+
+# Test and reload nginx
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 4. GitHub Actions (Self-Hosted Runner)
+
+The repo uses a self-hosted runner for deployment. Push to `main` triggers auto-deploy.
+
+## Pages
+
+- `/` - Dashboard with stats and activity
+- `/users` - User management
+- `/characters` - Character management
+- `/conversations` - Conversation logs
+- `/lorebooks` - Lorebook management
+- `/analytics` - Platform metrics
+- `/settings` - System configuration
