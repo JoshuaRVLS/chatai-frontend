@@ -113,7 +113,7 @@ const Navbar = () => {
                   <Link href="/settings" className="flex items-center gap-4 lg:gap-6 transition-opacity hover:opacity-80">
                     <div className="text-right hidden sm:block">
                       <p className="text-[10px] lg:text-xs font-black text-white uppercase tracking-tight">{session.user?.name || (session.user as any)?.username}</p>
-                      <p className="text-[8px] lg:text-[10px] text-zinc-600 uppercase tracking-widest font-black lg:mt-0.5">Member</p>
+                      <p className="text-[8px] lg:text-[10px] text-zinc-600 uppercase tracking-widest font-black lg:mt-0.5">{(session.user as any)?.isAdmin ? 'Admin' : 'Member'}</p>
                     </div>
                     <UserAvatar
                       name={session.user?.name || (session.user as any)?.username}
@@ -135,7 +135,7 @@ const Navbar = () => {
                           {/* Header section in dropdown */}
                           <div className="px-4 py-3 lg:px-6 lg:py-4 border-b border-white/5 bg-white/2">
                             <p className="text-[10px] lg:text-xs font-black text-white uppercase tracking-tight truncate">{session.user.name || (session.user as any).username}</p>
-                            <p className="text-[7px] lg:text-[9px] text-zinc-500 uppercase tracking-widest font-black mt-0.5">Authorized Member</p>
+                            <p className="text-[7px] lg:text-[9px] text-zinc-500 uppercase tracking-widest font-black mt-0.5">{(session.user as any)?.isAdmin ? 'Administrator' : 'Authorized Member'}</p>
                           </div>
 
                           <div className="p-1.5 lg:p-2.5 flex flex-col gap-0.5 lg:gap-1">
