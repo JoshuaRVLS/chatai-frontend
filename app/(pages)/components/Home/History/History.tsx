@@ -89,7 +89,7 @@ const History = () => {
       const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Chat removed from history");
-        await queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
+        queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
       } else {
         toast.error("Failed to remove chat");
         queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
@@ -113,7 +113,7 @@ const History = () => {
       setShowContextMenu(chatId);
       if ("vibrate" in navigator) navigator.vibrate(40);
       longPressTimer.current = null;
-    }, 600);
+    }, 450);
   };
 
   const handleTouchEnd = () => {

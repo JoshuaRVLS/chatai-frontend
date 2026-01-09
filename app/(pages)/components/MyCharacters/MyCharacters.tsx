@@ -85,11 +85,24 @@ const MyCharacters: React.FC = () => {
     )
       return;
 
-    // Optimistic Update
-    queryClient.setQueryData(["myCharacters", user?.id], (old: CharactersData | undefined) => {
+    // Optimistic Update across all character queries
+    const updateFn = (old: any) => {
       if (!old) return old;
-      return old.filter(char => char.id !== characterId);
-    });
+      if (Array.isArray(old)) {
+        return old.filter((char: any) => char.id !== characterId);
+      }
+      if (old.data && Array.isArray(old.data)) {
+        return {
+          ...old,
+          data: old.data.filter((char: any) => char.id !== characterId)
+        };
+      }
+      return old;
+    };
+
+    queryClient.setQueriesData({ queryKey: ["myCharacters"] }, updateFn);
+    queryClient.setQueriesData({ queryKey: ["characters"] }, updateFn);
+    queryClient.setQueriesData({ queryKey: ["current-user-characters"] }, updateFn);
 
     try {
       const response = await fetch(`/api/characters/${characterId}`, {
@@ -98,16 +111,21 @@ const MyCharacters: React.FC = () => {
 
       if (response.ok) {
         toast.success("Character deleted successfully");
-        await queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
-        await queryClient.invalidateQueries({ queryKey: ["characters"] });
+        queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
+        queryClient.invalidateQueries({ queryKey: ["characters"] });
+        queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
       } else {
         toast.error("Failed to delete character");
-        queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
+        queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
+        queryClient.invalidateQueries({ queryKey: ["characters"] });
+        queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
       }
     } catch (error) {
       console.error(error);
       toast.error("An error occurred while deleting the character");
-      queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
     }
   };
 

@@ -92,7 +92,7 @@ const CharacterCard = React.memo(function CharacterCard({
       setShowContextMenu(true);
       if ("vibrate" in navigator) navigator.vibrate(40);
       longPressTimer.current = null;
-    }, 600); // Slightly longer for better UX
+    }, 450); // Faster long-press for snappier feel
   };
 
   const handleTouchEnd = () => {
@@ -116,32 +116,56 @@ const CharacterCard = React.memo(function CharacterCard({
       variant: "danger"
     }))) return;
 
-    // Optimistic Update
-    queryClient.setQueryData(["characters"], (old: any[] | undefined) => {
+    // Optimistic Update across all character queries (lists, feed, etc.)
+    queryClient.setQueriesData({ queryKey: ["characters"] }, (old: any) => {
       if (!old) return old;
-      return old.filter(char => char.id !== characterId);
+      // Handle simple array response
+      if (Array.isArray(old)) {
+        return old.filter((char: any) => char.id !== characterId);
+      }
+      // Handle paginated response format { data: [], meta: {} }
+      if (old.data && Array.isArray(old.data)) {
+        return {
+          ...old,
+          data: old.data.filter((char: any) => char.id !== characterId)
+        };
+      }
+      return old;
     });
-    // Also update current-user-characters if that's the query key
-    queryClient.setQueryData(["current-user-characters"], (old: any[] | undefined) => {
+
+    queryClient.setQueriesData({ queryKey: ["current-user-characters"] }, (old: any) => {
       if (!old) return old;
-      return old.filter(char => char.id !== characterId);
+      if (Array.isArray(old)) {
+        return old.filter((char: any) => char.id !== characterId);
+      }
+      if (old.data && Array.isArray(old.data)) {
+        return {
+          ...old,
+          data: old.data.filter((char: any) => char.id !== characterId)
+        };
+      }
+      return old;
     });
 
     try {
       const res = await fetch(`/api/characters/${characterId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Character deleted");
-        await queryClient.invalidateQueries({ queryKey: ["characters"] });
-        await queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
+        // Trigger background invalidation without awaiting
+        queryClient.invalidateQueries({ queryKey: ["characters"] });
+        queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
+        queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
       } else {
         toast.error("Failed to delete character");
         queryClient.invalidateQueries({ queryKey: ["characters"] });
         queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
+        queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
       }
     } catch {
       toast.error("Failed to delete character");
       queryClient.invalidateQueries({ queryKey: ["characters"] });
       queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
+      queryClient.invalidateQueries({ queryKey: ["myCharacters"] });
     }
   };
 

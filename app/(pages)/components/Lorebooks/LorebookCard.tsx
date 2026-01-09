@@ -36,10 +36,13 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
         }))) return;
 
         // Optimistic Update
-        queryClient.setQueryData(["lorebooks"], (old: any[] | undefined) => {
+        const updateFn = (old: any[] | undefined) => {
             if (!old) return old;
             return old.filter(lb => lb.id !== lorebook.id);
-        });
+        };
+
+        queryClient.setQueriesData({ queryKey: ["lorebooks"] }, updateFn);
+        queryClient.setQueriesData({ queryKey: ["all-lorebooks"] }, updateFn);
 
         try {
             const res = await fetch(`/api/lorebooks/${lorebook.id}`, {
@@ -48,10 +51,14 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
 
             if (!res.ok) throw new Error();
             toast.success("Lorebook deleted");
-            await queryClient.invalidateQueries({ queryKey: ["lorebooks"] });
+            // Invalidate queries to refetch data in the background, but don't block
+            queryClient.invalidateQueries({ queryKey: ["lorebooks"] });
+            queryClient.invalidateQueries({ queryKey: ["all-lorebooks"] });
         } catch {
             toast.error("Failed to delete lorebook");
+            // On error, revert optimistic update by invalidating and refetching
             queryClient.invalidateQueries({ queryKey: ["lorebooks"] });
+            queryClient.invalidateQueries({ queryKey: ["all-lorebooks"] });
         }
     };
     const handleTouchStart = (e: React.TouchEvent) => {
@@ -66,7 +73,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
             setShowContextMenu(true);
             if ("vibrate" in navigator) navigator.vibrate(40);
             longPressTimer.current = null;
-        }, 600);
+        }, 450);
     };
 
     const handleTouchEnd = () => {
