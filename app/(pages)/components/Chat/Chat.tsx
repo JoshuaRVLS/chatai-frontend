@@ -1577,6 +1577,12 @@ const MessageBubble = React.memo(
 
 MessageBubble.displayName = "MessageBubble";
 
+const COMMANDS = [
+  { cmd: "/help", desc: "Show tutorial" },
+  { cmd: "/clear", desc: "Reset conversation" },
+  { cmd: "/reset", desc: "Wipe AI memory" },
+];
+
 const ChatInput = React.memo(({
   onSubmit,
   onContinue,
@@ -1595,11 +1601,58 @@ const ChatInput = React.memo(({
   onSelectSuggestion: (s: string) => void;
 }) => {
   const [message, setMessage] = useState("");
+  const [commandSuggestions, setCommandSuggestions] = useState<typeof COMMANDS>([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (commandSuggestions.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev + 1) % commandSuggestions.length);
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev - 1 + commandSuggestions.length) % commandSuggestions.length);
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        handleSelectCommand(commandSuggestions[selectedIndex].cmd);
+        return;
+      }
+      if (e.key === "Escape") {
+        setCommandSuggestions([]);
+        return;
+      }
+    }
+
     if (e.key === "Enter" && !e.shiftKey && window.innerWidth > 768) {
       e.preventDefault();
       handleInternalSubmit();
+    }
+  };
+
+  const handleSelectCommand = (cmd: string) => {
+    setMessage(cmd + " ");
+    setCommandSuggestions([]);
+    setSelectedIndex(0);
+  };
+
+  const handleInputChange = (val: string) => {
+    setMessage(val);
+    if (val.startsWith("/")) {
+      const parts = val.split(" ");
+      if (parts.length === 1) {
+        const query = parts[0].toLowerCase();
+        const matches = COMMANDS.filter(c => c.cmd.startsWith(query));
+        setCommandSuggestions(matches);
+        setSelectedIndex(0);
+      } else {
+        setCommandSuggestions([]);
+      }
+    } else {
+      setCommandSuggestions([]);
     }
   };
 
@@ -1613,6 +1666,7 @@ const ChatInput = React.memo(({
     if (!message.trim() || isSubmitting) return;
     const content = message;
     setMessage("");
+    setCommandSuggestions([]);
     try {
       await onSubmit(content);
       const textarea = document.querySelector('textarea[placeholder="Talk to character..."]') as HTMLTextAreaElement;
@@ -1675,10 +1729,36 @@ const ChatInput = React.memo(({
         </div>
 
         <div className="relative flex items-end gap-2 sm:gap-3">
+          {/* Command Autocomplete Dropdown */}
+          <AnimatePresence>
+            {commandSuggestions.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute bottom-full left-0 mb-4 w-64 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 shadow-2xl z-50 overflow-hidden"
+              >
+                <div className="px-3 py-1.5 mb-2 border-b border-white/5">
+                  <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">Available Commands</p>
+                </div>
+                {commandSuggestions.map((c, i) => (
+                  <button
+                    key={c.cmd}
+                    onClick={() => handleSelectCommand(c.cmd)}
+                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${i === selectedIndex ? "bg-white/10 text-primary" : "text-white/50 hover:bg-white/5 hover:text-white"}`}
+                  >
+                    <code className="text-[11px] font-black">{c.cmd}</code>
+                    <span className="text-[9px] font-bold uppercase tracking-tighter opacity-40">{c.desc}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           <div className="relative flex-1 group">
             <textarea
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onInput={handleInput}
               rows={1}

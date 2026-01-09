@@ -42,6 +42,13 @@ const slides = [
         features: ["Keyword Triggers", "Global Lore", "Infinite Context"]
     },
     {
+        title: "Roleplay Format",
+        subtitle: "Master the narrative",
+        icon: <FiMessageSquare className="text-pink-400" />,
+        content: "Pro-tip: Use *asterisks* to describe actions and narration. Use \"quotation marks\" for speech. This helps the AI differentiate between what you say and what you do.",
+        features: ["*Action*", "\"Dialogue\"", "*Action* \"Dialogue\""]
+    },
+    {
         title: "Slash Commands",
         subtitle: "Power at your fingertips",
         icon: <FiTerminal className="text-purple-400" />,
