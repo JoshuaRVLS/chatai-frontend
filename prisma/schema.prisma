@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id                       String            @id @default(cuid())
+  username                 String            @unique
+  email                    String            @unique
+  password                 String
+  profileImage             UserProfileImage?
+  verificationToken        String?
+  verificationTokenExpires DateTime?
+  verified                 Boolean           @default(false)
+  isAdmin                  Boolean           @default(false)
+  charCreated              Character[]
+  chats                    Chat[]
+  comments                 Comment[]
+  personaUsed              String?
+  personas                 UserPersona[]
+  userSettings             UserSettings?
+  lorebooks                Lorebook[]
+}
+
+model UserSettings {
+  id           String  @id @default(cuid())
+  user         User    @relation(fields: [userId], references: [id])
+  userId       String  @unique
+  chatSettings Json?
+  showNsfw     Boolean @default(false)
+  blurNsfw     Boolean @default(true)
+}
+
+model UserPersona {
+  id     String        @id @default(cuid())
+  name   String
+  person String
+  user   User          @relation(fields: [userId], references: [id])
+  userId String
+  image  PersonaImage?
+}
+
+model PersonaImage {
+  id        String      @id @default(cuid())
+  data      Bytes
+  name      String
+  mimetype  String
+  persona   UserPersona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  personaId String      @unique
+}
+
+model UserProfileImage {
+  id       String @id @default(cuid())
+  mimetype String
+  data     Bytes
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String @unique
+}
+
+model Character {
+  id                   String           @id @default(cuid())
+  name                 String
+  chubId               String?          @unique
+  persona              String
+  bio                  String
+  scenario             String
+  introMessage         String
+  exampleConversations String?
+  isNsfw               Boolean          @default(false)
+  author               User             @relation(fields: [authorId], references: [id])
+  authorId             String
+  chats                Chat[]
+  photo                CharacterImage?
+  tags                 CharacterTag[]
+  comments             Comment[]
+  lorebooks            Lorebook[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+}
+
+model Lorebook {
+  id                 String          @id @default(cuid())
+  name               String
+  description        String?
+  chubId             String?         @unique // ChubAI lorebook ID for duplicate prevention
+  scanDepth          Int             @default(4) // How deep to scan context
+  tokenBudget        Int             @default(512) // Max tokens for lorebook
+  recursiveScanning  Boolean         @default(false) // Enable recursive scanning
+  userId             String
+  user               User            @relation(fields: [userId], references: [id])
+  entries            LoreEntry[]
+  characters         Character[]
+  tags               LorebookTag[]
+  image              LorebookImage?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+}
+
+model LorebookImage {
+  id         String   @id @default(cuid())
+  lorebookId String   @unique
+  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+  name       String
+  mimetype   String
+  data       Bytes
+  createdAt  DateTime @default(now())
+}
+
+model LorebookTag {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  lorebooks Lorebook[]
+  createdAt DateTime   @default(now())
+}
+
+model LoreEntry {
+  id         String   @id @default(cuid())
+  lorebookId String
+  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+  keywords   String[] // Triggers for this entry
+  content    String // Information to inject
+  enabled    Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Comment {
+  id          String    @id @default(cuid())
+  content     String
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    String
+  character   Character @relation(fields: [characterId], references: [id])
+  characterId String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model CharacterTag {
+  id    String      @id @default(cuid())
+  name  String      @unique
+  chars Character[]
+}
+
+model CharacterImage {
+  id       String    @id @default(cuid())
+  data     Bytes
+  name     String
+  mimetype String
+  char     Character @relation(fields: [charId], references: [id])
+  charId   String    @unique
+}
+
+model Chat {
+  id           String      @id @default(cuid())
+  character    Character   @relation(fields: [characterId], references: [id])
+  characterId  String
+  user         User        @relation(fields: [userId], references: [id])
+  userId       String
+  messages     Message[]
+  summary      String?
+  memory       String?
+  personaId    String?
+  chatSettings Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model Message {
+  id              String   @id @default(cuid())
+  content         String
+  originalContent String? // Tracks the original AI response before user correction
+  fromUser        Boolean
+  pinned          Boolean  @default(false)
+  feedback        Feedback @default(NONE)
+  chat            Chat     @relation(fields: [chatId], references: [id])
+  chatId          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+enum Feedback {
+  NONE
+  LIKE
+  DISLIKE
+}
+
