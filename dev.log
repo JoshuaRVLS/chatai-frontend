@@ -45,3 +45,17 @@ nohup: ignoring input
  ✓ Compiled /api/stats in 480ms (691 modules)
  GET /api/stats 200 in 1622ms
  GET /api/stats 200 in 1801ms
+ ✓ Compiled in 296ms (1032 modules)
+ GET /dashboard 404 in 59ms
+ GET / 200 in 144ms
+ GET / 200 in 144ms
+ GET /dashboard 404 in 53ms
+ GET /api/stats 200 in 583ms
+ GET /api/stats 200 in 613ms
+ GET /api/stats 200 in 615ms
+ GET /api/stats 200 in 1063ms
+ ✓ Compiled in 231ms (1032 modules)
+ GET /dashboard 404 in 81ms
+ GET / 200 in 162ms
+ GET / 200 in 161ms
+ GET /dashboard 404 in 46ms

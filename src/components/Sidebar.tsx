@@ -107,10 +107,9 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5 relative z-[150] bg-zinc-950">
+      <div className="p-6 border-t border-white/5 relative z-[200] bg-zinc-950">
         <button
-          onClick={() => console.log('Admin Profile Clicked')}
-          className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-zinc-800 border border-transparent hover:border-white/10 transition-all cursor-pointer group text-left active:scale-95 shadow-sm"
+          className="w-full h-20 flex items-center gap-4 px-4 rounded-2xl bg-white/5 hover:bg-zinc-800 border border-white/5 hover:border-white/20 transition-all cursor-pointer group text-left active:scale-90 hover:scale-[1.05] shadow-lg hover:shadow-[0_0_30px_rgba(255,255,255,0.05)] hover:ring-2 hover:ring-white/10"
         >
           <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden shrink-0">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
