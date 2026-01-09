@@ -78,41 +78,87 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Maintenance Mode Check
+  // Access Control Check
   const headerList = await headers();
   const pathname = headerList.get("x-pathname") || "";
 
   let shouldRedirect = false;
-  let isMaintenanceMode = false;
-  let isWhitelistMode = false;
+  let redirectPath = "";
+
+  const [maintenanceSetting, whitelistSetting] = await Promise.all([
+    db.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
+    db.systemSetting.findUnique({ where: { key: "whitelistMode" } })
+  ]);
+
+  const session = await getServerSession(authOptions);
   let isAdmin = false;
+  let isWhitelisted = false;
+  let isSuspended = false;
 
-  try {
-    const [maintenanceSetting, whitelistSetting] = await Promise.all([
-      db.systemSetting.findUnique({ where: { key: "maintenanceMode" } }),
-      db.systemSetting.findUnique({ where: { key: "whitelistMode" } })
-    ]);
+  const isMaintenanceMode = maintenanceSetting?.value === "true";
+  const isWhitelistMode = whitelistSetting?.value === "true";
 
-    const session = await getServerSession(authOptions);
-    isAdmin = !!session?.user?.isAdmin;
+  if (session?.user?.email) {
+    const user = await db.user.findUnique({
+      where: { email: session.user.email },
+      select: { isAdmin: true, isWhitelisted: true, suspendedUntil: true }
+    });
 
-    if (maintenanceSetting?.value === "true") {
-      isMaintenanceMode = true;
-      // Only redirect non-admins on non-maintenance pages
-      if (!isAdmin && pathname !== "/maintenance") {
-        shouldRedirect = true;
+    if (user) {
+      isAdmin = user.isAdmin;
+      // Admins are always whitelisted
+      isWhitelisted = user.isWhitelisted || user.isAdmin;
+
+      // Check suspension
+      if (user.suspendedUntil && !user.isAdmin) {
+        isSuspended = new Date(user.suspendedUntil) > new Date();
       }
     }
-
-    if (whitelistSetting?.value === "true") {
-      isWhitelistMode = true;
-    }
-  } catch (error) {
-    console.error("System settings check failed:", error);
   }
 
-  if (shouldRedirect) {
-    redirect("/maintenance");
+  const publicRoutes = ['/login', '/register', '/maintenance', '/suspended', '/access-denied', '/privacy', '/terms'];
+  const isPublicRoute = publicRoutes.some(route => pathname === route);
+
+  // 1. Maintenance Mode Check
+  if (isMaintenanceMode && !isAdmin) {
+    if (pathname !== "/maintenance") {
+      shouldRedirect = true;
+      redirectPath = "/maintenance";
+    }
+  }
+  // 2. Suspension Check
+  else if (isSuspended) {
+    if (pathname !== "/suspended") {
+      shouldRedirect = true;
+      redirectPath = "/suspended";
+    }
+  }
+  // 3. Whitelist Mode Check
+  else if (isWhitelistMode && !isWhitelisted) {
+    // If not logged in, allow public routes (like login). 
+    // If logged in (but not whitelisted), block access.
+    if (!isPublicRoute) {
+      shouldRedirect = true;
+      redirectPath = "/access-denied";
+    }
+  }
+
+  // Reverse Checks - Redirect back to home if condition is CLEARED
+  if (pathname === "/maintenance" && (!isMaintenanceMode || isAdmin)) {
+    shouldRedirect = true;
+    redirectPath = "/";
+  }
+  if (pathname === "/suspended" && !isSuspended) {
+    shouldRedirect = true;
+    redirectPath = "/";
+  }
+  if (pathname === "/access-denied" && (!isWhitelistMode || isWhitelisted)) {
+    shouldRedirect = true;
+    redirectPath = "/";
+  }
+
+  if (shouldRedirect && redirectPath) {
+    redirect(redirectPath);
   }
 
   return (
