@@ -9,7 +9,7 @@
 import { PrismaClient } from '../app/generated/prisma';
 
 const prisma = new PrismaClient();
-const DEFAULT_USER_ID = "cmk3aq9vi0000vmksfjul6xnc";
+const DEFAULT_USER_ID = "cmk70q7xb0000cmlrwm9l86gz";
 const CHUB_GATEWAY_API = "https://gateway.chub.ai/api";
 const CHUB_GATEWAY_SEARCH = "https://gateway.chub.ai/search";
 
