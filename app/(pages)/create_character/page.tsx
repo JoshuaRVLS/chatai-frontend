@@ -95,7 +95,7 @@ const CreateCharacterPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
+    <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative">
       {/* Background Blobs - Monochrome */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
