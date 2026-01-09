@@ -22,6 +22,9 @@ export const GET = async (req: Request) => {
           take: 1,
           orderBy: { createdAt: "desc" },
         },
+        _count: {
+          select: { messages: true }
+        }
       },
       orderBy: { updatedAt: "desc" },
     });
@@ -39,6 +42,9 @@ export const GET = async (req: Request) => {
           take: 1,
           orderBy: { createdAt: "desc" },
         },
+        _count: {
+          select: { messages: true }
+        }
       },
       orderBy: { updatedAt: "desc" },
     });
