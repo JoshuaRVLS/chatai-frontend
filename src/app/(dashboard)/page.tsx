@@ -71,6 +71,48 @@ export default function Dashboard() {
     return num.toString();
   };
 
+  const formatTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+
+    return past.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'user':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+        );
+      case 'character':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        );
+      case 'chat':
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+        );
+      default:
+        return (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        );
+    }
+  };
+
   return (
     <div className="flex flex-col">
       <Header title="System Dashboard" subtitle="Overview of platform performance" />
@@ -127,32 +169,31 @@ export default function Dashboard() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Recent Activity */}
-          <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5">
+          <div className="lg:col-span-2 glass rounded-3xl p-8 border border-white/5">
             <div className="flex items-center justify-between mb-8 px-2">
-              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Recent Activity</h2>
-              <button className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors">
-                View History
-              </button>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500">System Live Stream</h2>
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500/60">Live Feed</span>
+              </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {loading ? (
                 <div className="text-[10px] font-black uppercase tracking-widest text-zinc-700 p-4">Loading application events...</div>
               ) : data?.recentActivity.length ? (
                 data.recentActivity.map((activity) => (
                   <div
                     key={activity.id}
-                    className="flex items-center gap-4 p-4 rounded-xl border border-transparent hover:border-white/5 hover:bg-white/2.5 transition-all duration-300 group"
+                    className="flex items-center gap-5 p-4 rounded-2xl border border-transparent hover:border-white/5 hover:bg-white/2.5 transition-all duration-300 group"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 group-hover:text-white transition-all">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center text-zinc-600 group-hover:text-white group-hover:bg-white/5 transition-all shadow-inner">
+                      {getActivityIcon((activity as any).type)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-black uppercase tracking-wide text-zinc-300">{activity.action}</p>
-                      <p className="text-[10px] font-bold text-zinc-600 lowercase truncate">{activity.user}</p>
+                      <p className="text-xs font-black uppercase tracking-wide text-zinc-300 group-hover:text-white transition-colors">{activity.action}</p>
+                      <p className="text-[10px] font-bold text-zinc-600 lowercase truncate mt-0.5">Executor: {activity.user}</p>
                     </div>
-                    <span className="text-[10px] font-black text-zinc-700 uppercase tracking-tighter">{activity.time}</span>
+                    <span className="text-[9px] font-black text-zinc-700 uppercase tracking-widest shrink-0 whitespace-nowrap">{formatTimeAgo(activity.time)}</span>
                   </div>
                 ))
               ) : (

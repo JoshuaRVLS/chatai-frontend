@@ -33,34 +33,62 @@ export async function GET() {
             }
         });
 
-        // Recent activity (latest users and characters)
-        const [recentUsers, recentChars] = await Promise.all([
+        // Diverse Recent Activity
+        const [recentUsers, recentChars, recentChats, recentLorebooks] = await Promise.all([
             db.user.findMany({
-                take: 5,
-                orderBy: { id: 'desc' }, // fallback for createdAt
-                select: { id: true, username: true }
+                take: 10,
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, username: true, createdAt: true }
             }),
             db.character.findMany({
-                take: 5,
+                take: 10,
                 orderBy: { createdAt: 'desc' },
                 select: { id: true, name: true, createdAt: true, author: { select: { username: true } } }
+            }),
+            db.chat.findMany({
+                take: 10,
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, createdAt: true, user: { select: { username: true } }, character: { select: { name: true } } }
+            }),
+            db.lorebook.findMany({
+                take: 10,
+                orderBy: { createdAt: 'desc' },
+                select: { id: true, name: true, createdAt: true, user: { select: { username: true } } }
             })
         ]);
 
         const activities = [
             ...recentUsers.map(u => ({
-                id: `u-${u.id}`,
-                action: 'New user registered',
+                id: `user-${u.id}`,
+                type: 'user',
+                action: 'New operator registered',
                 user: u.username,
-                time: 'Recently'
+                time: u.createdAt.toISOString()
             })),
             ...recentChars.map(c => ({
-                id: `c-${c.id}`,
-                action: 'Character created',
+                id: `char-${c.id}`,
+                type: 'character',
+                action: `Deployed character: ${c.name}`,
                 user: c.author.username,
-                time: c.createdAt.toISOString().split('T')[0]
+                time: c.createdAt.toISOString()
+            })),
+            ...recentChats.map(ch => ({
+                id: `chat-${ch.id}`,
+                type: 'chat',
+                action: `New link established with ${ch.character.name}`,
+                user: ch.user.username,
+                time: ch.createdAt.toISOString()
+            })),
+            ...recentLorebooks.map(l => ({
+                id: `lore-${l.id}`,
+                type: 'lorebook',
+                action: `Lorebook indexed: ${l.name}`,
+                user: l.user.username,
+                time: l.createdAt.toISOString()
             }))
-        ].sort((a, b) => b.id.localeCompare(a.id)).slice(0, 5);
+        ]
+            .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+            .slice(0, 10);
 
         return NextResponse.json({
             stats: {
@@ -73,7 +101,7 @@ export async function GET() {
                 id: c.id,
                 name: c.name,
                 conversations: c._count.chats,
-                growth: '+0%' // Static for now as we don't track historical growth yet
+                growth: '+0%'
             })),
             recentActivity: activities
         });

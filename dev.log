@@ -280,3 +280,364 @@
  GET /login 200 in 123ms
  ✓ Compiled in 334ms (895 modules)
  GET /login 200 in 60ms
+ ✓ Compiled in 120ms (391 modules)
+ GET /login 200 in 20ms
+ GET /login 200 in 78ms
+ ✓ Compiled /favicon.ico in 449ms (741 modules)
+ ✓ Compiled in 0ms (755 modules)
+ ✓ Compiled in 1ms (755 modules)
+ ✓ Compiled in 1ms (755 modules)
+ GET /api/auth/session 200 in 1300ms
+ GET /favicon.ico 200 in 1163ms
+ GET /login 200 in 1045ms
+ GET /login 200 in 1045ms
+ GET /api/auth/providers 200 in 81ms
+ GET /api/auth/csrf 200 in 6ms
+ POST /api/auth/callback/credentials 200 in 2208ms
+ GET /api/auth/session 200 in 21ms
+ GET / 200 in 110ms
+ ✓ Compiled /api/stats in 292ms (757 modules)
+ ✓ Compiled in 1ms (757 modules)
+ ✓ Compiled in 0ms (757 modules)
+ ✓ Compiled in 1ms (757 modules)
+ GET /api/auth/session 200 in 799ms
+ GET /login 200 in 702ms
+ GET / 200 in 702ms
+ GET /settings 200 in 19ms
+ ✓ Compiled /api/settings in 236ms (759 modules)
+ GET /login 200 in 47ms
+ GET /settings 200 in 49ms
+ GET /api/settings 200 in 854ms
+ GET /api/settings 200 in 1273ms
+ GET /api/stats 200 in 3840ms
+ ✓ Compiled /analytics in 370ms (1143 modules)
+ GET /analytics 200 in 423ms
+ ✓ Compiled /api/analytics in 222ms (1145 modules)
+ GET /api/analytics?days=7 200 in 2098ms
+ GET /api/analytics?days=7 200 in 3028ms
+ GET /lorebooks 200 in 35ms
+ ✓ Compiled /api/lorebooks in 213ms (768 modules)
+ GET /login 200 in 48ms
+ GET /lorebooks 200 in 49ms
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 1582ms
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 2096ms
+ GET /api/lorebooks?page=1&limit=10&search=&sort=newest 200 in 2211ms
+ GET /api/lorebooks?page=2&limit=10&search=&sort=newest 200 in 1403ms
+ ✓ Compiled /conversations in 204ms (773 modules)
+ GET /conversations 200 in 274ms
+ ✓ Compiled /api/conversations in 187ms (775 modules)
+ ✓ Compiled in 0ms (777 modules)
+ ✓ Compiled in 0ms (777 modules)
+ ✓ Compiled in 1ms (777 modules)
+ GET /login 200 in 856ms
+ GET /conversations 200 in 856ms
+ GET /login 200 in 21ms
+ GET /conversations 200 in 22ms
+ GET /api/characters/all 200 in 1577ms
+ GET /api/characters/all 200 in 1883ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 3722ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 3723ms
+ ✓ Compiled /api/characters/picture/[id] in 164ms (779 modules)
+ GET /api/characters/picture/cmk53irs700i7cmo9lt2649i4 200 in 4385ms
+ GET /api/characters/picture/cmk53iry200idcmo9zg0l45no 200 in 5410ms
+ GET /users 200 in 33ms
+ ✓ Compiled /api/users in 212ms (781 modules)
+ GET /login 200 in 41ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 972ms
+ GET /users 200 in 14ms
+ GET /api/characters/picture/cmk3bv0k0009rvmzol8yr9cjb 200 in 7673ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 1386ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 493ms
+ ✓ Compiled /api/users/[id] in 181ms (783 modules)
+ GET /login 200 in 47ms
+ GET /users 200 in 48ms
+ PATCH /api/users/cmk51spkl0000cmig73fgzrd3 200 in 792ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 506ms
+ GET /api/characters/picture/cmk3buty8008uvmzo7086wfqk 200 in 12474ms
+ GET /api/characters/picture/cmk53fdy5005mcmdmo9seq32a 200 in 12890ms
+ GET /api/auth/session 200 in 28ms
+ GET /api/characters/picture/cmk3bvdxo00bsvmzo199g4xo2 200 in 17090ms
+ PATCH /api/users/cmk51spkl0000cmig73fgzrd3 200 in 1156ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 616ms
+ PATCH /api/users/cmk51spkl0000cmig73fgzrd3 200 in 621ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 506ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=verified&limit=10 200 in 594ms
+ PATCH /api/users/cmk51spkl0000cmig73fgzrd3 200 in 464ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=verified&limit=10 200 in 460ms
+ GET /api/users?page=1&search=&sort=newest&role=all&verified=all&limit=10 200 in 597ms
+ GET / 200 in 16ms
+ GET /api/stats 200 in 2224ms
+ GET /api/stats 200 in 3562ms
+ ✓ Compiled in 194ms (393 modules)
+ GET /login 200 in 87ms
+ GET / 200 in 86ms
+ ✓ Compiled in 100ms (393 modules)
+ GET /login 200 in 34ms
+ GET / 200 in 37ms
+ ✓ Compiled in 320ms (897 modules)
+ GET /login 200 in 209ms
+ GET / 200 in 209ms
+ ✓ Compiled in 415ms (897 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 176ms
+ GET /login 200 in 197ms
+ GET / 200 in 118ms
+ ✓ Compiled /api/auth/[...nextauth] in 360ms (753 modules)
+ ✓ Compiled in 0ms (755 modules)
+ ✓ Compiled in 1ms (755 modules)
+ ✓ Compiled in 0ms (755 modules)
+ GET /api/auth/session 200 in 1246ms
+ GET /login 200 in 864ms
+ GET / 200 in 863ms
+prisma:error 
+Invalid `prisma.user.findMany()` invocation:
+
+{
+  take: 10,
+  orderBy: {
+    createdAt: "desc",
+    ~~~~~~~~~
+?   id?: SortOrder,
+?   username?: SortOrder,
+?   email?: SortOrder,
+?   password?: SortOrder,
+?   verificationToken?: SortOrder | SortOrderInput,
+?   verificationTokenExpires?: SortOrder | SortOrderInput,
+?   verified?: SortOrder,
+?   isAdmin?: SortOrder,
+?   personaUsed?: SortOrder | SortOrderInput,
+?   profileImage?: UserProfileImageOrderByWithRelationInput,
+?   charCreated?: CharacterOrderByRelationAggregateInput,
+?   chats?: ChatOrderByRelationAggregateInput,
+?   comments?: CommentOrderByRelationAggregateInput,
+?   personas?: UserPersonaOrderByRelationAggregateInput,
+?   userSettings?: UserSettingsOrderByWithRelationInput,
+?   lorebooks?: LorebookOrderByRelationAggregateInput
+  },
+  select: {
+    id: true,
+    username: true,
+    createdAt: true
+  }
+}
+
+Unknown argument `createdAt`. Available options are marked with ?.
+Stats fetch error: Error [PrismaClientValidationError]: 
+Invalid `prisma.user.findMany()` invocation:
+
+{
+  take: 10,
+  orderBy: {
+    createdAt: "desc",
+    ~~~~~~~~~
+?   id?: SortOrder,
+?   username?: SortOrder,
+?   email?: SortOrder,
+?   password?: SortOrder,
+?   verificationToken?: SortOrder | SortOrderInput,
+?   verificationTokenExpires?: SortOrder | SortOrderInput,
+?   verified?: SortOrder,
+?   isAdmin?: SortOrder,
+?   personaUsed?: SortOrder | SortOrderInput,
+?   profileImage?: UserProfileImageOrderByWithRelationInput,
+?   charCreated?: CharacterOrderByRelationAggregateInput,
+?   chats?: ChatOrderByRelationAggregateInput,
+?   comments?: CommentOrderByRelationAggregateInput,
+?   personas?: UserPersonaOrderByRelationAggregateInput,
+?   userSettings?: UserSettingsOrderByWithRelationInput,
+?   lorebooks?: LorebookOrderByRelationAggregateInput
+  },
+  select: {
+    id: true,
+    username: true,
+    createdAt: true
+  }
+}
+
+Unknown argument `createdAt`. Available options are marked with ?.
+    at async GET (src/app/api/stats/route.ts:37:73)
+  35 |
+  36 |         // Diverse Recent Activity
+> 37 |         const [recentUsers, recentChars, recentChats, recentLorebooks] = await Promise.all([
+     |                                                                         ^
+  38 |             db.user.findMany({
+  39 |                 take: 10,
+  40 |                 orderBy: { createdAt: 'desc' }, {
+  clientVersion: '6.12.0'
+}
+ GET /api/stats 500 in 3299ms
+ ✓ Compiled in 362ms (1148 modules)
+ GET /login 200 in 186ms
+ GET / 200 in 187ms
+ GET /api/auth/session 200 in 64ms
+prisma:error 
+Invalid `prisma.user.findMany()` invocation:
+
+{
+  take: 10,
+  orderBy: {
+    createdAt: "desc",
+    ~~~~~~~~~
+?   id?: SortOrder,
+?   username?: SortOrder,
+?   email?: SortOrder,
+?   password?: SortOrder,
+?   verificationToken?: SortOrder | SortOrderInput,
+?   verificationTokenExpires?: SortOrder | SortOrderInput,
+?   verified?: SortOrder,
+?   isAdmin?: SortOrder,
+?   personaUsed?: SortOrder | SortOrderInput,
+?   profileImage?: UserProfileImageOrderByWithRelationInput,
+?   charCreated?: CharacterOrderByRelationAggregateInput,
+?   chats?: ChatOrderByRelationAggregateInput,
+?   comments?: CommentOrderByRelationAggregateInput,
+?   personas?: UserPersonaOrderByRelationAggregateInput,
+?   userSettings?: UserSettingsOrderByWithRelationInput,
+?   lorebooks?: LorebookOrderByRelationAggregateInput
+  },
+  select: {
+    id: true,
+    username: true,
+    createdAt: true
+  }
+}
+
+Unknown argument `createdAt`. Available options are marked with ?.
+Stats fetch error: Error [PrismaClientValidationError]: 
+Invalid `prisma.user.findMany()` invocation:
+
+{
+  take: 10,
+  orderBy: {
+    createdAt: "desc",
+    ~~~~~~~~~
+?   id?: SortOrder,
+?   username?: SortOrder,
+?   email?: SortOrder,
+?   password?: SortOrder,
+?   verificationToken?: SortOrder | SortOrderInput,
+?   verificationTokenExpires?: SortOrder | SortOrderInput,
+?   verified?: SortOrder,
+?   isAdmin?: SortOrder,
+?   personaUsed?: SortOrder | SortOrderInput,
+?   profileImage?: UserProfileImageOrderByWithRelationInput,
+?   charCreated?: CharacterOrderByRelationAggregateInput,
+?   chats?: ChatOrderByRelationAggregateInput,
+?   comments?: CommentOrderByRelationAggregateInput,
+?   personas?: UserPersonaOrderByRelationAggregateInput,
+?   userSettings?: UserSettingsOrderByWithRelationInput,
+?   lorebooks?: LorebookOrderByRelationAggregateInput
+  },
+  select: {
+    id: true,
+    username: true,
+    createdAt: true
+  }
+}
+
+Unknown argument `createdAt`. Available options are marked with ?.
+    at async GET (src/app/api/stats/route.ts:37:73)
+  35 |
+  36 |         // Diverse Recent Activity
+> 37 |         const [recentUsers, recentChars, recentChats, recentLorebooks] = await Promise.all([
+     |                                                                         ^
+  38 |             db.user.findMany({
+  39 |                 take: 10,
+  40 |                 orderBy: { createdAt: 'desc' }, {
+  clientVersion: '6.12.0'
+}
+ GET /api/stats 500 in 1536ms
+ ✓ Compiled in 178ms (393 modules)
+ GET /login 200 in 142ms
+ GET / 200 in 143ms
+ ✓ Compiled /_not-found in 340ms (1138 modules)
+ GET /_next/static/css/app/layout.css?v=1767970923945 404 in 529ms
+ GET /_next/static/chunks/main-app.js?v=1767970923964 404 in 539ms
+ GET /_next/static/css/app/layout.css?v=1767970923964 404 in 545ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 536ms
+ GET /_next/static/chunks/app/(dashboard)/page.js 404 in 530ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 541ms
+ ✓ Compiled in 100ms (396 modules)
+ ⨯ Error: Cannot find module './204.js'
+Require stack:
+- /home/joshuarvl/Documents/admin.jchatai.space/.next/server/webpack-runtime.js
+- /home/joshuarvl/Documents/admin.jchatai.space/.next/server/app/_not-found/page.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/server/require.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/server/load-components.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/build/utils.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/build/swc/options.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/build/swc/index.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/build/next-config-ts/transpile-config.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/server/config.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/server/next.js
+- /home/joshuarvl/Documents/admin.jchatai.space/node_modules/.pnpm/next@15.3.8_react-dom@19.2.3_react@19.2.3__react@19.2.3/node_modules/next/dist/server/lib/start-server.js
+    at __webpack_require__.f.require (.next/server/webpack-runtime.js:203:28)
+    at <unknown> (.next/server/webpack-runtime.js:116:40)
+    at Array.reduce (<anonymous>)
+    at __webpack_require__.e (.next/server/webpack-runtime.js:115:67)
+    at Array.map (<anonymous>)
+    at __webpack_require__.X (.next/server/webpack-runtime.js:167:22)
+    at <unknown> (.next/server/app/(auth)/login/page.js:1:11528)
+    at Object.<anonymous> (.next/server/app/(auth)/login/page.js:1:11578) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [Array],
+  page: '/login'
+}
+ ○ Compiling /_error ...
+ ✓ Compiled /_error in 927ms (1235 modules)
+ GET /login 500 in 1357ms
+ GET /login 200 in 65ms
+ GET /login 200 in 13ms
+ GET /login 200 in 14ms
+ GET /login 200 in 68ms
+ GET /_next/static/css/app/layout.css?v=1767970943577 404 in 44ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 69ms
+ GET /_next/static/chunks/main-app.js?v=1767970943577 404 in 73ms
+ GET /_next/static/chunks/app/(auth)/login/page.js 404 in 66ms
+ GET / 200 in 76ms
+ GET /_next/static/chunks/main-app.js?v=1767970952938 404 in 97ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 96ms
+ GET /_next/static/css/app/layout.css?v=1767970952938 404 in 100ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 97ms
+ GET /_next/static/chunks/app/(dashboard)/page.js 404 in 48ms
+ GET /login 200 in 28ms
+ GET /_next/static/css/app/layout.css?v=1767970956226 404 in 26ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 57ms
+ GET /_next/static/chunks/main-app.js?v=1767970956226 404 in 59ms
+ GET /_next/static/chunks/app/(auth)/login/page.js 404 in 57ms
+ ✓ Compiled /favicon.ico in 213ms (608 modules)
+ GET /favicon.ico 200 in 296ms
+ GET /login? 200 in 111ms
+ GET /_next/static/css/app/layout.css?v=1767970994226 404 in 52ms
+ GET /_next/static/chunks/main-app.js?v=1767970994226 404 in 99ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 97ms
+ GET /_next/static/chunks/app/(auth)/login/page.js 404 in 59ms
+ GET /login 200 in 34ms
+ GET /_next/static/css/app/layout.css?v=1767971011933 404 in 100ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 100ms
+ GET /_next/static/chunks/main-app.js?v=1767971011933 404 in 104ms
+ GET /_next/static/chunks/app/(auth)/login/page.js 404 in 100ms
+ GET /login 200 in 30ms
+ GET /_next/static/css/app/layout.css?v=1767971247326 404 in 34ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 65ms
+ GET /_next/static/chunks/app/(auth)/login/page.js 404 in 61ms
+ GET /_next/static/chunks/main-app.js?v=1767971247326 404 in 71ms
+ GET /favicon.ico 200 in 4ms
+ GET / 200 in 140ms
+ GET /_next/static/chunks/main-app.js?v=1767971267034 404 in 226ms
+ GET /_next/static/css/app/layout.css?v=1767971267034 404 in 336ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 337ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 337ms
+ GET /_next/static/chunks/app/(dashboard)/page.js 404 in 206ms
+ GET / 200 in 48ms
+ GET /_next/static/css/app/layout.css?v=1767971291386 404 in 117ms
+ GET /_next/static/chunks/main-app.js?v=1767971291386 404 in 114ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 114ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 113ms
+ GET /_next/static/chunks/app/(dashboard)/page.js 404 in 65ms
+ GET / 200 in 47ms
+ GET /_next/static/css/app/layout.css?v=1767971306249 404 in 107ms
+ GET /_next/static/chunks/main-app.js?v=1767971306249 404 in 106ms
+ GET /_next/static/chunks/app-pages-internals.js 404 in 105ms
+ GET /_next/static/chunks/app/(dashboard)/layout.js 404 in 104ms
+ GET /_next/static/chunks/app/(dashboard)/page.js 404 in 54ms
