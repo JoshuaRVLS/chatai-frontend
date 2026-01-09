@@ -65,6 +65,52 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
             </div>
 
             <div className="space-y-6">
+                {/* Show NSFW Toggle */}
+                <div className="bg-white/2 border border-white/5 rounded-4xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/4">
+                    <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-white uppercase tracking-widest">Show Mature Content</span>
+                            {showNsfw ? (
+                                <FiCheck className="text-primary text-sm" />
+                            ) : (
+                                <FiEyeOff className="text-white/30 text-sm" />
+                            )}
+                        </div>
+                        <p className="text-white/20 text-[11px] leading-relaxed max-w-md font-medium">
+                            Enable viewing of NSFW characters and content on the platform.
+                        </p>
+                    </div>
+
+                    <div className="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5 relative">
+                        <button
+                            onClick={() => handleUpdateSetting("showNsfw", false)}
+                            className={`relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!showNsfw ? "text-slate-950" : "text-white/30 hover:text-white"
+                                }`}
+                        >
+                            Hide
+                        </button>
+                        <button
+                            onClick={() => handleUpdateSetting("showNsfw", true)}
+                            className={`relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${showNsfw ? "text-slate-950" : "text-white/30 hover:text-white"
+                                }`}
+                        >
+                            Show
+                        </button>
+                        <motion.div
+                            layoutId="show-nsfw-tab"
+                            className="absolute inset-y-1.5 bg-primary rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                            initial={false}
+                            animate={{
+                                x: showNsfw ? "100%" : "0%",
+                                left: showNsfw ? "-0.375rem" : "0.375rem",
+                                width: "calc(50% - 0rem)"
+                            }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        />
+                    </div>
+                </div>
+
+
                 {/* Blur Toggle */}
                 <div className={`bg-white/2 border border-white/5 rounded-4xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/4 ${!showNsfw ? 'opacity-50 pointer-events-none' : ''}`}>
                     <div className="space-y-1 flex-1">
