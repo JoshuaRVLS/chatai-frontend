@@ -8,7 +8,9 @@ export default function DashboardLayout({
     return (
         <div className="flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 ml-[260px]">
+            {/* Spacer for fixed sidebar */}
+            <div className="w-[260px] shrink-0 hidden lg:block" />
+            <main className="flex-1 min-w-0 p-4 md:p-8 lg:p-12">
                 {children}
             </main>
         </div>

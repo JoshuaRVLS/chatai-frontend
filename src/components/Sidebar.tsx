@@ -74,14 +74,14 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] bg-[var(--card)] border-r border-[var(--border)] flex flex-col z-50">
+    <aside className="fixed left-0 top-0 h-screen w-[260px] glass border-r border-white/5 flex flex-col z-50 hidden lg:flex">
       {/* Logo */}
-      <div className="h-16 flex items-center px-6 border-b border-[var(--border)]">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">JC</span>
+      <div className="h-16 flex items-center px-6 border-b border-white/5">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center group-hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] transition-all">
+            <span className="text-zinc-950 font-black text-sm">JC</span>
           </div>
-          <span className="font-semibold text-lg">JChatAI Admin</span>
+          <span className="font-black text-lg italic tracking-tighter uppercase leading-none">Admin</span>
         </Link>
       </div>
 
@@ -93,13 +93,14 @@ export default function Sidebar() {
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? 'bg-[var(--primary)] text-white'
-                  : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)] hover:bg-[var(--card-hover)]'
-              }`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${isActive
+                ? 'bg-white text-zinc-950 shadow-[0_0_20px_rgba(255,255,255,0.2)] scale-105'
+                : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                }`}
             >
-              {item.icon}
+              <span className={isActive ? 'text-zinc-950' : 'text-zinc-500'}>
+                {item.icon}
+              </span>
               {item.name}
             </Link>
           );
@@ -107,16 +108,18 @@ export default function Sidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-[var(--border)]">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[var(--card-hover)] transition-colors cursor-pointer">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--accent)] flex items-center justify-center">
-            <span className="text-white font-medium text-xs">A</span>
+      <div className="p-4 border-t border-white/5">
+        <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden">
+            <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
+              <span className="text-white font-black text-[10px]">A</span>
+            </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Admin User</p>
-            <p className="text-xs text-[var(--muted)] truncate">admin@jchatai.space</p>
+            <p className="text-[11px] font-black uppercase tracking-wider truncate">Admin User</p>
+            <p className="text-[9px] font-bold text-zinc-500 truncate lowercase">admin@jchatai.space</p>
           </div>
-          <svg className="w-4 h-4 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 text-zinc-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
           </svg>
         </div>
