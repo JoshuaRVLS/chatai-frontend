@@ -24,6 +24,18 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // Whitelist Mode Check - only whitelisted users can access the site
+    const publicRoutes = ['/login', '/register', '/access-denied', '/maintenance'];
+    const isPublicRoute = publicRoutes.some(route => pathname === route);
+
+    if (!isPublicRoute && !pathname.startsWith('/api/')) {
+      const accessCheck = await checkWhitelistMode(token?.email as string | undefined);
+      if (accessCheck.whitelistMode && !accessCheck.isWhitelisted) {
+        // User is not whitelisted, redirect to access denied
+        return NextResponse.redirect(new URL('/access-denied', request.url));
+      }
+    }
+
     const publicAuthRoutes = ['/login', '/register'];
     const isPublicAuthRoute = publicAuthRoutes.some(route => pathname === route);
 
@@ -45,6 +57,7 @@ export async function middleware(request: NextRequest) {
   }
 }
 
+
 // Check maintenance mode via API or direct DB access
 async function checkMaintenanceMode(): Promise<boolean> {
   try {
@@ -62,6 +75,28 @@ async function checkMaintenanceMode(): Promise<boolean> {
   }
   return false;
 }
+
+// Check whitelist mode and if user is whitelisted
+async function checkWhitelistMode(email?: string): Promise<{ whitelistMode: boolean; isWhitelisted: boolean }> {
+  try {
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const url = email
+      ? `${baseUrl}/api/settings/access?email=${encodeURIComponent(email)}`
+      : `${baseUrl}/api/settings/access`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        whitelistMode: data.whitelistMode === true,
+        isWhitelisted: data.isWhitelisted === true
+      };
+    }
+  } catch (error) {
+    console.error('[WHITELIST_CHECK_ERROR]', error);
+  }
+  return { whitelistMode: false, isWhitelisted: false };
+}
+
 
 export const config = {
   matcher: [

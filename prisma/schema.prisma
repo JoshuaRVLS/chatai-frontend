@@ -25,6 +25,7 @@ model User {
   verificationTokenExpires DateTime?
   verified                 Boolean           @default(false)
   isAdmin                  Boolean           @default(false)
+  isWhitelisted            Boolean           @default(false)
   charCreated              Character[]
   chats                    Chat[]
   comments                 Comment[]
@@ -200,4 +201,3 @@ model SystemSetting {
   key   String @id
   value String
 }
-

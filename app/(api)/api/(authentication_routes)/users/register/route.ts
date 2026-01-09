@@ -32,6 +32,27 @@ export const POST = async (req: Request) => {
     }
 
     const data = await req.json();
+
+    // Check if registration is allowed
+    const [allowRegistrationSetting, whitelistModeSetting] = await Promise.all([
+      db.systemSetting.findUnique({ where: { key: "allowRegistration" } }),
+      db.systemSetting.findUnique({ where: { key: "whitelistMode" } })
+    ]);
+
+    const allowRegistration = allowRegistrationSetting?.value !== "false";
+    const whitelistMode = whitelistModeSetting?.value === "true";
+
+    if (!allowRegistration) {
+      return NextResponse.json(
+        { success: false, message: "Registrasi sedang ditutup sementara." },
+        { status: 403 }
+      );
+    }
+
+    // Check if email is whitelisted when whitelist mode is on
+    // Note: With user-based whitelist, new registrations are allowed but users won't be able to access the site until whitelisted by admin
+    // Removed: whitelistEntry check since whitelist is now user-based, not email-based
+
     console.log(data);
     const userData = await userSchema.parseAsync(data);
     const user = await db.user.findFirst({
