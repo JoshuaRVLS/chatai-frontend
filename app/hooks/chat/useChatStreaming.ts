@@ -3,7 +3,9 @@
 import { useState, useCallback, useRef } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { fetchWithTimeout } from "@/app/utils/fetch";
-import type { Message, User } from "@/app/generated/prisma";
+import type { Message } from "@/app/generated/prisma";
+
+type UserWithId = { id: string } | null | undefined;
 
 export const useChatStreaming = ({
     chatId,
@@ -16,7 +18,7 @@ export const useChatStreaming = ({
     onClearMemory,
 }: {
     chatId: string;
-    user: User | null | undefined;
+    user: UserWithId;
     selectedModel: string;
     queryClient: QueryClient;
     scrollToBottom: () => void;
