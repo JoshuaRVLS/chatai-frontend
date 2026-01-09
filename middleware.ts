@@ -20,6 +20,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/', request.url));
     }
 
+    // Suspension Check (via Token)
+    // Requires user to re-login to pick up the isSuspended flag
+    if (token?.isSuspended && !token.isAdmin) {
+      if (!pathname.startsWith('/suspended')) {
+        return NextResponse.redirect(new URL('/suspended', request.url));
+      }
+    }
+
     // Add pathname header for server components
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-pathname', pathname);

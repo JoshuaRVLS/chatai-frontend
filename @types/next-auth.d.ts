@@ -6,6 +6,8 @@ declare module "next-auth" {
       id: string;
       username: string;
       isAdmin: boolean;
+      isSuspended: boolean;
+      isWhitelisted: boolean;
     } & DefaultSession["user"];
   }
 
@@ -13,5 +15,17 @@ declare module "next-auth" {
     id: string;
     username: string;
     isAdmin: boolean;
+    isSuspended: boolean;
+    isWhitelisted: boolean;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    username: string;
+    isAdmin: boolean;
+    isSuspended: boolean;
+    isWhitelisted: boolean;
   }
 }

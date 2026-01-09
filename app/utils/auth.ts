@@ -3,30 +3,6 @@ import { NextAuthOptions, DefaultSession } from "next-auth";
 import { db } from "./prisma";
 import bcrypt from "bcryptjs";
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      username: string;
-      isAdmin: boolean;
-    } & DefaultSession["user"];
-  }
-
-  interface User {
-    id: string;
-    username: string;
-    isAdmin: boolean;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id: string;
-    username: string;
-    isAdmin: boolean;
-  }
-}
-
 export const authOptions: NextAuthOptions = {
   providers: [
     Credentials({
@@ -66,6 +42,10 @@ export const authOptions: NextAuthOptions = {
             throw new Error("ACCOUNT_NOT_VERIFIED");
           }
 
+          const isSuspended = user.suspendedUntil ? new Date(user.suspendedUntil) > new Date() : false;
+          // Admins are always whitelisted
+          const isWhitelisted = user.isWhitelisted || user.isAdmin;
+
           return {
             id: user.id,
             name: user.username,
@@ -73,6 +53,8 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             image: user.profileImage ? `/api/users/picture/${user.id}` : null,
             isAdmin: user.isAdmin,
+            isSuspended,
+            isWhitelisted,
           };
         } catch (error) {
           console.error("[AUTH_AUTHORIZE_ERROR]", error);
@@ -100,6 +82,8 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         token.picture = user.image;
         token.isAdmin = user.isAdmin;
+        token.isSuspended = user.isSuspended;
+        token.isWhitelisted = user.isWhitelisted;
       }
 
       // Handle session updates (e.g. after profile edit)
@@ -117,6 +101,8 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email;
         session.user.image = token.picture;
         session.user.isAdmin = token.isAdmin;
+        session.user.isSuspended = token.isSuspended;
+        session.user.isWhitelisted = token.isWhitelisted;
       }
       return session;
     },
