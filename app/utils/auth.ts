@@ -75,6 +75,7 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     jwt: async ({ token, user, trigger, session }) => {
+      // Initial sign-in: source truth from "user" object (which comes from authorize)
       if (user) {
         token.id = user.id;
         token.username = user.username;
@@ -86,9 +87,29 @@ export const authOptions: NextAuthOptions = {
         token.isWhitelisted = user.isWhitelisted;
       }
 
-      // Handle session updates (e.g. after profile edit)
-      if (trigger === "update" && session) {
-        return { ...token, ...session };
+      // Handle session updates. 
+      // If triggered, we fetch fresh data from DB to ensure security flags are current.
+      if (trigger === "update") {
+        try {
+          const freshUser = await db.user.findUnique({
+            where: { id: token.id },
+            select: {
+              isAdmin: true,
+              isWhitelisted: true,
+              suspendedUntil: true
+            }
+          });
+
+          if (freshUser) {
+            token.isAdmin = freshUser.isAdmin;
+            token.isWhitelisted = freshUser.isWhitelisted || freshUser.isAdmin;
+            token.isSuspended = freshUser.suspendedUntil
+              ? new Date(freshUser.suspendedUntil) > new Date()
+              : false;
+          }
+        } catch (error) {
+          console.error("Error refreshing token user data:", error);
+        }
       }
 
       return token;
