@@ -31,7 +31,16 @@ const Characters = ({
   const gridRef = React.useRef<HTMLDivElement>(null);
   const sectionRef = React.useRef<HTMLDivElement>(null);
 
-  const [showAll, setShowAll] = React.useState(false);
+  const [showAll, setShowAll] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("showAllCharacters") === "true";
+    }
+    return false;
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("showAllCharacters", showAll.toString());
+  }, [showAll]);
 
   const [page, setPage] = React.useState(
     parseInt(searchParams.get("p") || "1", 10)
