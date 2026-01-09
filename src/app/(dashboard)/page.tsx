@@ -54,7 +54,7 @@ export default function Dashboard() {
     <div className="min-h-screen max-w-[1600px] mx-auto">
       <Header title="System Dashboard" subtitle="Overview of platform performance" />
 
-      <div className="p-20 space-y-24">
+      <div className="p-10 space-y-16">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <StatsCard

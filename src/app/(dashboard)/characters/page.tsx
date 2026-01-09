@@ -144,7 +144,7 @@ export default function CharactersPage() {
         <div className="min-h-screen">
             <Header title="Characters" subtitle="Manage AI characters" />
 
-            <div className="p-16 space-y-24 animate-fade-in">
+            <div className="p-10 space-y-16 animate-fade-in">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {[

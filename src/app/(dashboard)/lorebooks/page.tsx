@@ -141,7 +141,7 @@ export default function LorebooksPage() {
         <div className="min-h-screen">
             <Header title="Lorebooks" subtitle="Global Knowledge Management" />
 
-            <div className="p-20 space-y-24 animate-fade-in">
+            <div className="p-10 space-y-16 animate-fade-in">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {[
