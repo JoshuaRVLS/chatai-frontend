@@ -49,14 +49,15 @@ export default async function Template({ children }: { children: React.ReactNode
 
     // 1. Maintenance Mode Check
     if (isMaintenanceMode && !isAdmin) {
-        if (pathname !== "/maintenance") {
+        if (pathname && !pathname.startsWith("/maintenance")) {
             shouldRedirect = true;
             redirectPath = "/maintenance";
         }
     }
     // 2. Suspension Check
     else if (isSuspended) {
-        if (pathname !== "/suspended") {
+        // Defensive check: If pathname is missing (middleware fail), do NOT redirect to avoid loops
+        if (pathname && !pathname.startsWith("/suspended")) {
             shouldRedirect = true;
             redirectPath = "/suspended";
         }
@@ -65,7 +66,7 @@ export default async function Template({ children }: { children: React.ReactNode
     else if (isWhitelistMode && !isWhitelisted) {
         // If not logged in, allow public routes (like login). 
         // If logged in (but not whitelisted), block access.
-        if (!isPublicRoute) {
+        if (pathname && !isPublicRoute) {
             shouldRedirect = true;
             redirectPath = "/access-denied";
         }
