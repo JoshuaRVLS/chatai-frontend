@@ -74,7 +74,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-[260px] glass border-r border-white/5 flex flex-col z-50 hidden lg:flex">
+    <aside className="fixed left-0 top-0 h-screen w-[260px] glass border-r border-white/5 flex flex-col z-50 hidden lg:flex overflow-x-hidden">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-white/5">
         <Link href="/" className="flex items-center gap-3 group">
@@ -86,7 +86,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
         {navigation.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -107,22 +107,21 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-white/5">
-        <div className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
-          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden">
+      <div className="p-4 border-t border-white/5 relative z-10 bg-zinc-950/20">
+        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group text-left">
+          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden shrink-0">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
               <span className="text-white font-black text-[10px]">A</span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-black uppercase tracking-wider truncate">Admin User</p>
+            <p className="text-[11px] font-black uppercase tracking-wider truncate text-white">Admin User</p>
             <p className="text-[9px] font-bold text-zinc-500 truncate lowercase">admin@jchatai.space</p>
           </div>
-          <svg className="w-3 h-3 text-zinc-600 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 text-zinc-600 group-hover:text-white transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
           </svg>
-        </div>
+        </button>
       </div>
     </aside>
   );
