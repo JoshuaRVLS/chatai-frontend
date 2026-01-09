@@ -8,12 +8,14 @@ declare module "next-auth" {
     user: {
       id: string;
       username: string;
+      isAdmin: boolean;
     } & DefaultSession["user"];
   }
 
   interface User {
     id: string;
     username: string;
+    isAdmin: boolean;
   }
 }
 
@@ -21,6 +23,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     username: string;
+    isAdmin: boolean;
   }
 }
 
@@ -69,6 +72,7 @@ export const authOptions: NextAuthOptions = {
             username: user.username,
             email: user.email,
             image: user.profileImage ? `/api/users/picture/${user.id}` : null,
+            isAdmin: user.isAdmin,
           };
         } catch (error) {
           console.error("[AUTH_AUTHORIZE_ERROR]", error);
@@ -95,6 +99,7 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.email = user.email;
         token.picture = user.image;
+        token.isAdmin = user.isAdmin;
       }
 
       // Handle session updates (e.g. after profile edit)
@@ -111,6 +116,7 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name;
         session.user.email = token.email;
         session.user.image = token.picture;
+        session.user.isAdmin = token.isAdmin;
       }
       return session;
     },
