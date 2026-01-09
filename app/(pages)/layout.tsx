@@ -14,7 +14,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../utils/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -108,57 +107,7 @@ export default async function RootLayout({
       isAdmin = user.isAdmin;
       // Admins are always whitelisted
       isWhitelisted = user.isWhitelisted || user.isAdmin;
-
-      // Check suspension
-      if (user.suspendedUntil && !user.isAdmin) {
-        isSuspended = new Date(user.suspendedUntil) > new Date();
-      }
     }
-  }
-
-  const publicRoutes = ['/login', '/register', '/maintenance', '/suspended', '/access-denied', '/privacy', '/terms'];
-  const isPublicRoute = publicRoutes.some(route => pathname === route);
-
-  // 1. Maintenance Mode Check
-  if (isMaintenanceMode && !isAdmin) {
-    if (pathname !== "/maintenance") {
-      shouldRedirect = true;
-      redirectPath = "/maintenance";
-    }
-  }
-  // 2. Suspension Check
-  else if (isSuspended) {
-    if (pathname !== "/suspended") {
-      shouldRedirect = true;
-      redirectPath = "/suspended";
-    }
-  }
-  // 3. Whitelist Mode Check
-  else if (isWhitelistMode && !isWhitelisted) {
-    // If not logged in, allow public routes (like login). 
-    // If logged in (but not whitelisted), block access.
-    if (!isPublicRoute) {
-      shouldRedirect = true;
-      redirectPath = "/access-denied";
-    }
-  }
-
-  // Reverse Checks - Redirect back to home if condition is CLEARED
-  if (pathname === "/maintenance" && (!isMaintenanceMode || isAdmin)) {
-    shouldRedirect = true;
-    redirectPath = "/";
-  }
-  if (pathname === "/suspended" && !isSuspended) {
-    shouldRedirect = true;
-    redirectPath = "/";
-  }
-  if (pathname === "/access-denied" && (!isWhitelistMode || isWhitelisted)) {
-    shouldRedirect = true;
-    redirectPath = "/";
-  }
-
-  if (shouldRedirect && redirectPath) {
-    redirect(redirectPath);
   }
 
   return (
