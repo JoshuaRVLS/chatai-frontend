@@ -49,7 +49,7 @@ export default function AnalyticsPage() {
     const maxVal = (trend: TrendData[]) => Math.max(...trend.map(d => d.count), 1);
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="Analytics" subtitle="Platform insights and metrics" />
 
             <div className="space-y-16 animate-fade-in mt-8">

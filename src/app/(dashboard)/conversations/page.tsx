@@ -148,7 +148,7 @@ export default function ConversationsPage() {
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="Conversations" subtitle="Real-time session monitoring" />
 
             <div className="space-y-16 animate-fade-in mt-8">

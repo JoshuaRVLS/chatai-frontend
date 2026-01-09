@@ -51,7 +51,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="flex flex-col">
       <Header title="System Dashboard" subtitle="Overview of platform performance" />
 
       <div className="space-y-16 mt-8">

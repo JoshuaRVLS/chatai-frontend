@@ -138,7 +138,7 @@ export default function LorebooksPage() {
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="Lorebooks" subtitle="Global Knowledge Management" />
 
             <div className="space-y-16 animate-fade-in mt-8">

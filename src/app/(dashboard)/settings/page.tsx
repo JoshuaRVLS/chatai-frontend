@@ -61,7 +61,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="Settings" subtitle="Configure system settings" />
 
             <div className="space-y-16 animate-fade-in max-w-4xl mt-8">

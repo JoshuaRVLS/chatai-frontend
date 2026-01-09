@@ -133,7 +133,7 @@ export default function UsersPage() {
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="User Management" subtitle="Manage platform access" />
 
             <div className="space-y-16 animate-fade-in mt-8">

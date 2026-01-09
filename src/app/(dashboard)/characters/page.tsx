@@ -141,7 +141,7 @@ export default function CharactersPage() {
     ];
 
     return (
-        <div className="min-h-screen">
+        <div className="flex flex-col">
             <Header title="Characters" subtitle="Manage AI characters" />
 
             <div className="space-y-16 animate-fade-in mt-8">
