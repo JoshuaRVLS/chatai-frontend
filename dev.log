@@ -90,3 +90,109 @@ nohup: ignoring input
  GET / 200 in 162ms
  GET /characters 200 in 199ms
  GET /dashboard 404 in 43ms
+ GET /characters 200 in 76ms
+ ✓ Compiled /api/characters in 138ms (697 modules)
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1394ms
+ ✓ Compiled /api/characters/picture/[id] in 120ms (699 modules)
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1381ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 2467ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 2747ms
+ GET /characters 200 in 103ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1394ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 849ms
+ GET /api/characters/picture/cmk5ojaoj00k4cmpui99rugok 200 in 564ms
+ GET /api/characters/picture/cmk5oj9rr00j9cmpuv3y9vvl2 200 in 892ms
+ GET /api/characters/picture/cmk5oj95100iscmpu0w12ap4e 200 in 1081ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 1163ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 1209ms
+ GET /characters 200 in 36ms
+ ✓ Compiled /favicon.ico in 222ms (701 modules)
+ GET /favicon.ico 200 in 353ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 459ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 6ms
+ GET /characters 200 in 88ms
+ GET /favicon.ico 200 in 3ms
+ GET /favicon.ico 200 in 3ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 13ms
+ GET /characters 200 in 40ms
+ GET /favicon.ico 200 in 4ms
+ GET /favicon.ico 200 in 4ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 792ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 882ms
+ GET /api/characters/picture/cmk5ojaoj00k4cmpui99rugok 200 in 616ms
+ GET /api/characters/picture/cmk5oj90h00iocmpuqesny3gn 200 in 727ms
+ GET /api/characters/picture/cmk5oj95100iscmpu0w12ap4e 200 in 732ms
+ GET /api/characters/picture/cmk5oj9rr00j9cmpuv3y9vvl2 200 in 771ms
+ GET /api/characters/picture/cmk5oj6el00fjcmpubzu2hev4 200 in 220ms
+ GET /api/characters/picture/cmk5oj8d400i5cmpukudvccxe 200 in 824ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 48ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 86ms
+ GET /api/characters/picture/cmk5oj62n00f4cmpu6mjvoggt 200 in 86ms
+ GET /api/characters/picture/cmk5oj67y00f8cmpug8ttc3je 200 in 203ms
+ ✓ Compiled /users in 246ms (706 modules)
+ GET /users 200 in 175ms
+ ✓ Compiled /api/users in 203ms (708 modules)
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 745ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 421ms
+ ✓ Compiled /conversations in 272ms (1047 modules)
+ GET /conversations 200 in 335ms
+ ✓ Compiled /api/characters/all in 368ms (1051 modules)
+ GET /api/characters/all 200 in 633ms
+ GET /api/characters/all 200 in 634ms
+ GET /characters 200 in 27ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 1132ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 496ms
+ GET /api/conversations?page=1&limit=10&characterId=all&date= 200 in 1185ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 503ms
+ GET /users 200 in 10ms
+ GET /api/characters/picture/cmk5oj67y00f8cmpug8ttc3je 200 in 379ms
+ GET /api/characters/picture/cmk5oj8d400i5cmpukudvccxe 200 in 385ms
+ GET /api/characters/picture/cmk5oj62n00f4cmpu6mjvoggt 200 in 455ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 480ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 392ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 177ms
+ GET /api/users?page=1&search=&sort=newest&role=all&limit=10 200 in 182ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 815ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 919ms
+ ✓ Compiled in 477ms (790 modules)
+ ✓ Compiled in 352ms (790 modules)
+ GET / 200 in 163ms
+ ✓ Compiled /api/stats in 122ms (696 modules)
+ GET /api/stats 200 in 2400ms
+ ✓ Compiled in 119ms (345 modules)
+ GET / 200 in 99ms
+ GET /characters 200 in 13ms
+ ✓ Compiled /api/characters in 98ms (698 modules)
+ GET / 200 in 19ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1289ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1902ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1403ms
+ GET /characters 200 in 9ms
+ GET /api/stats 200 in 1839ms
+ GET /api/stats 200 in 1857ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 866ms
+ ✓ Compiled /api/characters/picture/[id] in 154ms (700 modules)
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1086ms
+ GET /api/characters?page=1&search=&sort=newest&filter=all&limit=10 200 in 1399ms
+ GET /api/characters/picture/cmk5ojaoj00k4cmpui99rugok 200 in 1321ms
+ GET /api/characters/picture/cmk5oj9rr00j9cmpuv3y9vvl2 200 in 1322ms
+ GET /api/characters/picture/cmk5oj95100iscmpu0w12ap4e 200 in 1520ms
+ GET /api/characters/picture/cmk5oj6el00fjcmpubzu2hev4 200 in 548ms
+ GET /api/characters/picture/cmk5oj62n00f4cmpu6mjvoggt 200 in 563ms
+ GET /api/characters/picture/cmk5oj8d400i5cmpukudvccxe 200 in 1908ms
+ GET /api/characters/picture/cmk5oj90h00iocmpuqesny3gn 200 in 3346ms
+ GET /api/characters/picture/cmk5oj67y00f8cmpug8ttc3je 200 in 2714ms
+ ✓ Compiled in 356ms (1045 modules)
+ GET /characters 200 in 49ms
+ ✓ Compiled /login in 452ms (1117 modules)
+ GET /login?callbackUrl=%2F 200 in 573ms
+ ✓ Compiled in 127ms (386 modules)
+ GET /characters 200 in 25ms
+ GET /api/characters/picture/cmk5oj12200c8cmpu80olrx3d 200 in 13499ms
+ ✓ Compiled in 113ms (386 modules)
+ GET /characters 200 in 15ms
+ ✓ Compiled in 112ms (386 modules)
+ GET /characters 200 in 15ms
+ ✓ Compiled in 107ms (386 modules)
+ GET /characters 200 in 20ms
+ GET /api/characters/picture/cmk5oj62q00f6cmpux2n5pdoh 200 in 31512ms

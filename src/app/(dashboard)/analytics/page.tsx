@@ -52,7 +52,7 @@ export default function AnalyticsPage() {
         <div className="min-h-screen">
             <Header title="Analytics" subtitle="Platform insights and metrics" />
 
-            <div className="p-10 space-y-16 animate-fade-in">
+            <div className="space-y-16 animate-fade-in mt-8">
                 {/* Time Range Selector */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

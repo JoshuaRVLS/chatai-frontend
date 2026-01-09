@@ -9,16 +9,13 @@ export default function DashboardLayout({
         <div className="flex min-h-screen bg-[#09090b] text-white selection:bg-white/10">
             <Sidebar />
 
-            {/* 
-                THE MAIN CONTENT AREA
-                - pl-[260px] to respect the fixed sidebar
-                - Massive padding for that premium 'airy' feel
-            */}
-            <main className="flex-1 lg:pl-[260px] flex flex-col min-h-screen">
-                <div className="flex-1 p-8 md:p-16 lg:p-24 xl:p-32">
-                    <div className="max-w-[1500px] mx-auto w-full space-y-16">
-                        {children}
-                    </div>
+            {/* Reliable spacer for the fixed sidebar */}
+            <div className="hidden lg:block w-[260px] shrink-0" />
+
+            {/* Balanced Main Content Area */}
+            <main className="flex-1 min-w-0 flex flex-col">
+                <div className="p-8 md:p-12 lg:p-16 w-full max-w-[1800px] mx-auto">
+                    {children}
                 </div>
             </main>
         </div>

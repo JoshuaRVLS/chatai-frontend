@@ -64,7 +64,7 @@ export default function SettingsPage() {
         <div className="min-h-screen">
             <Header title="Settings" subtitle="Configure system settings" />
 
-            <div className="p-10 space-y-16 animate-fade-in max-w-4xl">
+            <div className="space-y-16 animate-fade-in max-w-4xl mt-8">
                 {/* System Controls */}
                 <div className="card-premium p-8">
                     <h3 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 mb-8 px-2">System Controls</h3>

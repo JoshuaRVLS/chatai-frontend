@@ -136,7 +136,7 @@ export default function UsersPage() {
         <div className="min-h-screen">
             <Header title="User Management" subtitle="Manage platform access" />
 
-            <div className="p-10 space-y-16 animate-fade-in">
+            <div className="space-y-16 animate-fade-in mt-8">
                 {/* Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {[

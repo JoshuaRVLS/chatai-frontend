@@ -151,7 +151,7 @@ export default function ConversationsPage() {
         <div className="min-h-screen">
             <Header title="Conversations" subtitle="Real-time session monitoring" />
 
-            <div className="p-10 space-y-16 animate-fade-in">
+            <div className="space-y-16 animate-fade-in mt-8">
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {[
