@@ -43,11 +43,9 @@ const ChatNavbar = ({
                     onClick={(e) => {
                         if (shouldBlur) {
                             setTempUnblur(true);
-                        } else {
-                            onProfileClick(e);
                         }
                     }}
-                    className="relative group group-active:scale-95 transition-all"
+                    className={`relative group transition-all ${shouldBlur ? 'cursor-pointer group-active:scale-95' : 'cursor-default'}`}
                 >
                     <div className="absolute -inset-1.5 bg-linear-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
                     <Image

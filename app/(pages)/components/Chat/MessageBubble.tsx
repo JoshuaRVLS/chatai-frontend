@@ -84,11 +84,9 @@ export const MessageBubble = React.memo(
                             const shouldBlur = isNsfw && isBlurEnabled && !tempUnblur;
                             if (shouldBlur) {
                                 onUnblur?.();
-                            } else {
-                                onProfileClick(e);
                             }
                         }}
-                        className="relative hover:scale-105 transition-transform shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9"
+                        className={`relative transition-all shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9 ${isNsfw && isBlurEnabled && !tempUnblur ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
                     >
                         {avatarLoading && (
                             <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
