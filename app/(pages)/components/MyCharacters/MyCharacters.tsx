@@ -330,14 +330,14 @@ const MyCharacters: React.FC = () => {
                   onClick={() => { setPage(1); setTimeout(scrollToSection, 100); }}
                   className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  FIRST
+                  &lt;&lt;
                 </button>
                 <button
                   disabled={page === 1}
                   onClick={() => { setPage(p => Math.max(1, p - 1)); setTimeout(scrollToSection, 100); }}
                   className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  PREV
+                  &lt;
                 </button>
 
                 <div className="flex items-center gap-2 text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-white/5 px-4 py-1.5 rounded-lg border border-white/5">
@@ -375,14 +375,14 @@ const MyCharacters: React.FC = () => {
                   onClick={() => { setPage(p => Math.min(totalPages, p + 1)); setTimeout(scrollToSection, 100); }}
                   className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  NEXT
+                  &gt;
                 </button>
                 <button
                   disabled={page === totalPages}
                   onClick={() => { setPage(totalPages); setTimeout(scrollToSection, 100); }}
                   className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
                 >
-                  LAST
+                  &gt;&gt;
                 </button>
               </div>
             )}

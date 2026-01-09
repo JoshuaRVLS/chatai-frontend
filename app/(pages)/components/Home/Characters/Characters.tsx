@@ -408,7 +408,7 @@ const Characters = ({
             className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
             title="First Cycle"
           >
-            FIRST
+            &lt;&lt;
           </button>
 
           <button
@@ -421,7 +421,7 @@ const Characters = ({
             }}
             className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            Prev
+            &lt;
           </button>
 
           <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
@@ -479,7 +479,7 @@ const Characters = ({
             }}
             className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
           >
-            Next
+            &gt;
           </button>
 
           <button
@@ -492,7 +492,7 @@ const Characters = ({
             className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
             title="Last Cycle"
           >
-            LAST
+            &gt;&gt;
           </button>
         </div>
       )}
