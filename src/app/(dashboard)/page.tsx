@@ -51,12 +51,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen max-w-[1600px] mx-auto">
       <Header title="System Dashboard" subtitle="Overview of platform performance" />
 
-      <div className="p-10 space-y-16">
+      <div className="p-12 space-y-24">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <StatsCard
             title="Total Users"
             value={loading ? "..." : formatNumber(data?.stats.users || 0)}
@@ -104,7 +104,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Recent Activity */}
           <div className="lg:col-span-2 glass rounded-2xl p-6 border border-white/5">
             <div className="flex items-center justify-between mb-8 px-2">
@@ -177,7 +177,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="space-y-6">
           <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500 px-2">Quick Commands</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
             {[
               { label: 'Add User', desc: 'Create account', color: 'zinc', icon: 'M12 4v16m8-8H4' },
               { label: 'Add Character', desc: 'Create AI', color: 'zinc', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
