@@ -9,6 +9,11 @@ import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
 import { ConfirmationProvider } from "./providers/ConfirmationProvider";
 import Footer from "./components/Footer/Footer";
+import { db } from "../utils/prisma";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../utils/auth";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,11 +79,32 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Maintenance Mode Check
+  const headerList = await headers();
+  const pathname = headerList.get("x-invoke-path") || "";
+
+  if (pathname !== "/maintenance") {
+    try {
+      const setting = await db.systemSetting.findUnique({
+        where: { key: "maintenanceMode" }
+      });
+
+      if (setting?.value === "true") {
+        const session = await getServerSession(authOptions);
+        if (!session?.user?.isAdmin) {
+          redirect("/maintenance");
+        }
+      }
+    } catch (error) {
+      console.error("Maintenance check failed:", error);
+    }
+  }
+
   return (
     <html lang="en" className={`dark ${inter.variable} ${playfair.variable} ${raleway.variable}`}>
       <body className="antialiased bg-background-custom text-foreground overflow-x-hidden">
