@@ -139,27 +139,79 @@ const Navbar = () => {
                           </div>
 
                           <div className="p-1.5 lg:p-2.5 flex flex-col gap-0.5 lg:gap-1">
-                            {dropdownLinks.map((link) => (
-                              <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsProfileHovered(false)}
-                                className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                            {/* Create Section */}
+                            <div className="space-y-0.5 lg:space-y-1">
+                              {dropdownLinks.slice(0, 2).map((link) => (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => setIsProfileHovered(false)}
+                                  className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                                >
+                                  <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                  <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
+                                </Link>
+                              ))}
+                            </div>
+
+                            <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-1 mx-4" />
+
+                            {/* Discovery Section */}
+                            <div className="space-y-0.5 lg:space-y-1">
+                              {dropdownLinks.slice(2, 3).map((link) => (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => setIsProfileHovered(false)}
+                                  className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                                >
+                                  <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                  <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
+                                </Link>
+                              ))}
+                            </div>
+
+                            <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-1 mx-4" />
+
+                            {/* My Collection Section */}
+                            <div className="space-y-0.5 lg:space-y-1">
+                              {dropdownLinks.slice(3, 6).map((link) => (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => setIsProfileHovered(false)}
+                                  className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                                >
+                                  <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                  <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
+                                </Link>
+                              ))}
+                            </div>
+
+                            <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-1 mx-4" />
+
+                            {/* Settings & System Section */}
+                            <div className="space-y-0.5 lg:space-y-1">
+                              {dropdownLinks.slice(6, 7).map((link) => (
+                                <Link
+                                  key={link.href}
+                                  href={link.href}
+                                  onClick={() => setIsProfileHovered(false)}
+                                  className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
+                                >
+                                  <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
+                                  <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
+                                </Link>
+                              ))}
+
+                              <button
+                                onClick={() => signOut()}
+                                className="w-full flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-zinc-900 text-zinc-600 hover:text-zinc-200 group/item text-left"
                               >
-                                <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
-                                <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
-                              </Link>
-                            ))}
-
-                            <div className="h-px bg-white/5 my-1 mx-2" />
-
-                            <button
-                              onClick={() => signOut()}
-                              className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-zinc-900 text-zinc-600 hover:text-zinc-200 group/item"
-                            >
-                              <FiLogOut className="text-sm lg:text-base transition-transform group-hover/item:scale-110" />
-                              <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">Sign Out</span>
-                            </button>
+                                <FiLogOut className="text-sm lg:text-base transition-transform group-hover/item:scale-110" />
+                                <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">Sign Out</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </motion.div>
@@ -194,20 +246,80 @@ const Navbar = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-60 bg-zinc-950/95 backdrop-blur-2xl flex flex-col p-8 pt-24 md:hidden"
           >
-            <div className="flex flex-col gap-2">
-              <p className="text-[10px] uppercase tracking-[0.3em] font-black text-zinc-600 px-4 mb-2">Navigation</p>
-              {dropdownLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
-                    }`}
-                >
-                  <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
-                </Link>
-              ))}
+            <div className="flex flex-col gap-1 overflow-y-auto pr-2 scrollbar-hide">
+              {/* Create Section */}
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">Create Intelligence</p>
+                {dropdownLinks.slice(0, 2).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+                      }`}
+                  >
+                    <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-4 mx-6" />
+
+              {/* Discovery Section */}
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">Discovery Hub</p>
+                {dropdownLinks.slice(2, 3).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+                      }`}
+                  >
+                    <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-4 mx-6" />
+
+              {/* My Collection Section */}
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">My Library</p>
+                {dropdownLinks.slice(3, 6).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+                      }`}
+                  >
+                    <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
+                  </Link>
+                ))}
+              </div>
+
+              <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-4 mx-6" />
+
+              {/* Settings Section */}
+              <div className="space-y-1">
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">System</p>
+                {dropdownLinks.slice(6, 7).map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
+                      }`}
+                  >
+                    <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
 
             <div className="mt-auto flex flex-col gap-3">
