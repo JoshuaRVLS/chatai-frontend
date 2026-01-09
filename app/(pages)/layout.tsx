@@ -81,18 +81,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${inter.variable} ${playfair.variable} ${raleway.variable}`}>
-      <body className="antialiased bg-background-custom text-foreground">
+      <body className="antialiased bg-background-custom text-foreground overflow-x-hidden">
         <QueryProvider>
           <ScrollProvider>
             <AuthProvider>
               <ConfirmationProvider>
-                <AuthModal />
-                <ToastContainer />
-                <Navbar />
-                <main className="relative min-h-screen">
-                  {children}
-                </main>
-                <Footer />
+                <div className="min-h-screen flex flex-col">
+                  <AuthModal />
+                  <ToastContainer />
+                  <Navbar />
+                  <main className="flex-1 relative">
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
               </ConfirmationProvider>
             </AuthProvider>
           </ScrollProvider>

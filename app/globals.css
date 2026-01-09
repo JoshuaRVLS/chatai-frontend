@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-body {
-  background-color: #09090b !important;
-}
-
 :root {
   /* Monochrome Zinc Palette */
   --background-hex: #09090b;

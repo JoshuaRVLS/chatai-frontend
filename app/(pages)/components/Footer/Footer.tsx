@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
     if (pathname.startsWith("/chat/")) return null;
 
     return (
-        <footer className="relative mt-20 border-t border-white/5 bg-black/20 backdrop-blur-xl">
+        <footer className="relative border-t border-white/5 bg-black/20 backdrop-blur-xl">
             <div className="w-full px-6 py-12">
                 <div className="flex flex-col items-center text-center space-y-8">
                     {/* Brand Section */}

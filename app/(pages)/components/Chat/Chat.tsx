@@ -172,7 +172,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
   if (!chat) return <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-400">No chat data found.</div>;
 
   const characterImage = chat.character?.photo ? `/api/image/${chat.character.id}` : null;
-  const userImage = chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null;
+  const activePersona = chat.user?.personas?.find(p => p.id === (selectedPersonaId || chat.personaId));
+  const userImage = activePersona?.image
+    ? `/api/persona/image/${activePersona.id}`
+    : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null);
   const pinnedMessages = allMessages.filter(m => m.pinned);
 
   return (

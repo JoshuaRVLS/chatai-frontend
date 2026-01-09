@@ -351,11 +351,8 @@ export const useChatActions = ({
             if (!old) return old;
             return {
                 ...old,
-                data: {
-                    ...old.data,
-                    chatSettings: { ...old.data.chatSettings, model },
-                    personaId: personaId
-                }
+                chatSettings: { ...old.chatSettings, model },
+                personaId: personaId
             };
         });
 
