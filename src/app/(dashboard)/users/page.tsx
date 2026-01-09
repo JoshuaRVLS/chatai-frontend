@@ -9,6 +9,7 @@ interface User {
     name: string;
     email: string;
     isAdmin: boolean;
+    isWhitelisted: boolean;
     verified: boolean;
     charCount: number;
     chatCount: number;
@@ -101,6 +102,19 @@ export default function UsersPage() {
         }
     };
 
+    const handleToggleWhitelisted = async (id: string, current: boolean) => {
+        try {
+            const res = await fetch(`/api/users/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isWhitelisted: !current })
+            });
+            if (res.ok) fetchUsers();
+        } catch (error) {
+            console.error("Update error:", error);
+        }
+    };
+
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this user? This will also delete all their characters, chats, and data!')) return;
 
@@ -156,6 +170,12 @@ export default function UsersPage() {
                         className={`badge cursor-pointer hover:opacity-80 transition-opacity ${user.verified ? 'badge-success' : 'badge-danger'}`}
                     >
                         {user.verified ? 'Verified' : 'Unverified'}
+                    </button>
+                    <button
+                        onClick={() => handleToggleWhitelisted(user.id, user.isWhitelisted)}
+                        className={`badge cursor-pointer hover:opacity-80 transition-opacity ${user.isWhitelisted ? 'bg-amber-500/20 border-amber-500/20 text-amber-500' : 'bg-white/5 border-white/10 text-zinc-500'}`}
+                    >
+                        {user.isWhitelisted ? 'Whitelisted' : 'Not Listed'}
                     </button>
                 </div>
             ),

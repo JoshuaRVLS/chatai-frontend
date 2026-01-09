@@ -18,6 +18,7 @@ model User {
   verified                 Boolean           @default(false)
   personaUsed              String?
   isAdmin                  Boolean           @default(false)
+  isWhitelisted            Boolean           @default(false)
   createdAt                DateTime          @default(now())
   updatedAt                DateTime          @default(now()) @updatedAt
   charCreated              Character[]

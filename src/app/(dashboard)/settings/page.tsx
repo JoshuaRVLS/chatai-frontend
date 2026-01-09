@@ -7,6 +7,7 @@ export default function SettingsPage() {
     const [settings, setSettings] = useState({
         maintenanceMode: false,
         allowRegistration: true,
+        whitelistMode: false,
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -16,9 +17,7 @@ export default function SettingsPage() {
         try {
             const res = await fetch('/api/settings');
             const data = await res.json();
-            if (res.ok) {
-                setSettings(data);
-            }
+            if (res.ok) setSettings(data);
         } catch (error) {
             console.error("Failed to fetch settings:", error);
         } finally {
@@ -91,6 +90,18 @@ export default function SettingsPage() {
                                 className={`w-12 h-6 rounded-full transition-all duration-300 relative ${settings.allowRegistration ? 'bg-emerald-500/20 border border-emerald-500/20' : 'bg-white/5 border border-white/10'}`}
                             >
                                 <div className={`w-4 h-4 rounded-lg absolute top-0.5 transition-all duration-300 ${settings.allowRegistration ? 'translate-x-7 bg-emerald-500 shadow-lg shadow-emerald-500/50' : 'translate-x-1 bg-zinc-600'}`}></div>
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between p-6 rounded-2xl bg-white/2.5 border border-white/5 hover:border-white/10 transition-all">
+                            <div>
+                                <p className="text-xs font-black uppercase tracking-widest text-zinc-200">Whitelist Mode</p>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-tighter mt-1">Only whitelisted users can access the site (manage in Users panel)</p>
+                            </div>
+                            <button
+                                onClick={() => setSettings({ ...settings, whitelistMode: !settings.whitelistMode })}
+                                className={`w-12 h-6 rounded-full transition-all duration-300 relative ${settings.whitelistMode ? 'bg-amber-500/20 border border-amber-500/20' : 'bg-white/5 border border-white/10'}`}
+                            >
+                                <div className={`w-4 h-4 rounded-lg absolute top-0.5 transition-all duration-300 ${settings.whitelistMode ? 'translate-x-7 bg-amber-500 shadow-lg shadow-amber-500/50' : 'translate-x-1 bg-zinc-600'}`}></div>
                             </button>
                         </div>
                     </div>

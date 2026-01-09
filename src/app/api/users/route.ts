@@ -85,6 +85,7 @@ export async function GET(request: Request) {
                 name: user.username,
                 email: user.email,
                 isAdmin: user.isAdmin,
+                isWhitelisted: user.isWhitelisted,
                 verified: user.verified,
                 charCount: user._count.charCreated,
                 chatCount: user._count.chats,

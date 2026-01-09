@@ -20,6 +20,7 @@ export async function GET() {
         return NextResponse.json({
             maintenanceMode: settings.maintenanceMode === "true",
             allowRegistration: settings.allowRegistration !== "false", // Default to true
+            whitelistMode: settings.whitelistMode === "true", // Default to false
         });
     } catch (error) {
         console.error("Failed to fetch settings:", error);
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     }
 
     try {
-        const { maintenanceMode, allowRegistration } = await request.json();
+        const { maintenanceMode, allowRegistration, whitelistMode } = await request.json();
 
         const updates = [];
         if (maintenanceMode !== undefined) {
@@ -50,6 +51,13 @@ export async function POST(request: Request) {
                 where: { key: "allowRegistration" },
                 update: { value: String(allowRegistration) },
                 create: { key: "allowRegistration", value: String(allowRegistration) }
+            }));
+        }
+        if (whitelistMode !== undefined) {
+            updates.push(db.systemSetting.upsert({
+                where: { key: "whitelistMode" },
+                update: { value: String(whitelistMode) },
+                create: { key: "whitelistMode", value: String(whitelistMode) }
             }));
         }
 
