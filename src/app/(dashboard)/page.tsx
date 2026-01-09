@@ -122,7 +122,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <StatsCard
             title="Total Users"
-            value={loading ? "..." : formatNumber(data?.stats.users || 0)}
+            value={loading ? "..." : formatNumber(data?.stats?.users || 0)}
             change="Real-time"
             changeType="positive"
             icon={
@@ -133,7 +133,7 @@ export default function Dashboard() {
           />
           <StatsCard
             title="AI Characters"
-            value={loading ? "..." : formatNumber(data?.stats.characters || 0)}
+            value={loading ? "..." : formatNumber(data?.stats?.characters || 0)}
             change="Active Content"
             changeType="positive"
             icon={
@@ -144,7 +144,7 @@ export default function Dashboard() {
           />
           <StatsCard
             title="Conversations"
-            value={loading ? "..." : formatNumber(data?.stats.conversations || 0)}
+            value={loading ? "..." : formatNumber(data?.stats?.conversations || 0)}
             change="Active Chats"
             changeType="positive"
             icon={
@@ -155,7 +155,7 @@ export default function Dashboard() {
           />
           <StatsCard
             title="Total Messages"
-            value={loading ? "..." : formatNumber(data?.stats.messages || 0)}
+            value={loading ? "..." : formatNumber(data?.stats?.messages || 0)}
             change="System Load"
             changeType="positive"
             icon={
@@ -180,7 +180,7 @@ export default function Dashboard() {
             <div className="space-y-3">
               {loading ? (
                 <div className="text-[10px] font-black uppercase tracking-widest text-zinc-700 p-4">Loading application events...</div>
-              ) : data?.recentActivity.length ? (
+              ) : data?.recentActivity?.length ? (
                 data.recentActivity.map((activity) => (
                   <div
                     key={activity.id}
@@ -213,7 +213,7 @@ export default function Dashboard() {
             <div className="space-y-2">
               {loading ? (
                 <div className="text-[10px] font-black uppercase tracking-widest text-zinc-700 p-4">Calculating rankings...</div>
-              ) : data?.topCharacters.length ? (
+              ) : data?.topCharacters?.length ? (
                 data.topCharacters.map((character, index) => (
                   <div
                     key={character.id}

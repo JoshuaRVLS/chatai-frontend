@@ -87,6 +87,8 @@ export async function GET(request: Request) {
                 isAdmin: user.isAdmin,
                 isWhitelisted: user.isWhitelisted,
                 verified: user.verified,
+                suspendedUntil: user.suspendedUntil,
+                suspensionReason: user.suspensionReason,
                 charCount: user._count.charCreated,
                 chatCount: user._count.chats,
                 commentCount: user._count.comments,

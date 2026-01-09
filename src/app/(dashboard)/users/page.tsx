@@ -11,6 +11,8 @@ interface User {
     isAdmin: boolean;
     isWhitelisted: boolean;
     verified: boolean;
+    suspendedUntil: string | null;
+    suspensionReason: string | null;
     charCount: number;
     chatCount: number;
     commentCount: number;
@@ -131,6 +133,92 @@ export default function UsersPage() {
         }
     };
 
+    // Suspension Modal State
+    const [suspendModal, setSuspendModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
+    const [suspendDuration, setSuspendDuration] = useState<'7d' | '30d' | 'permanent' | 'custom'>('7d');
+    const [customDate, setCustomDate] = useState('');
+    const [suspensionReason, setSuspensionReason] = useState('');
+
+    const openSuspendModal = (user: User) => {
+        setSuspendModal({ open: true, user });
+        setSuspendDuration('7d');
+        setCustomDate('');
+        setSuspensionReason('');
+    };
+
+    const closeSuspendModal = () => {
+        setSuspendModal({ open: false, user: null });
+    };
+
+    const getSuspendUntilDate = (): string => {
+        const now = new Date();
+        switch (suspendDuration) {
+            case '7d':
+                return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            case '30d':
+                return new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            case 'permanent':
+                return new Date('2099-12-31T23:59:59.999Z').toISOString();
+            case 'custom':
+                return new Date(customDate).toISOString();
+            default:
+                return new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+        }
+    };
+
+    const handleSuspend = async () => {
+        if (!suspendModal.user) return;
+        if (suspendDuration === 'custom' && !customDate) {
+            alert('Please select a custom date');
+            return;
+        }
+
+        try {
+            const res = await fetch(`/api/users/${suspendModal.user.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    suspendedUntil: getSuspendUntilDate(),
+                    suspensionReason: suspensionReason || null
+                })
+            });
+            if (res.ok) {
+                fetchUsers();
+                closeSuspendModal();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to suspend user');
+            }
+        } catch (error) {
+            console.error("Suspend error:", error);
+        }
+    };
+
+    const handleUnsuspend = async (id: string) => {
+        try {
+            const res = await fetch(`/api/users/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ suspendedUntil: null, suspensionReason: null })
+            });
+            if (res.ok) fetchUsers();
+        } catch (error) {
+            console.error("Unsuspend error:", error);
+        }
+    };
+
+    const isUserSuspended = (user: User): boolean => {
+        if (!user.suspendedUntil) return false;
+        return new Date(user.suspendedUntil) > new Date();
+    };
+
+    const formatSuspensionEnd = (dateStr: string): string => {
+        const date = new Date(dateStr);
+        if (date.getFullYear() >= 2099) return 'Permanent';
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+
     const columns = [
         {
             key: 'name',
@@ -177,6 +265,11 @@ export default function UsersPage() {
                     >
                         {user.isWhitelisted ? 'Whitelisted' : 'Not Listed'}
                     </button>
+                    {isUserSuspended(user) && (
+                        <div className="badge bg-red-500/20 border-red-500/20 text-red-400">
+                            🚫 {formatSuspensionEnd(user.suspendedUntil!)}
+                        </div>
+                    )}
                 </div>
             ),
         },
@@ -208,7 +301,28 @@ export default function UsersPage() {
             key: 'actions',
             header: 'Tools',
             render: (user: User) => (
-                <div className="flex justify-end pr-4">
+                <div className="flex items-center gap-2 justify-end pr-4">
+                    {isUserSuspended(user) ? (
+                        <button
+                            onClick={() => handleUnsuspend(user.id)}
+                            className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all group shadow-sm active:scale-90"
+                            title="Unsuspend User"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => openSuspendModal(user)}
+                            className="p-2.5 rounded-xl bg-orange-500/10 border border-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white transition-all group shadow-sm active:scale-90"
+                            title="Suspend User"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                        </button>
+                    )}
                     <button
                         onClick={() => handleDelete(user.id)}
                         className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all group shadow-sm active:scale-90"
@@ -308,6 +422,80 @@ export default function UsersPage() {
                     />
                 </div>
             </div>
+
+            {/* Suspension Modal */}
+            {suspendModal.open && suspendModal.user && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-zinc-900 rounded-3xl border border-white/10 p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white mb-2">Suspend User</h3>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-6">
+                            {suspendModal.user.name} — {suspendModal.user.email}
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 block">Duration</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    {[
+                                        { value: '7d', label: '7 Days' },
+                                        { value: '30d', label: '30 Days' },
+                                        { value: 'permanent', label: 'Permanent' },
+                                        { value: 'custom', label: 'Custom' },
+                                    ].map((opt) => (
+                                        <button
+                                            key={opt.value}
+                                            onClick={() => setSuspendDuration(opt.value as any)}
+                                            className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suspendDuration === opt.value
+                                                    ? 'bg-orange-500 text-white'
+                                                    : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                                                }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {suspendDuration === 'custom' && (
+                                <div>
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">Suspend Until</label>
+                                    <input
+                                        type="datetime-local"
+                                        value={customDate}
+                                        onChange={(e) => setCustomDate(e.target.value)}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+                                    />
+                                </div>
+                            )}
+
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">Reason (Optional)</label>
+                                <textarea
+                                    value={suspensionReason}
+                                    onChange={(e) => setSuspensionReason(e.target.value)}
+                                    placeholder="Enter reason for suspension..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-orange-500 resize-none h-20"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                onClick={closeSuspendModal}
+                                className="flex-1 py-3 rounded-xl bg-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSuspend}
+                                className="flex-1 py-3 rounded-xl bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-orange-600 transition-all"
+                            >
+                                Suspend
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

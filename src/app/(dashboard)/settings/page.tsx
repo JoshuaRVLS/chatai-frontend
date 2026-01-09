@@ -72,9 +72,18 @@ export default function SettingsPage() {
                             <div>
                                 <p className="text-xs font-black uppercase tracking-widest text-zinc-200">Maintenance Mode</p>
                                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-tighter mt-1">Disable access for all non-admin users</p>
+                                {settings.whitelistMode && <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">⚠️ Enabling will disable Whitelist Mode</p>}
                             </div>
                             <button
-                                onClick={() => setSettings({ ...settings, maintenanceMode: !settings.maintenanceMode })}
+                                onClick={() => {
+                                    const newMaintenanceMode = !settings.maintenanceMode;
+                                    setSettings({
+                                        ...settings,
+                                        maintenanceMode: newMaintenanceMode,
+                                        // Disable whitelist mode if enabling maintenance mode
+                                        whitelistMode: newMaintenanceMode ? false : settings.whitelistMode
+                                    });
+                                }}
                                 className={`w-12 h-6 rounded-full transition-all duration-300 relative ${settings.maintenanceMode ? 'bg-red-500/20 border border-red-500/20' : 'bg-white/5 border border-white/10'}`}
                             >
                                 <div className={`w-4 h-4 rounded-lg absolute top-0.5 transition-all duration-300 ${settings.maintenanceMode ? 'translate-x-7 bg-red-500 shadow-lg shadow-red-500/50' : 'translate-x-1 bg-zinc-600'}`}></div>
@@ -96,9 +105,18 @@ export default function SettingsPage() {
                             <div>
                                 <p className="text-xs font-black uppercase tracking-widest text-zinc-200">Whitelist Mode</p>
                                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-tighter mt-1">Only whitelisted users can access the site (manage in Users panel)</p>
+                                {settings.maintenanceMode && <p className="text-[10px] font-bold text-amber-500/80 uppercase tracking-tighter mt-1">⚠️ Enabling will disable Maintenance Mode</p>}
                             </div>
                             <button
-                                onClick={() => setSettings({ ...settings, whitelistMode: !settings.whitelistMode })}
+                                onClick={() => {
+                                    const newWhitelistMode = !settings.whitelistMode;
+                                    setSettings({
+                                        ...settings,
+                                        whitelistMode: newWhitelistMode,
+                                        // Disable maintenance mode if enabling whitelist mode
+                                        maintenanceMode: newWhitelistMode ? false : settings.maintenanceMode
+                                    });
+                                }}
                                 className={`w-12 h-6 rounded-full transition-all duration-300 relative ${settings.whitelistMode ? 'bg-amber-500/20 border border-amber-500/20' : 'bg-white/5 border border-white/10'}`}
                             >
                                 <div className={`w-4 h-4 rounded-lg absolute top-0.5 transition-all duration-300 ${settings.whitelistMode ? 'translate-x-7 bg-amber-500 shadow-lg shadow-amber-500/50' : 'translate-x-1 bg-zinc-600'}`}></div>

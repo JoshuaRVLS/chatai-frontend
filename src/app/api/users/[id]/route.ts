@@ -77,6 +77,8 @@ export async function PATCH(
                 isAdmin: body.isAdmin !== undefined ? body.isAdmin : undefined,
                 isWhitelisted: body.isWhitelisted !== undefined ? body.isWhitelisted : undefined,
                 verified: body.verified !== undefined ? body.verified : undefined,
+                suspendedUntil: body.suspendedUntil !== undefined ? (body.suspendedUntil ? new Date(body.suspendedUntil) : null) : undefined,
+                suspensionReason: body.suspensionReason !== undefined ? body.suspensionReason : undefined,
                 username: body.username || undefined,
                 email: body.email || undefined,
             }
