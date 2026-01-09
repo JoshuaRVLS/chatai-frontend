@@ -19,6 +19,8 @@ import dynamic from "next/dynamic";
 const ChatSettingsModal = dynamic(() => import("./ChatSettingsModal"), { ssr: false });
 const BrainPanel = dynamic(() => import("./BrainPanel"), { ssr: false });
 import { useRouter } from "next/navigation";
+import TutorialModal from "../Modal/TutorialModal";
+
 import MarkDown from "../MarkDown/MarkDown";
 import { bytesToBase64 } from "@/app/utils/image";
 import { AuthContext } from "@/app/(pages)/providers/AuthProvider";
@@ -68,6 +70,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const [messageAvatarsLoading, setMessageAvatarsLoading] = useState<{ [key: string]: boolean }>({});
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isGeneratingSuggestions, setIsGeneratingSuggestions] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
 
   const fetchSuggestions = async () => {
     if (isGeneratingSuggestions) return;
@@ -558,7 +562,30 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const handleSubmit = useCallback(async (content: string) => {
     if (!content.trim() || !user?.id || isSubmitting) return;
 
+    // Slash Command Interception
+    const trimmed = content.trim();
+    if (trimmed.startsWith("/")) {
+      const parts = trimmed.split(" ");
+      const command = parts[0].toLowerCase();
+
+      if (command === "/help") {
+        setShowTutorial(true);
+        return;
+      }
+
+      if (command === "/clear") {
+        handleClearHistory();
+        return;
+      }
+
+      if (command === "/reset") {
+        handleClearMemory();
+        return;
+      }
+    }
+
     setIsSubmitting(true);
+
     hasScrolledToBottom.current = false; // Reset scroll lock to allow auto-scroll for new interaction
 
     const now = new Date();
@@ -1275,9 +1302,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
         pinnedMessages={(allMessages || []).filter(m => m.pinned).map(m => ({ id: m.id, content: m.content, fromUser: m.fromUser }))}
         onUnpin={(id) => handleTogglePin(id, true)}
       />
+      <TutorialModal
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </div>
   );
 };
+
 
 const MessageBubble = React.memo(
   ({
@@ -1830,6 +1862,5 @@ const LoadingScreen = () => {
   );
 };
 
-Chat.displayName = "Chat";
-
 export default Chat;
+
