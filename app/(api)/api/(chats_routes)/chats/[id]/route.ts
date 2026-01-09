@@ -38,7 +38,18 @@ export const GET = async (
                 // data: false (Excluded to reduce payload size)
               }
             },
-            userSettings: true
+            userSettings: true,
+            personas: {
+              include: {
+                image: {
+                  select: {
+                    id: true,
+                    name: true,
+                    mimetype: true
+                  }
+                }
+              }
+            }
           }
         },
       },
@@ -85,19 +96,34 @@ export const DELETE = async (
   const chatId = (await params).id;
 
   try {
+    const chat = await db.chat.findUnique({
+      where: { id: chatId },
+      include: { character: true }
+    });
+
+    if (!chat) {
+      return NextResponse.json({ success: false, message: "Chat not found" }, { status: 404 });
+    }
+
+    // 1. Delete all existing messages
     await db.message.deleteMany({
       where: {
         chatId: chatId,
       },
     });
 
-    await db.chat.delete({
-      where: {
-        id: chatId,
-      },
-    });
+    // 2. Re-seed intro message if it exists
+    if (chat.character.introMessage) {
+      await db.message.create({
+        data: {
+          content: chat.character.introMessage,
+          fromUser: false,
+          chatId: chat.id,
+        },
+      });
+    }
 
-    return NextResponse.json({ success: true, message: "Chat history cleared and record removed" }, { status: 200 });
+    return NextResponse.json({ success: true, message: "Chat history reset to greeting" }, { status: 200 });
   } catch (error) {
     console.error("Failed to clear chat history:", error);
     return NextResponse.json({ success: false, message: "Failed to clear history" }, { status: 500 });

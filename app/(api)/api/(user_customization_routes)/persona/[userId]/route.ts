@@ -11,6 +11,15 @@ export const GET = async (
       where: {
         userId,
       },
+      include: {
+        image: {
+          select: {
+            id: true,
+            name: true,
+            mimetype: true
+          }
+        }
+      }
     });
     return NextResponse.json({ success: true, data: personas });
   } catch (error) {
@@ -25,14 +34,14 @@ export const POST = async (
   const { userId } = await params;
   const { personaName, persona } = await req.json();
   try {
-    await db.userPersona.create({
+    const newPersona = await db.userPersona.create({
       data: {
         userId,
         name: personaName,
         person: persona,
       },
     });
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, data: newPersona });
   } catch (error) {
     console.log(error);
   }

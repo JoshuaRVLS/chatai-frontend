@@ -38,7 +38,7 @@ import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 type ChatData = ChatModel & {
   character: Character & { photo: CharacterImage };
   messages: Message[];
-  user: User & { profileImage: UserProfileImage; userSettings: UserSettings | null };
+  user: User & { profileImage: UserProfileImage; userSettings: UserSettings | null; personas: (UserPersona & { image: any })[] };
 };
 
 const Chat = ({ chatId }: { chatId: string }) => {
@@ -202,10 +202,20 @@ const Chat = ({ chatId }: { chatId: string }) => {
     }
   }, [allMessages.length, streamingMessage, shouldAutoScroll, scrollToBottom]);
 
-  const userImage = useMemo(
-    () => chat?.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null,
-    [chat?.user?.id, chat?.user?.profileImage]
-  );
+  const userImage = useMemo(() => {
+    if (!chat) return null;
+
+    // 1. If chat.personaId is set, find that persona in user.personas
+    if (chat.personaId) {
+      const activePersona = chat.user.personas?.find(p => p.id === chat.personaId);
+      if (activePersona?.image) {
+        return `/api/persona/image/${activePersona.id}`;
+      }
+    }
+
+    // 2. Fallback to user profile image
+    return chat.user.profileImage ? `/api/users/picture/${chat.user.id}` : null;
+  }, [chat]);
 
   const characterImage = useMemo(
     () => chat?.character?.id ? `/api/image/${chat.character.id}` : null,
@@ -637,14 +647,35 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleSaveEdit = useCallback(async (messageId: string) => {
     if (!editContent.trim()) return;
-    await fetch(`/api/messages/${messageId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content: editContent }),
+
+    // Optimistic Update
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any) => ({
+          ...page,
+          data: page.data.map((m: any) => m.id === messageId ? { ...m, content: editContent } : m)
+        }))
+      };
     });
-    await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
-    setEditingMessageId(null);
-    setEditContent("");
+
+    try {
+      await fetch(`/api/messages/${messageId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editContent }),
+      });
+      setEditingMessageId(null);
+      setEditContent("");
+      // Settle delay
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+      }, 1000);
+    } catch (err) {
+      toast.error("Failed to save edit");
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
+    }
   }, [editContent, chatId, queryClient]);
 
   const handleCancelEdit = useCallback(() => {
@@ -652,31 +683,33 @@ const Chat = ({ chatId }: { chatId: string }) => {
     setEditContent("");
   }, []);
 
-  const handleDelete = useCallback(async (messageId: string, isUserMessage: boolean) => {
+  const handleDelete = useCallback(async (messageId: string) => {
+    const targetMsg = allMessages.find(m => m.id === messageId);
+    if (!targetMsg) return;
+
     if (!(await confirm({
-      title: "Delete Message",
-      message: "Are you sure you want to delete this message? This will permanently remove it from the simulation.",
-      confirmLabel: "Delete",
+      title: "Delete Messages",
+      message: "Are you sure you want to delete this message and all subsequent messages? This will permanently rewind the simulation.",
+      confirmLabel: "Delete All",
       variant: "danger"
     }))) return;
 
     pushToUndoStack();
 
-    // Optimistic Delete
+    // Cascading Optimistic Delete
     queryClient.setQueryData(["messages", chatId], (old: any) => {
       if (!old) return old;
       return {
         ...old,
         pages: old.pages.map((page: any) => ({
           ...page,
-          data: page.data.filter((m: any) => m.id !== messageId)
+          data: page.data.filter((m: any) => new Date(m.createdAt) < new Date(targetMsg.createdAt))
         }))
       };
     });
 
     try {
-      const cascade = isUserMessage ? "?cascade=true" : "";
-      await fetchWithTimeout(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+      await fetchWithTimeout(`/api/messages/${messageId}`, { method: "DELETE" });
 
       // Settle delay for invalidation
       setTimeout(() => {
@@ -687,7 +720,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       toast.error("Failed to delete message");
       queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     }
-  }, [chatId, queryClient, pushToUndoStack, confirm]);
+  }, [chatId, queryClient, pushToUndoStack, confirm, allMessages]);
 
   const handleRegenerate = useCallback(async (messageId: string) => {
     if (isSubmitting || !chat) return;
@@ -695,20 +728,21 @@ const Chat = ({ chatId }: { chatId: string }) => {
     const msgIndex = allMessages.findIndex((m) => m.id === messageId);
     if (msgIndex === -1) return;
 
+    const targetMsg = allMessages[msgIndex];
     const lastUserMsg = allMessages[msgIndex - 1];
     const hasUserMessage = lastUserMsg && lastUserMsg.fromUser;
 
     setIsSubmitting(true);
     setShouldAutoScroll(true);
 
-    // Optimistic Delete
+    // Cascading Optimistic Delete
     queryClient.setQueryData(["messages", chatId], (old: any) => {
       if (!old) return old;
       return {
         ...old,
         pages: old.pages.map((page: any) => ({
           ...page,
-          data: page.data.filter((m: any) => m.id !== messageId)
+          data: page.data.filter((m: any) => new Date(m.createdAt) < new Date(targetMsg.createdAt))
         }))
       };
     });
@@ -737,35 +771,35 @@ const Chat = ({ chatId }: { chatId: string }) => {
     if (isSubmitting || !chat) return;
     const msgIndex = allMessages.findIndex((m) => m.id === messageId);
     if (msgIndex === -1) return;
-    const userMsg = allMessages[msgIndex];
-    if (!userMsg.fromUser) return;
+
+    const targetMsg = allMessages[msgIndex];
+    if (!targetMsg.fromUser) return;
 
     pushToUndoStack();
     setIsSubmitting(true);
     setShouldAutoScroll(true);
 
-    // Optimistic Delete
+    // Cascading Optimistic Delete
     queryClient.setQueryData(["messages", chatId], (old: any) => {
       if (!old) return old;
       return {
         ...old,
         pages: old.pages.map((page: any) => ({
           ...page,
-          data: page.data.filter((m: any) => m.id !== messageId)
+          data: page.data.filter((m: any) => new Date(m.createdAt) < new Date(targetMsg.createdAt))
         }))
       };
     });
 
     try {
-      const cascade = "?cascade=true";
-      await fetchWithTimeout(`/api/messages/${messageId}${cascade}`, { method: "DELETE" });
+      await fetchWithTimeout(`/api/messages/${messageId}`, { method: "DELETE" });
 
       // Settle delay for invalidation
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
       }, 1000);
 
-      await startStreaming(userMsg.content, true);
+      await startStreaming(targetMsg.content, true);
     } catch (err) {
       console.error("User regenerate failed:", err);
       toast.error("Failed to redo message");
@@ -806,13 +840,26 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const handleClearHistory = useCallback(async () => {
     if (!(await confirm({
-      title: "Clear Chat History",
-      message: "Are you sure you want to clear the entire chat history? This cannot be undone and will reset the conversation state.",
-      confirmLabel: "Clear History",
+      title: "Reset Chat Conversation",
+      message: "Are you sure you want to reset this conversation? All existing messages will be cleared and the character will return to its initial greeting.",
+      confirmLabel: "Reset Conversation",
       variant: "danger"
     }))) return;
 
     setIsSubmitting(true);
+
+    // Optimistic Clear
+    queryClient.setQueryData(["messages", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page: any, i: number) => ({
+          ...page,
+          data: i === 0 ? [] : [] // Clear everything. Intro will be re-seeded by API and invalidation.
+        }))
+      };
+    });
+
     try {
       const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
       if (res.ok) {
@@ -821,10 +868,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
         await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
       } else {
         toast.error("Failed to clear history");
+        queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
       }
     } catch (err) {
       console.error(err);
       toast.error("An error occurred");
+      queryClient.invalidateQueries({ queryKey: ["messages", chatId] });
     } finally {
       setIsSubmitting(false);
     }
@@ -865,6 +914,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
       variant: "danger"
     }))) return;
 
+    // Optimistic Reset
+    queryClient.setQueryData(["chat", chatId], (old: any) => {
+      if (!old) return old;
+      return { ...old, data: { ...old.data, memory: null } };
+    });
+
     try {
       const res = await fetch(`/api/chats/${chatId}`, {
         method: "PATCH",
@@ -874,15 +929,31 @@ const Chat = ({ chatId }: { chatId: string }) => {
       if (res.ok) {
         toast.success("AI brain reset successfully");
         await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      } else {
+        throw new Error();
       }
     } catch (err) {
       toast.error("Failed to reset memory");
+      queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     }
   }, [chatId, queryClient, confirm]);
 
   const handleUpdateChatSettings = useCallback(async (model: string, personaId: string | null) => {
     setSelectedModel(model);
     setSelectedPersonaId(personaId);
+
+    // Optimistic Update
+    queryClient.setQueryData(["chat", chatId], (old: any) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: {
+          ...old.data,
+          chatSettings: { ...old.data.chatSettings, model },
+          personaId: personaId
+        }
+      };
+    });
 
     try {
       const res = await fetch(`/api/chats/${chatId}`, {
@@ -901,10 +972,17 @@ const Chat = ({ chatId }: { chatId: string }) => {
       }
     } catch (err) {
       toast.error("Failed to update chat settings");
+      queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     }
   }, [chatId, queryClient]);
 
   const handleUpdateMemory = useCallback(async (newMemory: string) => {
+    // Optimistic Update
+    queryClient.setQueryData(["chat", chatId], (old: any) => {
+      if (!old) return old;
+      return { ...old, data: { ...old.data, memory: newMemory } };
+    });
+
     try {
       const res = await fetch(`/api/chats/${chatId}`, {
         method: "PATCH",
@@ -914,9 +992,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
       if (res.ok) {
         toast.success("AI brain updated");
         await queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
+      } else {
+        throw new Error();
       }
     } catch (err) {
       toast.error("Failed to update memory");
+      queryClient.invalidateQueries({ queryKey: ["chat", chatId] });
     }
   }, [chatId, queryClient]);
 
@@ -1078,7 +1159,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   isOptimistic={msg.id.startsWith("temp-") || msg.id.startsWith("ai-temp-")}
                   onProfileClick={handleProfileClick}
                   onEdit={handleEdit}
-                  onDelete={(id) => handleDelete(id, msg.fromUser)}
+                  onDelete={(id) => handleDelete(id)}
                   onRegenerate={handleRegenerate}
                   onUserRegenerate={handleUserRegenerate}
                   isEditing={editingMessageId === msg.id}

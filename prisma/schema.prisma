@@ -43,11 +43,21 @@ model UserSettings {
 }
 
 model UserPersona {
-  id     String @id @default(cuid())
+  id     String        @id @default(cuid())
   name   String
   person String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User          @relation(fields: [userId], references: [id])
   userId String
+  image  PersonaImage?
+}
+
+model PersonaImage {
+  id        String      @id @default(cuid())
+  data      Bytes
+  name      String
+  mimetype  String
+  persona   UserPersona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  personaId String      @unique
 }
 
 model UserProfileImage {

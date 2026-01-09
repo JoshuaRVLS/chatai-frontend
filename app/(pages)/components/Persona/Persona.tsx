@@ -1,7 +1,7 @@
 "use client";
 
 import { UserPersona } from "@/app/generated/prisma";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { FaPlus, FaUser, FaInfo, FaCheck, FaTimes } from "react-icons/fa";
@@ -12,11 +12,14 @@ import { motion, AnimatePresence } from "motion/react";
 
 const Persona: React.FC = () => {
   const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [personaName, setPersonaName] = useState("");
   const [persona, setPersona] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const { isPending, data, error, refetch } = useQuery<UserPersona[]>({
+  const { isPending, data, error, refetch } = useQuery<any[]>({
     queryKey: ["personas"],
     queryFn: async () => {
       const res = await fetch(`/api/persona/${user?.id}`);
@@ -32,6 +35,21 @@ const Persona: React.FC = () => {
       return;
     }
 
+    // Optimistic Update
+    const optimisticId = `temp-${Date.now()}`;
+    const optimisticPersona = {
+      id: optimisticId,
+      name: personaName.trim(),
+      person: persona.trim(),
+      userId: user?.id,
+      image: null, // No image yet
+    };
+
+    queryClient.setQueryData(["personas"], (old: any[] | undefined) => {
+      if (!old) return [optimisticPersona];
+      return [optimisticPersona, ...old];
+    });
+
     try {
       const res = await fetch(`/api/persona/${user?.id}`, {
         method: "POST",
@@ -39,15 +57,42 @@ const Persona: React.FC = () => {
         body: JSON.stringify({ personaName, persona }),
       });
 
-      if (!res.ok) return toast.error("Failed to create persona");
+      if (!res.ok) {
+        toast.error("Failed to create persona");
+        queryClient.invalidateQueries({ queryKey: ["personas"] });
+        return;
+      }
+      const { data: newPersona } = await res.json();
+
+      if (imageFile && newPersona?.id) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        const imgRes = await fetch(`/api/persona/image/${newPersona.id}`, {
+          method: "POST",
+          body: formData,
+        });
+        if (!imgRes.ok) toast.error("Failed to upload persona image");
+      }
 
       toast.success("Persona created successfully!");
       setPersona("");
       setPersonaName("");
+      setImageFile(null);
+      setImagePreview(null);
       setIsCreating(false);
-      await refetch();
+
+      // Surgical Replace
+      queryClient.setQueryData(["personas"], (old: any[] | undefined) => {
+        if (!old) return old;
+        return old.map(p => p.id === optimisticId ? { ...newPersona, image: imageFile ? { id: 'temp' } : null } : p);
+      });
+
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["personas"] });
+      }, 1000);
     } catch {
       toast.error("Error creating persona");
+      queryClient.invalidateQueries({ queryKey: ["personas"] });
     }
   };
 
@@ -168,6 +213,43 @@ const Persona: React.FC = () => {
                       className="input-modern w-full min-h-[120px] py-4 text-xs leading-relaxed"
                       placeholder="Define personality traits, speech patterns, and background..."
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Visual</label>
+                    <div className="flex items-center gap-4">
+                      {imagePreview ? (
+                        <div className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/10">
+                          <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                          <button
+                            onClick={() => { setImageFile(null); setImagePreview(null); }}
+                            className="absolute top-1 right-1 w-5 h-5 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all"
+                          >
+                            <FaTimes size={8} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="w-20 h-20 rounded-xl border border-dashed border-white/10 flex flex-col items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all cursor-pointer">
+                          <FaPlus size={12} />
+                          <span className="text-[8px] font-black uppercase mt-1">Upload</span>
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setImageFile(file);
+                                setImagePreview(URL.createObjectURL(file));
+                              }
+                            }}
+                          />
+                        </label>
+                      )}
+                      <p className="text-zinc-600 text-[8px] font-bold uppercase tracking-widest max-w-[150px]">
+                        Recommended: Square aspect ratio. Max 5MB.
+                      </p>
+                    </div>
                   </div>
 
                   <div className="flex justify-end pt-4">

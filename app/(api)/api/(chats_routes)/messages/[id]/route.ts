@@ -21,23 +21,15 @@ export const DELETE = async (
             );
         }
 
-        if (cascadeDelete && messageToDelete.fromUser) {
-            const allMessages = await db.message.findMany({
-                where: { chatId: messageToDelete.chatId },
-                orderBy: { id: "asc" },
-            });
-
-            const messageIndex = allMessages.findIndex((m) => m.id === messageId);
-
-            if (messageIndex !== -1 && messageIndex < allMessages.length - 1) {
-                const nextMessage = allMessages[messageIndex + 1];
-                if (!nextMessage.fromUser) {
-                    await db.message.delete({ where: { id: nextMessage.id } });
-                }
-            }
-        }
-
-        await db.message.delete({ where: { id: messageId } });
+        // Delete target message and all subsequent messages in the same chat
+        await db.message.deleteMany({
+            where: {
+                chatId: messageToDelete.chatId,
+                createdAt: {
+                    gte: messageToDelete.createdAt,
+                },
+            },
+        });
 
         return NextResponse.json({ success: true }, { status: 200 });
     } catch (error) {

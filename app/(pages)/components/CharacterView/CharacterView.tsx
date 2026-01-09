@@ -54,15 +54,21 @@ const CharacterView = ({ id }: { id: string }) => {
     persona: false,
     intro: false,
   });
+  const [isStartingChat, setIsStartingChat] = useState(false);
 
   const startChat = withAuth(async () => {
+    if (isStartingChat) return;
+    setIsStartingChat(true);
     try {
       const res = await fetch("/api/chats", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ characterId: id, userId: user?.id }),
       });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setIsStartingChat(false);
+        return;
+      }
       const { chat } = await res.json();
 
       // Invalidate history cache to ensure new chat appears
@@ -71,6 +77,7 @@ const CharacterView = ({ id }: { id: string }) => {
       router.push(`/chat/${chat.id}`);
     } catch (e) {
       console.error(e);
+      setIsStartingChat(false);
     }
   });
 
@@ -161,10 +168,15 @@ const CharacterView = ({ id }: { id: string }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               onClick={startChat}
-              className="w-full py-4 bg-white text-zinc-950 font-black text-xs uppercase tracking-widest rounded-xl hover:bg-zinc-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl"
+              disabled={isStartingChat}
+              className={`w-full py-4 bg-white text-zinc-950 font-black text-xs uppercase tracking-widest rounded-xl transition-all flex items-center justify-center gap-2 shadow-xl ${isStartingChat ? 'opacity-70 cursor-not-allowed' : 'hover:bg-zinc-200 active:scale-[0.98]'}`}
             >
-              <FiMessageCircle size={14} />
-              Protocol Start
+              {isStartingChat ? (
+                <div className="w-4 h-4 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
+              ) : (
+                <FiMessageCircle size={14} />
+              )}
+              {isStartingChat ? 'Initializing...' : 'Protocol Start'}
             </motion.button>
 
             <div className="bg-white/1 p-4 rounded-xl border border-white/5 space-y-3">
