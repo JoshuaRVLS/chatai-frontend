@@ -107,8 +107,8 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5 relative z-10 bg-zinc-950/20">
-        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/5 transition-all cursor-pointer group text-left">
+      <div className="p-4 border-t border-white/5 relative z-50 bg-zinc-950/20">
+        <button className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-white/10 transition-all cursor-pointer group text-left active:scale-[0.98] hover:scale-[1.02] shadow-sm hover:shadow-xl">
           <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center group-hover:border-white/20 border border-transparent transition-all overflow-hidden shrink-0">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
               <span className="text-white font-black text-[10px]">A</span>

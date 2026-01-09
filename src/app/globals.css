@@ -81,9 +81,13 @@ body {
 
 /* Card Component */
 .card-premium {
-  @apply rounded-2xl p-6 transition-all duration-300;
+  @apply rounded-3xl p-10 transition-all duration-300;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-premium:hover {
+  @apply border-white/10 shadow-2xl shadow-black/40;
 }
 
 .card-premium:hover {
