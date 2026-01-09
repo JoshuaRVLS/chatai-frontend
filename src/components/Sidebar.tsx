@@ -1,7 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useSession, signOut } from 'next-auth/react';
+import { useState, useRef, useEffect } from 'react';
 
 const navigation = [
   {
@@ -72,6 +74,25 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push('/login');
+  };
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-[260px] bg-zinc-950 border-r border-white/5 flex flex-col z-100 hidden lg:flex overflow-hidden select-none">
@@ -106,18 +127,51 @@ export default function Sidebar() {
       </nav>
 
       {/* Profile Section */}
-      <div className="p-4 border-t border-white/5 bg-zinc-950 shrink-0">
+      <div className="p-4 border-t border-white/5 bg-zinc-950 shrink-0 relative" ref={menuRef}>
+        {showProfileMenu && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-zinc-900 border border-white/10 rounded-2xl p-2 shadow-2xl animate-fade-in z-50 overflow-hidden">
+            <button
+              onClick={() => {
+                setShowProfileMenu(false);
+                router.push('/settings');
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/5 text-zinc-400 hover:text-white transition-all text-[11px] font-black uppercase tracking-widest"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              </svg>
+              Account Settings
+            </button>
+            <div className="h-px bg-white/5 my-1" />
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-red-500/10 text-zinc-400 hover:text-red-500 transition-all text-[11px] font-black uppercase tracking-widest"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Terminate Session
+            </button>
+          </div>
+        )}
         <button
+          onClick={() => setShowProfileMenu(!showProfileMenu)}
           className="w-full flex items-center gap-3 px-3 py-4 rounded-2xl bg-white/5 hover:bg-zinc-800 border border-white/5 hover:border-white/20 transition-all cursor-pointer group text-left active:scale-95 shadow-lg"
         >
           <div className="w-9 h-9 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-white/10 group-hover:border-white/30 transition-all">
             <div className="w-full h-full bg-linear-to-br from-zinc-700 to-zinc-900 flex items-center justify-center">
-              <span className="text-white font-black text-[11px]">A</span>
+              <span className="text-white font-black text-[11px]">
+                {session?.user?.name?.[0]?.toUpperCase() || 'A'}
+              </span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-black uppercase tracking-wider truncate text-white">Admin User</p>
-            <p className="text-[9px] font-bold text-zinc-600 truncate lowercase">admin@jchatai.space</p>
+            <p className="text-[11px] font-black uppercase tracking-wider truncate text-white">
+              {session?.user?.name || 'Admin User'}
+            </p>
+            <p className="text-[9px] font-bold text-zinc-600 truncate lowercase">
+              {session?.user?.email || 'admin@jchatai.space'}
+            </p>
           </div>
         </button>
       </div>
