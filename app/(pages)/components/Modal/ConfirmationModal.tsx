@@ -28,14 +28,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[9999] flex items-center justify-center p-6">
+                <div className="fixed inset-0 z-9999 flex items-center justify-center p-6">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onCancel}
-                        className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                        className="absolute inset-0 bg-slate-950/60" // Removed blur for performance
                     />
 
                     {/* Modal */}
@@ -43,7 +43,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="relative w-full max-w-md bg-[#0f172a]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-2xl overflow-hidden"
+                        style={{ transform: "translateZ(0)" }} // Force GPU acceleration
+                        className="relative w-full max-w-md bg-[#0f172a]/90 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-xl overflow-hidden"
                     >
                         {/* Decoration */}
                         <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -82,8 +83,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                                 <button
                                     onClick={onConfirm}
                                     className={`flex-1 px-6 py-4 rounded-2xl text-slate-950 text-[11px] font-black uppercase tracking-widest transition-all shadow-lg shadow-black/20 ${variant === "danger"
-                                            ? "bg-red-500 hover:bg-red-400"
-                                            : "bg-primary hover:bg-primary/80 shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+                                        ? "bg-red-500 hover:bg-red-400"
+                                        : "bg-primary hover:bg-primary/80 shadow-[0_0_20px_rgba(34,211,238,0.3)]"
                                         }`}
                                 >
                                     {confirmLabel}
