@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import {
@@ -16,6 +16,7 @@ import {
 } from "react-icons/fa";
 import { FiBookOpen, FiActivity, FiSettings, FiInfo } from "react-icons/fi";
 import { toast } from '@/app/lib/toast';
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import Select from "react-select";
@@ -29,6 +30,8 @@ interface LorebookDetailProps {
 const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
     const { user } = useContext(AuthContext);
     const { withAuth, isAuthenticated } = useAuthAction();
+    const queryClient = useQueryClient();
+    const confirm = useConfirm();
     const [isAddingEntry, setIsAddingEntry] = useState(false);
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [isEditingMetadata, setIsEditingMetadata] = useState(false);
@@ -113,6 +116,23 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
             return;
         }
 
+        const tempId = `temp-${Date.now()}`;
+        const newEntry = {
+            id: tempId,
+            keywords: keywords.split(",").map(k => k.trim()),
+            content,
+            enabled,
+        };
+
+        // Optimistic Update
+        queryClient.setQueryData(["lorebook", lorebookId], (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                entries: [...(old.entries || []), newEntry],
+            };
+        });
+
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries`, {
                 method: "POST",
@@ -124,13 +144,30 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
 
             toast.success("Entry added");
             resetForm();
-            refetch();
+            await queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         } catch {
             toast.error("Failed to add entry");
+            queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         }
     });
 
     const handleUpdateEntry = withAuth(async (entryId: string) => {
+        const updatedEntry = {
+            id: entryId,
+            keywords: keywords.split(",").map(k => k.trim()),
+            content,
+            enabled,
+        };
+
+        // Optimistic Update
+        queryClient.setQueryData(["lorebook", lorebookId], (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                entries: old.entries.map((e: any) => e.id === entryId ? updatedEntry : e),
+            };
+        });
+
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entryId}`, {
                 method: "PATCH",
@@ -143,14 +180,30 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
             toast.success("Entry updated");
             setEditingEntryId(null);
             resetForm();
-            refetch();
+            await queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         } catch {
             toast.error("Failed to update entry");
+            queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         }
     });
 
     const handleDeleteEntry = withAuth(async (entryId: string) => {
-        if (!confirm("Delete this entry?")) return;
+        if (!(await confirm({
+            title: "Terminate Entry",
+            message: "Are you sure you want to delete this knowledge entry? This memory will be permanently removed from the system.",
+            confirmLabel: "Delete Entry",
+            variant: "danger"
+        }))) return;
+
+        // Optimistic Update
+        queryClient.setQueryData(["lorebook", lorebookId], (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                entries: old.entries.filter((e: any) => e.id !== entryId),
+            };
+        });
+
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entryId}`, {
                 method: "DELETE",
@@ -158,13 +211,23 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
 
             if (!res.ok) throw new Error();
             toast.success("Entry deleted");
-            refetch();
+            await queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         } catch {
             toast.error("Failed to delete entry");
+            queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         }
     });
 
     const toggleEntry = withAuth(async (entry: any) => {
+        // Optimistic Update
+        queryClient.setQueryData(["lorebook", lorebookId], (old: any) => {
+            if (!old) return old;
+            return {
+                ...old,
+                entries: old.entries.map((e: any) => e.id === entry.id ? { ...e, enabled: !entry.enabled } : e),
+            };
+        });
+
         try {
             const res = await fetch(`/api/lorebooks/${lorebookId}/entries/${entry.id}`, {
                 method: "PATCH",
@@ -173,9 +236,10 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
             });
 
             if (!res.ok) throw new Error();
-            refetch();
+            await queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         } catch {
             toast.error("Failed to toggle entry");
+            queryClient.invalidateQueries({ queryKey: ["lorebook", lorebookId] });
         }
     });
 

@@ -7,6 +7,8 @@ import { FiBook } from "react-icons/fi";
 import Link from "next/link";
 import { toast } from '@/app/lib/toast';
 import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 interface LorebookCardProps {
     lorebook: any;
@@ -14,9 +16,22 @@ interface LorebookCardProps {
 }
 
 const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
+    const queryClient = useQueryClient();
+    const confirm = useConfirm();
     const handleDelete = async (e: React.MouseEvent) => {
         e.preventDefault();
-        if (!confirm("Are you sure you want to delete this lorebook and all its entries?")) return;
+        if (!(await confirm({
+            title: "Archive Deletion",
+            message: `Are you sure you want to permanently delete "${lorebook.name}"? This will erase all world logic and semantic entries associated with this module.`,
+            confirmLabel: "Delete Module",
+            variant: "danger"
+        }))) return;
+
+        // Optimistic Update
+        queryClient.setQueryData(["lorebooks"], (old: any[] | undefined) => {
+            if (!old) return old;
+            return old.filter(lb => lb.id !== lorebook.id);
+        });
 
         try {
             const res = await fetch(`/api/lorebooks/${lorebook.id}`, {
@@ -25,9 +40,10 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate }) => {
 
             if (!res.ok) throw new Error();
             toast.success("Lorebook deleted");
-            onUpdate();
+            await queryClient.invalidateQueries({ queryKey: ["lorebooks"] });
         } catch {
             toast.error("Failed to delete lorebook");
+            queryClient.invalidateQueries({ queryKey: ["lorebooks"] });
         }
     };
 

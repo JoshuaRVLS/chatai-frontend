@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import CharacterCard from "../CharacterCard/CharacterCard";
@@ -24,6 +24,7 @@ const MyCharacters: React.FC = () => {
   const [inputPage, setInputPage] = useState("1");
   const pageSize = 32;
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const gridRef = React.useRef<HTMLDivElement>(null);
 
   const scrollToSection = React.useCallback(() => {
@@ -84,6 +85,12 @@ const MyCharacters: React.FC = () => {
     )
       return;
 
+    // Optimistic Update
+    queryClient.setQueryData(["myCharacters", user?.id], (old: CharactersData | undefined) => {
+      if (!old) return old;
+      return old.filter(char => char.id !== characterId);
+    });
+
     try {
       const response = await fetch(`/api/characters/${characterId}`, {
         method: "DELETE",
@@ -91,13 +98,16 @@ const MyCharacters: React.FC = () => {
 
       if (response.ok) {
         toast.success("Character deleted successfully");
-        window.location.reload();
+        await queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
+        await queryClient.invalidateQueries({ queryKey: ["characters"] });
       } else {
         toast.error("Failed to delete character");
+        queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
       }
     } catch (error) {
       console.error(error);
       toast.error("An error occurred while deleting the character");
+      queryClient.invalidateQueries({ queryKey: ["myCharacters", user?.id] });
     }
   };
 

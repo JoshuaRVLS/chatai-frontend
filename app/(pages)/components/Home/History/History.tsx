@@ -73,17 +73,25 @@ const History = () => {
       variant: "danger"
     }))) return;
 
+    // Optimistic Update
+    queryClient.setQueryData(["chatsHistory"], (old: any[] | undefined) => {
+      if (!old) return old;
+      return old.filter(chat => chat.id !== chatId);
+    });
+
     try {
       const res = await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Chat removed from history");
-        queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
+        await queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
       } else {
         toast.error("Failed to remove chat");
+        queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
       }
     } catch (err) {
       console.error(err);
       toast.error("An error occurred");
+      queryClient.invalidateQueries({ queryKey: ["chatsHistory"] });
     }
   };
 
@@ -93,7 +101,7 @@ const History = () => {
         <div className="h-6 w-40 bg-white/5 rounded-full shimmer" />
         <div className="flex gap-8 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="min-w-[320px] h-44 rounded-[2rem] bg-white/5 shimmer border border-white/5" />
+            <div key={i} className="min-w-[320px] h-44 rounded-4xl bg-white/5 shimmer border border-white/5" />
           ))}
         </div>
       </div>
@@ -106,7 +114,7 @@ const History = () => {
   return (
     <div className="flex flex-col gap-10 px-6 md:px-12 relative group/history">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
-        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-gradient-to-r from-primary/30 to-transparent" />
+        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-primary/30 to-transparent" />
 
         <div className="space-y-2">
           <div className="flex items-center gap-3">
@@ -154,15 +162,15 @@ const History = () => {
                 setTempUnblur(prev => ({ ...prev, [chat.id]: true }));
               }
             }}
-            className="group flex-shrink-0 w-[340px] snap-start"
+            className="group shrink-0 w-[340px] snap-start"
           >
             <motion.div
-              className="relative h-44 flex gap-6 p-5 items-center rounded-[2rem] border border-white/5 bg-[#0f172a]/40 backdrop-blur-md hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(56,189,248,0.1)]"
+              className="relative h-44 flex gap-6 p-5 items-center rounded-4xl border border-white/5 bg-[#0f172a]/40 backdrop-blur-md hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(56,189,248,0.1)]"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
             >
-              <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 flex-shrink-0 border border-white/5 shadow-xl">
+              <div className="relative w-28 h-28 rounded-2xl overflow-hidden bg-white/5 shrink-0 border border-white/5 shadow-xl">
                 {(() => {
                   const shouldBlur = chat.character.isNsfw && settings?.blurNsfw && !tempUnblur[chat.id];
                   return (
@@ -190,7 +198,7 @@ const History = () => {
                     </>
                   );
                 })()}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#020617]/40 to-transparent" />
               </div>
 
               <div className="flex flex-col justify-between flex-1 min-w-0 h-full py-2">

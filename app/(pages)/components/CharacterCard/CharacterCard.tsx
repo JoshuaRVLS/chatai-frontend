@@ -10,6 +10,7 @@ import { AuthContext } from "../../providers/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from '@/app/lib/toast';
 import { useAuthAction } from "@/app/hooks/useAuthAction";
+import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 interface CharacterCardProps {
   characterName: string;
@@ -37,6 +38,7 @@ const CharacterCard = React.memo(function CharacterCard({
   const { user } = useContext(AuthContext);
   const { withAuth } = useAuthAction();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [tempUnblur, setTempUnblur] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [showContextMenu, setShowContextMenu] = useState(false);
@@ -80,18 +82,39 @@ const CharacterCard = React.memo(function CharacterCard({
 
   const handleDelete = async () => {
     setShowContextMenu(false);
-    if (!confirm(`Delete "${characterName}"? This cannot be undone.`)) return;
+    if (!(await confirm({
+      title: "Deconstruct Identity",
+      message: `Are you sure you want to permanently delete "${characterName}"? This process is irreversible.`,
+      confirmLabel: "Delete Character",
+      variant: "danger"
+    }))) return;
+
+    // Optimistic Update
+    queryClient.setQueryData(["characters"], (old: any[] | undefined) => {
+      if (!old) return old;
+      return old.filter(char => char.id !== characterId);
+    });
+    // Also update current-user-characters if that's the query key
+    queryClient.setQueryData(["current-user-characters"], (old: any[] | undefined) => {
+      if (!old) return old;
+      return old.filter(char => char.id !== characterId);
+    });
 
     try {
       const res = await fetch(`/api/characters/${characterId}`, { method: "DELETE" });
       if (res.ok) {
         toast.success("Character deleted");
-        queryClient.invalidateQueries({ queryKey: ["characters"] });
+        await queryClient.invalidateQueries({ queryKey: ["characters"] });
+        await queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
       } else {
         toast.error("Failed to delete character");
+        queryClient.invalidateQueries({ queryKey: ["characters"] });
+        queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
       }
     } catch {
       toast.error("Failed to delete character");
+      queryClient.invalidateQueries({ queryKey: ["characters"] });
+      queryClient.invalidateQueries({ queryKey: ["current-user-characters"] });
     }
   };
 
@@ -194,7 +217,7 @@ const CharacterCard = React.memo(function CharacterCard({
             </div>
           )}
 
-          <div className="absolute inset-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
 
           {/* Floating Badge */}
           <div className="absolute top-2 right-2 bg-black/50 border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
