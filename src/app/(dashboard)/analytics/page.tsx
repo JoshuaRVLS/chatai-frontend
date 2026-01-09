@@ -52,19 +52,18 @@ export default function AnalyticsPage() {
         <div className="min-h-screen">
             <Header title="Analytics" subtitle="Platform insights and metrics" />
 
-            <div className="p-8 space-y-8 animate-fade-in">
+            <div className="p-20 space-y-24 animate-fade-in">
                 {/* Time Range Selector */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         {[7, 30, 90].map((d) => (
-                            <button 
+                            <button
                                 key={d}
                                 onClick={() => setDays(d)}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                    days === d 
-                                    ? 'bg-white text-zinc-950 scale-105 shadow-lg' 
-                                    : 'bg-white/5 text-zinc-500 hover:text-white hover:bg-white/10'
-                                }`}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${days === d
+                                        ? 'bg-white text-zinc-950 scale-105 shadow-lg'
+                                        : 'bg-white/5 text-zinc-500 hover:text-white hover:bg-white/10'
+                                    }`}
                             >
                                 {d} Days
                             </button>
@@ -73,7 +72,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
                     {[
                         { label: 'New Users', val: data?.metrics.usersCreated || 0, change: data?.metrics.userGrowth, color: 'white' },
                         { label: 'Messages Sent', val: data?.metrics.messagesSent || 0, change: data?.metrics.messageGrowth, color: 'emerald-400' },
@@ -93,7 +92,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 {/* Trend Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     {/* User Growth Chart */}
                     <div className="card-premium p-8 h-80 flex flex-col">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500 mb-8">User Acquisition Trend</h3>
@@ -102,7 +101,7 @@ export default function AnalyticsPage() {
                                 <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-zinc-800">Processing global data...</div>
                             ) : data?.trends.users.map((d, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div 
+                                    <div
                                         className="w-full bg-white/5 group-hover:bg-white/20 transition-all rounded-t-sm relative"
                                         style={{ height: `${(d.count / maxVal(data.trends.users)) * 100}%` }}
                                     >
@@ -124,7 +123,7 @@ export default function AnalyticsPage() {
                                 <div className="w-full h-full flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-zinc-800">Calculating system load...</div>
                             ) : data?.trends.messages.map((d, i) => (
                                 <div key={i} className="flex-1 flex flex-col items-center gap-2 group">
-                                    <div 
+                                    <div
                                         className="w-full bg-emerald-500/10 group-hover:bg-emerald-500/30 transition-all rounded-t-sm relative"
                                         style={{ height: `${(d.count / maxVal(data.trends.messages)) * 100}%` }}
                                     >

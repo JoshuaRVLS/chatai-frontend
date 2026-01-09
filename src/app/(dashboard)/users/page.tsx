@@ -136,9 +136,9 @@ export default function UsersPage() {
         <div className="min-h-screen">
             <Header title="User Management" subtitle="Manage platform access" />
 
-            <div className="p-8 space-y-8 animate-fade-in">
+            <div className="p-16 space-y-24 animate-fade-in">
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {[
                         { label: 'Total Users', val: stats.total.toLocaleString(), color: 'white' },
                         { label: 'Administrators', val: stats.admins.toLocaleString(), color: 'emerald-400' },

@@ -144,9 +144,9 @@ export default function CharactersPage() {
         <div className="min-h-screen">
             <Header title="Characters" subtitle="Manage AI characters" />
 
-            <div className="p-8 space-y-8 animate-fade-in">
+            <div className="p-16 space-y-24 animate-fade-in">
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {[
                         { label: 'Total Characters', val: stats.total.toLocaleString(), color: 'white' },
                         { label: 'NSFW Content', val: stats.nsfw.toLocaleString(), color: 'red-400' },

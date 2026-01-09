@@ -10,8 +10,10 @@ export default function DashboardLayout({
             <Sidebar />
             {/* Spacer for fixed sidebar */}
             <div className="w-[260px] shrink-0 hidden lg:block" />
-            <main className="flex-1 min-w-0 p-8 md:p-16 lg:p-24 relative z-0">
-                {children}
+            <main className="flex-1 min-w-0 p-8 md:p-16 lg:p-28 relative z-0">
+                <div className="max-w-[1800px] mx-auto w-full">
+                    {children}
+                </div>
             </main>
         </div>
     );

@@ -151,9 +151,9 @@ export default function ConversationsPage() {
         <div className="min-h-screen">
             <Header title="Conversations" subtitle="Real-time session monitoring" />
 
-            <div className="p-8 space-y-8 animate-fade-in">
+            <div className="p-20 space-y-24 animate-fade-in">
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {[
                         { label: 'Today', val: stats?.today || 0, color: 'white' },
                         { label: 'Total', val: stats?.total || 0, color: 'zinc-400' },

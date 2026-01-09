@@ -141,9 +141,9 @@ export default function LorebooksPage() {
         <div className="min-h-screen">
             <Header title="Lorebooks" subtitle="Global Knowledge Management" />
 
-            <div className="p-8 space-y-8 animate-fade-in">
+            <div className="p-20 space-y-24 animate-fade-in">
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
                     {[
                         { label: 'Total Books', val: stats?.total || 0, color: 'white' },
                         { label: 'Global Entries', val: stats?.entries || 0, color: 'amber-400' },
