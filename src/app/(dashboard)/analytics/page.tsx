@@ -48,9 +48,49 @@ export default function AnalyticsPage() {
 
     const maxVal = (trend: TrendData[]) => Math.max(...trend.map(d => d.count), 1);
 
+    const [generating, setGenerating] = useState(false);
+    const [reportTimestamp, setReportTimestamp] = useState(Date.now());
+
+    const generateReport = async () => {
+        setGenerating(true);
+        try {
+            const res = await fetch('/api/analytics/generate-report', { method: 'POST' });
+            if (res.ok) {
+                setReportTimestamp(Date.now());
+            } else {
+                alert('Failed to generate report');
+            }
+        } catch (error) {
+            console.error("Report generation error:", error);
+        } finally {
+            setGenerating(false);
+        }
+    };
+
     return (
         <div className="flex flex-col">
-            <Header title="Analytics" subtitle="Platform insights and metrics" />
+            <div className="flex items-start justify-between">
+                <Header title="Analytics" subtitle="Platform insights and metrics" />
+                <button
+                    onClick={generateReport}
+                    disabled={generating}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {generating ? (
+                        <>
+                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            <span>Generating...</span>
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                            <span>Generate Python Report</span>
+                        </>
+                    )}
+                </button>
+            </div>
 
             <div className="space-y-16 animate-fade-in mt-8">
                 {/* Time Range Selector */}
@@ -135,6 +175,35 @@ export default function AnalyticsPage() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+
+                {/* Detailed Python Report */}
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-black italic uppercase tracking-tighter text-white">Daily Health Report (Python Generated)</h2>
+                        <span className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Last Updated: {new Date(reportTimestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div className="w-full aspect-20/12 bg-zinc-950 rounded-3xl border border-white/5 overflow-hidden shadow-2xl relative group">
+                        <img
+                            src={`/reports/analytics_dashboard.png?t=${reportTimestamp}`}
+                            alt="Daily Analytics Report"
+                            className="w-full h-full object-contain"
+                            onError={(e) => {
+                                // Hide broken image if report doesn't exist yet
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement!.innerHTML = `
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-zinc-700 gap-4">
+                                        <svg class="w-12 h-12 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25" />
+                                        </svg>
+                                        <p class="font-bold uppercase tracking-widest text-xs">No Report Generated Yet</p>
+                                        <p class="text-[10px] text-zinc-800">Click the button above to generate one.</p>
+                                    </div>
+                                `;
+                            }}
+                        />
                     </div>
                 </div>
             </div>
