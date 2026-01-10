@@ -82,6 +82,33 @@ export default function LorebooksPage() {
         }
     };
 
+    const handleDeleteAll = async () => {
+        if (!confirm('EXTREME WARNING: You are about to delete ALL lorebooks in the database. This action is IRREVERSIBLE. Are you absolutely sure?')) return;
+        if (!confirm('FINAL CONFIRMATION: Type "DELETE ALL" (case sensitive) if you really want to proceed.')) return;
+
+        const verification = prompt('Please type DELETE ALL:');
+        if (verification !== 'DELETE ALL') {
+            alert('Verification failed. Action cancelled.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const res = await fetch('/api/lorebooks', { method: 'DELETE' });
+            if (res.ok) {
+                alert('All lorebooks have been successfully deleted.');
+                fetchLorebooks();
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to delete all lorebooks');
+            }
+        } catch (error) {
+            console.error("Delete all error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Details Modal
     const [detailsModal, setDetailsModal] = useState<{ open: boolean; lorebook: Lorebook | null; loading: boolean }>({ open: false, lorebook: null, loading: false });
 
@@ -239,6 +266,16 @@ export default function LorebooksPage() {
                             <option value="characters">Most Character Links</option>
                         </select>
                     </div>
+
+                    <button
+                        onClick={handleDeleteAll}
+                        className="px-6 py-2 rounded-xl bg-red-500/10 border border-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all active:scale-95 flex items-center gap-2"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Purge Repository
+                    </button>
                 </div>
 
                 {/* Data Table */}

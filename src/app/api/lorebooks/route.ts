@@ -89,3 +89,23 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user.isAdmin) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        // Delete all lorebooks
+        // Prisma will handle dependent entries if CASCADE is set, otherwise we might need to delete entries first
+        // Based on the schema, LoreEntry usually belongs to Lorebook.
+        await db.lorebook.deleteMany({});
+
+        return NextResponse.json({ message: "All lorebooks deleted successfully" });
+    } catch (error) {
+        console.error("Failed to delete all lorebooks:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
