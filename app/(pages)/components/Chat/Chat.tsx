@@ -303,7 +303,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                     </div>
                   )}
                   <Image
-                    src={characterImage || "/default-character.png"}
+                    src={characterImage || "/default.jpg"}
                     fill
                     alt={chat.character.name}
                     className={`object-cover transition-all duration-500 ${chat.character.isNsfw && settings.blurNsfw && !tempUnblurModal ? 'blur-2xl grayscale scale-110' : ''} ${profileModalImageLoading ? 'opacity-0' : 'opacity-100'}`}

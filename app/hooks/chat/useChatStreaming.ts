@@ -33,7 +33,7 @@ export const useChatStreaming = ({
     const startStreaming = async (content: string, isRegenerate = false, isContinue = false) => {
         try {
             const controller = new AbortController();
-            const totalTimeout = setTimeout(() => controller.abort(), 30000);
+            const totalTimeout = setTimeout(() => controller.abort(), 300000); // 5 minutes total timeout
 
             const aiRes = await fetch("/api/ai", {
                 method: "POST",
@@ -54,12 +54,12 @@ export const useChatStreaming = ({
             let lastActivity = Date.now();
 
             const watchdog = setInterval(() => {
-                if (Date.now() - lastActivity > 10000) {
+                if (Date.now() - lastActivity > 30000) { // 30 seconds of inactivity allowed
                     console.warn("Watchdog: Stream inactivity detected. Aborting.");
                     controller.abort();
                     clearInterval(watchdog);
                 }
-            }, 2000);
+            }, 5000);
 
             try {
                 while (!isDone) {

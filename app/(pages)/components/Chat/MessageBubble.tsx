@@ -57,8 +57,8 @@ export const MessageBubble = React.memo(
         const [showActions, setShowActions] = useState(false);
         const [avatarLoading, setAvatarLoading] = useState(true);
         const imageSrc = isUserMessage
-            ? userImage || "/default-user.png"
-            : characterImage || "/default-character.png";
+            ? userImage || "/avatar.png"
+            : characterImage || "/default.jpg";
 
         const altText = isUserMessage ? "User" : "Character";
 
