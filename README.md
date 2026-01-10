@@ -48,6 +48,33 @@ A modern, full-stack AI roleplay chat platform built with Next.js, allowing user
 
     Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Deployment
 
-This project is configured for deployment on VPS using PM2 and Nginx. The production build serves the application on a specified port, proxied via Nginx with SSL enabled.
+## API Routes
+
+### Authentication & Users
+- `POST /api/users/register` - Register a new user
+- `POST /api/users/validate` - Validate user credentials
+- `POST /api/send-verification` - Send email verification
+- `GET /api/verify-email` - Verify email token
+- `GET /api/users/[userId]` - Get user profile
+- `GET /api/users/picture/[userId]` - Get user avatar
+
+### Characters & AI
+- `GET /api/characters` - List characters (with filtering/sorting)
+- `GET /api/characters/[id]` - Get character details
+- `POST /api/characters` - Create a new character
+- `POST /api/import/chub` - Import character/lorebook from Chub.ai
+- `POST /api/ai` - Generate AI response
+- `GET /api/suggestions` - Get chat suggestions
+
+### Chat & Messaging
+- `GET /api/chats` - List user chats
+- `GET /api/chats/[id]` - Get chat history
+- `POST /api/messages` - Send a message
+- `POST /api/messages/regenerate` - Regenerate last AI response
+
+### Lorebooks
+- `GET /api/lorebooks` - List lorebooks
+- `POST /api/lorebooks` - Create lorebook
+- `GET /api/lorebooks/[id]` - Get lorebook details
+
