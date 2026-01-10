@@ -167,9 +167,15 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
   const characterImage = chat.character?.photo ? `/api/image/${chat.character.id}` : null;
   const activePersona = chat.user?.personas?.find(p => p.id === (selectedPersonaId || chat.personaId));
+  /*
+   * User Image Logic:
+   * 1. Active Persona Image (highest priority)
+   * 2. Chat User Profile Image (from chat data)
+   * 3. Session User Image (fallback if chat data is incomplete but user is same)
+   */
   const userImage = activePersona?.image
     ? `/api/persona/image/${activePersona.id}`
-    : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : null);
+    : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : (user?.id === chat.userId ? (user?.image || null) : null));
   const pinnedMessages = allMessages.filter(m => m.pinned);
 
   return (

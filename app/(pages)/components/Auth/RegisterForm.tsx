@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams, useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from '@/app/lib/toast';
 import { FiUser, FiMail, FiLock, FiArrowRight } from "react-icons/fi";
@@ -13,6 +14,7 @@ export const RegisterForm = () => {
     const [loading, setLoading] = useState(false);
     const [formError, setFormError] = useState("");
     const setView = useAuthModalStore((state) => state.setView);
+    const router = useRouter();
 
     useEffect(() => {
         if (password !== confirmPassword && confirmPassword.length > 0) {
@@ -47,7 +49,8 @@ export const RegisterForm = () => {
             }
 
             toast.success("Identity established! Check transmission (email).");
-            setView('login');
+            // setView('login');
+            router.push(`/verify-email?email=${encodeURIComponent(email)}`);
         } catch {
             toast.error("Subsystem failure");
         } finally {
