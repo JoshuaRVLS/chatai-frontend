@@ -273,6 +273,34 @@ export default function CharactersPage() {
                     </div>
                 </div>
 
+                <div className="flex justify-end mb-4">
+                    <button
+                        onClick={async () => {
+                            if (confirm('⚠️ DANGER: Are you sure you want to delete ALL characters? This will also delete all chats, messages, and character images. This action cannot be undone.')) {
+                                try {
+                                    const res = await fetch('/api/characters/clear', { method: 'POST' });
+                                    if (res.ok) {
+                                        alert('All characters cleared successfully.');
+                                        fetchCharacters();
+                                    } else {
+                                        const err = await res.json();
+                                        alert('Failed to clear characters: ' + (err.error || 'Unknown error'));
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                    alert('An error occurred.');
+                                }
+                            }
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl border border-red-500/20 transition-all font-bold text-xs uppercase tracking-wide"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete All Characters
+                    </button>
+                </div>
+
                 {/* Data Table */}
                 <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
                     <DataTable

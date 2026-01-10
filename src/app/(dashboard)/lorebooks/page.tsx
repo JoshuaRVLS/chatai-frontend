@@ -11,6 +11,8 @@ interface Lorebook {
     characters: number;
     creator: string;
     createdAt: string;
+    description?: string;
+    charactersList?: { id: string; name: string; }[];
 }
 
 interface Stats {
@@ -80,6 +82,47 @@ export default function LorebooksPage() {
         }
     };
 
+    // Details Modal
+    const [detailsModal, setDetailsModal] = useState<{ open: boolean; lorebook: Lorebook | null; loading: boolean }>({ open: false, lorebook: null, loading: false });
+
+    const handleViewDetails = async (id: string) => {
+        setDetailsModal({ open: true, lorebook: null, loading: true });
+        try {
+            const res = await fetch(`/api/lorebooks/${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                // Map API response to UI model
+                const lorebookWithDetails = {
+                    ...data,
+                    charactersList: data.characters
+                };
+                setDetailsModal({ open: true, lorebook: lorebookWithDetails, loading: false });
+            } else {
+                alert('Failed to load details');
+                setDetailsModal({ open: false, lorebook: null, loading: false });
+            }
+        } catch (error) {
+            console.error("Fetch details error:", error);
+            setDetailsModal({ open: false, lorebook: null, loading: false });
+        }
+    };
+
+    const closeDetailsModal = () => {
+        setDetailsModal({ open: false, lorebook: null, loading: false });
+    };
+
+    // Prevent scrolling when modal is open
+    useEffect(() => {
+        if (detailsModal.open) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [detailsModal.open]);
+
     const columns = [
         {
             key: 'name',
@@ -125,7 +168,17 @@ export default function LorebooksPage() {
             key: 'actions',
             header: 'Tools',
             render: (book: Lorebook) => (
-                <div className="flex justify-end pr-4">
+                <div className="flex justify-end pr-4 gap-2">
+                    <button
+                        onClick={() => handleViewDetails(book.id)}
+                        className="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white transition-all shadow-sm active:scale-90"
+                        title="View Details"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
                     <button
                         onClick={() => handleDelete(book.id)}
                         className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-90"
@@ -202,6 +255,90 @@ export default function LorebooksPage() {
                     />
                 </div>
             </div>
-        </div>
+            {/* Details Modal */}
+            {detailsModal.open && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
+                    onClick={closeDetailsModal}
+                >
+                    <div
+                        className="bg-zinc-900 rounded-3xl border border-white/10 p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={closeDetailsModal}
+                            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {detailsModal.loading ? (
+                            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                                <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Retrieving Data...</p>
+                            </div>
+                        ) : detailsModal.lorebook ? (
+                            <div className="space-y-8">
+                                <div className="flex items-start gap-6">
+                                    <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-600 shrink-0">
+                                        <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic">{detailsModal.lorebook.name}</h2>
+                                        <p className="text-xs font-bold text-zinc-500 mt-1 uppercase tracking-wide">
+                                            Created by <span className="text-zinc-300">{detailsModal.lorebook.creator}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">Description</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 font-mono">
+                                                {detailsModal.lorebook.description || "No description provided."}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Attached Characters</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
+                                            {detailsModal.lorebook.charactersList && detailsModal.lorebook.charactersList.length > 0 ? (
+                                                <div className="flex flex-wrap gap-2">
+                                                    {detailsModal.lorebook.charactersList.map(char => (
+                                                        <div key={char.id} className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/10 rounded-lg px-2 py-1.5 text-emerald-400 text-[10px] font-bold">
+                                                            <div className="w-4 h-4 rounded bg-emerald-900/50 flex items-center justify-center overflow-hidden">
+                                                                <img
+                                                                    src={`/api/characters/picture/${char.id}`}
+                                                                    onError={(e) => (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${char.name}&background=random`}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            {char.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs text-zinc-500 italic">No characters linked to this lorebook.</p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-20">
+                                <p className="text-white/30 font-bold uppercase tracking-widest">Failed to load lorebook data</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )
+            }
+        </div >
     );
 }
