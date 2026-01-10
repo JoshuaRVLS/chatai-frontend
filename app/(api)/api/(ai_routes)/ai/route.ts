@@ -9,13 +9,12 @@ export const POST = async (req: Request) => {
   const { content, chatId, model, regenerate, continue: isContinue } = await req.json();
   const isRegenerate = regenerate === true;
 
-  const chat = await db.chat.findFirst({
+  const chatMetadata = await db.chat.findUnique({
     where: {
       id: chatId,
     },
     include: {
       user: true,
-      messages: true,
       character: {
         include: {
           lorebooks: {
@@ -29,6 +28,37 @@ export const POST = async (req: Request) => {
       },
     },
   });
+
+  if (!chatMetadata) {
+    return NextResponse.json({ success: false, error: 'Chat not found' }, { status: 404 });
+  }
+
+  // Optimize: Fetch only necessary messages (Recent 50 + All Pinned)
+  const [dbRecentMessages, dbPinnedMessages] = await Promise.all([
+    db.message.findMany({
+      where: { chatId },
+      take: 50,
+      orderBy: { createdAt: 'desc' }
+    }),
+    db.message.findMany({
+      where: { chatId, pinned: true }
+    })
+  ]);
+
+  // Merge and de-duplicate (pinned messages might be in recent)
+  const allMessageIds = new Set();
+  const mergedMessages = [...dbRecentMessages, ...dbPinnedMessages]
+    .filter(m => {
+      if (allMessageIds.has(m.id)) return false;
+      allMessageIds.add(m.id);
+      return true;
+    })
+    .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+
+  const chat = {
+    ...chatMetadata,
+    messages: mergedMessages
+  };
 
   const personaId = chat?.personaId || chat?.user.personaUsed;
   const persona = await db.userPersona.findFirst({
