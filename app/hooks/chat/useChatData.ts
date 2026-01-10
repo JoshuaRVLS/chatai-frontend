@@ -100,9 +100,10 @@ export const useChatData = (chatId: string) => {
     }, []);
 
     const scrollToBottom = useCallback(() => {
-        setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-        }, 100);
+        // Immediate scroll for better streaming feel
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+        }
     }, []);
 
     // Intersection Observer for loading more

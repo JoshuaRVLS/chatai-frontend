@@ -261,11 +261,36 @@ Provide a fresh perspective, different tone, or different angle. Do NOT repeat t
     return NextResponse.json({ success: false, error: 'AI generation failed' }, { status: 500 });
   }
 
-  return new Response(response.body, {
+  // Use a TransformStream to ensure chunks are delivered immediately and not buffered
+  const transformStream = new TransformStream();
+  const writer = transformStream.writable.getWriter();
+  const reader = response.body?.getReader();
+
+  if (reader) {
+    (async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writer.write(value);
+        }
+      } catch (error) {
+        console.error("Streaming error in proxy:", error);
+      } finally {
+        writer.close();
+      }
+    })();
+  } else {
+    writer.close();
+  }
+
+  return new Response(transformStream.readable, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      'X-Accel-Buffering': 'no',
       'Connection': 'keep-alive',
+      'Transfer-Encoding': 'chunked',
     },
   });
 };

@@ -76,9 +76,9 @@ export const useChatStreaming = ({
 
                     for (const line of lines) {
                         const trimmedLine = line.trim();
-                        if (!trimmedLine || !trimmedLine.startsWith("data: ")) continue;
+                        if (!trimmedLine || !trimmedLine.startsWith("data:")) continue;
 
-                        const dataStr = trimmedLine.slice(6).trim();
+                        let dataStr = trimmedLine.slice(5).trim();
                         if (dataStr === "[DONE]") {
                             isDone = true;
                             break;
@@ -86,13 +86,17 @@ export const useChatStreaming = ({
 
                         try {
                             const parsed = JSON.parse(dataStr);
-                            const delta = parsed.choices[0]?.delta?.content || "";
+                            const delta = parsed.choices[0]?.delta?.content ||
+                                parsed.choices[0]?.text || // Fallback for some models
+                                "";
                             if (delta) {
                                 fullContent += delta;
                                 setStreamingMessage(fullContent);
                                 scrollToBottom();
                             }
-                        } catch (e) { }
+                        } catch (e) {
+                            // If parsing fails, it might be an incomplete JSON but we try to continue
+                        }
                     }
                 }
             } catch (err: any) {
@@ -101,12 +105,14 @@ export const useChatStreaming = ({
                 clearInterval(watchdog);
             }
 
-            if (buffer.startsWith("data: ")) {
-                const dataStr = buffer.slice(6).trim();
+            if (buffer.startsWith("data:")) {
+                const dataStr = buffer.slice(5).trim();
                 if (dataStr !== "[DONE]") {
                     try {
                         const parsed = JSON.parse(dataStr);
-                        const delta = parsed.choices[0]?.delta?.content || "";
+                        const delta = parsed.choices[0]?.delta?.content ||
+                            parsed.choices[0]?.text ||
+                            "";
                         if (delta) fullContent += delta;
                     } catch (e) { }
                 }
@@ -287,6 +293,8 @@ export const useChatStreaming = ({
     return {
         isSubmitting,
         streamingMessage,
+        setIsSubmitting,
+        setStreamingMessage,
         handleSubmit,
         handleContinueStory,
         startStreaming,

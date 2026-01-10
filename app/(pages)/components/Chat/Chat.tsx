@@ -39,8 +39,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
   // Shared UI/Settings State
   const [selectedModel, setSelectedModel] = useState("deepseek/deepseek-v3.2");
   const [selectedPersonaId, setSelectedPersonaId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
 
   // Modal states
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -69,8 +67,10 @@ const Chat = ({ chatId }: { chatId: string }) => {
     handleSubmit,
     handleContinueStory,
     startStreaming,
-    isSubmitting: isStreamingProcessing,
-    streamingMessage: currentStream,
+    isSubmitting,
+    streamingMessage,
+    setIsSubmitting,
+    setStreamingMessage,
   } = useChatStreaming({
     chatId,
     user,
@@ -81,12 +81,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     onClearHistory: () => handleClearHistory(),
     onClearMemory: () => handleClearMemory(),
   });
-
-  // Proxy streaming states to local state for shared access
-  useEffect(() => {
-    setIsSubmitting(isStreamingProcessing);
-    setStreamingMessage(currentStream);
-  }, [isStreamingProcessing, currentStream]);
 
   // 3. Mutation Actions
   const {
