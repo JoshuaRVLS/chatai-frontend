@@ -18,6 +18,16 @@ pnpm install
 echo "🗄️ Generating Prisma client..."
 pnpm prisma generate
 
+echo "🐍 Setting up Python environment..."
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv venv
+fi
+source venv/bin/activate
+echo "Installing Python dependencies..."
+pip install --upgrade pip setuptools wheel
+pip install -r scripts/analytics/requirements.txt
+
 echo "🏗️ Building application..."
 pnpm build
 
