@@ -405,6 +405,22 @@ export default function UsersPage() {
                                 <option value="most_chats">Sort: Activity</option>
                             </select>
                         </div>
+
+                        <button
+                            onClick={() => fetchUsers()}
+                            disabled={loading}
+                            className="bg-white/5 border border-white/5 rounded-2xl p-3 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
+                            title="Refresh Data"
+                        >
+                            <svg
+                                className={`w-5 h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
 
@@ -446,8 +462,8 @@ export default function UsersPage() {
                                             key={opt.value}
                                             onClick={() => setSuspendDuration(opt.value as any)}
                                             className={`p-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${suspendDuration === opt.value
-                                                    ? 'bg-orange-500 text-white'
-                                                    : 'bg-white/5 text-zinc-400 hover:bg-white/10'
+                                                ? 'bg-orange-500 text-white'
+                                                : 'bg-white/5 text-zinc-400 hover:bg-white/10'
                                                 }`}
                                         >
                                             {opt.label}

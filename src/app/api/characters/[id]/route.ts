@@ -3,6 +3,55 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
+export async function GET(
+    request: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    const session = await getServerSession(authOptions);
+
+    if (!session || !session.user.isAdmin) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const { id: charId } = await params;
+
+        const character = await db.character.findUnique({
+            where: { id: charId },
+            include: {
+                author: {
+                    select: {
+                        username: true,
+                        email: true
+                    }
+                },
+                tags: true,
+                lorebooks: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                _count: {
+                    select: {
+                        chats: true,
+                        comments: true
+                    }
+                }
+            }
+        });
+
+        if (!character) {
+            return NextResponse.json({ error: "Character not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(character);
+    } catch (error) {
+        console.error("Failed to fetch character details:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
+
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }

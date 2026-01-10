@@ -11,6 +11,24 @@ interface Character {
     conversations: number;
     isNsfw: boolean;
     createdAt: string;
+    // Details
+    persona?: string;
+    bio?: string;
+    scenario?: string;
+    introMessage?: string;
+    exampleConversations?: string;
+    tags?: { id: string; name: string }[];
+    lorebooks?: { id: string; name: string }[];
+    chubId?: string | null;
+    updatedAt?: string;
+    author?: {
+        username: string;
+        email: string;
+    };
+    _count?: {
+        chats: number;
+        comments: number;
+    };
 }
 
 interface Stats {
@@ -80,6 +98,42 @@ export default function CharactersPage() {
         }
     };
 
+    // Details Modal
+    const [detailsModal, setDetailsModal] = useState<{ open: boolean; character: Character | null; loading: boolean }>({ open: false, character: null, loading: false });
+
+    const handleViewDetails = async (id: string) => {
+        setDetailsModal({ open: true, character: null, loading: true });
+        try {
+            const res = await fetch(`/api/characters/${id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setDetailsModal({ open: true, character: data, loading: false });
+            } else {
+                alert('Failed to load details');
+                setDetailsModal({ open: false, character: null, loading: false });
+            }
+        } catch (error) {
+            console.error("Fetch details error:", error);
+            setDetailsModal({ open: false, character: null, loading: false });
+        }
+    };
+
+    const closeDetailsModal = () => {
+        setDetailsModal({ open: false, character: null, loading: false });
+    };
+
+    // Prevent scrolling when modal is open
+    useEffect(() => {
+        if (detailsModal.open) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [detailsModal.open]);
+
     const columns = [
         {
             key: 'name',
@@ -129,12 +183,22 @@ export default function CharactersPage() {
             header: 'Tools',
             render: (char: Character) => (
                 <div className="flex items-center gap-2 justify-end pr-4">
+                    <button
+                        onClick={() => handleViewDetails(char.id)}
+                        className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/10 text-sky-500 hover:bg-sky-500 hover:text-white transition-all shadow-sm active:scale-90"
+                        title="View Details"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
                     <a
-                        href={`https://jchatai.space/chat/${char.id}`} // Assuming this is the link structure
+                        href={`https://jchatai.space/chat/${char.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 rounded-lg bg-white/5 border border-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition-all shadow-sm"
-                        title="View on Site"
+                        title="Open on Site"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -223,6 +287,163 @@ export default function CharactersPage() {
                     />
                 </div>
             </div>
-        </div >
+
+            {/* Details Modal */}
+            {detailsModal.open && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
+                    onClick={closeDetailsModal}
+                >
+                    <div
+                        className="bg-zinc-900 rounded-3xl border border-white/10 p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={closeDetailsModal}
+                            className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {detailsModal.loading ? (
+                            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                                <div className="w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
+                                <p className="text-xs font-black uppercase tracking-widest text-zinc-500">Retrieving Data...</p>
+                            </div>
+                        ) : detailsModal.character ? (
+                            <div className="space-y-8">
+                                <div className="flex items-start gap-6">
+                                    <div className="w-24 h-24 rounded-2xl bg-white/5 border border-white/5 overflow-hidden shrink-0">
+                                        <img
+                                            src={`/api/characters/picture/${detailsModal.character.id}`}
+                                            alt={detailsModal.character.name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${detailsModal.character?.name}&background=09090b&color=fff&bold=true`;
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic">{detailsModal.character.name}</h2>
+                                        <div className="flex flex-wrap gap-2 mt-2">
+                                            <span className={`badge ${detailsModal.character.isNsfw ? 'badge-danger' : 'badge-success'}`}>
+                                                {detailsModal.character.isNsfw ? 'NSFW' : 'SFW'}
+                                            </span>
+                                            {detailsModal.character.tags?.map(tag => (
+                                                <span key={tag.id} className="badge bg-white/5 border-white/10 text-zinc-400">
+                                                    #{tag.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                        {detailsModal.character.chubId && (
+                                            <div className="mt-4">
+                                                <a
+                                                    href={`https://chub.ai/characters/${detailsModal.character.chubId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center gap-2 text-xs font-bold text-sky-500 hover:text-sky-400 transition-colors bg-sky-500/10 px-3 py-1.5 rounded-lg border border-sky-500/10 hover:border-sky-500/20"
+                                                >
+                                                    View on Chub.ai
+                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                    </svg>
+                                                </a>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Metadata Grid */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/5 rounded-2xl p-6 border border-white/5">
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1">Author</p>
+                                        <p className="text-sm font-bold text-white truncate">{detailsModal.character.author?.username || detailsModal.character.creator}</p>
+                                        <p className="text-[10px] text-zinc-500 truncate">{detailsModal.character.author?.email}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1">Created</p>
+                                        <p className="text-sm font-bold text-zinc-300">{new Date(detailsModal.character.createdAt).toLocaleDateString()}</p>
+                                        <p className="text-[10px] text-zinc-500">{new Date(detailsModal.character.createdAt).toLocaleTimeString()}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1">Statistics</p>
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-xs font-bold text-zinc-400">
+                                                <span className="text-white">{detailsModal.character._count?.chats || detailsModal.character.conversations || 0}</span> Chats
+                                            </span>
+                                            <span className="text-xs font-bold text-zinc-400">
+                                                <span className="text-white">{detailsModal.character._count?.comments || 0}</span> Comments
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600 mb-1">System ID</p>
+                                        <p className="text-[10px] font-mono text-zinc-500 truncate bg-black/20 p-1.5 rounded border border-white/5 select-all">
+                                            {detailsModal.character.id}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Lorebooks */}
+                                {detailsModal.character.lorebooks && detailsModal.character.lorebooks.length > 0 && (
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-500">Linked Lorebooks</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {detailsModal.character.lorebooks.map(lb => (
+                                                <div key={lb.id} className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/10 rounded-lg px-3 py-2 text-emerald-400 text-xs font-bold">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                    </svg>
+                                                    {lb.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">Persona</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-60 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">{detailsModal.character.persona || 'No persona defined.'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">Scenario</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-60 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">{detailsModal.character.scenario || 'No scenario defined.'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">First Message</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-40 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">{detailsModal.character.introMessage || 'No intro message.'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">Bio / Description</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-60 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">{detailsModal.character.bio || 'No bio.'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <h3 className="text-[10px] font-black uppercase tracking-widest text-sky-500">Example Dialogue</h3>
+                                        <div className="bg-white/5 border border-white/5 rounded-2xl p-4 max-h-60 overflow-y-auto custom-scrollbar">
+                                            <p className="text-xs leading-relaxed text-zinc-300 whitespace-pre-wrap font-mono">{detailsModal.character.exampleConversations || 'No examples.'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-20">
+                                <p className="text-white/30 font-bold uppercase tracking-widest">Failed to load character data</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
