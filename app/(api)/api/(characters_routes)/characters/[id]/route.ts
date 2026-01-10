@@ -24,7 +24,11 @@ export const GET =
           },
           tags: true,
           lorebooks: {
-            select: { id: true }
+            select: {
+              id: true,
+              name: true,
+              description: true,
+            }
           }
         },
       });

@@ -9,6 +9,7 @@ import {
   FiTag,
   FiAward,
   FiStar,
+  FiBook,
 } from "react-icons/fi";
 import { Character, CharacterTag, User } from "@/app/generated/prisma";
 import { useQuery } from "@tanstack/react-query";
@@ -31,6 +32,7 @@ const CharacterView = ({ id }: { id: string }) => {
       author: User;
       photo: { data: Uint8Array; mimetype: string; name: string };
       tags: CharacterTag[];
+      lorebooks: { id: string; name: string; description: string }[];
     }
   >({
     queryKey: ["character", id],
@@ -49,10 +51,11 @@ const CharacterView = ({ id }: { id: string }) => {
   const shouldBlur = data?.isNsfw && settings?.blurNsfw && !tempUnblur;
 
   const [expandedSections, setExpandedSections] = useState({
-    biography: true,
+    biography: false,
     scenario: false,
     persona: false,
     intro: false,
+    lorebooks: false,
   });
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
@@ -263,6 +266,30 @@ const CharacterView = ({ id }: { id: string }) => {
               >
                 <div className="p-4 rounded-xl bg-white/2 border border-white/5 prose prose-invert prose-sm max-w-none prose-p:text-white/80 prose-p:leading-relaxed prose-p:italic prose-headings:text-white">
                   <ReactMarkdown>{data.introMessage}</ReactMarkdown>
+                </div>
+              </CollapsibleSection>
+              <CollapsibleSection
+                title="Attached Lorebooks"
+                icon={<FiBook />}
+                isOpen={expandedSections.lorebooks}
+                onToggle={() => setExpandedSections(prev => ({ ...prev, lorebooks: !prev.lorebooks }))}
+              >
+                <div className="p-4 space-y-3">
+                  {data && data.lorebooks && data.lorebooks.length > 0 ? (
+                    data.lorebooks.map((lb) => (
+                      <div key={lb.id} className="p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
+                        <div className="flex items-center gap-2 mb-1">
+                          <FiBook className="text-emerald-500 text-xs" />
+                          <h4 className="text-sm font-bold text-white">{lb.name}</h4>
+                        </div>
+                        {lb.description && (
+                          <p className="text-xs text-zinc-400 line-clamp-2">{lb.description}</p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-xs text-zinc-500 italic">No lorebooks attached.</p>
+                  )}
                 </div>
               </CollapsibleSection>
             </div>
