@@ -32,7 +32,7 @@ export default async function Template({ children }: { children: React.ReactNode
     let shouldRedirect = false;
     let redirectPath = "";
 
-    const publicRoutes = ['/login', '/register', '/maintenance', '/suspended', '/access-denied', '/privacy', '/terms'];
+    const publicRoutes = ['/login', '/register', '/verify-email', '/maintenance', '/suspended', '/access-denied', '/privacy', '/terms'];
     // Check if path is public (exact match or starts with for sub-routes)
     const isPublicRoute = publicRoutes.some(route => pathname === route || pathname.startsWith(`${route}/`));
 

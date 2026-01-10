@@ -48,8 +48,12 @@ export default function RegisterPage() {
         return;
       }
 
-      toast.success("Identity established! Check transmission (email).");
-      router.push("/login");
+      toast.success("Identity established! Transmission initiated.");
+      console.log("Redirecting to verify-email...");
+      // Small delay to ensure toast is visible and navigation handles correctly
+      setTimeout(() => {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      }, 1000);
     } catch {
       toast.error("Subsystem failure");
     } finally {

@@ -73,7 +73,7 @@ export const POST = async (req: Request) => {
       );
     }
 
-    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationTokenExpires =
       new Date(Date.now() + 24 * 60 * 60 * 1000);  // 24 hours\
 

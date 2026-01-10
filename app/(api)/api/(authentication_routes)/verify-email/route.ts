@@ -2,11 +2,19 @@ import { db } from "@/app/utils/prisma";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
-  const { token } = await req.json();
+  const { email, code } = await req.json();
+
+  if (!email || !code) {
+    return NextResponse.json(
+      { success: false, message: "Email and code are required" },
+      { status: 400 }
+    );
+  }
 
   const user = await db.user.findFirst({
     where: {
-      verificationToken: token,
+      email: email,
+      verificationToken: code,
       verificationTokenExpires: {
         gt: new Date(),
       },
@@ -15,7 +23,7 @@ export const POST = async (req: Request) => {
 
   if (!user) {
     return NextResponse.json(
-      { success: false, message: "Invalid or expired verification token" },
+      { success: false, message: "Invalid or expired verification code" },
       { status: 400 }
     );
   }

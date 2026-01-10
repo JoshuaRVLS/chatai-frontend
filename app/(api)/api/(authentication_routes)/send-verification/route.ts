@@ -1,7 +1,4 @@
-import { db } from "@/app/utils/prisma";
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
-import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { rateLimit } from "@/app/utils/rateLimit";
 import { headers } from "next/headers";
 
@@ -9,7 +6,7 @@ export const POST = async (req: Request) => {
   const headerPayload = await headers();
   const ip = headerPayload.get("x-forwarded-for") || "unknown";
 
-  const limitResult = await rateLimit(ip, { limit: 2, windowMs: 300000 }); // 2 emails per 5 mins
+  const limitResult = await rateLimit(ip, { limit: 10, windowMs: 300000 }); // 10 emails per 5 mins
   if (!limitResult.success) {
     return NextResponse.json(
       { success: false, message: "Terlalu banyak permintaan verifikasi. Silakan coba lagi nanti." },
@@ -19,30 +16,31 @@ export const POST = async (req: Request) => {
 
   const { email, verificationToken } = await req.json();
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_SERVER_HOST as string,
-    secure: false,
-    port: process.env.EMAIL_SERVER_PORT,
-    auth: {
-      user: process.env.EMAIL_SERVER_USER,
-      pass: process.env.EMAIL_SERVER_PASSWORD,
-    },
-  } as SMTPTransport.Options);
+  console.log(`📧 Attempting to send verification code to: ${email}`);
 
-  const baseUrl = new URL(req.url).origin;
-  const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
-
-  console.log(`📧 Attempting to send verification email to: ${email}`);
   try {
-    // Verify SMTP connection
-    await transporter.verify();
-    console.log("✅ SMTP connection verified");
+    const senderName = process.env.EMAIL_FROM_NAME || "JChatAI";
+    const senderEmail = process.env.EMAIL_FROM || "noreply@jchatai.space";
 
-    await transporter.sendMail({
-      from: `"JCorp" <${process.env.BREVO_EMAIL}>`,
-      to: email,
-      subject: "Verify Your Email Address",
-      html: `
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": process.env.BREVO_KEY as string,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        sender: {
+          name: senderName,
+          email: senderEmail,
+        },
+        to: [
+          {
+            email: email,
+          },
+        ],
+        subject: "Verify Your Email Address",
+        htmlContent: `
        <!DOCTYPE html>
 <html>
 <head>
@@ -78,29 +76,24 @@ export const POST = async (req: Request) => {
             font-size: 24px;
             margin-bottom: 20px;
         }
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #4299e1;
-            color: white !important;
-            text-decoration: none;
-            border-radius: 4px;
-            font-weight: 600;
-            margin: 20px 0;
+        .code-container {
+            text-align: center;
+            margin: 30px 0;
         }
-        .button:hover {
-            background-color: #3182ce;
+        .verification-code {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            color: #4299e1;
+            background-color: #ebf8ff;
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: 1px dashed #4299e1;
+            display: inline-block;
         }
         .divider {
             border-top: 1px solid #e2e8f0;
             margin: 25px 0;
-        }
-        .link-text {
-            word-break: break-all;
-            background-color: #f0f4f8;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 14px;
         }
         .footer {
             text-align: center;
@@ -114,27 +107,35 @@ export const POST = async (req: Request) => {
     <div class="container">
         <div class="header">
             <!-- Replace with your logo -->
-            <img src="https://via.placeholder.com/150x50?text=Your+Logo" alt="Company Logo" class="logo">
+            <img src="https://via.placeholder.com/150x50?text=JChatAI" alt="JChatAI Logo" class="logo">
             <h1>Verify Your Email Address</h1>
         </div>
         
-        <p>Thanks for signing up! To complete your registration, please verify your email address by clicking the button below:</p>
+        <p>Thanks for signing up! To complete your registration, please use the verification code below:</p>
         
-        <div style="text-align: center;">
-            <a href="${verificationLink}" class="button">Verify Email Address</a>
+        <div class="code-container">
+            <div class="verification-code">${verificationToken}</div>
         </div>
+        
+        <p>This code will expire in 24 hours. If you didn't request this email, you can safely ignore it.</p>
         
         <div class="divider"></div>
         
-        <p>If the button doesn't work, copy and paste this link into your browser:</p>
-        <p class="link-text">${verificationLink}</p>
-        
-        <p>This link will expire in 24 hours. If you didn't request this email, you can safely ignore it.</p>
+        <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} JChatAI. All rights reserved.</p>
+        </div>
       </div>
 </body>
 </html>
       `,
+      }),
     });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Brevo API Error:", errorData);
+      throw new Error(`Brevo API responded with status ${response.status}`);
+    }
 
     console.log(`✅ Verification email sent successfully to: ${email}`);
     return NextResponse.json({ success: true });
