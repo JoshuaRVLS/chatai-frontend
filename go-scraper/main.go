@@ -240,8 +240,10 @@ func fetchChubCharacter(path string) (*ScrapedCharacter, error) {
 		AvatarURL: node.AvatarURL,
 	}
 	
+	// Prioritize Max Resolution
+	char.AvatarURL = node.MaxResURL
 	if char.AvatarURL == "" {
-		char.AvatarURL = node.MaxResURL
+		char.AvatarURL = node.AvatarURL
 	}
 
 	// Mapping Logic

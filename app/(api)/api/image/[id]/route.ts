@@ -16,15 +16,14 @@ export const GET = async (
         if (!image || !image.data) {
             return new NextResponse("Not Found", { status: 404 });
         }
-
         // Optimize image using sharp
         const optimizedBuffer = await sharp(Buffer.from(image.data))
             .resize({
-                width: 400,
+                width: 1024,
                 withoutEnlargement: true,
                 fit: 'inside'
             })
-            .webp({ quality: 80 })
+            .webp({ quality: 90 })
             .toBuffer();
 
         return new NextResponse(new Uint8Array(optimizedBuffer), {

@@ -17,7 +17,7 @@ const LorebookSelector = ({
 }) => {
     const { data, error } = useQuery<any[]>({
         queryKey: ["lorebooks"],
-        queryFn: () => fetch("/api/lorebooks").then(res => res.json().then(d => d.data)),
+        queryFn: () => fetch("/api/lorebooks?filter=library").then(res => res.json().then(d => d.data)),
     });
 
     if (error) return <p className="text-red-400 text-xs">{error.message}</p>;

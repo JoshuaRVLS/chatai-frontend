@@ -44,8 +44,7 @@ const Navbar = () => {
   const dropdownLinks = [
     { name: "Create Character", href: "/create_character", icon: <FiPlusSquare /> },
     { name: "Create Lorebook", href: "/create_lorebook", icon: <FiPlusSquare /> },
-    { name: "Lorebooks", href: "/lorebooks-repository", icon: <FiBookOpen /> },
-    { name: "My Lorebooks", href: "/lorebooks", icon: <FiBookOpen /> },
+    { name: "Lorebook Library", href: "/lorebooks", icon: <FiBookOpen /> },
     { name: "My Characters", href: "/my_characters", icon: <FiUsers /> },
     { name: "My Personas", href: "/my_personas", icon: <FiCpu /> },
     { name: "Settings", href: "/settings", icon: <FiSettings /> },
@@ -156,26 +155,9 @@ const Navbar = () => {
 
                             <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-1 mx-4" />
 
-                            {/* Discovery Section */}
+                            {/* Discovery & Collection Section */}
                             <div className="space-y-0.5 lg:space-y-1">
-                              {dropdownLinks.slice(2, 3).map((link) => (
-                                <Link
-                                  key={link.href}
-                                  href={link.href}
-                                  onClick={() => setIsProfileHovered(false)}
-                                  className="flex items-center gap-3 lg:gap-4 px-3 py-2 lg:px-4 lg:py-3 rounded-xl transition-all hover:bg-white/5 text-zinc-500 hover:text-white group/item"
-                                >
-                                  <span className="text-sm lg:text-base transition-transform group-hover/item:scale-110">{link.icon}</span>
-                                  <span className="text-[9px] lg:text-[11px] font-black uppercase tracking-widest leading-none">{link.name}</span>
-                                </Link>
-                              ))}
-                            </div>
-
-                            <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-1 mx-4" />
-
-                            {/* My Collection Section */}
-                            <div className="space-y-0.5 lg:space-y-1">
-                              {dropdownLinks.slice(3, 6).map((link) => (
+                              {dropdownLinks.slice(2, 5).map((link) => (
                                 <Link
                                   key={link.href}
                                   href={link.href}
@@ -192,7 +174,7 @@ const Navbar = () => {
 
                             {/* Settings & System Section */}
                             <div className="space-y-0.5 lg:space-y-1">
-                              {dropdownLinks.slice(6, 7).map((link) => (
+                              {dropdownLinks.slice(5, 6).map((link) => (
                                 <Link
                                   key={link.href}
                                   href={link.href}
@@ -272,29 +254,10 @@ const Navbar = () => {
 
               <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-4 mx-6" />
 
-              {/* Discovery Section */}
+              {/* Discovery & Collection Section */}
               <div className="space-y-1">
-                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">Discovery Hub</p>
-                {dropdownLinks.slice(2, 3).map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-4 px-6 py-4 rounded-2xl transition-all ${pathname === link.href ? "bg-white/10 text-white font-bold" : "text-zinc-500 hover:text-zinc-200 hover:bg-white/5"
-                      }`}
-                  >
-                    <span className="text-lg group-hover:scale-110 transition-transform">{link.icon}</span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{link.name}</span>
-                  </Link>
-                ))}
-              </div>
-
-              <div className="h-px bg-linear-to-r from-transparent via-white/10 to-transparent my-4 mx-6" />
-
-              {/* My Collection Section */}
-              <div className="space-y-1">
-                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">My Library</p>
-                {dropdownLinks.slice(3, 6).map((link) => (
+                <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">My Intelligence Hub</p>
+                {dropdownLinks.slice(2, 5).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -313,7 +276,7 @@ const Navbar = () => {
               {/* Settings Section */}
               <div className="space-y-1">
                 <p className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.4em] px-6 mb-2">System</p>
-                {dropdownLinks.slice(6, 7).map((link) => (
+                {dropdownLinks.slice(5, 6).map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}

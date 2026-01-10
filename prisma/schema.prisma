@@ -37,6 +37,7 @@ model User {
   personas                 UserPersona[]
   userSettings             UserSettings?
   lorebooks                Lorebook[]
+  savedLorebooks           Lorebook[] @relation("SavedLorebooks")
 }
 
 model UserSettings {
@@ -111,6 +112,7 @@ model Lorebook {
   image              LorebookImage?
   createdAt          DateTime        @default(now())
   updatedAt          DateTime        @updatedAt
+  savedByUsers       User[]          @relation("SavedLorebooks")
 }
 
 model LorebookImage {

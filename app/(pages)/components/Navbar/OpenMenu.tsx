@@ -60,7 +60,6 @@ const OpenMenu = () => {
     { href: "/my_characters", icon: <FaUserFriends />, label: "My Characters" },
     { href: "#", icon: <FaLine />, label: "My Chats" },
     { href: "/my_personas", icon: <FaMask />, label: "My Personas" },
-    { href: "/lorebooks-repository", icon: <FaLine />, label: "Lorebooks" },
     { href: "/settings", icon: <FaGear />, label: "Settings" },
   ];
 

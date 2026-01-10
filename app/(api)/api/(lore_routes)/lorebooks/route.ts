@@ -9,18 +9,61 @@ export const GET = async (req: Request) => {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(req.url);
+    const filter = searchParams.get("filter") || "library"; // library, discover, saved, created
+    const query = searchParams.get("q");
+
     try {
+        let where: any = {};
+
+        if (query) {
+            where.OR = [
+                { name: { contains: query, mode: "insensitive" } },
+                { description: { contains: query, mode: "insensitive" } },
+            ];
+        }
+
+        if (filter === "library") {
+            where.AND = [
+                ...(where.AND || []),
+                {
+                    OR: [
+                        { userId: session.user.id },
+                        { savedByUsers: { some: { id: session.user.id } } }
+                    ]
+                }
+            ];
+        } else if (filter === "saved") {
+            where.savedByUsers = { some: { id: session.user.id } };
+        } else if (filter === "created") {
+            where.userId = session.user.id;
+        }
+        // filter === 'discover' implies no user restrictions (public)
+
         const lorebooks = await db.lorebook.findMany({
-            where: { userId: session.user.id },
+            where,
             include: {
                 _count: {
-                    select: { entries: true }
+                    select: { entries: true, characters: true }
                 },
                 tags: true,
+                savedByUsers: {
+                    where: { id: session.user.id },
+                    select: { id: true }
+                }
             },
-            orderBy: { updatedAt: "desc" }
+            orderBy: { updatedAt: "desc" },
+            take: 50
         });
-        return NextResponse.json({ success: true, data: lorebooks });
+
+        // Map to include isSaved bool
+        const mapped = lorebooks.map(lb => ({
+            ...lb,
+            isSaved: lb.savedByUsers.length > 0,
+            savedByUsers: undefined // Remove from payload
+        }));
+
+        return NextResponse.json({ success: true, data: mapped });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

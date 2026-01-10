@@ -10,11 +10,23 @@ import Link from "next/link";
 
 const Lorebooks: React.FC = () => {
     const { user } = useContext(AuthContext);
+    const [filter, setFilter] = React.useState<"library" | "discover">("library");
+    const [search, setSearch] = React.useState("");
+    const [debouncedSearch, setDebouncedSearch] = React.useState("");
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 500);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const { isPending, data, error, refetch } = useQuery<any[]>({
-        queryKey: ["lorebooks"],
+        queryKey: ["lorebooks", filter, debouncedSearch],
         queryFn: async () => {
-            const res = await fetch(`/api/lorebooks`);
+            const params = new URLSearchParams();
+            params.set("filter", filter);
+            if (debouncedSearch) params.set("q", debouncedSearch);
+
+            const res = await fetch(`/api/lorebooks?${params.toString()}`);
             const json = await res.json();
             return json.data;
         },
@@ -31,29 +43,8 @@ const Lorebooks: React.FC = () => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
     };
 
-    if (isPending)
-        return (
-            <div className="min-h-screen pt-24 px-6 bg-[#09090b]">
-                <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
-                    <div className="h-8 bg-white/5 rounded-xl w-32" />
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="h-40 bg-white/5 rounded-2xl" />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        );
-
-    if (error)
-        return (
-            <div className="min-h-screen pt-24 bg-[#09090b] flex items-center justify-center text-center">
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Archival Failure: {error.message}</p>
-            </div>
-        );
-
     return (
-        <div className="min-h-screen bg-[#09090b] pt-24 pb-16 px-4 sm:px-8 relative overflow-hidden">
+        <div className="min-h-screen bg-[#09090b] pt-36 pb-16 px-4 sm:px-8 relative overflow-hidden">
             {/* Background Decor */}
             <div className="fixed inset-0 pointer-events-none opacity-20">
                 <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-white/2 blur-[100px]" />
@@ -67,30 +58,54 @@ const Lorebooks: React.FC = () => {
             >
                 {/* Header Section */}
                 <motion.div
-                    className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
+                    className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8"
                     variants={item}
                 >
-                    <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-5 bg-white/10 rounded-full" />
+                    <div className="space-y-4 w-full md:w-auto">
+                        <div className="space-y-1">
                             <h1 className="text-3xl sm:text-5xl font-black text-white italic tracking-tight uppercase leading-none">
-                                My Lorebooks
+                                {filter === 'library' ? 'My Library' : 'Discovery'}
                             </h1>
+                            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-1 leading-none">
+                                {filter === 'library' ? 'Managed Modules' : 'Public Database'} • {data?.length || 0} Found
+                            </p>
                         </div>
-                        <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-3 leading-none">
-                            Knowledge Base • {data?.length || 0} Modules Indexed
-                        </p>
+
+                        {/* Tabs */}
+                        <div className="flex bg-white/5 p-1 rounded-xl w-fit border border-white/5">
+                            <button
+                                onClick={() => setFilter("library")}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'library' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                            >
+                                Library
+                            </button>
+                            <button
+                                onClick={() => setFilter("discover")}
+                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'discover' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                            >
+                                Discovery
+                            </button>
+                        </div>
                     </div>
 
-                    <Link href="/create_lorebook">
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl"
-                        >
-                            <FaPlus size={10} /> Create Module
-                        </motion.button>
-                    </Link>
+                    <div className="flex gap-4 w-full md:w-auto">
+                        <input
+                            type="text"
+                            placeholder="SEARCH MODULES..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="bg-zinc-900/50 border border-white/10 text-white text-xs font-bold px-4 py-2.5 rounded-lg w-full md:w-64 focus:outline-none focus:border-white/30 transition-colors uppercase placeholder:text-zinc-700"
+                        />
+                        <Link href="/create_lorebook">
+                            <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl whitespace-nowrap h-full"
+                            >
+                                <FaPlus size={10} /> Create
+                            </motion.button>
+                        </Link>
+                    </div>
                 </motion.div>
 
                 {/* Cards Grid */}
@@ -98,10 +113,14 @@ const Lorebooks: React.FC = () => {
                     className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
                     variants={container}
                 >
-                    {data && data.length > 0 ? (
+                    {isPending ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="h-40 bg-white/5 rounded-2xl animate-pulse" />
+                        ))
+                    ) : data && data.length > 0 ? (
                         data.map((lb: any) => (
-                            <motion.div key={lb.id} variants={item}>
-                                <LorebookCard lorebook={lb} onUpdate={refetch} />
+                            <motion.div key={lb.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="h-full">
+                                <LorebookCard lorebook={lb} onUpdate={refetch} currentUserId={user?.id} />
                             </motion.div>
                         ))
                     ) : (
@@ -113,27 +132,13 @@ const Lorebooks: React.FC = () => {
                                 <div>
                                     <h3 className="text-2xl font-black text-white italic uppercase tracking-tight">No Modules Found</h3>
                                     <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest mt-2">
-                                        Create a lorebook to define languages, locations, and history for your entities.
+                                        {filter === 'library' ? "You haven't saved or created any lorebooks yet." : "No public lorebooks found."}
                                     </p>
                                 </div>
                             </div>
                         </motion.div>
                     )}
                 </motion.div>
-
-                {/* Info Section */}
-                {data && data.length === 0 && (
-                    <motion.div variants={item} className="mt-16 max-w-3xl mx-auto">
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-8 space-y-6">
-                            <div className="space-y-2">
-                                <h4 className="text-sm font-black text-white uppercase tracking-widest">About Lorebooks</h4>
-                                <p className="text-white/40 text-xs leading-relaxed font-medium">
-                                    Lorebooks enable persistent world-state across different characters. By defining entries with triggers (keywords), you ensure the AI only accesses information when it becomes relevant to the current conversation focus.
-                                </p>
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
             </motion.div>
         </div>
     );
