@@ -81,6 +81,7 @@ export async function PATCH(
                 suspensionReason: body.suspensionReason !== undefined ? body.suspensionReason : undefined,
                 username: body.username || undefined,
                 email: body.email || undefined,
+                sessionVersion: { increment: 1 },
             }
         });
 

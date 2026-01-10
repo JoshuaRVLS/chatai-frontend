@@ -9,6 +9,7 @@ declare module "next-auth" {
             id: string;
             username: string;
             isAdmin: boolean;
+            sessionVersion: number;
         } & DefaultSession["user"];
     }
 
@@ -16,6 +17,7 @@ declare module "next-auth" {
         id: string;
         username: string;
         isAdmin: boolean;
+        sessionVersion: number;
     }
 }
 
@@ -24,6 +26,7 @@ declare module "next-auth/jwt" {
         id: string;
         username: string;
         isAdmin: boolean;
+        sessionVersion: number;
     }
 }
 
@@ -85,6 +88,7 @@ export const authOptions: NextAuthOptions = {
                     username: user.username,
                     email: user.email,
                     isAdmin: user.isAdmin,
+                    sessionVersion: user.sessionVersion,
                 };
             },
         }),
@@ -100,7 +104,31 @@ export const authOptions: NextAuthOptions = {
                 token.id = user.id;
                 token.username = user.username;
                 token.isAdmin = user.isAdmin;
+                token.sessionVersion = user.sessionVersion;
             }
+
+            // Continuous Session Validation
+            try {
+                const freshUser = await db.user.findUnique({
+                    where: { id: token.id },
+                    select: {
+                        sessionVersion: true,
+                        isAdmin: true,
+                    }
+                });
+
+                if (!freshUser || freshUser.sessionVersion !== token.sessionVersion || !freshUser.isAdmin) {
+                    throw new Error("SESSION_INVALIDATED");
+                }
+
+                token.isAdmin = freshUser.isAdmin;
+            } catch (error) {
+                console.error("Admin session validation error:", error);
+                // Fail-safe: if it's explicitly invalidated, it will throw. 
+                // We keep it throwing to ensure admin security.
+                if (error instanceof Error && error.message === "SESSION_INVALIDATED") throw error;
+            }
+
             return token;
         },
         session: async ({ session, token }) => {
@@ -108,6 +136,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id;
                 session.user.username = token.username;
                 session.user.isAdmin = token.isAdmin;
+                session.user.sessionVersion = token.sessionVersion;
             }
             return session;
         },
