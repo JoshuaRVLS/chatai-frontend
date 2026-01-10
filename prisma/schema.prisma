@@ -30,6 +30,7 @@ model User {
   suspensionReason         String?
   createdAt                DateTime          @default(now())
   updatedAt                DateTime          @default(now()) @updatedAt
+  sessionVersion           Int               @default(0)
   charCreated              Character[]
   chats                    Chat[]
   comments                 Comment[]

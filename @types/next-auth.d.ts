@@ -8,6 +8,7 @@ declare module "next-auth" {
       isAdmin: boolean;
       isSuspended: boolean;
       isWhitelisted: boolean;
+      sessionVersion: number;
     } & DefaultSession["user"];
   }
 
@@ -17,6 +18,7 @@ declare module "next-auth" {
     isAdmin: boolean;
     isSuspended: boolean;
     isWhitelisted: boolean;
+    sessionVersion: number;
   }
 }
 
@@ -27,5 +29,6 @@ declare module "next-auth/jwt" {
     isAdmin: boolean;
     isSuspended: boolean;
     isWhitelisted: boolean;
+    sessionVersion: number;
   }
 }

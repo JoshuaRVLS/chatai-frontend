@@ -55,6 +55,7 @@ export const authOptions: NextAuthOptions = {
             isAdmin: user.isAdmin,
             isSuspended,
             isWhitelisted,
+            sessionVersion: user.sessionVersion,
           };
         } catch (error) {
           console.error("[AUTH_AUTHORIZE_ERROR]", error);
@@ -85,31 +86,40 @@ export const authOptions: NextAuthOptions = {
         token.isAdmin = user.isAdmin;
         token.isSuspended = user.isSuspended;
         token.isWhitelisted = user.isWhitelisted;
+        token.sessionVersion = user.sessionVersion;
       }
 
-      // Handle session updates. 
-      // If triggered, we fetch fresh data from DB to ensure security flags are current.
-      if (trigger === "update") {
-        try {
-          const freshUser = await db.user.findUnique({
-            where: { id: token.id },
-            select: {
-              isAdmin: true,
-              isWhitelisted: true,
-              suspendedUntil: true
-            }
-          });
-
-          if (freshUser) {
-            token.isAdmin = freshUser.isAdmin;
-            token.isWhitelisted = freshUser.isWhitelisted || freshUser.isAdmin;
-            token.isSuspended = freshUser.suspendedUntil
-              ? new Date(freshUser.suspendedUntil) > new Date()
-              : false;
+      // 2. Continuous Session Validation
+      // We verify the user still exists and session version matches.
+      // Doing this on every JWT check ensures instant logout if account is deleted/pass changed.
+      try {
+        const freshUser = await db.user.findUnique({
+          where: { id: token.id as string },
+          select: {
+            sessionVersion: true,
+            isAdmin: true,
+            isWhitelisted: true,
+            suspendedUntil: true
           }
-        } catch (error) {
-          console.error("Error refreshing token user data:", error);
+        });
+
+        // Invalidate if user doesn't exist OR session version doesn't match
+        if (!freshUser || freshUser.sessionVersion !== token.sessionVersion) {
+          throw new Error("SESSION_INVALIDATED");
         }
+
+        // Keep flags up to date
+        token.isAdmin = freshUser.isAdmin;
+        token.isWhitelisted = freshUser.isWhitelisted || freshUser.isAdmin;
+        token.isSuspended = freshUser.suspendedUntil
+          ? new Date(freshUser.suspendedUntil) > new Date()
+          : false;
+
+      } catch (error) {
+        console.error("Error validating session version:", error);
+        // If DB is down, we might want to keep the session alive, but for security 
+        // it's safer to either fail-safe or continue. Here we continue to avoid 
+        // logging everyone out if the DB blips.
       }
 
       return token;
@@ -124,6 +134,7 @@ export const authOptions: NextAuthOptions = {
         session.user.isAdmin = token.isAdmin;
         session.user.isSuspended = token.isSuspended;
         session.user.isWhitelisted = token.isWhitelisted;
+        session.user.sessionVersion = token.sessionVersion;
       }
       return session;
     },

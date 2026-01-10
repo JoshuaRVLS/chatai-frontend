@@ -49,7 +49,10 @@ export const PATCH =
 
       await db.user.update({
         where: { id: userId },
-        data: { password: newPasswordHash },
+        data: {
+          password: newPasswordHash,
+          sessionVersion: { increment: 1 }
+        },
       });
 
       return NextResponse.json({ success: true }, { status: 200 });
