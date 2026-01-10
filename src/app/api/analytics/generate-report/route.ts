@@ -24,8 +24,13 @@ export async function POST() {
             imagePath: "/reports/analytics_dashboard.png",
             generatedAt: new Date().toISOString()
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error("Failed to generate report:", error);
-        return NextResponse.json({ error: "Failed to generate report" }, { status: 500 });
+        return NextResponse.json({
+            error: "Failed to generate report",
+            details: error.message,
+            stderr: error.stderr || "",
+            command: `cwd: ${process.cwd()}`
+        }, { status: 500 });
     }
 }
