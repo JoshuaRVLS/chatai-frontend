@@ -207,3 +207,9 @@ model SystemSetting {
   key   String @id
   value String
 }
+
+model WhitelistedEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
