@@ -56,3 +56,21 @@ This admin panel shares the same repository as the main application but resides 
     ```bash
     PORT=3001 pm2 start pnpm --name "jchatai-admin" -- start
     ```
+
+## API Routes
+
+### System & Analytics
+- `GET /api/stats` - Dashboard overview statistics (users, nsfw/sfw counts)
+- `GET /api/analytics` - Detailed platform metrics
+- `GET /api/settings` - Get system configuration
+- `POST /api/settings` - Update settings (Maintenance/Whitelist mode)
+
+### Content Management
+- `GET /api/characters` - List all characters (paginated)
+- `GET /api/characters/[id]` - Get full character details (prompts, author, etc.)
+- `DELETE /api/characters/[id]` - Delete a character
+- `GET /api/users` - List all users
+- `POST /api/users/[id]` - Moderate user (Ban/Unban/Verify)
+- `GET /api/conversations` - View chat logs
+- `GET /api/lorebooks` - Manage lorebooks
+
