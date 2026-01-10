@@ -13,10 +13,10 @@ model User {
   username                 String            @unique
   email                    String            @unique
   password                 String
+  profileImage             UserProfileImage?
   verificationToken        String?
   verificationTokenExpires DateTime?
   verified                 Boolean           @default(false)
-  personaUsed              String?
   isAdmin                  Boolean           @default(false)
   isWhitelisted            Boolean           @default(false)
   suspendedUntil           DateTime?
@@ -26,28 +26,29 @@ model User {
   charCreated              Character[]
   chats                    Chat[]
   comments                 Comment[]
-  lorebooks                Lorebook[]
+  personaUsed              String?
   personas                 UserPersona[]
-  profileImage             UserProfileImage?
   userSettings             UserSettings?
+  lorebooks                Lorebook[]
+  savedLorebooks           Lorebook[] @relation("SavedLorebooks")
 }
 
 model UserSettings {
   id           String  @id @default(cuid())
+  user         User    @relation(fields: [userId], references: [id])
   userId       String  @unique
   chatSettings Json?
   showNsfw     Boolean @default(false)
   blurNsfw     Boolean @default(true)
-  user         User    @relation(fields: [userId], references: [id])
 }
 
 model UserPersona {
   id     String        @id @default(cuid())
   name   String
   person String
+  user   User          @relation(fields: [userId], references: [id])
   userId String
   image  PersonaImage?
-  user   User          @relation(fields: [userId], references: [id])
 }
 
 model PersonaImage {
@@ -55,100 +56,101 @@ model PersonaImage {
   data      Bytes
   name      String
   mimetype  String
-  personaId String      @unique
   persona   UserPersona @relation(fields: [personaId], references: [id], onDelete: Cascade)
+  personaId String      @unique
 }
 
 model UserProfileImage {
   id       String @id @default(cuid())
   mimetype String
   data     Bytes
-  userId   String @unique
   user     User   @relation(fields: [userId], references: [id])
+  userId   String @unique
 }
 
 model Character {
-  id                   String          @id @default(cuid())
+  id                   String           @id @default(cuid())
   name                 String
-  chubId               String?         @unique
+  chubId               String?          @unique
   persona              String
   bio                  String
   scenario             String
   introMessage         String
   exampleConversations String?
-  isNsfw               Boolean         @default(false)
+  isNsfw               Boolean          @default(false)
+  author               User             @relation(fields: [authorId], references: [id])
   authorId             String
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-  author               User            @relation(fields: [authorId], references: [id])
-  photo                CharacterImage?
   chats                Chat[]
+  photo                CharacterImage?
+  tags                 CharacterTag[]
   comments             Comment[]
-  tags                 CharacterTag[]  @relation("CharacterToCharacterTag")
-  lorebooks            Lorebook[]      @relation("CharacterToLorebook")
+  lorebooks            Lorebook[]
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 }
 
 model Lorebook {
-  id                String         @id @default(cuid())
-  name              String
-  description       String?
-  userId            String
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  chubId            String?        @unique
-  recursiveScanning Boolean        @default(false)
-  scanDepth         Int            @default(4)
-  tokenBudget       Int            @default(512)
-  entries           LoreEntry[]
-  user              User           @relation(fields: [userId], references: [id])
-  image             LorebookImage?
-  characters        Character[]    @relation("CharacterToLorebook")
-  tags              LorebookTag[]  @relation("LorebookToLorebookTag")
+  id                 String          @id @default(cuid())
+  name               String
+  description        String?
+  chubId             String?         @unique // ChubAI lorebook ID for duplicate prevention
+  scanDepth          Int             @default(4) // How deep to scan context
+  tokenBudget        Int             @default(512) // Max tokens for lorebook
+  recursiveScanning  Boolean         @default(false) // Enable recursive scanning
+  userId             String
+  user               User            @relation(fields: [userId], references: [id])
+  entries            LoreEntry[]
+  characters         Character[]
+  tags               LorebookTag[]
+  image              LorebookImage?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  savedByUsers       User[]          @relation("SavedLorebooks")
 }
 
 model LorebookImage {
   id         String   @id @default(cuid())
   lorebookId String   @unique
+  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
   name       String
   mimetype   String
   data       Bytes
   createdAt  DateTime @default(now())
-  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
 }
 
 model LorebookTag {
   id        String     @id @default(cuid())
   name      String     @unique
+  lorebooks Lorebook[]
   createdAt DateTime   @default(now())
-  lorebooks Lorebook[] @relation("LorebookToLorebookTag")
 }
 
 model LoreEntry {
   id         String   @id @default(cuid())
   lorebookId String
-  keywords   String[]
-  content    String
+  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
+  keywords   String[] // Triggers for this entry
+  content    String // Information to inject
   enabled    Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  lorebook   Lorebook @relation(fields: [lorebookId], references: [id], onDelete: Cascade)
 }
 
 model Comment {
   id          String    @id @default(cuid())
   content     String
+  author      User      @relation(fields: [authorId], references: [id])
   authorId    String
+  character   Character @relation(fields: [characterId], references: [id])
   characterId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  author      User      @relation(fields: [authorId], references: [id])
-  character   Character @relation(fields: [characterId], references: [id])
 }
 
 model CharacterTag {
   id    String      @id @default(cuid())
   name  String      @unique
-  chars Character[] @relation("CharacterToCharacterTag")
+  chars Character[]
 }
 
 model CharacterImage {
@@ -156,36 +158,42 @@ model CharacterImage {
   data     Bytes
   name     String
   mimetype String
-  charId   String    @unique
   char     Character @relation(fields: [charId], references: [id])
+  charId   String    @unique
 }
 
 model Chat {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
+  character    Character   @relation(fields: [characterId], references: [id])
   characterId  String
+  user         User        @relation(fields: [userId], references: [id])
   userId       String
+  messages     Message[]
   summary      String?
   memory       String?
   personaId    String?
   chatSettings Json?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  character    Character @relation(fields: [characterId], references: [id])
-  user         User      @relation(fields: [userId], references: [id])
-  messages     Message[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 }
 
 model Message {
   id              String   @id @default(cuid())
   content         String
+  originalContent String? // Tracks the original AI response before user correction
   fromUser        Boolean
   pinned          Boolean  @default(false)
+  feedback        Feedback @default(NONE)
+  chat            Chat     @relation(fields: [chatId], references: [id])
   chatId          String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  feedback        Feedback @default(NONE)
-  originalContent String?
-  chat            Chat     @relation(fields: [chatId], references: [id])
+}
+
+enum Feedback {
+  NONE
+  LIKE
+  DISLIKE
 }
 
 model SystemSetting {
@@ -193,8 +201,8 @@ model SystemSetting {
   value String
 }
 
-enum Feedback {
-  NONE
-  LIKE
-  DISLIKE
+model WhitelistedEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
 }
