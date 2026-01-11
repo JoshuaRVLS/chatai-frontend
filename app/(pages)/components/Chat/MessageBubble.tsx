@@ -135,7 +135,7 @@ export const MessageBubble = React.memo(
                     {/* Message Content */}
                     <div
                         onClick={handleTap}
-                        className={`relative rounded-3xl sm:rounded-4xl px-5 py-3.5 sm:px-6 sm:py-4 transition-all duration-300 cursor-pointer ${isUserMessage
+                        className={`relative rounded-3xl sm:rounded-4xl px-5 py-3.5 sm:px-6 sm:py-4 transition-all duration-300 cursor-pointer text-base sm:text-lg leading-relaxed ${isUserMessage
                             ? "bg-white/10 border border-white/20 text-white font-bold shadow-xl rounded-tr-sm"
                             : "bg-white/5 border border-white/10 text-white/95 rounded-tl-sm backdrop-blur-md shadow-xl"
                             }`}
