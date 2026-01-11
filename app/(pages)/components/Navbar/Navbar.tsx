@@ -62,27 +62,20 @@ const Navbar = () => {
         <div className="w-full flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3 group"
+            className="flex items-center group"
             onClick={(e) => {
               e.preventDefault();
               window.location.href = '/';
             }}
           >
-            <div className="w-8 h-8 lg:w-11 lg:h-11 rounded-lg lg:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-white/20 group-hover:bg-white/5 overflow-hidden">
-              <Image
-                src="/jchatai-icon.png"
-                alt="JChatAI"
-                width={48}
-                height={48}
-                className="object-contain mix-blend-screen scale-125 lg:scale-110"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs lg:text-sm font-black tracking-[0.2em] text-white leading-none">CHATAi</span>
-              <span className="text-[8px] lg:text-[10px] font-black text-white/10 uppercase tracking-widest lg:mt-0.5">
-                AI Hub</span>
-            </div>
+            <Image
+              src="/jchatai-text-logo.png"
+              alt="jchatai.space"
+              width={180}
+              height={40}
+              className="h-8 lg:h-10 w-auto object-contain"
+              priority
+            />
           </Link>
 
           <div className="hidden md:flex items-center gap-12">
