@@ -124,19 +124,23 @@ const Lorebooks: React.FC = () => {
                             </motion.div>
                         ))
                     ) : (
-                        <motion.div variants={item} className="col-span-full text-center py-20">
-                            <div className="space-y-4">
+                        <div className="col-span-full text-center py-20">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="space-y-4"
+                            >
                                 <div className="w-20 h-20 mx-auto bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center">
-                                    <FaPlus className="text-zinc-800 text-3xl" />
+                                    <FaPlus className="text-white/20 text-3xl" />
                                 </div>
                                 <div>
                                     <h3 className="text-2xl font-black text-white italic uppercase tracking-tight">No Modules Found</h3>
-                                    <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest mt-2">
+                                    <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mt-2">
                                         {filter === 'library' ? "You haven't saved or created any lorebooks yet." : "No public lorebooks found."}
                                     </p>
                                 </div>
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        </div>
                     )}
                 </motion.div>
             </motion.div>

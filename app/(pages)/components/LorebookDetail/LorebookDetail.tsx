@@ -301,10 +301,10 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                 <div className="w-full md:w-1/4">
                                     <div className="aspect-square relative rounded-3xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
                                         <Image
-                                            src={metaImagePreview || (lorebook?.image?.id ? `/api/lorebook-image?id=${lorebook.id}` : "/placeholder-lore.png")}
+                                            src={metaImagePreview || `/api/lorebook-image/${lorebookId}`}
                                             fill
                                             className="object-cover"
-                                            alt={lorebook?.name}
+                                            alt={lorebook?.name || "Lorebook Image"}
                                         />
                                     </div>
                                 </div>
@@ -552,7 +552,7 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                             ) : (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
                                     <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/10 bg-white/5 group mb-6 mx-auto w-3/4">
-                                        <Image src={metaImagePreview || (lorebook?.image?.id ? `/api/lorebook-image?id=${lorebook.id}` : "/placeholder-lore.png")} fill className="object-cover" alt="Preview" />
+                                        <Image src={metaImagePreview || `/api/lorebook-image/${lorebookId}`} fill className="object-cover" alt="Preview" />
                                         <input
                                             type="file"
                                             id="meta-image-upload"

@@ -175,7 +175,13 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                                     : "bg-black/60 text-white/60 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
-                                {isSaved ? <FaCheck size={12} /> : <FaPlus size={12} />}
+                                {saving ? (
+                                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                ) : isSaved ? (
+                                    <FaCheck size={12} />
+                                ) : (
+                                    <FaPlus size={12} />
+                                )}
                             </button>
                         )}
                     </div>
@@ -184,7 +190,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                 {/* Content Section */}
                 <div className="p-6 flex flex-col flex-1 relative gap-4">
                     {/* Title */}
-                    <h3 className="text-xl lg:text-2xl font-black text-white italic uppercase tracking-tight leading-tight group-hover:text-cyan-400 transition-colors line-clamp-2 min-h-[3.5rem]">
+                    <h3 className="text-xl lg:text-2xl font-black text-white italic uppercase tracking-tight leading-tight group-hover:text-cyan-400 transition-colors line-clamp-2 min-h-14">
                         {lorebook.name}
                     </h3>
 
