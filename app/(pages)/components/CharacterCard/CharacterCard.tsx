@@ -208,115 +208,105 @@ const CharacterCard = React.memo(function CharacterCard({
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchEnd} // Cancel on scroll
-        className="group relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer overflow-hidden rounded-xl lg:rounded-2xl border border-white/5 bg-zinc-900/40 transition-[border-color,box-shadow,transform] duration-300 hover:border-white/20 hover:shadow-xl will-change-transform"
+        onTouchMove={handleTouchEnd}
+        className="group relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 isolate"
         style={{ contentVisibility: 'auto', containIntrinsicSize: '0 240px' } as any}
-        whileHover={{ y: -6 }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
       >
-        {/* Image Container */}
-        <div className="relative h-[55%] w-full overflow-hidden">
-          {image ? (
-            <div className="relative w-full h-full">
+        {/* Base Card (Visible by Default, Hidden on Hover) */}
+        <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-white/5 bg-zinc-900/40 opacity-100 group-hover:opacity-0 transition-opacity duration-200">
+          <div className="relative h-full w-full">
+            {image ? (
               <Image
                 src={image}
                 fill
-                className={`object-cover object-top transition-all duration-700 group-hover:scale-105 ${shouldBlur ? 'blur-xl scale-110 grayscale-[0.5]' : ''} ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                style={shouldBlur ? { willChange: 'filter' } : {}}
+                className={`object-cover object-top ${shouldBlur ? 'blur-xl grayscale-[0.5]' : ''}`}
                 alt={characterName}
                 sizes="(max-width: 768px) 50vw, 20vw"
-                onLoad={() => setImageLoading(false)}
               />
-
-              {/* Shimmer Placeholder */}
-              <AnimatePresence>
-                {imageLoading && (
-                  <motion.div
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-white/5 shimmer flex items-center justify-center z-10"
-                  >
-                    <div className="w-6 h-6 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* NSFW Blur Overlay - only covers image area */}
-              <AnimatePresence>
-                {shouldBlur && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 flex flex-col items-center justify-center bg-black/60"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform duration-300">
-                      <FiEye className="text-white/40 text-lg" />
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <p className="text-[8px] lg:text-[10px] font-black text-white/80 uppercase tracking-widest">Sensitive</p>
-                      <p className="text-[7px] lg:text-[8px] font-bold text-white/30 uppercase tracking-tighter">Click to Reveal</p>
-                    </div>
-
-                    <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded-md bg-zinc-800 border border-white/5">
-                      <span className="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">NSFW</span>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+            ) : (
+              <div className="flex items-center justify-center h-full bg-white/5"><FiUser className="text-white/10 w-12 h-12" /></div>
+            )}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 inset-x-0 p-4">
+              <h3 className="text-xs lg:text-sm font-black text-white leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md">{characterName}</h3>
+              <p className="text-[9px] text-zinc-500 line-clamp-1 font-medium mt-1">{characterBio}</p>
             </div>
-          ) : (
-            <div className="flex items-center justify-center h-full bg-white/5">
-              <FiUser className="text-white/10 w-12 h-12" />
-            </div>
-          )}
-
-          <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-[#020617] via-transparent to-transparent opacity-80 pointer-events-none" />
-
-          {/* Floating Badge */}
-          <div className="absolute top-2 right-2 bg-black/50 border border-white/5 px-2 py-0.5 rounded-full flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-            <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
-            <span className="text-[7px] font-black text-white/40 uppercase tracking-widest">Linked</span>
           </div>
         </div>
 
-        {/* Info Content - removed z-20 for better batching, removed backdrop-blur */}
-        <div className="relative flex-1 p-3 lg:p-4 flex flex-col justify-between -mt-4 bg-zinc-950/95">
-          <div className="space-y-1 lg:space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-xs lg:text-sm font-black text-white group-hover:text-zinc-400 transition-colors leading-tight line-clamp-1 tracking-tight uppercase">
-                {characterName}
-              </h3>
-              <div className="p-1 lg:p-1.5 rounded-md bg-white/5 border border-white/5 text-white/20 text-[9px] lg:text-[10px]">
-                <FiMoreHorizontal />
-              </div>
+        {/* Floating "Mini Profile" (Visible on Hover) */}
+        <div className="absolute -top-4 -left-4 -right-4 z-50 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+          <div className="w-full h-auto min-h-[calc(100%+2rem)] bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
+
+            {/* Full Background Image */}
+            <div className="absolute inset-0 z-0">
+              {image ? (
+                <Image
+                  src={image}
+                  fill
+                  className={`object-cover ${shouldBlur ? 'blur-2xl' : 'opacity-40'}`}
+                  alt={characterName}
+                />
+              ) : (
+                <div className="w-full h-full bg-zinc-900" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40" />
             </div>
 
-            <p className="text-[9px] lg:text-[11px] text-zinc-500 line-clamp-2 leading-snug font-medium">
-              {characterBio}
-            </p>
-          </div>
-
-          <div className="space-y-3 lg:space-y-4">
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
-              {Array.from(new Map(tags?.map(tag => [tag.id, tag])).values()).slice(0, 2).map((tag) => (
-                <span
-                  key={tag.id}
-                  className="px-1.5 py-0.5 lg:px-2 lg:py-1 text-[7px] lg:text-[9px] font-black rounded-sm border border-white/5 bg-white/5 text-zinc-500 uppercase tracking-wider"
-                >
-                  {tag.name}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex items-center justify-between border-t border-white/5 pt-2 lg:pt-3">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 lg:w-6 lg:h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[6px] lg:text-[9px] font-black text-white/20 uppercase tracking-tighter">
-                  {authorName.slice(0, 2)}
+            {/* Content */}
+            <div className="p-5 flex flex-col gap-3 relative z-10 h-full">
+              {/* Header: Title & Meta */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-black text-white uppercase tracking-tight leading-none drop-shadow-lg">{characterName}</h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <span className="text-[10px] font-bold text-zinc-400">{authorName}</span>
+                    <span className="w-1 h-1 rounded-full bg-zinc-600" />
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase">24m ago</span>
+                  </div>
                 </div>
-                <span className="text-[8px] lg:text-[10px] font-bold text-zinc-500 group-hover:text-white transition-colors truncate max-w-[100px] lg:max-w-[140px]">{authorName}</span>
+                <div className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 shrink-0">
+                  <span className="text-[8px] font-black text-white/80 uppercase tracking-widest">Lv. 1</span>
+                </div>
+              </div>
+
+              {/* Scrollable Bio */}
+              <p className="text-[11px] text-zinc-300 font-medium leading-relaxed max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40 break-words shadow-black drop-shadow-sm">
+                {characterBio}
+              </p>
+
+              {/* Spacer */}
+              <div className="flex-1" />
+
+              {/* Interactive Tags */}
+              <div className="flex flex-wrap gap-1.5">
+                {Array.from(new Map(tags?.map(tag => [tag.id, tag])).values()).slice(0, 4).map((tag) => (
+                  <button
+                    key={tag.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toast.success(`Filter by: ${tag.name}`);
+                    }}
+                    className="px-2 py-1 text-[9px] font-black rounded-md border border-white/10 bg-black/40 text-zinc-400 uppercase tracking-wider hover:bg-cyan-500/20 hover:text-cyan-400 hover:border-cyan-500/30 transition-all backdrop-blur-sm"
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+              </div>
+
+              {/* Footer Actions */}
+              <div className="pt-3 mt-1 border-t border-white/10 flex gap-2">
+                <button className="flex-1 bg-white text-zinc-950 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg">
+                  Chat <span className="opacity-50 text-[10px]">→</span>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleEdit(); }}
+                  className="p-2.5 bg-white/5 text-white/40 rounded-xl hover:text-white hover:bg-white/10 transition-colors border border-white/5"
+                >
+                  <FiEdit2 size={14} />
+                </button>
               </div>
             </div>
           </div>
