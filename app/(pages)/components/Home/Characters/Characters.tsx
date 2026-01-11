@@ -239,7 +239,7 @@ const Characters = ({
               </h2>
               {!isPending && meta && (
                 <span className="text-sm md:text-xl font-bold text-white/30 tracking-wider mb-1">
-                  {meta.totalCount} available
+                  {meta.totalCount} Characters
                 </span>
               )}
             </div>
