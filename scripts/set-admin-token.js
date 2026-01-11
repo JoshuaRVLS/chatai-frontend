@@ -4,7 +4,13 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-    const rawToken = '09071982';
+    const rawToken = process.argv[2];
+
+    if (!rawToken) {
+        console.error('Error: Please provide a security token as an argument.');
+        console.log('Usage: node scripts/set-admin-token.js <token>');
+        process.exit(1);
+    }
     const salt = await bcrypt.genSalt(12);
     const hashedToken = await bcrypt.hash(rawToken, salt);
 

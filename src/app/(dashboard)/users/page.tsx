@@ -133,6 +133,38 @@ export default function UsersPage() {
         }
     };
 
+    // Create Admin Modal State
+    const [createAdminModal, setCreateAdminModal] = useState(false);
+    const [newAdmin, setNewAdmin] = useState({ username: '', email: '', password: '' });
+    const [creatingAdmin, setCreatingAdmin] = useState(false);
+
+    const handleCreateAdmin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreatingAdmin(true);
+        try {
+            const res = await fetch('/api/users/create-admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newAdmin)
+            });
+
+            if (res.ok) {
+                alert('Admin account created successfully');
+                setCreateAdminModal(false);
+                setNewAdmin({ username: '', email: '', password: '' });
+                fetchUsers();
+            } else {
+                const data = await res.text();
+                alert(data || 'Failed to create admin');
+            }
+        } catch (error) {
+            console.error('Create admin error:', error);
+            alert('An error occurred');
+        } finally {
+            setCreatingAdmin(false);
+        }
+    };
+
     // Suspension Modal State
     const [suspendModal, setSuspendModal] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
     const [suspendDuration, setSuspendDuration] = useState<'7d' | '30d' | 'permanent' | 'custom'>('7d');
@@ -217,7 +249,6 @@ export default function UsersPage() {
         if (date.getFullYear() >= 2099) return 'Permanent';
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     };
-
 
     const columns = [
         {
@@ -353,7 +384,18 @@ export default function UsersPage() {
 
     return (
         <div className="flex flex-col">
-            <Header title="User Intelligence" subtitle="Deep oversight of platform participants" />
+            <div className="flex items-center justify-between">
+                <Header title="User Intelligence" subtitle="Deep oversight of platform participants" />
+                <button
+                    onClick={() => setCreateAdminModal(true)}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl transition-all shadow-lg active:scale-95"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Create Admin</span>
+                </button>
+            </div>
 
             <div className="space-y-16 animate-fade-in mt-8">
                 {/* Advanced Stats */}
@@ -452,6 +494,67 @@ export default function UsersPage() {
                     />
                 </div>
             </div>
+
+            {/* Create Admin Modal */}
+            {createAdminModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-zinc-900 rounded-3xl border border-white/10 p-8 max-w-md w-full mx-4 shadow-2xl">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-white mb-6">Create New Admin</h3>
+                        <form onSubmit={handleCreateAdmin} className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">Username</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newAdmin.username}
+                                    onChange={(e) => setNewAdmin({ ...newAdmin, username: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
+                                    placeholder="admin_username"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">Email</label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={newAdmin.email}
+                                    onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
+                                    placeholder="admin@example.com"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-2 block">Password</label>
+                                <input
+                                    type="password"
+                                    required
+                                    value={newAdmin.password}
+                                    onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-emerald-500"
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setCreateAdminModal(false)}
+                                    className="flex-1 py-3 rounded-xl bg-white/5 text-zinc-400 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={creatingAdmin}
+                                    className="flex-1 py-3 rounded-xl bg-emerald-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all disabled:opacity-50"
+                                >
+                                    {creatingAdmin ? 'Creating...' : 'Create Admin'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* Suspension Modal */}
             {suspendModal.open && suspendModal.user && (
