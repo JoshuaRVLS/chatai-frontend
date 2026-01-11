@@ -21,6 +21,10 @@ import { signOut, useSession } from "next-auth/react";
 import UserAvatar from "../Common/UserAvatar";
 import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
 
+import { Orbitron } from "next/font/google";
+
+const orbitron = Orbitron({ subsets: ["latin"], weight: ["900"] });
+
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
@@ -62,20 +66,16 @@ const Navbar = () => {
         <div className="w-full flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center group"
+            className="flex items-center group relative"
             onClick={(e) => {
               e.preventDefault();
               window.location.href = '/';
             }}
           >
-            <Image
-              src="/jchatai-text-logo-cropped.png"
-              alt="jchatai.space"
-              width={500}
-              height={120}
-              className="h-14 sm:h-20 lg:h-24 w-auto object-contain object-left mix-blend-screen"
-              priority
-            />
+            <div className="absolute -inset-4 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
+            <span className={`${orbitron.className} relative z-10 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.4)] group-hover:scale-105 transition-transform duration-300`}>
+              jchatai.space
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-12">
