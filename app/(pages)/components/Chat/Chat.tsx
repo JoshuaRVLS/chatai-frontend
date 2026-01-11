@@ -286,8 +286,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowProfileModal(false)}
+              className="fixed inset-0 z-50 pointer-events-none"
             >
               <motion.div
                 ref={modalRef}
@@ -300,7 +299,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   top: modalPosition.y,
                 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="absolute w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl"
+                className="absolute w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl pointer-events-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
