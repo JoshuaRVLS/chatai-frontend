@@ -69,11 +69,11 @@ const Navbar = () => {
             }}
           >
             <Image
-              src="/jchatai-text-logo.png"
+              src="/jchatai-text-logo-cropped.png"
               alt="jchatai.space"
-              width={240}
-              height={50}
-              className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
+              width={300}
+              height={80}
+              className="h-12 sm:h-16 lg:h-20 w-auto object-contain scale-110"
               priority
             />
           </Link>
