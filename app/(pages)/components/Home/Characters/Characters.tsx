@@ -233,9 +233,16 @@ const Characters = ({
               <div className="w-1 h-4 bg-white/10 rounded-full" />
               <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Character Hub</span>
             </div>
-            <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
-              {searchQuery ? "Search Results" : "Community Feed"}
-            </h2>
+            <div className="flex items-end gap-4">
+              <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
+                {searchQuery ? "Search Results" : "Community Feed"}
+              </h2>
+              {!isPending && meta && (
+                <span className="text-sm md:text-xl font-bold text-white/30 tracking-wider mb-1">
+                  {meta.totalCount} available
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Quick Discovery Categories */}
