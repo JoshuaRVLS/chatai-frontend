@@ -71,9 +71,9 @@ const Navbar = () => {
             <Image
               src="/jchatai-text-logo.png"
               alt="jchatai.space"
-              width={180}
-              height={40}
-              className="h-8 lg:h-10 w-auto object-contain"
+              width={240}
+              height={50}
+              className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
               priority
             />
           </Link>
