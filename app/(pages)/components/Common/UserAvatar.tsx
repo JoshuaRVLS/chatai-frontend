@@ -78,7 +78,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ name, image, size = "md", class
     }
 
     return (
-        <div className={`${containerClasses} ${bgColor} text-white/60 font-black uppercase tracking-tighter italic`}>
+        <div className={`${containerClasses} ${bgColor} text-white/60 font-black uppercase tracking-tighter italic pr-0.5`}>
             {initials}
         </div>
     );
