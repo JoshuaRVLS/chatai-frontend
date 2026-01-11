@@ -357,9 +357,7 @@ const Characters = ({
           </div>
         </div>
 
-        <div className="w-full lg:max-w-md relative group">
-          <SearchBar onSearch={onSearch} initialQuery={searchQuery} />
-        </div>
+
       </div>
 
       <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4 md:gap-6">
