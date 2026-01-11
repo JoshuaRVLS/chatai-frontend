@@ -7,11 +7,13 @@ import { FiEye } from "react-icons/fi";
 import { FaEdit, FaTrash, FaRedo, FaThumbtack, FaThumbsUp, FaThumbsDown } from "react-icons/fa";
 import MarkDown from "../MarkDown/MarkDown";
 import type { Message } from "@/app/generated/prisma";
+import UserAvatar from "../Common/UserAvatar";
 
 export const MessageBubble = React.memo(
     ({
         message,
         userImage,
+        userName,
         characterImage,
         isNsfw,
         isBlurEnabled,
@@ -34,6 +36,7 @@ export const MessageBubble = React.memo(
     }: {
         message: Message;
         userImage: string | null;
+        userName?: string | null;
         characterImage: string | null;
         isNsfw?: boolean;
         isBlurEnabled?: boolean;
@@ -84,9 +87,11 @@ export const MessageBubble = React.memo(
                             const shouldBlur = isNsfw && isBlurEnabled && !tempUnblur;
                             if (shouldBlur) {
                                 onUnblur?.();
+                            } else {
+                                onProfileClick(e);
                             }
                         }}
-                        className={`relative transition-all shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9 ${isNsfw && isBlurEnabled && !tempUnblur ? 'cursor-pointer hover:scale-105' : 'cursor-default'}`}
+                        className="relative transition-all shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9 cursor-pointer hover:scale-105"
                     >
                         {avatarLoading && (
                             <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
@@ -116,22 +121,12 @@ export const MessageBubble = React.memo(
                         </AnimatePresence>
                     </button>
                 ) : (
-                    <div className="relative w-8 h-8 sm:w-9 sm:h-9 shrink-0">
-                        {avatarLoading && (
-                            <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
-                                <div className="w-3 h-3 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
-                            </div>
-                        )}
-                        <Image
-                            src={imageSrc}
-                            width={32}
-                            height={32}
-                            alt={altText}
-                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-opacity duration-300 ${avatarLoading ? 'opacity-0' : 'opacity-100'}`}
-                            onLoad={() => setAvatarLoading(false)}
-                            onError={() => setAvatarLoading(false)}
-                        />
-                    </div>
+                    <UserAvatar
+                        name={userName}
+                        image={userImage}
+                        size="sm"
+                        className="w-8 h-8 sm:w-9 sm:h-9 shrink-0"
+                    />
                 )}
 
                 <div

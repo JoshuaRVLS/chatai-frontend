@@ -176,6 +176,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const userImage = activePersona?.image
     ? `/api/persona/image/${activePersona.id}`
     : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : (user?.id === chat.userId ? (user?.image || null) : null));
+
+  const userName = activePersona?.name || chat.user?.username || (user?.id === chat.userId ? (user?.name || (user as any)?.username) : null);
+
   const pinnedMessages = allMessages.filter(m => m.pinned);
 
   return (
@@ -207,6 +210,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
               key={msg.id}
               message={msg}
               userImage={userImage}
+              userName={userName}
               characterImage={characterImage}
               isNsfw={chat.character.isNsfw}
               isBlurEnabled={settings.blurNsfw}
