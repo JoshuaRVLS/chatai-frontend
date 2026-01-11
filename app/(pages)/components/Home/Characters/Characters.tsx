@@ -494,7 +494,21 @@ const Characters = ({
           <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-white/20">
             <FiAlertTriangle size={32} />
           </div>
-          <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
+          {meta?.totalMatchesIgnoringNsfw > 0 && !showAll ? (
+            <div className="space-y-4 max-w-md mx-auto px-4">
+              <p className="text-white/50 font-medium text-sm">
+                <span className="text-white font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety protocols.
+              </p>
+              <button
+                onClick={() => setShowAll(true)}
+                className="px-6 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 hover:bg-orange-500/20 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 mx-auto"
+              >
+                Disable Safety Filters
+              </button>
+            </div>
+          ) : (
+            <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
+          )}
         </div>
       )}
     </div>

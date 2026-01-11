@@ -159,7 +159,11 @@ export const GET = async (req: Request) => {
       where.isNsfw = false;
     }
 
-    const [characters, totalCount, allTags] = await Promise.all([
+    // Create a version of the query that ignores the NSFW filter to check if results exist but are hidden
+    const whereIgnoringNsfw = { ...where };
+    delete whereIgnoringNsfw.isNsfw;
+
+    const [characters, totalCount, totalMatchesIgnoringNsfw, allTags] = await Promise.all([
       db.character.findMany({
         where,
         orderBy: {
@@ -181,6 +185,7 @@ export const GET = async (req: Request) => {
         take: pageSize,
       }),
       db.character.count({ where }),
+      db.character.count({ where: whereIgnoringNsfw }),
       db.characterTag.findMany({
         orderBy: { name: 'asc' }
       })
@@ -191,6 +196,7 @@ export const GET = async (req: Request) => {
       data: characters,
       meta: {
         totalCount,
+        totalMatchesIgnoringNsfw,
         page,
         pageSize,
         totalPages: Math.ceil(totalCount / pageSize),

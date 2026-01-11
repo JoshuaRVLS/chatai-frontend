@@ -64,11 +64,8 @@ const Navbar = () => {
             href="/"
             className="flex items-center gap-3 group"
             onClick={(e) => {
-              // Ensure full refresh if navigation gets stuck
-              if (pathname === '/') {
-                e.preventDefault();
-                window.location.reload();
-              }
+              e.preventDefault();
+              window.location.href = '/';
             }}
           >
             <div className="w-8 h-8 lg:w-11 lg:h-11 rounded-lg lg:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-all group-hover:border-white/20 group-hover:bg-white/5 overflow-hidden">
