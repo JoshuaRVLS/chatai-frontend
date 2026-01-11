@@ -9,6 +9,7 @@ import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
 
 interface ChatNavbarProps {
+    characterId: string;
     characterName: string;
     characterImage: string | null;
     isNsfw?: boolean;
@@ -21,6 +22,7 @@ interface ChatNavbarProps {
 }
 
 const ChatNavbar = ({
+    characterId,
     characterName,
     characterImage,
     isNsfw,
@@ -36,6 +38,10 @@ const ChatNavbar = ({
     const [tempUnblur, setTempUnblur] = React.useState(false);
     const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
 
+    const handleNavigateToProfile = () => {
+        router.push(`/character/${characterId}`);
+    };
+
     return (
         <div className="flex items-center justify-between px-6 sm:px-8 py-3 sm:py-4 border-b border-white/5 bg-slate-950/40 backdrop-blur-xl z-20">
             <div className="flex items-center gap-4 sm:gap-5">
@@ -43,9 +49,11 @@ const ChatNavbar = ({
                     onClick={(e) => {
                         if (shouldBlur) {
                             setTempUnblur(true);
+                        } else {
+                            handleNavigateToProfile();
                         }
                     }}
-                    className={`relative group transition-all ${shouldBlur ? 'cursor-pointer group-active:scale-95' : 'cursor-default'}`}
+                    className={`relative group transition-all cursor-pointer ${shouldBlur ? 'group-active:scale-95' : 'hover:scale-105'}`}
                 >
                     <div className="absolute -inset-1.5 bg-linear-to-tr from-primary to-purple-500 rounded-full opacity-20 group-hover:opacity-40 transition-opacity blur-md" />
                     <Image
@@ -68,7 +76,10 @@ const ChatNavbar = ({
                         )}
                     </AnimatePresence>
                 </button>
-                <div>
+                <div
+                    onClick={handleNavigateToProfile}
+                    className="cursor-pointer hover:opacity-80 transition-opacity"
+                >
                     <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase leading-none">
                         {characterName}
                     </h2>

@@ -154,6 +154,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   return (
     <div className="fixed inset-0 flex flex-col bg-[#020617] text-white selection:bg-primary/30 scroll-smooth">
       <ChatNavbar
+        characterId={chat.character.id}
         characterName={chat.character.name}
         characterImage={characterImage}
         isNsfw={chat.character.isNsfw}
