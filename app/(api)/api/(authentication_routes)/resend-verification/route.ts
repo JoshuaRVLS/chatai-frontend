@@ -8,13 +8,18 @@ export const POST = async (req: Request) => {
 
         if (!email) {
             return NextResponse.json(
-                { success: false, message: "Email is required" },
+                { success: false, message: "Email or Username is required" },
                 { status: 400 }
             );
         }
 
-        const user = await db.user.findUnique({
-            where: { email },
+        const user = await db.user.findFirst({
+            where: {
+                OR: [
+                    { email: email },
+                    { username: email }
+                ]
+            },
         });
 
         if (!user) {

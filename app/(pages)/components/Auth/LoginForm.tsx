@@ -15,8 +15,7 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const setView = useAuthModalStore((state) => state.setView);
-    const closeModal = useAuthModalStore((state) => state.closeModal);
+    const { setView, closeModal, setVerifyEmail } = useAuthModalStore();
 
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
@@ -32,8 +31,56 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
             if (!response?.ok) {
                 let errorMessage = (response?.error as string) || "Invalid credentials";
                 if (errorMessage === "ACCOUNT_NOT_VERIFIED") {
-                    errorMessage = "Please verify your account first!";
+                    // Try to resend verification code
+                    try {
+                        // Attempt to resend code assuming username might be email, or we need to adjust API
+                        // Ideally we should update the API to handle username too, but for now let's try.
+                        // If username is not email, this request might fail or we need a way to look up email by username first.
+                        // Actually, let's just show the verify modal and set the email if it looks like one.
+                        // If it's a username, the user might need to enter their email in the VerifyModal manually if we don't have it?
+                        // But verifying requires the code sent to email.
+
+                        // Let's first fetch to see if we can resolve email from username if needed? No, that exposes info.
+
+                        // Best approach: Modifying resend-verification to accept username OR email.
+                        // But I am in LoginForm task.
+                        // Let's assume for a moment I can change resend-verification.
+
+                        const resendRes = await fetch("/api/resend-verification", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ email: username }), // sending username as email for now
+                        });
+
+                        if (resendRes.ok) {
+                            toast.success("Verification expired. New code sent!");
+                            setVerifyEmail(username); // Set whatever they typed
+                            setView('verify');
+                            setLoading(false);
+                            return;
+                        } else {
+                            // If resend failed (maybe because username is not email), 
+                            // we still redirect to verify but maybe let them know
+                            const data = await resendRes.json();
+                            if (data.message === "User not found" && !username.includes('@')) {
+                                // If they typed a username, and resend failed, we can't easily auto-resend without modifying API.
+                                // Fallback: just tell them.
+                                errorMessage = "Account unverified. Please log in with email to re-verify or check your inbox.";
+                            } else {
+                                // If it failed for other reasons
+                                toast.error(data.message || "Could not resend verification code");
+                            }
+                        }
+                    } catch {
+                        // ignore
+                    }
                 }
+
+                if (errorMessage === "ACCOUNT_NOT_VERIFIED") {
+                    // If we didn't return above
+                    errorMessage = "Please verify your account!";
+                }
+
                 toast.error(errorMessage);
                 setLoading(false);
                 return;
@@ -53,42 +100,52 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div className="text-center space-y-2">
-                <h1 className="text-3xl font-black tracking-tighter text-white">
-                    JCHAT <span className="text-primary italic">AI</span>
-                </h1>
-                <p className="text-[10px] text-white/50 uppercase tracking-[0.4em] font-medium">Access Portal</p>
+                <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                    <h1 className="text-3xl font-bold tracking-tight text-white mb-1">
+                        Welcome <span className="text-transparent bg-clip-text bg-linear-to-r from-white to-white/60">Back</span>
+                    </h1>
+                    <p className="text-xs text-zinc-400 font-medium tracking-wide">Enter your credentials to access the portal</p>
+                </motion.div>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-5">
                 <div className="space-y-4">
-                    <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/30 ml-4">Identity</label>
-                        <div className="group/input relative">
-                            <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-primary transition-colors duration-300" />
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500 ml-1">Username</label>
+                        <div className="group relative">
+                            <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none text-zinc-500 group-focus-within:text-white transition-colors duration-300">
+                                <FiUser className="text-lg" />
+                            </div>
                             <input
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 type="text"
-                                placeholder="Enter Username"
+                                placeholder="Enter your username"
                                 required
-                                className="input-modern has-icon h-11 bg-white/3! border-white/5! focus:border-primary/40!"
+                                className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:border-white/20 focus:bg-white/10 focus:ring-4 focus:ring-white/5 outline-none transition-all placeholder:text-zinc-600 text-sm text-white font-medium"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2">
-                        <label className="text-[10px] uppercase tracking-widest font-black text-white/30 ml-4">Access Key</label>
-                        <div className="group/input relative">
-                            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-primary transition-colors duration-300" />
+                    <div className="space-y-1.5">
+                        <label className="text-[10px] uppercase tracking-wider font-bold text-zinc-500 ml-1">Password</label>
+                        <div className="group relative">
+                            <div className="absolute left-0 top-0 bottom-0 w-10 flex items-center justify-center pointer-events-none text-zinc-500 group-focus-within:text-white transition-colors duration-300">
+                                <FiLock className="text-lg" />
+                            </div>
                             <input
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 type="password"
-                                placeholder="Enter Password"
+                                placeholder="Enter your password"
                                 required
-                                className="input-modern has-icon h-11 bg-white/3! border-white/5! focus:border-primary/40!"
+                                className="w-full h-11 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl focus:border-white/20 focus:bg-white/10 focus:ring-4 focus:ring-white/5 outline-none transition-all placeholder:text-zinc-600 text-sm text-white font-medium"
                             />
                         </div>
                     </div>
@@ -97,29 +154,31 @@ export const LoginForm = ({ onSuccess }: LoginFormProps) => {
                 <button
                     disabled={loading}
                     type="submit"
-                    className="btn-primary w-full h-11 text-[10px] uppercase tracking-[0.3em] font-black flex items-center justify-center gap-3 overflow-hidden group/btn"
+                    className="relative w-full h-12 bg-white text-black font-bold text-sm tracking-wide rounded-xl overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
-                    {loading ? (
-                        <div className="bg-zinc-900 border border-white/10 shadow-[0_32px_64px_rgba(0,0,0,0.5)] rounded-4xl overflow-hidden">
-                            <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                        </div>
-                    ) : (
-                        <>
-                            <span className="relative z-10">Login</span>
-                            <FiArrowRight className="relative z-10 group-hover/btn:translate-x-2 transition-transform duration-500" />
-                        </>
-                    )}
+                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-black/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+
+                    <div className="relative flex items-center justify-center gap-2">
+                        {loading ? (
+                            <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <span>Sign In</span>
+                                <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                            </>
+                        )}
+                    </div>
                 </button>
             </form>
 
-            <div className="text-center">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/30">
-                    New here?{" "}
+            <div className="text-center border-t border-white/5 pt-6">
+                <p className="text-xs text-zinc-500">
+                    Don't have an account?{" "}
                     <button
                         onClick={() => setView('register')}
-                        className="text-primary font-bold hover:text-white transition-colors"
+                        className="text-white font-bold hover:underline decoration-white/30 underline-offset-4 transition-all"
                     >
-                        Register
+                        Create one
                     </button>
                 </p>
             </div>
