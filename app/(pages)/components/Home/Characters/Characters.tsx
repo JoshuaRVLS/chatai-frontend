@@ -257,9 +257,7 @@ const Characters = ({
           </div>
 
           <div className="flex items-center gap-4 pt-2 relative">
-            <div className="bg-white/5 p-3 rounded-2xl border border-white/5 text-white/20 flex items-center justify-center shrink-0 shadow-2xl">
-              <FiHash size={16} />
-            </div>
+
 
             {/* Multi-Select Tags Filter & Search */}
             <div className="flex-1 min-w-0 flex flex-wrap items-center gap-3" ref={dropdownRef}>
