@@ -43,8 +43,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   // Modal states
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showBrainPanel, setShowBrainPanel] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
@@ -131,35 +130,6 @@ const Chat = ({ chatId }: { chatId: string }) => {
     setShowProfileModal(true);
   };
 
-  const handleDragStart = (e: React.MouseEvent) => {
-    if (modalRef.current) {
-      setIsDragging(true);
-      setDragOffset({
-        x: e.clientX - modalPosition.x,
-        y: e.clientY - modalPosition.y
-      });
-    }
-  };
-
-  useEffect(() => {
-    const handleDrag = (e: MouseEvent) => {
-      if (isDragging) {
-        setModalPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y
-        });
-      }
-    };
-    const handleDragEnd = () => setIsDragging(false);
-    if (isDragging) {
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('mouseup', handleDragEnd);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleDrag);
-      window.removeEventListener('mouseup', handleDragEnd);
-    };
-  }, [isDragging, dragOffset, modalPosition]);
 
   if (isChatLoading || isMessagesLoading) return <LoadingScreen />;
   if (chatError) return <div className="fixed inset-0 flex items-center justify-center bg-black text-red-400">Error: {(chatError as any).message}</div>;
@@ -290,6 +260,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
             >
               <motion.div
                 ref={modalRef}
+                drag
+                dragMomentum={false}
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{
                   scale: 1,
@@ -299,12 +271,11 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   top: modalPosition.y,
                 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="absolute w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl pointer-events-auto"
+                className="absolute w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl pointer-events-auto select-none touch-none"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
-                  className="relative h-64 w-full bg-slate-800 cursor-move group"
-                  onMouseDown={handleDragStart}
+                  className="relative h-64 w-full bg-slate-800 cursor-grab active:cursor-grabbing group"
                 >
                   {profileModalImageLoading && (
                     <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
