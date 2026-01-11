@@ -8,9 +8,10 @@ import { useSettings } from "@/app/hooks/useSettings";
 
 interface SearchBarProps {
     onSearch: (query: string) => void;
+    initialQuery?: string;
 }
 
-const SearchSuggestionItem = ({
+const SearchSuggestItem = ({
     char,
     settings,
     onSelect
@@ -35,7 +36,7 @@ const SearchSuggestionItem = ({
     return (
         <button
             onClick={handleClick}
-            className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/[0.03] rounded-2xl sm:rounded-[1.75rem] transition-all group"
+            className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/5 rounded-2xl sm:rounded-[1.75rem] transition-all group"
         >
             <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
                 <img
@@ -79,14 +80,19 @@ const SearchSuggestionItem = ({
     );
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-    const [query, setQuery] = useState("");
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "" }) => {
+    const [query, setQuery] = useState(initialQuery);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const { settings } = useSettings();
+
+    // Sync query with prop (URL)
+    useEffect(() => {
+        setQuery(initialQuery);
+    }, [initialQuery]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -133,6 +139,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     const handleSelect = (charId: string) => {
         router.push(`/character/${charId}`);
         setIsOpen(false);
+        // setQuery(""); // Don't clear query on selection if we want persistence, though navigating to char page might not need persistence.
+        // User asked "when searched entered", which usually means the search results page.
+        // If clicking a suggestion goes to a specific character, clearing or keeping is debatable.
+        // Usually clicking a concrete result leaves the search context.
         setQuery("");
     };
 
@@ -143,20 +153,18 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
     };
 
     return (
-        <div ref={containerRef} className="relative w-full max-w-2xl mx-auto z-40">
+        <div ref={containerRef} className="relative w-full z-100">
             <form onSubmit={handleSearchSubmit} className="relative group">
-                <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-700" />
-
-                <div className="relative flex items-center bg-[#0f172a]/40 border border-white/5 rounded-[1.5rem] sm:rounded-3xl p-1.5 sm:p-2 backdrop-blur-2xl group-focus-within:border-primary/30 transition-all duration-500 shadow-2xl">
-                    <FiSearch className={`ml-3 sm:ml-5 transition-colors text-lg sm:text-xl ${loading ? 'text-primary animate-pulse' : 'text-white/20 group-focus-within:text-primary'}`} />
+                <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2 transition-all focus-within:border-primary/50 focus-within:bg-white/10">
+                    <FiSearch className={`mr-2 transition-colors ${loading ? 'text-primary animate-pulse' : 'text-white/40 group-focus-within:text-white'}`} />
 
                     <input
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => query.length > 0 && setIsOpen(true)}
-                        placeholder="Search..."
-                        className="flex-1 bg-transparent border-none outline-none py-3 sm:py-4 px-2 sm:px-4 text-white placeholder:text-white/20 font-medium text-xs sm:text-sm"
+                        placeholder="Search characters..."
+                        className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/30 text-sm font-medium w-full min-w-0"
                     />
 
                     <AnimatePresence>
@@ -167,9 +175,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 type="button"
                                 onClick={() => { setQuery(""); onSearch(""); }}
-                                className="p-3 hover:bg-white/5 rounded-2xl text-white/20 hover:text-white transition-all mr-2"
+                                className="p-1 hover:bg-white/10 rounded-full text-white/20 hover:text-white transition-all ml-2"
                             >
-                                <FiX size={16} />
+                                <FiX size={14} />
                             </motion.button>
                         )}
                     </AnimatePresence>
@@ -180,20 +188,19 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
             <AnimatePresence>
                 {isOpen && suggestions.length > 0 && (
                     <motion.div
-                        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 20, scale: 0.98 }}
-                        className="absolute top-full left-0 right-0 mt-4 bg-[#0f172a]/90 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-50"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a]/95 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-101"
                     >
-                        <div className="p-3">
-                            <p className="px-6 py-4 text-[9px] uppercase tracking-[0.4em] font-black text-white/20 flex items-center gap-3 italic">
-                                <span className="w-8 h-px bg-white/5" />
+                        <div className="p-2">
+                            <p className="px-3 py-2 text-[9px] uppercase tracking-[0.2em] font-black text-white/30 flex items-center gap-2">
                                 <FiTrendingUp size={10} /> Results
                             </p>
 
                             <div className="space-y-1">
                                 {suggestions.map((char) => (
-                                    <SearchSuggestionItem
+                                    <SearchSuggestItem
                                         key={char.id}
                                         char={char}
                                         settings={settings}

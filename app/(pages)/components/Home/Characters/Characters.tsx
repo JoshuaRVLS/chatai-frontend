@@ -261,28 +261,20 @@ const Characters = ({
               <FiHash size={16} />
             </div>
 
-            {/* Multi-Select Tags Filter */}
-            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-2" ref={dropdownRef}>
-              {/* Selected Tags */}
-              {selectedTags.map(tag => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-white/60 uppercase tracking-wider"
-                >
-                  {tag}
-                  <button
-                    onClick={() => handleRemoveTag(tag)}
-                    className="hover:bg-primary/30 rounded-full p-0.5 transition-colors"
-                    aria-label={`Remove ${tag} filter`}
-                  >
-                    <FiX size={12} />
-                  </button>
-                </span>
-              ))}
+            {/* Multi-Select Tags Filter & Search */}
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-3" ref={dropdownRef}>
+
+              {/* Integrated Search Bar */}
+              <div className="w-full sm:w-64 lg:w-80">
+                <SearchBar onSearch={onSearch} initialQuery={searchQuery} />
+              </div>
+
+              <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
 
               {/* Tag Search Input */}
               <div className="relative">
                 <div className="flex items-center gap-2">
+                  <FiHash className="text-white/20" />
                   <input
                     type="text"
                     value={tagSearchQuery}
@@ -291,8 +283,8 @@ const Characters = ({
                       setShowTagDropdown(true);
                     }}
                     onFocus={() => setShowTagDropdown(true)}
-                    placeholder={selectedTags.length > 0 ? "Add more tags..." : "Filter by tags..."}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-primary/50 w-48 transition-colors"
+                    placeholder={selectedTags.length > 0 ? "Add more tags..." : "Filter tags..."}
+                    className="bg-transparent border-none outline-none text-sm text-white placeholder:text-white/30 w-32 focus:w-48 transition-all"
                   />
                   <button
                     onClick={() => setShowTagDropdown(!showTagDropdown)}
@@ -366,7 +358,7 @@ const Characters = ({
         </div>
 
         <div className="w-full lg:max-w-md relative group">
-          <SearchBar onSearch={onSearch} />
+          <SearchBar onSearch={onSearch} initialQuery={searchQuery} />
         </div>
       </div>
 
