@@ -12,8 +12,7 @@ import {
     FiInfo,
     FiBook,
     FiPlus,
-    FiZap,
-    FiArrowLeft
+    FiZap
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -92,46 +91,28 @@ const CreateLorebookPage: React.FC = () => {
     });
 
     return (
-        <div className="min-h-screen bg-zinc-950 pt-36 pb-20 relative overflow-hidden">
+        <div className="min-h-screen bg-black pt-28 pb-20 px-6 sm:px-12 relative overflow-hidden">
             {/* Background Blobs */}
             <div className="fixed inset-0 pointer-events-none overflow-hidden">
                 <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/1 blur-[100px] rounded-full" />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-                {/* Mobile Header with Back Button */}
-                <div className="md:hidden flex items-center gap-4 mb-6 sticky top-0 bg-zinc-950/80 backdrop-blur-xl py-4 z-20 border-b border-white/5 -mx-4 px-4">
-                    <button
-                        onClick={() => router.push("/lorebooks")}
-                        className="p-2 rounded-full bg-white/5 border border-white/10 text-white active:scale-95 transition-transform"
-                    >
-                        <FiArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <h2 className="text-lg font-black uppercase tracking-tighter text-white leading-none">
-                            New Lorebook
-                        </h2>
-                        <p className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Create Module</p>
-                    </div>
-                </div>
+            <div className="w-full relative z-10">
+                {/* Mobile Header with Back Button (Hidden for standardization if requested, keeping strictly standardized) */}
+                {/* The user requested to remove the exit button like in Character creation. Character creation has NO exit button in header. */}
 
                 <div className="relative z-10 animate-fade-in-up">
-                    {/* Desktop Header */}
-                    <div className="hidden md:flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                         <div className="space-y-2">
                             <div className="flex items-center gap-4">
-                                <button
-                                    onClick={() => router.push("/lorebooks")}
-                                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all"
-                                >
-                                    <FiArrowLeft />
-                                </button>
-                                <h1 className="text-4xl sm:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                <div className="w-1.5 h-10 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+                                <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
                                     New Lorebook
                                 </h1>
                             </div>
-                            <p className="text-white/40 text-sm font-medium tracking-wide ml-14">
+                            <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
                                 Semantic Archive • World State Protocol L-01
                             </p>
                         </div>
