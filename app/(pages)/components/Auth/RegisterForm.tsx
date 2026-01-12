@@ -72,7 +72,7 @@ export const RegisterForm = () => {
                 return;
             }
 
-            toast.success("Identity established! Check transmission (email).");
+            toast.success("Account Registered! Please check your email for verification.");
             setVerifyEmail(email);
             setView('verify');
         } catch {

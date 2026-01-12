@@ -94,7 +94,7 @@ export const VerifyForm = () => {
             const data = await response.json();
 
             if (data.success) {
-                toast.success("Identity Verified!");
+                toast.success("Account Verified!");
                 setTimeout(() => {
                     setView('login');
                     // Optionally autofill login or just let them login

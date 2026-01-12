@@ -50,8 +50,8 @@ const LoginLanding = () => {
                         autoPlay={index === 0}
                         muted
                         playsInline
-                        className={`absolute inset-0 object-cover w-full h-full transition-opacity duration-1500 [image-rendering:pixelated] 
-                            ${activeVideo === index ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+                        className={`absolute inset-0 object-cover w-full h-full transition-opacity duration-1000 [image-rendering:pixelated] 
+                            ${activeVideo === index && (index !== 0 || isLoaded) ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                         onTimeUpdate={(e) => handleTimeUpdate(e, index)}
                         onLoadedData={() => {
                             if (index === 0) setIsLoaded(true);
