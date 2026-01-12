@@ -223,30 +223,30 @@ const Characters = ({
   }
 
   return (
-    <div ref={sectionRef} className="flex flex-col gap-8 w-full px-6 md:px-8">
+    <div ref={sectionRef} className="flex flex-col gap-10 w-full">
       <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
-        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-white/10" />
+        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-white/20 to-transparent" />
 
         <div className="space-y-8 flex-1 min-w-0">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-4 bg-white/10 rounded-full" />
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Character Hub</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">CHARACTER HUB</span>
             </div>
-            <div className="flex items-end gap-4">
-              <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tighter text-white leading-none">
-                {searchQuery ? "Search Results" : "Community Feed"}
+            <div className="flex items-baseline gap-4">
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic leading-none">
+                {searchQuery ? "Search Results" : "CHARACTER FEED"}
               </h2>
               {!isPending && meta && (
-                <span className="text-sm md:text-xl font-bold text-white/30 tracking-wider mb-1">
-                  {meta.totalCount} Characters
+                <span className="text-xl font-black text-white/30 tracking-wider mb-1">
+                  {meta.totalCount} {meta.totalCount === 1 ? "Character" : "Characters"}
                 </span>
               )}
             </div>
           </div>
 
           {/* Quick Discovery Categories */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-2 px-2">
+          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide -mx-6 md:-mx-12 px-6 md:px-12">
             {discoveryCategories.map((cat) => (
               <motion.button
                 key={cat.name}

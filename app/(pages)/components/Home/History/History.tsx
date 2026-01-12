@@ -154,7 +154,7 @@ const History = () => {
   if (!data || data.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-10 px-6 md:px-12 relative group/history">
+    <div className="flex flex-col gap-10 relative group/history">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
         <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-primary/30 to-transparent" />
 
@@ -164,7 +164,7 @@ const History = () => {
             <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.4em]">Chronological Archives</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic flex items-baseline gap-4">
-            Identity Logs
+            YOUR HISTORY
             <span className="text-xl text-primary/30 not-italic font-black opacity-50">{data.length} {data.length === 1 ? "Record" : "Records"}</span>
           </h2>
         </div>
@@ -191,7 +191,7 @@ const History = () => {
 
       <div
         ref={scrollContainerRef}
-        className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide -mx-6 px-6 snap-x"
+        className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide -mx-6 md:-mx-12 px-6 md:px-12 snap-x"
       >
         {data.map((chat, index) => (
           <Link
