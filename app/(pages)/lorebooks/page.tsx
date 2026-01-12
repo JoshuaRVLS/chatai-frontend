@@ -8,7 +8,7 @@ const page = async () => {
     const queryClient = new QueryClient();
     const session = await getServerSession(authOptions);
 
-    if (!session?.user?.id) return null;
+
 
     await queryClient.prefetchQuery({
         queryKey: ["lorebooks"],

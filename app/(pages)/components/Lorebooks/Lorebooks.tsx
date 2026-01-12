@@ -10,9 +10,15 @@ import Link from "next/link";
 
 const Lorebooks: React.FC = () => {
     const { user } = useContext(AuthContext);
-    const [filter, setFilter] = React.useState<"library" | "discover">("library");
+    // If no user, default to discover
+    const [filter, setFilter] = React.useState<"library" | "discover">(user ? "library" : "discover");
     const [search, setSearch] = React.useState("");
     const [debouncedSearch, setDebouncedSearch] = React.useState("");
+
+    // Sync filter if user changes (e.g. login)
+    React.useEffect(() => {
+        if (!user && filter === 'library') setFilter('discover');
+    }, [user, filter]);
 
     React.useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(search), 500);
@@ -30,7 +36,7 @@ const Lorebooks: React.FC = () => {
             const json = await res.json();
             return json.data;
         },
-        enabled: !!user?.id,
+        // Enable always
     });
 
     const container = {
@@ -71,21 +77,23 @@ const Lorebooks: React.FC = () => {
                             </p>
                         </div>
 
-                        {/* Tabs */}
-                        <div className="flex bg-white/5 p-1 rounded-xl w-fit border border-white/5">
-                            <button
-                                onClick={() => setFilter("library")}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'library' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
-                            >
-                                Library
-                            </button>
-                            <button
-                                onClick={() => setFilter("discover")}
-                                className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'discover' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
-                            >
-                                Discovery
-                            </button>
-                        </div>
+                        {/* Tabs - Hide navigation for guests, they are locked to Discovery */}
+                        {user && (
+                            <div className="flex bg-white/5 p-1 rounded-xl w-fit border border-white/5">
+                                <button
+                                    onClick={() => setFilter("library")}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'library' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                                >
+                                    Library
+                                </button>
+                                <button
+                                    onClick={() => setFilter("discover")}
+                                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'discover' ? 'bg-white text-black shadow-lg' : 'text-zinc-500 hover:text-white'}`}
+                                >
+                                    Discovery
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex gap-4 w-full md:w-auto">
@@ -96,15 +104,17 @@ const Lorebooks: React.FC = () => {
                             onChange={(e) => setSearch(e.target.value)}
                             className="bg-zinc-900/50 border border-white/10 text-white text-xs font-bold px-4 py-2.5 rounded-lg w-full md:w-64 focus:outline-none focus:border-white/30 transition-colors uppercase placeholder:text-zinc-700"
                         />
-                        <Link href="/create_lorebook">
-                            <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl whitespace-nowrap h-full"
-                            >
-                                <FaPlus size={10} /> Create
-                            </motion.button>
-                        </Link>
+                        {user && (
+                            <Link href="/create_lorebook">
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 transition-all shadow-xl whitespace-nowrap h-full"
+                                >
+                                    <FaPlus size={10} /> Create
+                                </motion.button>
+                            </Link>
+                        )}
                     </div>
                 </motion.div>
 

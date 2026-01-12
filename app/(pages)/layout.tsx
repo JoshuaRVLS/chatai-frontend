@@ -4,7 +4,7 @@ import "../globals.css";
 import AuthProvider from "./providers/AuthProvider";
 import { ToastContainer } from "./components/Toast/ToastContainer";
 import { AuthModal } from "./components/Auth/AuthModal";
-import Navbar from "./components/Navbar/Navbar";
+import Sidebar from "./components/Sidebar/Sidebar";
 import ScrollProvider from "./providers/ScrollProvider";
 import QueryProvider from "./providers/QueryProvider";
 import { ConfirmationProvider } from "./providers/ConfirmationProvider";
@@ -120,7 +120,7 @@ export default async function RootLayout({
                 <div className={`min-h-screen flex flex-col ${((isMaintenanceMode && isAdmin) || isWhitelistMode) ? 'pt-12' : ''}`}>
                   {/* Maintenance indicator - admin only */}
                   {isMaintenanceMode && isAdmin && (
-                    <div className="fixed top-0 left-0 right-0 z-9999 py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#f59e0b' }}>
+                    <div className="fixed top-0 left-0 right-0 z-50 py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#f59e0b' }}>
                       <p className="text-xs uppercase tracking-widest font-bold text-black">
                         ⚠️ Maintenance Mode Active — Admin Bypass
                       </p>
@@ -128,7 +128,7 @@ export default async function RootLayout({
                   )}
                   {/* Whitelist indicator - all users */}
                   {isWhitelistMode && !isMaintenanceMode && (
-                    <div className="fixed top-0 left-0 right-0 z-9999 py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#3b82f6' }}>
+                    <div className="fixed top-0 left-0 right-0 z-50 py-2 px-4 text-center shadow-lg flex items-center justify-center gap-4" style={{ background: '#3b82f6' }}>
                       <p className="text-xs uppercase tracking-widest font-bold text-white">
                         🔒 Whitelist Mode Active — Restricted Access
                       </p>
@@ -136,16 +136,27 @@ export default async function RootLayout({
                   )}
                   <AuthModal />
                   <ToastContainer />
-                  {/* Hide Navbar on restrictive pages to prevent navigation loops */}
+
+                  {/* Sidebar (Desktop & Mobile Drawer) */}
                   {!['/maintenance', '/suspended', '/access-denied'].some(path => pathname.startsWith(path)) && (
-                    <Navbar />
+                    <Sidebar />
                   )}
-                  <main className="flex-1 relative">
+
+                  {/* Main Content Wrapper */}
+                  {/* md:pl-64 for desktop sidebar space */}
+                  {/* No extra padding needed for mobile since sidebar is a drawer now */}
+                  <main className={`flex-1 relative ${pathname.startsWith('/chat/') || ['/maintenance', '/suspended', '/access-denied'].some(path => pathname.startsWith(path))
+                    ? ''
+                    : 'md:pl-64'
+                    }`}>
                     {children}
                   </main>
-                  {/* Hide Footer on restrictive pages */}
-                  {!['/maintenance', '/suspended', '/access-denied'].some(path => pathname.startsWith(path)) && (
-                    <Footer />
+
+                  {/* Hide Footer on restrictive pages, AND probably hide it on mobile if it clutters? keeping it for now but maybe styled differently */}
+                  {!['/maintenance', '/suspended', '/access-denied'].some(path => pathname.startsWith(path)) && !pathname.startsWith('/chat/') && (
+                    <div className="md:pl-64">
+                      <Footer />
+                    </div>
                   )}
                 </div>
               </ConfirmationProvider>

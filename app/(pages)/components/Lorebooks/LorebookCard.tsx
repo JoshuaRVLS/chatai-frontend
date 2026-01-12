@@ -13,6 +13,8 @@ import { AnimatePresence } from "motion/react";
 import { FiTrash2 } from "react-icons/fi";
 import Image from "next/image";
 
+import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
+
 interface LorebookCardProps {
     lorebook: any;
     onUpdate: () => void;
@@ -22,6 +24,7 @@ interface LorebookCardProps {
 const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, currentUserId }) => {
     const queryClient = useQueryClient();
     const confirm = useConfirm();
+    const openModal = useAuthModalStore((state) => state.openModal);
     const [showContextMenu, setShowContextMenu] = useState(false);
     const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
     const [imageLoading, setImageLoading] = useState(true);
@@ -31,9 +34,27 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
     const isOwner = currentUserId && lorebook.userId === currentUserId;
     const isSaved = lorebook.isSaved;
 
+    const handleCardClick = (e: React.MouseEvent) => {
+        if (!currentUserId && !lorebook.recursiveScanning) {
+            // Logic check: The user request is "open login modal when click on lorebooik when not logged in".
+            // currentUserId is passed from parent (Lorebooks.tsx) which gets it from AuthContext.
+        }
+
+        if (!currentUserId) {
+            e.preventDefault();
+            openModal('login');
+        }
+    };
+
     const handleToggleSave = async (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!currentUserId) {
+            openModal('login');
+            return;
+        }
+
+
         if (saving) return;
         setSaving(true);
         try {
@@ -126,7 +147,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
     }, [showContextMenu]);
 
     return (
-        <Link href={`/lorebooks/${lorebook.id}`} className="h-full block">
+        <Link href={`/lorebooks/${lorebook.id}`} className="h-full block" onClick={handleCardClick}>
             <motion.div
                 whileHover={{ y: -5, scale: 1.02 }}
                 onTouchStart={handleTouchStart}

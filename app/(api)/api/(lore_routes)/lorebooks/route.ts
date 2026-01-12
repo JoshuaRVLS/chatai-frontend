@@ -5,9 +5,7 @@ import { authOptions } from "@/app/utils/auth";
 
 export const GET = async (req: Request) => {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // REMOVED STRICT AUTH CHECK
 
     const { searchParams } = new URL(req.url);
     const filter = searchParams.get("filter") || "library"; // library, discover, saved, created
@@ -23,21 +21,36 @@ export const GET = async (req: Request) => {
             ];
         }
 
-        if (filter === "library") {
-            where.AND = [
-                ...(where.AND || []),
-                {
-                    OR: [
-                        { userId: session.user.id },
-                        { savedByUsers: { some: { id: session.user.id } } }
-                    ]
-                }
-            ];
-        } else if (filter === "saved") {
-            where.savedByUsers = { some: { id: session.user.id } };
-        } else if (filter === "created") {
-            where.userId = session.user.id;
+        if (!session?.user?.id) {
+            // GUEST MODE: Force discovery/public logic
+            // If they ask for 'library', 'saved', 'created', we return nothing or just public?
+            // Cleanest is to just ignore their filter if it's personal, or return empty.
+            if (filter !== 'discover') {
+                // For now, if guests try to access library/saved/created, return empty.
+                return NextResponse.json({ success: true, data: [] });
+            }
+            // If discover, just get public ones (no user ID filtering needed usually, unless specific visibility logic exists)
+            // Assuming all lorebooks are public for now or filtered by visibility field if it existed?
+            // Schema check: Lorebook doesn't seem to have visibility field, assuming all are public currently?
+        } else {
+            // AUTHENTICATED LOGIC
+            if (filter === "library") {
+                where.AND = [
+                    ...(where.AND || []),
+                    {
+                        OR: [
+                            { userId: session.user.id },
+                            { savedByUsers: { some: { id: session.user.id } } }
+                        ]
+                    }
+                ];
+            } else if (filter === "saved") {
+                where.savedByUsers = { some: { id: session.user.id } };
+            } else if (filter === "created") {
+                where.userId = session.user.id;
+            }
         }
+
         // filter === 'discover' implies no user restrictions (public)
 
         const lorebooks = await db.lorebook.findMany({
@@ -47,10 +60,12 @@ export const GET = async (req: Request) => {
                     select: { entries: true, characters: true }
                 },
                 tags: true,
-                savedByUsers: {
-                    where: { id: session.user.id },
-                    select: { id: true }
-                }
+                ...(session?.user?.id ? {
+                    savedByUsers: {
+                        where: { id: session.user.id },
+                        select: { id: true }
+                    }
+                } : {})
             },
             orderBy: { updatedAt: "desc" },
             take: 50
@@ -59,7 +74,7 @@ export const GET = async (req: Request) => {
         // Map to include isSaved bool
         const mapped = lorebooks.map(lb => ({
             ...lb,
-            isSaved: lb.savedByUsers.length > 0,
+            isSaved: session?.user?.id ? (lb as any).savedByUsers.length > 0 : false,
             savedByUsers: undefined // Remove from payload
         }));
 
