@@ -1,21 +1,21 @@
-/**
- * Chub.ai Automatic Discovery & Import Tool
- * 
- * Fetches characters from Chub.ai and imports them directly into the database.
- * 
- * Usage: npx tsx scripts/chub-auto-import.ts --search "Anime" --pages 2
- */
-
 import { PrismaClient } from '../app/generated/prisma';
 
 const prisma = new PrismaClient();
-const DEFAULT_USER_ID = "cmk70q7xb0000cmlrwm9l86gz";
-const CHUB_GATEWAY_API = "https://gateway.chub.ai/api";
-const CHUB_GATEWAY_SEARCH = "https://gateway.chub.ai/search";
 
-const stripHtml = (html: string): string => {
-    if (!html) return "";
-    return html
+const CONFIG = {
+    userId: "cmk70q7xb0000cmlrwm9l86gz",
+    api: "https://gateway.chub.ai/api",
+    search: "https://gateway.chub.ai/search",
+    headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
+        "Referer": "https://chub.ai/"
+    }
+};
+
+const sanitize = (str: string): string => {
+    if (!str) return "";
+    return str
         .replace(/<[^>]*>/g, '')
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
@@ -27,225 +27,160 @@ const stripHtml = (html: string): string => {
         .trim();
 };
 
-async function importSingleCharacter(charPath: string) {
+const fetchJson = async (url: string) => {
+    const res = await fetch(url, { headers: CONFIG.headers });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    return res.json();
+};
+
+const upsertTags = async (topics: string[]) => {
+    return Promise.all(topics.map(name =>
+        prisma.characterTag.upsert({
+            where: { name },
+            create: { name },
+            update: {}
+        })
+    ));
+};
+
+const saveImage = async (charId: string, name: string, url: string) => {
+    if (!url) return;
     try {
-        // Check for existing first
-        const existing = await prisma.character.findFirst({
-            where: { chubId: charPath }
-        });
+        const res = await fetch(url);
+        if (!res.ok) return;
 
-        if (existing) {
-            console.log(`⏩ Skipping: ${charPath} (Already in archive)`);
-            return { success: true, skipped: true };
-        }
-
-        const detailUrl = `${CHUB_GATEWAY_API}/characters/${charPath}?full=true`;
-        console.log(`📡 Fetching: ${detailUrl}`);
-
-        const detailRes = await fetch(detailUrl, {
-            headers: {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Accept": "application/json",
-                "Referer": "https://chub.ai/"
+        const buffer = Buffer.from(await res.arrayBuffer());
+        await prisma.characterImage.create({
+            data: {
+                charId,
+                name: `${name}_avatar`,
+                mimetype: res.headers.get("content-type") || "image/png",
+                data: buffer
             }
         });
+    } catch (e) {
+        console.warn(`Failed to save image for ${name}`);
+    }
+};
 
-        if (!detailRes.ok) {
-            console.error(`❌ Failed to fetch: ${detailRes.statusText}`);
-            return { success: false };
-        }
+const importCharacter = async (path: string) => {
+    try {
+        const existing = await prisma.character.findFirst({ where: { chubId: path } });
+        if (existing) return { status: 'skipped' };
 
-        const detail = (await detailRes.json()).node;
-        const { definition } = detail;
+        const { node: detail } = await fetchJson(`${CONFIG.api}/characters/${path}?full=true`);
+        const def = detail.definition;
         const topics = detail.topics || [];
 
-        // Handle Tags in parallel
-        const tags = await Promise.all(
-            topics.map((topicName: string) =>
-                prisma.characterTag.upsert({
-                    where: { name: topicName },
-                    update: {},
-                    create: { name: topicName }
-                })
-            )
-        );
+        const tags = await upsertTags(topics);
+        const isNsfw = topics.some((t: string) => ['nsfw', 'mature'].includes(t.toLowerCase()));
 
-        // Create Character
-        const introMessage = definition.first_message || definition.first_mes || "";
-        const exampleConvo = definition.example_dialogs || definition.mes_example || "";
-        const newChar = await prisma.character.create({
+        const char = await prisma.character.create({
             data: {
                 name: detail.name,
-                chubId: charPath,
-                bio: stripHtml(detail.description || detail.tagline || ""),
-                persona: stripHtml(definition.personality || definition.description || ""),
-                scenario: stripHtml(definition.scenario || ""),
-                introMessage: stripHtml(introMessage),
-                exampleConversations: stripHtml(exampleConvo),
-                isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature"),
-                authorId: DEFAULT_USER_ID,
-                tags: {
-                    connect: tags.map((t: any) => ({ id: t.id }))
-                }
+                chubId: path,
+                bio: sanitize(detail.description || detail.tagline),
+                persona: sanitize(def.personality || def.description),
+                scenario: sanitize(def.scenario),
+                introMessage: sanitize(def.first_message || def.first_mes),
+                exampleConversations: sanitize(def.example_dialogs || def.mes_example),
+                isNsfw,
+                authorId: CONFIG.userId,
+                tags: { connect: tags.map(t => ({ id: t.id })) }
             }
         });
 
-        // Handle Image
-        const imageUrl = detail.max_res_url || definition.avatar;
-        if (imageUrl) {
-            try {
-                const imgRes = await fetch(imageUrl);
-                if (imgRes.ok) {
-                    const buffer = await imgRes.arrayBuffer();
-                    await prisma.characterImage.create({
-                        data: {
-                            charId: newChar.id,
-                            name: `${detail.name}_avatar`,
-                            mimetype: imgRes.headers.get("content-type") || "image/png",
-                            data: Buffer.from(buffer)
-                        }
-                    });
-                    console.log(`   ✅ Integrated: ${detail.name} (with HD visuals)`);
-                } else {
-                    console.log(`   ✅ Integrated: ${detail.name} (no visuals)`);
-                }
-            } catch {
-                console.log(`   ✅ Integrated: ${detail.name} (visual error)`);
-            }
-        } else {
-            console.log(`   ✅ Integrated: ${detail.name}`);
-        }
-        return { success: true, isNsfw: topics.some((t: string) => t.toLowerCase() === "nsfw" || t.toLowerCase() === "mature") };
+        await saveImage(char.id, detail.name, detail.max_res_url || def.avatar);
+
+        return { status: 'success', name: detail.name, isNsfw };
     } catch (e: any) {
-        console.error(`❌ Failed to import ${charPath}:`, e.message);
-        return { success: false };
+        return { status: 'error', error: e.message };
     }
-}
+};
+
+const parseArgs = () => {
+    const args = process.argv.slice(2);
+    const getArg = (flag: string) => {
+        const idx = args.indexOf(flag);
+        return idx !== -1 ? args[idx + 1] : null;
+    };
+
+    return {
+        query: getArg('--search') || '',
+        pages: parseInt(getArg('--pages') || '1'),
+        tags: getArg('--tags') || '',
+        sort: getArg('--sort') || 'default',
+        concurrency: parseInt(getArg('--concurrency') || '5'),
+        id: getArg('--id')
+    };
+};
 
 async function main() {
-    const args = process.argv.slice(2);
-    const searchIndex = args.indexOf('--search');
-    const pagesIndex = args.indexOf('--pages');
-    const tagsIndex = args.indexOf('--tags');
-    const sortIndex = args.indexOf('--sort');
-    const idIndex = args.indexOf('--id');
-    const concurrencyIndex = args.indexOf('--concurrency');
+    const opts = parseArgs();
 
-    if (idIndex !== -1) {
-        const charId = args[idIndex + 1];
-        if (!charId) {
-            console.error("❌ Please provide a character ID, e.g.: --id Anonymous/furina-5e0e2c07");
-            return;
-        }
-        await importSingleCharacter(charId);
+    if (opts.id) {
+        const res = await importCharacter(opts.id);
+        console.log(res);
         return;
     }
 
-    const sortMap: Record<string, string> = {
-        'popular': 'star_count',
-        'newest': 'created_at',
-        'downloads': 'download_count',
-        'rating': 'rating',
-        'default': 'default'
-    };
+    console.log(`Starting sync: ${opts.pages} pages, ${opts.concurrency} threads`);
 
-    let query = searchIndex !== -1 ? (args[searchIndex + 1] || '') : '';
-    if (query === '""' || query === "''") query = '';
-
-    const maxPages = pagesIndex !== -1 ? parseInt(args[pagesIndex + 1]) : 1;
-    const tagsInput = tagsIndex !== -1 ? args[tagsIndex + 1] : '';
-    const sortInput = sortIndex !== -1 ? args[sortIndex + 1]?.toLowerCase() : 'default';
-    const sort = sortMap[sortInput] || sortInput;
-    const concurrency = concurrencyIndex !== -1 ? parseInt(args[concurrencyIndex + 1]) : 5;
-
-    console.log(`\n🚀 Starting Multi-threaded Intelligence Sync${query ? ` for: "${query}"` : ''}`);
-    console.log(`📄 Scope: ${maxPages} pages`);
-    console.log(`⚡ Concurrency: ${concurrency}`);
-    if (tagsInput) console.log(`🏷️  Filtered by Topics: ${tagsInput}`);
-    console.log(`📈 Sort Order: ${sort}`);
-    console.log(`👤 Target Author ID: ${DEFAULT_USER_ID}\n`);
-
-    let totalImported = 0;
-    let nsfwCount = 0;
-    let cleanCount = 0;
-
+    const stats = { total: 0, nsfw: 0, errors: 0 };
     const startTime = Date.now();
 
-    for (let page = 1; page <= maxPages; page++) {
-        console.log(`📄 Fetching Page ${page}...`);
+    for (let i = 1; i <= opts.pages; i++) {
+        console.log(`Processing page ${i}...`);
+
         try {
             const params = new URLSearchParams({
+                page: i.toString(),
                 first: '20',
-                page: page.toString(),
+                sort: opts.sort,
+                ...(opts.query && { search: opts.query }),
+                ...(opts.tags && { topics: opts.tags }),
                 namespace: 'characters',
                 include_forks: 'true',
-                nsfw: 'true',
-                nsfl: 'true',
-                chub: 'true',
-                sort: sort
-            });
-            if (query) params.set('search', query);
-            if (tagsInput) params.set('topics', tagsInput);
-
-            const searchUrl = `${CHUB_GATEWAY_SEARCH}?${params.toString()}`;
-            const response = await fetch(searchUrl, {
-                headers: {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                    "Accept": "application/json",
-                    "Referer": "https://chub.ai/"
-                }
+                nsfw: 'true'
             });
 
-            if (!response.ok) {
-                console.error(`❌ Failed to fetch page ${page}: ${response.statusText}`);
-                continue;
-            }
+            const data = await fetchJson(`${CONFIG.search}?${params}`);
+            const nodes = data.data?.nodes || [];
 
-            const searchResult = await response.json();
-            const characterNodes = searchResult.data?.nodes || [];
+            if (!nodes.length) break;
 
-            if (characterNodes.length === 0) {
-                console.log(`ℹ️ No characters found on page ${page}.`);
-                break;
-            }
+            const queue = [...nodes];
+            const workers = Array(opts.concurrency).fill(null).map(async () => {
+                while (queue.length) {
+                    const node = queue.shift();
+                    if (!node) break;
 
-            // Parallel Import with Concurrency Control
-            const queue = [...characterNodes];
-            const activePromises: Promise<void>[] = [];
-
-            while (queue.length > 0 || activePromises.length > 0) {
-                while (activePromises.length < concurrency && queue.length > 0) {
-                    const node = queue.shift()!;
-                    const promise = (async () => {
-                        const result = await importSingleCharacter(node.fullPath);
-                        if (result.success && !result.skipped) {
-                            totalImported++;
-                            if (result.isNsfw) nsfwCount++;
-                            else cleanCount++;
-                        }
-                    })().finally(() => {
-                        activePromises.splice(activePromises.indexOf(promise), 1);
-                    });
-                    activePromises.push(promise);
+                    const res = await importCharacter(node.fullPath);
+                    if (res.status === 'success') {
+                        stats.total++;
+                        if (res.isNsfw) stats.nsfw++;
+                        process.stdout.write('.');
+                    } else if (res.status === 'error') {
+                        stats.errors++;
+                        process.stdout.write('x');
+                    }
                 }
-                if (activePromises.length > 0) {
-                    await Promise.race(activePromises);
-                }
-            }
-        } catch (error: any) {
-            console.error(`❌ Global error on page ${page}:`, error.message);
+            });
+
+            await Promise.all(workers);
+            console.log(''); // Newline after progress dots
+
+        } catch (e) {
+            console.error(`Page ${i} failed`);
         }
     }
 
-    const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`\n🎉 Multi-threaded sync completed in ${duration}s!`);
-    console.log(`🚀 Total Integrated: ${totalImported}`);
-    console.log(`🌶️  NSFW Integrated : ${nsfwCount}`);
-    console.log(`🛡️  Clean Integrated: ${cleanCount}\n`);
+    const seconds = ((Date.now() - startTime) / 1000).toFixed(1);
+    console.log(`\nDone in ${seconds}s`);
+    console.log(`Imported: ${stats.total} (${stats.nsfw} NSFW)`);
+    console.log(`Errors: ${stats.errors}`);
 }
 
 main()
     .catch(console.error)
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+    .finally(() => prisma.$disconnect());

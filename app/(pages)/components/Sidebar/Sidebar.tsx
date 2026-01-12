@@ -40,9 +40,6 @@ const Sidebar = () => {
     const openModal = useAuthModalStore((state) => state.openModal);
     const [isOpen, setIsOpen] = React.useState(false);
 
-    // STRICT GUEST MODE: Hide Sidebar completely if not logged in
-    if (!session) return null;
-
     // Close sidebar on route change
     React.useEffect(() => {
         setIsOpen(false);
@@ -58,8 +55,8 @@ const Sidebar = () => {
         return () => { document.body.style.overflow = 'unset'; };
     }, [isOpen]);
 
-    // Hide on chat pages or specific routes if needed
-    if (pathname.startsWith("/chat/")) return null;
+    // Hide on chat pages or specific routes if needed, OR if not logged in
+    if (pathname.startsWith("/chat/") || !session) return null;
 
     const mainLinks = [
         { name: "Home", href: "/", icon: FiHome },
