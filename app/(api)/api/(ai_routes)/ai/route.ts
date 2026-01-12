@@ -6,7 +6,7 @@ export const POST = async (req: Request) => {
     return Math.ceil(text.length / 4);
   };
 
-  const { content, chatId, model, regenerate, continue: isContinue } = await req.json();
+  const { content, chatId, model, regenerate, continue: isContinue, activeEngine, customApiUrl, customApiKey } = await req.json();
   const isRegenerate = regenerate === true;
 
   const chatMetadata = await db.chat.findUnique({
@@ -246,16 +246,47 @@ ${feedbackSteering ? `[USER PREFERENCES & STEERING]\n${feedbackSteering}` : ''}
     totalTokens += msgTokens;
   }
 
+  // const { content, chatId, model, regenerate, continue: isContinue, activeEngine, customApiUrl, customApiKey } = await req.json(); // REMOVED DUPLICATE
+  // ... (existing code)
+
+  // Determine API Config based on Engine Preference
+  let targetUrl = 'https://openrouter.ai/api/v1/chat/completions';
+  let targetKey = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY;
+  let targetModel = selectedModel;
+
+  if (activeEngine === 'external') {
+    // Basic validation
+    if (!customApiKey) {
+      return NextResponse.json({ success: false, error: 'External API Key is missing in settings.' }, { status: 400 });
+    }
+
+    // Normalize URL: Remove trailing slash
+    let url = (customApiUrl || "https://api.openai.com/v1").replace(/\/$/, "");
+    // Append /chat/completions if not present (heuristic)
+    if (!url.includes('/chat/completions')) {
+      url += '/chat/completions';
+    }
+    targetUrl = url;
+    targetKey = customApiKey;
+
+    // For external, we usually trust the model selected or fallback to a standard one if the user typed nothing
+    // But usually the UI sends the 'model' anyway.
+  }
+
   const response =
-    await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    await fetch(targetUrl, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+        Authorization: `Bearer ${targetKey}`,
         'Content-Type': 'application/json',
-        'X-Title': 'JChatAI',
+        // Only send X-Title/HTTP-Referer if using OpenRouter to avoid leaking data to random endpoints
+        ...(targetUrl.includes('openrouter') ? {
+          'X-Title': 'JChatAI',
+          'HTTP-Referer': 'https://jchatai.space'
+        } : {})
       },
       body: JSON.stringify({
-        model: selectedModel,
+        model: targetModel,
         user: chat?.user.username,
         stream: true,
         temperature: isRegenerate ? 1.0 : 0.7,
@@ -279,9 +310,9 @@ Provide a fresh perspective, different tone, or different angle. Do NOT repeat t
             }
           ]),
         ],
-        sort: 'price',
-        allow_fallbacks: true,
-        max_input_tokens: 8192,
+        // Params - these might not be supported by all providers, but most OpenAI-likes support them
+        stream_options: { include_usage: false }, // Prevent some errors
+        max_tokens: 4096, // Using standardized param
       }),
     });
 

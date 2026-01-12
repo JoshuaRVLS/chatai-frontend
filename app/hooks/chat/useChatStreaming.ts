@@ -35,10 +35,26 @@ export const useChatStreaming = ({
             const controller = new AbortController();
             const totalTimeout = setTimeout(() => controller.abort(), 300000); // 5 minutes total timeout
 
+            // Read preferences from localStorage
+            let prefs = { activeEngine: "default", apiUrl: "", apiKey: "" };
+            try {
+                const stored = localStorage.getItem("jchat_ai_prefs");
+                if (stored) prefs = JSON.parse(stored);
+            } catch (e) { console.error("Failed to parse AI prefs", e); }
+
             const aiRes = await fetch("/api/ai", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chatId, content, model: selectedModel, regenerate: isRegenerate, continue: isContinue }),
+                body: JSON.stringify({
+                    chatId,
+                    content,
+                    model: selectedModel,
+                    regenerate: isRegenerate,
+                    continue: isContinue,
+                    activeEngine: prefs.activeEngine,
+                    customApiUrl: prefs.apiUrl,
+                    customApiKey: prefs.apiKey
+                }),
                 signal: controller.signal
             });
 
