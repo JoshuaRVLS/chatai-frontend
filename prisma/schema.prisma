@@ -207,3 +207,19 @@ model WhitelistedEmail {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String?
+  link        String?
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  
+  // Image Storage
+  imageType   String?  // MIME type (e.g. image/png)
+  imageData   Bytes?   // Binary data
+  imageUrl    String?  // Fallback for external URLs
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
