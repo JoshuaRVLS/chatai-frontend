@@ -53,7 +53,7 @@ const Security = () => {
   return (
     <div className="space-y-8 p-4">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl border border-primary/20">
+        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white text-2xl border border-white/20">
           <FiShield />
         </div>
         <div>
@@ -68,12 +68,12 @@ const Security = () => {
             Current Password
           </label>
           <div className="relative group">
-            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
             <input
               type="password"
               value={oldPassword}
               onChange={(e) => setOldPassword(e.target.value)}
-              className="input-modern has-icon"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
               placeholder="••••••••"
             />
           </div>
@@ -86,12 +86,12 @@ const Security = () => {
             New Password
           </label>
           <div className="relative group">
-            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
             <input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="input-modern has-icon"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
               placeholder="Min. 8 characters"
             />
           </div>
@@ -102,12 +102,12 @@ const Security = () => {
             Confirm New Password
           </label>
           <div className="relative group">
-            <FiCheckCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+            <FiCheckCircle className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
             <input
               type="password"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="input-modern has-icon"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
               placeholder="Repeat new password"
             />
           </div>
@@ -118,7 +118,7 @@ const Security = () => {
           disabled={isUpdating}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="btn-primary w-full py-4 flex items-center justify-center gap-2 group"
+          className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 group hover:bg-zinc-200 transition-colors"
         >
           {isUpdating ? (
             <FiLoader className="animate-spin" />

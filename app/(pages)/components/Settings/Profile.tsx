@@ -76,7 +76,7 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
   return (
     <div className="space-y-8 p-4">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl border border-primary/20">
+        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white text-2xl border border-white/20">
           <FiUser />
         </div>
         <div>
@@ -98,7 +98,7 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
             />
 
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 rounded-2xl">
-              <FiCamera className="text-primary text-2xl" />
+              <FiCamera className="text-white text-2xl" />
               <span className="text-[8px] font-black uppercase tracking-widest text-white/70">Change Photo</span>
             </div>
           </div>
@@ -120,12 +120,12 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
             Display Name
           </label>
           <div className="relative group">
-            <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+            <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="input-modern has-icon"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
               placeholder="Your username"
             />
           </div>
@@ -136,12 +136,12 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
             Email Address
           </label>
           <div className="relative group">
-            <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+            <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="input-modern has-icon opacity-70 cursor-not-allowed"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white/50 placeholder:text-white/20 outline-none cursor-not-allowed font-bold"
               placeholder="your@email.com"
               disabled
             />
@@ -154,7 +154,7 @@ const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
           disabled={isUpdating}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="btn-primary w-full py-4 flex items-center justify-center gap-2 group"
+          className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 group hover:bg-zinc-200 transition-colors"
         >
           {isUpdating ? (
             <FiLoader className="animate-spin" />

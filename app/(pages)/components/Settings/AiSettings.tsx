@@ -52,7 +52,7 @@ const AiSettings = ({ data }: { data: any }) => {
   return (
     <div className="space-y-8 p-4">
       <div className="flex items-center gap-4 mb-8">
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary text-2xl border border-primary/20">
+        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white text-2xl border border-white/20">
           <FiCpu />
         </div>
         <div>
@@ -67,7 +67,7 @@ const AiSettings = ({ data }: { data: any }) => {
           <button
             onClick={() => setActiveEngine("default")}
             className={`flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-sm ${activeEngine === "default"
-              ? "bg-primary text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+              ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]"
               : "hover:bg-white/5 text-white/50"
               }`}
           >
@@ -76,7 +76,7 @@ const AiSettings = ({ data }: { data: any }) => {
           <button
             onClick={() => setActiveEngine("external")}
             className={`flex items-center justify-center gap-2 py-3 rounded-xl transition-all font-bold text-sm ${activeEngine === "external"
-              ? "bg-primary text-black shadow-[0_0_20px_rgba(34,211,238,0.3)]"
+              ? "bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]"
               : "hover:bg-white/5 text-white/50"
               }`}
           >
@@ -102,7 +102,7 @@ const AiSettings = ({ data }: { data: any }) => {
                     key={m.id}
                     onClick={() => setSelectedModel(m.name)}
                     className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${selectedModel === m.name
-                      ? "bg-white/10 border-primary/40 text-white"
+                      ? "bg-white/10 border-white/40 text-white"
                       : "bg-white/5 border-white/5 text-white/40 hover:border-white/20"
                       }`}
                   >
@@ -110,7 +110,7 @@ const AiSettings = ({ data }: { data: any }) => {
                       <p className="font-bold">{m.name}</p>
                       <p className="text-[10px] opacity-60">{m.desc}</p>
                     </div>
-                    {selectedModel === m.name && <FiCheck className="text-primary" />}
+                    {selectedModel === m.name && <FiCheck className="text-white" />}
                   </button>
                 ))}
               </div>
@@ -128,12 +128,12 @@ const AiSettings = ({ data }: { data: any }) => {
                   Base Proxy URL
                 </label>
                 <div className="relative group">
-                  <FiGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+                  <FiGlobe className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
                   <input
                     type="url"
                     value={apiUrl}
                     onChange={(e) => setApiUrl(e.target.value)}
-                    className="input-modern has-icon"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
                     placeholder="https://api.openai.com/v1"
                   />
                 </div>
@@ -144,12 +144,12 @@ const AiSettings = ({ data }: { data: any }) => {
                   Private API Key
                 </label>
                 <div className="relative group">
-                  <FiKey className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
+                  <FiKey className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-white transition-colors" />
                   <input
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
-                    className="input-modern has-icon"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/20 outline-none focus:border-white/30 focus:bg-white/10 transition-all font-bold"
                     placeholder="sk-••••••••••••••••"
                   />
                 </div>
@@ -163,7 +163,7 @@ const AiSettings = ({ data }: { data: any }) => {
           disabled={isSaving}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="btn-primary w-full py-4 flex items-center justify-center gap-2 group mt-4"
+          className="w-full bg-white text-black py-4 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-2 group mt-4 hover:bg-zinc-200 transition-colors"
         >
           {isSaving ? <FiSave className="animate-spin" /> : <><FiSave /> <span>Synchronize Preferences</span></>}
         </motion.button>

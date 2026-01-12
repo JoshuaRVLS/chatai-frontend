@@ -13,7 +13,8 @@ import {
     FiCpu,
     FiBookOpen,
     FiSettings,
-    FiGrid
+    FiGrid,
+    FiCommand
 } from "react-icons/fi";
 import { Orbitron } from "next/font/google";
 import UserAvatar from "../Common/UserAvatar";
@@ -71,6 +72,7 @@ const Sidebar = () => {
     ];
 
     const systemLinks = [
+        ...(session?.user?.isAdmin ? [{ name: "Admin Panel", href: "/admin", icon: FiCommand }] : []),
         { name: "Settings", href: "/settings", icon: FiSettings },
     ];
 

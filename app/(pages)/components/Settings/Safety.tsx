@@ -55,25 +55,26 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
 
     return (
         <div className="p-8 sm:p-10 space-y-10">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-3 italic">
-                    <FiShield className="text-primary" /> Content Safety
-                </h2>
-                <p className="text-white/40 text-sm">
-                    Configure how sensitive content is displayed across the platform.
-                </p>
+            <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-white text-2xl border border-white/20">
+                    <FiShield />
+                </div>
+                <div>
+                    <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase">Content Safety</h3>
+                    <p className="text-white/40 text-[10px] mt-1 uppercase tracking-[0.2em] font-black">Configure how sensitive content is displayed.</p>
+                </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-2">
                 {/* Blur Toggle */}
                 <div className="bg-white/2 border border-white/5 rounded-4xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 transition-all hover:bg-white/4">
                     <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
                             <span className="text-xs font-black text-white uppercase tracking-widest">Image Filtering</span>
                             {blurNsfw ? (
-                                <FiEyeOff className="text-primary text-sm" />
+                                <FiEyeOff className="text-white text-sm" />
                             ) : (
-                                <FiEye className="text-orange-500 text-sm" />
+                                <FiEye className="text-white/40 text-sm" />
                             )}
                         </div>
                         <p className="text-white/20 text-[11px] leading-relaxed max-w-md font-medium">
@@ -81,7 +82,7 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
                         </p>
                     </div>
 
-                    <div className="flex bg-slate-950/50 p-1.5 rounded-2xl border border-white/5 relative">
+                    <div className="flex bg-black/50 p-1.5 rounded-2xl border border-white/5 relative">
                         <button
                             onClick={() => handleUpdateSetting("blurNsfw", true)}
                             className={`relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${blurNsfw ? "text-slate-950" : "text-white/30 hover:text-white"
@@ -98,7 +99,7 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
                         </button>
                         <motion.div
                             layoutId="blur-tab"
-                            className="absolute inset-y-1.5 bg-primary rounded-xl shadow-[0_0_15px_rgba(34,211,238,0.3)]"
+                            className="absolute inset-y-1.5 bg-white rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.2)]"
                             initial={false}
                             animate={{
                                 x: !blurNsfw ? "100%" : "0%",
