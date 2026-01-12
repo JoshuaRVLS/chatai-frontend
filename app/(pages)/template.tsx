@@ -24,8 +24,12 @@ export default async function Template({ children }: { children: React.ReactNode
     const isMaintenanceMode = maintenanceSetting?.value === "true";
     const isWhitelistMode = whitelistSetting?.value === "true";
 
-    // Optimization: If neither mode is active, return early
+    // Optimization: If neither mode is active
     if (!isMaintenanceMode && !isWhitelistMode) {
+        // If maintenance is OFF but we are on the maintenance page, redirect to home
+        if (pathname.startsWith("/maintenance")) {
+            redirect("/");
+        }
         return <>{children}</>;
     }
 
