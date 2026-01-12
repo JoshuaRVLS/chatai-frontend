@@ -7,6 +7,7 @@ import { toast } from '@/app/lib/toast';
 import { AuthContext } from "../providers/AuthProvider";
 import CharacterTags from "../components/CharacterTags/CharacterTags";
 import CharacterCard from "../components/CharacterCard/CharacterCard";
+import DescriptionEditor from "../components/DescriptionEditor/DescriptionEditor";
 import {
   FiCamera,
   FiInfo,
@@ -18,7 +19,8 @@ import {
   FiPlus,
   FiHash,
   FiBook,
-  FiAlertTriangle
+  FiAlertTriangle,
+  FiAlignLeft
 } from "react-icons/fi";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
@@ -205,16 +207,7 @@ const CreateCharacterPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Public Biography</label>
-                    <textarea
-                      required
-                      value={characterBio}
-                      onChange={(e) => setCharacterBio(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/10 transition-all text-sm h-32 resize-none scrollbar-hide font-medium leading-relaxed"
-                      placeholder="Brief history for the central archives..."
-                    />
-                  </div>
+
 
                   <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group transition-all hover:border-orange-500/20">
                     <div className="flex items-center gap-3">
@@ -238,6 +231,20 @@ const CreateCharacterPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+            </section>
+
+            {/* Biography Section (Independent) */}
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <FiAlignLeft className="text-white/40" />
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Public Biography</h3>
+              </div>
+              <DescriptionEditor
+                value={characterBio}
+                onChange={setCharacterBio}
+                placeholder="Brief history for the central archives... (Supports HTML)"
+                className="h-[500px]"
+              />
             </section>
 
             {/* Tags Section */}

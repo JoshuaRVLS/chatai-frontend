@@ -10,6 +10,7 @@ import { AuthContext } from "../../providers/AuthProvider";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from '@/app/lib/toast';
 import { useAuthAction } from "@/app/hooks/useAuthAction";
+import { cleanHtml } from "@/app/utils/clean-html";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
 
 interface CharacterCardProps {
@@ -233,7 +234,7 @@ const CharacterCard = React.memo(function CharacterCard({
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 inset-x-0 p-4">
               <h3 className="text-xs lg:text-sm font-black text-white leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md">{characterName}</h3>
-              <p className="text-[9px] text-zinc-500 line-clamp-1 font-medium mt-1">{characterBio}</p>
+              <div className="text-[9px] text-zinc-500 line-clamp-1 font-medium mt-1 [&_p]:inline [&_br]:hidden" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
             </div>
           </div>
         </div>
@@ -275,9 +276,10 @@ const CharacterCard = React.memo(function CharacterCard({
               </div>
 
               {/* Scrollable Bio */}
-              <p className="text-[11px] text-zinc-300 font-medium leading-relaxed max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40 wrap-break-word shadow-black drop-shadow-sm">
-                {characterBio}
-              </p>
+              <div
+                className="text-[11px] text-zinc-300 font-medium leading-relaxed max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40 wrap-break-word shadow-black drop-shadow-sm prose prose-invert prose-p:my-1 prose-headings:text-white prose-headings:text-xs prose-strong:text-white prose-a:text-cyan-400"
+                dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }}
+              />
 
               {/* Spacer */}
               <div className="flex-1" />
