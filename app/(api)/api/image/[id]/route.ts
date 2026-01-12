@@ -16,10 +16,13 @@ export const GET = async (
         if (!image || !image.data) {
             return new NextResponse("Not Found", { status: 404 });
         }
+        const { searchParams } = new URL(req.url);
+        const width = parseInt(searchParams.get('width') || '1024');
+
         // Optimize image using sharp
         const optimizedBuffer = await sharp(Buffer.from(image.data))
             .resize({
-                width: 1024,
+                width: width,
                 withoutEnlargement: true,
                 fit: 'inside'
             })

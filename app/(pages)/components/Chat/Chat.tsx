@@ -136,6 +136,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   if (!chat) return <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-400">No chat data found.</div>;
 
   const characterImage = chat.character?.photo ? `/api/image/${chat.character.id}` : null;
+  const characterThumbnail = chat.character?.photo ? `/api/image/${chat.character.id}?width=100` : null;
   const activePersona = chat.user?.personas?.find(p => p.id === (selectedPersonaId || chat.personaId));
   /*
    * User Image Logic:
@@ -144,8 +145,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
    * 3. Session User Image (fallback if chat data is incomplete but user is same)
    */
   const userImage = activePersona?.image
-    ? `/api/persona/image/${activePersona.id}`
-    : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}` : (user?.id === chat.userId ? (user?.image || null) : null));
+    ? `/api/persona/image/${activePersona.id}?width=100`
+    : (chat.user?.profileImage ? `/api/users/picture/${chat.user.id}?width=100` : (user?.id === chat.userId ? (user?.image || null) : null));
 
   const userName = activePersona?.name || chat.user?.username || (user?.id === chat.userId ? (user?.name || (user as any)?.username) : null);
 
@@ -156,7 +157,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
       <ChatNavbar
         characterId={chat.character.id}
         characterName={chat.character.name}
-        characterImage={characterImage}
+        characterImage={characterThumbnail}
         isNsfw={chat.character.isNsfw}
         onProfileClick={handleProfileClick}
         onUndo={handleUndo}
@@ -182,7 +183,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
               message={msg}
               userImage={userImage}
               userName={userName}
-              characterImage={characterImage}
+              characterImage={characterThumbnail}
               isNsfw={chat.character.isNsfw}
               isBlurEnabled={settings.blurNsfw}
               tempUnblur={tempUnblurMessages[msg.id]}
@@ -217,7 +218,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
                 updatedAt: new Date()
               } as any}
               userImage={null}
-              characterImage={characterImage}
+              characterImage={characterThumbnail}
               isNsfw={chat.character.isNsfw}
               isBlurEnabled={settings.blurNsfw}
               tempUnblur={tempUnblurMessages["streaming"]}

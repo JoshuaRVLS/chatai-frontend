@@ -170,19 +170,19 @@ export const MessageBubble = React.memo(
                             <>
                                 {!message.content && isOptimistic && message.id === "streaming" ? (
                                     <div className="flex gap-1.5 py-2 px-1 items-center">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce [animation-duration:0.8s]" />
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce [animation-duration:0.8s] [animation-delay:0.15s]" />
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce [animation-duration:0.8s] [animation-delay:0.3s]" />
-                                        <span className="ml-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-primary/40 leading-none">Thinking</span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s]" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s] [animation-delay:0.15s]" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s] [animation-delay:0.3s]" />
+                                        <span className="ml-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 leading-none">Thinking</span>
                                     </div>
                                 ) : (
                                     <>
                                         <MarkDown>{message.content}</MarkDown>
                                         {isOptimistic && message.id === "streaming" && (
                                             <div className="absolute bottom-1 right-3 flex gap-1">
-                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-bounce" />
-                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-bounce [animation-delay:0.2s]" />
-                                                <div className="w-1 h-1 rounded-full bg-primary/40 animate-bounce [animation-delay:0.4s]" />
+                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce" />
+                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce [animation-delay:0.2s]" />
+                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce [animation-delay:0.4s]" />
                                             </div>
                                         )}
                                     </>
@@ -207,7 +207,7 @@ export const MessageBubble = React.memo(
 
                             <button
                                 onClick={() => onDelete(message.id)}
-                                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-red-500/20 hover:border-red-500/30 transition-all text-white/30 hover:text-red-400"
+                                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
                                 title="Delete"
                             >
                                 <FaTrash size={10} />
@@ -216,7 +216,7 @@ export const MessageBubble = React.memo(
                             {!isUserMessage && (
                                 <button
                                     onClick={() => onRegenerate(message.id)}
-                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-primary/20 hover:border-primary/30 transition-all text-white/30 hover:text-primary"
+                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
                                     title="Regenerate"
                                 >
                                     <FaRedo size={10} />
@@ -226,7 +226,7 @@ export const MessageBubble = React.memo(
                             {isUserMessage && (
                                 <button
                                     onClick={() => onUserRegenerate(message.id)}
-                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-purple-500/20 hover:border-purple-500/30 transition-all text-white/30 hover:text-purple-400"
+                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
                                     title="Edit and resend"
                                 >
                                     <FaRedo size={10} />
@@ -236,8 +236,8 @@ export const MessageBubble = React.memo(
                             <button
                                 onClick={() => onTogglePin(message.id, !!message.pinned)}
                                 className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.pinned
-                                    ? "bg-primary/20 border-primary/40 text-primary"
-                                    : "bg-white/5 border-white/5 text-white/30 hover:bg-primary/10 hover:text-primary"
+                                    ? "bg-white/20 border-white/40 text-white"
+                                    : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
                                     }`}
                                 title={message.pinned ? "Unpin message" : "Pin message"}
                             >
@@ -249,8 +249,8 @@ export const MessageBubble = React.memo(
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "LIKE" ? "NONE" : "LIKE")}
                                         className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "LIKE"
-                                            ? "bg-green-500/20 border-green-500/40 text-green-400"
-                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-green-500/10 hover:text-green-400"
+                                            ? "bg-white/20 border-white/40 text-white"
+                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
                                             }`}
                                         title="Like response"
                                     >
@@ -259,8 +259,8 @@ export const MessageBubble = React.memo(
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "DISLIKE" ? "NONE" : "DISLIKE")}
                                         className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "DISLIKE"
-                                            ? "bg-red-500/20 border-red-500/40 text-red-400"
-                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-red-500/10 hover:text-red-400"
+                                            ? "bg-white/20 border-white/40 text-white"
+                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
                                             }`}
                                         title="Dislike response"
                                     >
