@@ -95,7 +95,7 @@ const CreateCharacterPage: React.FC = () => {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 pt-28 pb-20 px-6 sm:px-12 relative">
+    <div className="min-h-screen bg-black pt-28 pb-20 px-6 sm:px-12 relative">
       {/* Background Blobs - Monochrome */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
@@ -107,7 +107,7 @@ const CreateCharacterPage: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
           <div className="space-y-2">
             <div className="flex items-center gap-4">
-              <div className="w-1.5 h-10 bg-primary rounded-full shadow-[0_0_15px_rgba(34,211,238,0.5)]" />
+              <div className="w-1.5 h-10 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
               <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
                 New Character
               </h1>
@@ -118,7 +118,7 @@ const CreateCharacterPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="bg-white/3 border border-white/5 rounded-2xl px-6 py-3 backdrop-blur-xl">
+            <div className="bg-zinc-900/30 border border-white/10 rounded-2xl px-6 py-3 backdrop-blur-xl">
               <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Estimated Density</p>
               <div className="flex items-center gap-2">
                 <FiZap className="text-white/40" />
@@ -133,7 +133,7 @@ const CreateCharacterPage: React.FC = () => {
           <div className="lg:col-span-8 space-y-10">
 
             {/* Image & Identity Section */}
-            <section className="bg-white/3 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
                 <FiInfo className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>
@@ -194,12 +194,12 @@ const CreateCharacterPage: React.FC = () => {
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Character Name</label>
                     <div className="relative group">
-                      <FiType className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-primary transition-colors" />
+                      <FiType className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-white transition-colors" />
                       <input
                         required
                         value={characterName}
                         onChange={(e) => setCharacterName(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/10 transition-all font-bold"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/10 transition-all font-bold"
                         placeholder="Identity label..."
                       />
                     </div>
@@ -211,7 +211,7 @@ const CreateCharacterPage: React.FC = () => {
                       required
                       value={characterBio}
                       onChange={(e) => setCharacterBio(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/10 transition-all text-sm h-32 resize-none scrollbar-hide font-medium leading-relaxed"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/10 transition-all text-sm h-32 resize-none scrollbar-hide font-medium leading-relaxed"
                       placeholder="Brief history for the central archives..."
                     />
                   </div>
@@ -241,7 +241,7 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Tags Section */}
-            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FiHash className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Tags</h3>
@@ -253,7 +253,7 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Lorebooks Section */}
-            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
                 <FiBook className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
@@ -290,7 +290,7 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Intelligence Configuration */}
-            <section className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
                 <FiCpu className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">AI Configuration</h3>
@@ -306,13 +306,13 @@ const CreateCharacterPage: React.FC = () => {
                     required
                     value={characterPersona}
                     onChange={(e) => setCharacterPersona(e.target.value)}
-                    className="w-full bg-white/1 shadow-inner border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
+                    className="w-full bg-white/1 shadow-inner border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
                     placeholder="Describe traits, personality, speech patterns..."
                   />
-                  <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 flex gap-3">
-                    <div className="text-primary pt-0.5"><FiInfo size={14} /></div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-3">
+                    <div className="text-white pt-0.5"><FiInfo size={14} /></div>
                     <p className="text-[10px] text-white/40 leading-relaxed font-bold">
-                      Use <span className="text-primary">{`{char}`}</span> for character and <span className="text-primary">{`{user}`}</span> for the person chatting.
+                      Use <span className="text-white">{`{char}`}</span> for character and <span className="text-white">{`{user}`}</span> for the person chatting.
                     </p>
                   </div>
                 </div>
@@ -320,7 +320,7 @@ const CreateCharacterPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Scenario</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
+                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{getTokenCount(scenario)} Tokens</span>
                   </div>
                   <div className="relative">
                     <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -331,7 +331,7 @@ const CreateCharacterPage: React.FC = () => {
                     <textarea
                       value={scenario}
                       onChange={(e) => setScenario(e.target.value)}
-                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed"
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed"
                       placeholder="Context of the interaction or world state..."
                     />
                   </div>
@@ -340,7 +340,7 @@ const CreateCharacterPage: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
                     <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Intro Message</label>
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest">{getTokenCount(initialMessage)} Tokens</span>
+                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{getTokenCount(initialMessage)} Tokens</span>
                   </div>
                   <div className="relative">
                     <FiMessageSquare className="absolute right-6 top-6 text-white/10" />
@@ -348,7 +348,7 @@ const CreateCharacterPage: React.FC = () => {
                       required
                       value={initialMessage}
                       onChange={(e) => setInitialMessage(e.target.value)}
-                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-primary/50 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed italic"
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed italic"
                       placeholder="The first greeting from the AI..."
                     />
                   </div>
@@ -379,7 +379,7 @@ const CreateCharacterPage: React.FC = () => {
           <div className="lg:col-span-4 lg:sticky lg:top-32 h-fit space-y-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3 px-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <h3 className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Live Preview</h3>
               </div>
               <div className="scale-95 sm:scale-100 origin-top">
@@ -390,11 +390,12 @@ const CreateCharacterPage: React.FC = () => {
                   characterBio={characterBio || "Draft your character to see it reflected here..."}
                   isNsfw={isNsfw}
                   tags={selectedOptions.map(opt => ({ name: opt.label, id: opt.value }))}
+                  disableHover
                 />
               </div>
             </div>
 
-            <div className="bg-white/3 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <div className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3">
                 <FiZap className="text-white/40" />
                 <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deployment Stats</h3>

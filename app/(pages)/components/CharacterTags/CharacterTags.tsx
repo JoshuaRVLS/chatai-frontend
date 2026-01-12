@@ -39,10 +39,10 @@ const CharacterTags = ({
         control: (styles, { isFocused }) => ({
           ...styles,
           backgroundColor: "rgba(255, 255, 255, 0.05)",
-          border: isFocused ? "1px solid rgba(56, 189, 248, 0.5)" : "1px solid rgba(255, 255, 255, 0.1)",
+          border: isFocused ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: "16px",
           padding: "8px",
-          boxShadow: isFocused ? "0 0 0 4px rgba(56, 189, 248, 0.1)" : "none",
+          boxShadow: isFocused ? "0 0 0 4px rgba(255, 255, 255, 0.05)" : "none",
           transition: "all 0.3s ease",
           "&:hover": {
             borderColor: "rgba(255, 255, 255, 0.2)",
@@ -64,14 +64,14 @@ const CharacterTags = ({
         }),
         multiValue: (styles) => ({
           ...styles,
-          backgroundColor: "rgba(56, 189, 248, 0.1)",
+          backgroundColor: "rgba(255, 255, 255, 0.1)",
           borderRadius: "10px",
           padding: "2px 8px",
-          border: "1px solid rgba(56, 189, 248, 0.3)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
         }),
         multiValueLabel: (styles) => ({
           ...styles,
-          color: "#38bdf8",
+          color: "white",
           fontSize: "11px",
           fontWeight: "800",
           textTransform: "uppercase",
@@ -79,16 +79,16 @@ const CharacterTags = ({
         }),
         multiValueRemove: (styles) => ({
           ...styles,
-          color: "#38bdf8",
+          color: "rgba(255, 255, 255, 0.4)",
           ":hover": {
-            backgroundColor: "rgba(56, 189, 248, 0.2)",
-            color: "white",
+            backgroundColor: "rgba(255, 255, 255, 1)",
+            color: "black",
             borderRadius: "8px",
           },
         }),
         menu: (styles) => ({
           ...styles,
-          backgroundColor: "#0f172a",
+          backgroundColor: "#000000",
           backdropFilter: "blur(40px)",
           border: "1px solid rgba(255, 255, 255, 0.1)",
           borderRadius: "20px",
@@ -100,15 +100,15 @@ const CharacterTags = ({
         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
         option: (styles, { isFocused, isSelected }) => ({
           ...styles,
-          backgroundColor: isSelected ? "#38bdf8" : isFocused ? "rgba(255, 255, 255, 0.08)" : "transparent",
-          color: isSelected ? "#0f172a" : "white",
+          backgroundColor: isSelected ? "white" : isFocused ? "rgba(255, 255, 255, 0.08)" : "transparent",
+          color: isSelected ? "black" : "white",
           fontSize: "13px",
           fontWeight: isSelected ? "800" : "600",
           cursor: "pointer",
           padding: "14px 20px",
           transition: "all 0.2s ease",
           active: {
-            backgroundColor: "rgba(56, 189, 248, 0.2)",
+            backgroundColor: "rgba(255, 255, 255, 0.2)",
           }
         }),
       }}

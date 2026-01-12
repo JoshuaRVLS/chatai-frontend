@@ -21,6 +21,7 @@ interface CharacterCardProps {
   characterId?: string;
   isNsfw?: boolean;
   tags?: { name: string; id: string }[];
+  disableHover?: boolean;
 }
 
 const CharacterCard = React.memo(function CharacterCard({
@@ -32,6 +33,7 @@ const CharacterCard = React.memo(function CharacterCard({
   characterId,
   isNsfw,
   tags,
+  disableHover = false,
 }: CharacterCardProps) {
   const router = useRouter();
   const { settings } = useSettings();
@@ -209,7 +211,7 @@ const CharacterCard = React.memo(function CharacterCard({
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchEnd}
-        className="group relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 isolate"
+        className={`relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 isolate ${!disableHover ? 'group' : ''}`}
         style={{ contentVisibility: 'auto', containIntrinsicSize: '0 240px' } as any}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -252,7 +254,7 @@ const CharacterCard = React.memo(function CharacterCard({
               ) : (
                 <div className="w-full h-full bg-zinc-900" />
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40" />
+              <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40" />
             </div>
 
             {/* Content */}
@@ -273,7 +275,7 @@ const CharacterCard = React.memo(function CharacterCard({
               </div>
 
               {/* Scrollable Bio */}
-              <p className="text-[11px] text-zinc-300 font-medium leading-relaxed max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40 break-words shadow-black drop-shadow-sm">
+              <p className="text-[11px] text-zinc-300 font-medium leading-relaxed max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/40 wrap-break-word shadow-black drop-shadow-sm">
                 {characterBio}
               </p>
 
@@ -298,9 +300,7 @@ const CharacterCard = React.memo(function CharacterCard({
 
               {/* Footer Actions */}
               <div className="pt-3 mt-1 border-t border-white/10 flex gap-2">
-                <button className="flex-1 bg-white text-zinc-950 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shadow-lg">
-                  Chat <span className="opacity-50 text-[10px]">→</span>
-                </button>
+
                 <button
                   onClick={(e) => { e.stopPropagation(); handleEdit(); }}
                   className="p-2.5 bg-white/5 text-white/40 rounded-xl hover:text-white hover:bg-white/10 transition-colors border border-white/5"
