@@ -67,10 +67,6 @@ const Navbar = () => {
           <Link
             href="/"
             className="flex items-center group relative"
-            onClick={(e) => {
-              e.preventDefault();
-              window.location.href = '/';
-            }}
           >
             <div className="absolute -inset-4 bg-primary/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full" />
             <span className={`${orbitron.className} relative z-10 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tighter bg-linear-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent drop-shadow-[0_0_15px_rgba(34,211,238,0.4)] group-hover:scale-105 transition-transform duration-300`}>
