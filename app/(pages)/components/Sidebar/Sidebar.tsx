@@ -40,6 +40,9 @@ const Sidebar = () => {
     const openModal = useAuthModalStore((state) => state.openModal);
     const [isOpen, setIsOpen] = React.useState(false);
 
+    // STRICT GUEST MODE: Hide Sidebar completely if not logged in
+    if (!session) return null;
+
     // Close sidebar on route change
     React.useEffect(() => {
         setIsOpen(false);

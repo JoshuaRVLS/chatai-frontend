@@ -24,6 +24,16 @@ export const metadata: Metadata = {
 
 };
 
-export default function Page() {
+import { getServerSession } from "next-auth";
+import { authOptions } from "../utils/auth";
+import LoginLanding from "./components/Auth/LoginLanding";
+
+export default async function Page() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return <LoginLanding />;
+  }
+
   return <HomeClient />;
 }
