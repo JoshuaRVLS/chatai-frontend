@@ -2,7 +2,7 @@ import { db } from "@/app/utils/prisma";
 import { NextResponse } from "next/server";
 
 export const POST = async (req: Request) => {
-  const { characterId, content, userId } = await req.json();
+  const { characterId, content, userId, parentId } = await req.json();
 
   try {
     const comment = await db.comment.create({
@@ -18,6 +18,13 @@ export const POST = async (req: Request) => {
             id: userId,
           },
         },
+        ...(parentId && {
+          parent: {
+            connect: {
+              id: parentId
+            }
+          }
+        })
       },
     });
     console.log("Commend added");

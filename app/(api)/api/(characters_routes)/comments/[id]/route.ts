@@ -11,6 +11,7 @@ export const GET = async (
     const comments = await db.comment.findMany({
       where: {
         characterId,
+        parentId: null, // Only fetch top-level comments initially
       },
       orderBy: {
         createdAt: "desc",
@@ -21,6 +22,18 @@ export const GET = async (
             profileImage: true,
           },
         },
+        replies: {
+          include: {
+            author: {
+              include: {
+                profileImage: true
+              }
+            }
+          },
+          orderBy: {
+            createdAt: 'asc'
+          }
+        }
       },
     });
     console.log(comments);

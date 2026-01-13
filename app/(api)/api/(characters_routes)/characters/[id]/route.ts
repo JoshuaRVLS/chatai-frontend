@@ -29,6 +29,12 @@ export const GET =
               name: true,
               description: true,
             }
+          },
+          ratings: {
+            select: {
+              value: true,
+              userId: true
+            }
           }
         },
       });

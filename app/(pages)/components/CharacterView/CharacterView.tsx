@@ -11,7 +11,7 @@ import {
   FiStar,
   FiBook,
 } from "react-icons/fi";
-import { Character, CharacterTag, User } from "@/app/generated/prisma";
+import { Character, CharacterTag, User, CharacterRating } from "@/app/generated/prisma";
 import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
@@ -33,6 +33,7 @@ const CharacterView = ({ id }: { id: string }) => {
       photo: { data: Uint8Array; mimetype: string; name: string };
       tags: CharacterTag[];
       lorebooks: { id: string; name: string; description: string }[];
+      ratings: { value: number; userId: string; }[];
     }
   >({
     queryKey: ["character", id],
@@ -192,15 +193,18 @@ const CharacterView = ({ id }: { id: string }) => {
 
             <div className="bg-white/1 p-4 rounded-xl border border-white/5 space-y-3">
               <h4 className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Architect</h4>
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                  <FiUser className="text-zinc-400 text-sm" />
+              <button
+                onClick={() => router.push(`/user/${data?.author.username}`)}
+                className="flex items-center gap-2.5 group w-full text-left"
+              >
+                <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <FiUser className="text-zinc-400 text-sm group-hover:text-white" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white tracking-tight">{data?.author.username}</p>
+                  <p className="text-xs font-bold text-white tracking-tight group-hover:underline decoration-white/30 underline-offset-4">{data?.author.username}</p>
                   <p className="text-[8px] text-zinc-600 uppercase font-black tracking-tighter">Verified Creator</p>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -298,9 +302,11 @@ const CharacterView = ({ id }: { id: string }) => {
             <div className="pt-6 border-t border-white/5">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-black text-white tracking-tight uppercase italic">Feedback Logs</h3>
-                <div className="flex items-center gap-1.5 text-[8px] font-black text-zinc-600 uppercase tracking-widest">
-                  <FiStar className="text-zinc-400" /> Interaction Quality
-                </div>
+                <RatingComponent
+                  characterId={id}
+                  ratings={data.ratings || []}
+                  currentUserId={user?.id}
+                />
               </div>
               <Comments characterId={id} />
             </div>
@@ -363,3 +369,57 @@ const CollapsibleSection = ({ title, icon, children, isOpen, onToggle }: {
 };
 
 export default CharacterView;
+
+const RatingComponent = ({ characterId, ratings, currentUserId }: { characterId: string, ratings: { value: number, userId: string }[], currentUserId?: string }) => {
+  const [hoverRating, setHoverRating] = useState(0);
+  const queryClient = useQueryClient();
+  const { withAuth } = useAuthAction();
+
+  const averageRating = ratings.length > 0
+    ? ratings.reduce((acc, curr) => acc + curr.value, 0) / ratings.length
+    : 0;
+
+  const userRating = ratings.find(r => r.userId === currentUserId)?.value || 0;
+
+  const handleRate = withAuth(async (value: number) => {
+    try {
+      const res = await fetch(`/api/characters/${characterId}/rate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value })
+      });
+      if (res.ok) {
+        queryClient.invalidateQueries({ queryKey: ["character", characterId] });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex flex-col items-end">
+        <span className="text-2xl font-black text-white leading-none">{averageRating.toFixed(1)}</span>
+        <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{ratings.length} Ratings</span>
+      </div>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            onClick={() => handleRate(star)}
+            className="focus:outline-none transition-transform active:scale-90"
+          >
+            <FiStar
+              className={`text-lg transition-colors ${star <= (hoverRating || userRating)
+                ? "text-yellow-400 fill-yellow-400"
+                : "text-zinc-700 hover:text-zinc-500"
+                }`}
+            />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
