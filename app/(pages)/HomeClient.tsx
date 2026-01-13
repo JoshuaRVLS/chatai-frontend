@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
+import TrendingSection from "./TrendingSection";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -49,6 +50,17 @@ const HomeClient = () => {
                         className="px-6 md:px-12"
                     >
                         <History />
+                    </motion.section>
+                )}
+
+                {!searchQuery && (
+                    <motion.section
+                        variants={fadeUpVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="px-6 md:px-12"
+                    >
+                        <TrendingSection />
                     </motion.section>
                 )}
 

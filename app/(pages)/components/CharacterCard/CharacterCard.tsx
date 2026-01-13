@@ -12,6 +12,7 @@ import { toast } from '@/app/lib/toast';
 import { useAuthAction } from "@/app/hooks/useAuthAction";
 import { cleanHtml } from "@/app/utils/clean-html";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
+import { FiStar } from "react-icons/fi";
 
 interface CharacterCardProps {
   characterName: string;
@@ -23,6 +24,8 @@ interface CharacterCardProps {
   isNsfw?: boolean;
   tags?: { name: string; id: string }[];
   disableHover?: boolean;
+  rating?: number;
+  ratingCount?: number;
 }
 
 const CharacterCard = React.memo(function CharacterCard({
@@ -35,6 +38,8 @@ const CharacterCard = React.memo(function CharacterCard({
   isNsfw,
   tags,
   disableHover = false,
+  rating = 0,
+  ratingCount = 0,
 }: CharacterCardProps) {
   const router = useRouter();
   const { settings } = useSettings();
@@ -233,7 +238,15 @@ const CharacterCard = React.memo(function CharacterCard({
             )}
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 inset-x-0 p-4">
-              <h3 className="text-xs lg:text-sm font-black text-white leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md">{characterName}</h3>
+              <div className="flex justify-between items-end mb-1">
+                <h3 className="text-xs lg:text-sm font-black text-white leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md flex-1 pr-2">{characterName}</h3>
+                {rating > 0 && (
+                  <div className="flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-black/40 px-1.5 py-0.5 rounded-full backdrop-blur-sm border border-white/5">
+                    <FiStar size={8} className="fill-yellow-400" />
+                    <span>{rating.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
               <div className="text-[9px] text-zinc-500 line-clamp-1 font-medium mt-1 [&_p]:inline [&_br]:hidden" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
             </div>
           </div>
@@ -266,8 +279,16 @@ const CharacterCard = React.memo(function CharacterCard({
                   <h3 className="text-lg font-black text-white uppercase tracking-tight leading-none drop-shadow-lg">{characterName}</h3>
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className="text-[10px] font-bold text-zinc-400">{authorName}</span>
-                    <span className="w-1 h-1 rounded-full bg-zinc-600" />
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase">24m ago</span>
+                    {rating > 0 && (
+                      <>
+                        <span className="w-0.5 h-0.5 rounded-full bg-zinc-600" />
+                        <div className="flex items-center gap-1 text-[9px] font-black text-yellow-400">
+                          <FiStar size={8} className="fill-yellow-400" />
+                          <span>{rating.toFixed(1)}</span>
+                          <span className="text-zinc-600">({ratingCount})</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10 shrink-0">
