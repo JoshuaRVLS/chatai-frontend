@@ -45,64 +45,6 @@ export const DELETE =
     const characterId = (await params).id;
 
     try {
-      const chats = await db.chat.findMany({
-        where: {
-          characterId: characterId,
-        },
-        select: { id: true }
-      });
-
-      const chatIds = chats.map(chat => chat.id);
-
-
-      if (chatIds.length > 0) {
-        await db.message.deleteMany({ where: { chatId: { in: chatIds } } });
-      }
-
-
-      await db.chat.deleteMany({
-        where: {
-          characterId: characterId,
-        }
-      });
-
-
-      await db.comment.deleteMany({
-        where: {
-          characterId: characterId,
-        }
-      });
-
-
-      // Disconnect this character from all tags (many-to-many relationship)
-      const characterTags = await db.characterTag.findMany({
-        where: {
-          chars: {
-            some: { id: characterId }
-          }
-        },
-        select: { id: true }
-      });
-
-      for (const tag of characterTags) {
-        await db.characterTag.update({
-          where: { id: tag.id },
-          data: {
-            chars: {
-              disconnect: { id: characterId }
-            }
-          }
-        });
-      }
-
-
-      await db.characterImage.deleteMany({
-        where: {
-          charId: characterId,
-        }
-      });
-
-
       await db.character.delete({
         where: {
           id: characterId,

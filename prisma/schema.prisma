@@ -149,7 +149,7 @@ model Comment {
   content     String
   author      User      @relation(fields: [authorId], references: [id])
   authorId    String
-  character   Character @relation(fields: [characterId], references: [id])
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   characterId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -166,15 +166,15 @@ model CharacterImage {
   data     Bytes
   name     String
   mimetype String
-  char     Character @relation(fields: [charId], references: [id])
+  char     Character @relation(fields: [charId], references: [id], onDelete: Cascade)
   charId   String    @unique
 }
 
 model Chat {
   id           String      @id @default(cuid())
-  character    Character   @relation(fields: [characterId], references: [id])
+  character    Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
   characterId  String
-  user         User        @relation(fields: [userId], references: [id])
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   messages     Message[]
   summary      String?
@@ -192,7 +192,7 @@ model Message {
   fromUser        Boolean
   pinned          Boolean  @default(false)
   feedback        Feedback @default(NONE)
-  chat            Chat     @relation(fields: [chatId], references: [id])
+  chat            Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId          String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
