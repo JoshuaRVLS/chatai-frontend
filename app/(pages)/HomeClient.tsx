@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
 import TrendingSection from "./TrendingSection";
@@ -13,7 +12,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { scaleInVariants, fadeUpVariants } from "./components/Animations/variants";
 import { FiGrid, FiClock, FiStar } from "react-icons/fi";
 
-type HomeTab = 'featured' | 'browse' | 'history';
+type HomeTab = 'featured' | 'explore' | 'history';
 
 const HomeClient = () => {
     const { data: session } = useSession();
@@ -40,12 +39,16 @@ const HomeClient = () => {
 
         // Auto-scroll to browse on search
         if (q) {
-            setTimeout(() => scrollToSection('browse'), 100);
+            router.push(`/explore?q=${q}`);
         }
     };
 
     const scrollToSection = (id: HomeTab) => {
-        const ref = id === 'featured' ? featuredRef : id === 'browse' ? browseRef : historyRef;
+        if (id === 'explore') {
+            router.push('/explore');
+            return;
+        }
+        const ref = id === 'featured' ? featuredRef : historyRef;
         if (ref.current) {
             const yOffset = -128; // Matches scroll-mt-32
             const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -80,7 +83,7 @@ const HomeClient = () => {
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
         { id: 'featured', label: 'Featured', icon: FiStar },
         ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
-        { id: 'browse', label: 'Browse', icon: FiGrid },
+        { id: 'explore', label: 'Explore', icon: FiGrid },
     ];
 
     return (
@@ -128,14 +131,21 @@ const HomeClient = () => {
                     <TrendingSection />
                     <PopularSection />
                     <TrendingAuthors />
-                </section>
 
-                {/* BROWSE SECTION */}
-                <section id="browse" ref={browseRef} className="pb-32 scroll-mt-32">
-                    <Characters
-                        searchQuery={searchQuery}
-                        onSearch={handleSearch}
-                    />
+                    {/* EXPLORE MORE CTA */}
+                    <div className="pt-16 pb-32 flex flex-col items-center text-center gap-8 border-t border-white/5">
+                        <div className="space-y-3">
+                            <h3 className="text-4xl font-black text-white italic uppercase tracking-tighter">Endless Possibilities</h3>
+                            <p className="text-zinc-500 text-sm max-w-md mx-auto font-medium">Dive deeper into the archives. Thousands of unique personas and stories are waiting to be discovered.</p>
+                        </div>
+                        <button
+                            onClick={() => router.push('/explore')}
+                            className="group relative px-12 py-5 bg-white text-zinc-950 font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-zinc-200 transition-all shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] active:scale-95"
+                        >
+                            Explore More
+                            <div className="absolute inset-x-4 -bottom-1 h-px bg-zinc-950/20 group-hover:bg-zinc-950/40 transition-colors" />
+                        </button>
+                    </div>
                 </section>
 
             </div>
