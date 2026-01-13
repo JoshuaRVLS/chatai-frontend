@@ -88,7 +88,7 @@ const CharacterView = ({ id }: { id: string }) => {
 
   if (isPending) {
     return (
-      <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
+      <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border border-white/10 border-t-white rounded-full animate-spin" />
           <p className="text-zinc-600 font-bold tracking-widest text-[8px] uppercase">Initializing...</p>
@@ -105,7 +105,7 @@ const CharacterView = ({ id }: { id: string }) => {
     );
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-300 selection:bg-white/10">
+    <div className="min-h-screen bg-surface text-zinc-300 selection:bg-white/10">
       {/* Dynamic Header Background */}
       <div className="absolute top-0 left-0 w-full h-[400px] bg-linear-to-b from-white/2 to-transparent pointer-events-none" />
 

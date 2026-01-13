@@ -155,7 +155,7 @@ const History = () => {
 
   return (
     <div className="flex flex-col gap-6 relative group/history">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 relative">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 mb-6 relative">
         <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-primary/30 to-transparent" />
 
         <div className="space-y-2">
@@ -191,7 +191,7 @@ const History = () => {
 
       <div
         ref={scrollContainerRef}
-        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-6 md:-mx-12 px-6 md:px-12 snap-x"
+        className="flex gap-4 overflow-x-auto pb-6 -mx-6 md:-mx-12 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar"
       >
         {data.map((chat, index) => (
           <Link
@@ -325,5 +325,5 @@ const History = () => {
   );
 };
 
-export default History;
+export default React.memo(History);
 

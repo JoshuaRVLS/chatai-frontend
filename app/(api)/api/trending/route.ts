@@ -25,6 +25,11 @@ export const GET = async () => {
                         id: true,
                         mimetype: true, // Only select necessary fields
                     }
+                },
+                _count: {
+                    select: {
+                        chats: true
+                    }
                 }
             }
         });
@@ -36,7 +41,8 @@ export const GET = async () => {
             return {
                 ...char,
                 averageRating: avg,
-                ratingCount: char.ratings.length
+                ratingCount: char.ratings.length,
+                chatCount: char._count.chats
                 // ratings: undefined // Exclude raw ratings array to save bandwidth if not needed
             };
         })

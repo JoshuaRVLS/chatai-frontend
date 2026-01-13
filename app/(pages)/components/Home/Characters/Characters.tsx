@@ -365,29 +365,26 @@ const Characters = ({
 
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-4 md:gap-6">
-        <AnimatePresence>
-          {paginatedData?.map((character: any) => (
-            <motion.div
-              key={character.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <CharacterCard
-                characterName={character.name}
-                image={`/api/image/${character.id}`}
-                characterId={character.id}
-                characterBio={character.bio}
-                authorName={character.author.username}
-                authorId={character.authorId}
-                isNsfw={character.isNsfw}
-                tags={character.tags}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8 min-h-[500px]">
+        {paginatedData?.map((character: any) => (
+          <div
+            key={character.id}
+          >
+            <CharacterCard
+              characterName={character.name}
+              image={`/api/image/${character.id}`}
+              characterId={character.id}
+              characterBio={character.bio}
+              authorName={character.author.username}
+              authorId={character.authorId}
+              isNsfw={character.isNsfw}
+              tags={character.tags}
+              rating={character.rating}
+              ratingCount={character.ratingCount}
+              chatCount={character.chatCount}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Pagination Controls */}
@@ -518,4 +515,4 @@ const Characters = ({
   );
 };
 
-export default Characters;
+export default React.memo(Characters);

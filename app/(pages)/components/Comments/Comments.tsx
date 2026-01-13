@@ -259,7 +259,7 @@ const CommentItem = ({
       {comment.replies && comment.replies.length > 0 && (
         <div className="pl-12 space-y-4 relative">
           {/* Thread Line */}
-          <div className="absolute left-6 top-0 bottom-6 w-px bg-gradient-to-b from-white/10 to-transparent" />
+          <div className="absolute left-6 top-0 bottom-6 w-px bg-linear-to-b from-white/10 to-transparent" />
 
           {comment.replies.map(reply => (
             <div key={reply.id} className="relative flex gap-4 p-4 rounded-3xl bg-white/2 border border-white/5">

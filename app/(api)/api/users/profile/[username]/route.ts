@@ -18,8 +18,8 @@ export const GET = async (
                 profileImage: {
                     select: {
                         id: true,
-                        mimetype: true
-                        // Data excluded
+                        mimetype: true,
+                        data: true
                     }
                 },
                 charCreated: {
@@ -33,13 +33,38 @@ export const GET = async (
                                 mimetype: true,
                                 name: true
                             }
+                        },
+                        ratings: true,
+                        _count: {
+                            select: {
+                                chats: true
+                            }
+                        }
+                    }
+                },
+                lorebooks: {
+                    orderBy: { createdAt: 'desc' },
+                    include: {
+                        tags: true,
+                        image: {
+                            select: {
+                                id: true,
+                                mimetype: true,
+                                name: true
+                            }
+                        },
+                        _count: {
+                            select: {
+                                entries: true
+                            }
                         }
                     }
                 },
                 _count: {
                     select: {
                         charCreated: true,
-                        chats: true
+                        chats: true,
+                        lorebooks: true
                     }
                 }
             }
@@ -49,7 +74,25 @@ export const GET = async (
             return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ success: true, data: user }, { status: 200 });
+        // Calculate stats for characters
+        const charCreatedWithStats = user.charCreated.map((char: any) => {
+            const totalRating = char.ratings ? char.ratings.reduce((acc: number, curr: any) => acc + curr.value, 0) : 0;
+            const averageRating = (char.ratings && char.ratings.length > 0) ? totalRating / char.ratings.length : 0;
+
+            return {
+                ...char,
+                rating: averageRating,
+                ratingCount: char.ratings ? char.ratings.length : 0,
+                chatCount: char._count ? char._count.chats : 0
+            };
+        });
+
+        const userData = {
+            ...user,
+            charCreated: charCreatedWithStats
+        };
+
+        return NextResponse.json({ success: true, data: userData }, { status: 200 });
     } catch (error) {
         console.error('Error fetching user profile:', error);
         return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });

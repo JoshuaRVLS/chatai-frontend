@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
@@ -10,6 +10,9 @@ import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { scaleInVariants, fadeUpVariants } from "./components/Animations/variants";
+import { FiGrid, FiClock, FiStar } from "react-icons/fi";
+
+type HomeTab = 'featured' | 'browse' | 'history';
 
 const HomeClient = () => {
     const { data: session } = useSession();
@@ -17,6 +20,12 @@ const HomeClient = () => {
     const router = useRouter();
     const pathname = usePathname();
     const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+    const [activeTab, setActiveTab] = useState<HomeTab>('featured');
+
+    // Refs for sections
+    const featuredRef = useRef<HTMLDivElement>(null);
+    const browseRef = useRef<HTMLDivElement>(null);
+    const historyRef = useRef<HTMLDivElement>(null);
 
     const handleSearch = (q: string) => {
         setSearchQuery(q);
@@ -27,56 +36,105 @@ const HomeClient = () => {
         // Always reset page when search changes
         params.set("p", "1");
         router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+
+        // Auto-scroll to browse on search
+        if (q) {
+            setTimeout(() => scrollToSection('browse'), 100);
+        }
     };
 
+    const scrollToSection = (id: HomeTab) => {
+        const ref = id === 'featured' ? featuredRef : id === 'browse' ? browseRef : historyRef;
+        if (ref.current) {
+            const yOffset = -128; // Matches scroll-mt-32
+            const y = ref.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+            setActiveTab(id);
+        }
+    };
+
+    // Performance Optimized ScrollSpy using IntersectionObserver
+    useEffect(() => {
+        const options = {
+            root: null,
+            rootMargin: '-130px 0px -50% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    setActiveTab(entry.target.id as HomeTab);
+                }
+            });
+        }, options);
+
+        if (featuredRef.current) observer.observe(featuredRef.current);
+        if (historyRef.current) observer.observe(historyRef.current);
+        if (browseRef.current) observer.observe(browseRef.current);
+
+        return () => observer.disconnect();
+    }, [session?.user]);
+
+    const tabs: { id: HomeTab; label: string; icon: any }[] = [
+        { id: 'featured', label: 'Featured', icon: FiStar },
+        ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
+        { id: 'browse', label: 'Browse', icon: FiGrid },
+    ];
+
     return (
-        <div className="flex flex-col w-full gap-8 pt-24 pb-20">
+        <div className="flex flex-col w-full gap-8 pt-24 pb-20 min-h-screen">
             <h1 className="sr-only">JChatAI - Premium AI Character Conversations and Roleplay</h1>
-            <div className="w-full space-y-10">
-                {/* Banner Section */}
-                <motion.section
-                    variants={scaleInVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="px-6 md:px-12"
-                >
+
+            {/* Navigation Tabs (Sticky) */}
+            <div className="sticky top-[64px] md:top-0 z-30 px-6 md:px-12 py-4 bg-zinc-950/95 backdrop-blur-md border-b border-white/5">
+                <div className="flex items-center gap-6 overflow-x-auto no-scrollbar w-full">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => scrollToSection(tab.id)}
+                            className={`flex items-center gap-2 pb-3 text-sm font-black uppercase tracking-wider transition-all relative shrink-0 ${activeTab === tab.id
+                                ? 'text-white'
+                                : 'text-white/40 hover:text-white/70'
+                                }`}
+                        >
+                            <tab.icon size={16} />
+                            {tab.label}
+                            {activeTab === tab.id && (
+                                <motion.div
+                                    layoutId="homeActiveTab"
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                />
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="w-full space-y-24 px-6 md:px-12">
+
+                {/* FEATURED SECTION */}
+                <section id="featured" ref={featuredRef} className="space-y-16 scroll-mt-32">
                     <BannerCarousel />
-                </motion.section>
+                    <TrendingSection />
+                    <TrendingAuthors />
+                </section>
 
-                {session?.user && !searchQuery && (
-                    <motion.section
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="px-6 md:px-12"
-                    >
+                {/* HISTORY SECTION (Conditional) */}
+                {session?.user && (
+                    <section id="history" ref={historyRef} className="scroll-mt-32">
                         <History />
-                    </motion.section>
+                    </section>
                 )}
 
-                {!searchQuery && (
-                    <motion.section
-                        variants={fadeUpVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="px-6 md:px-12"
-                    >
-                        <TrendingSection />
-                        <TrendingAuthors />
-                    </motion.section>
-                )}
-
-                <motion.section
-                    variants={fadeUpVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="px-6 md:px-12"
-                >
+                {/* BROWSE SECTION */}
+                <section id="browse" ref={browseRef} className="pb-32 scroll-mt-32">
                     <Characters
                         searchQuery={searchQuery}
                         onSearch={handleSearch}
                     />
-                </motion.section>
+                </section>
+
             </div>
         </div>
     );

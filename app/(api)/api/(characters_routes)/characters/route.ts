@@ -163,7 +163,7 @@ export const GET = async (req: Request) => {
     const whereIgnoringNsfw = { ...where };
     delete whereIgnoringNsfw.isNsfw;
 
-    const [characters, totalCount, totalMatchesIgnoringNsfw, allTags] = await Promise.all([
+    const [charactersData, totalCount, totalMatchesIgnoringNsfw, allTags] = await Promise.all([
       db.character.findMany({
         where,
         orderBy: {
@@ -179,7 +179,13 @@ export const GET = async (req: Request) => {
               name: true,
             }
           },
-          tags: true
+          tags: true,
+          ratings: true,
+          _count: {
+            select: {
+              chats: true
+            }
+          }
         },
         skip,
         take: pageSize,
@@ -190,6 +196,18 @@ export const GET = async (req: Request) => {
         orderBy: { name: 'asc' }
       })
     ]);
+
+    const characters = charactersData.map(char => {
+      const totalRating = char.ratings.reduce((acc, curr) => acc + curr.value, 0);
+      const averageRating = char.ratings.length > 0 ? totalRating / char.ratings.length : 0;
+
+      return {
+        ...char,
+        rating: averageRating,
+        ratingCount: char.ratings.length,
+        chatCount: char._count.chats
+      };
+    });
 
     return NextResponse.json({
       success: true,

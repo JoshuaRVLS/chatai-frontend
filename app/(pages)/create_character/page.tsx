@@ -41,6 +41,7 @@ const CreateCharacterPage: React.FC = () => {
   const [characterPersona, setCharacterPersona] = useState("");
   const [scenario, setScenario] = useState("");
   const [initialMessage, setInitialMessage] = useState("");
+  const [exampleConversations, setExampleConversations] = useState("");
   const [selectedOptions, setSelectedOptions] = useState<TagOption[]>([]);
   const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
   const [isNsfw, setIsNsfw] = useState(false);
@@ -54,7 +55,7 @@ const CreateCharacterPage: React.FC = () => {
   });
 
   const getTokenCount = (text: string) => Math.floor(text.length / 4);
-  const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage);
+  const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage) + getTokenCount(exampleConversations);
 
 
   const handleSubmit = withAuth(async (e: FormEvent) => {
@@ -73,6 +74,7 @@ const CreateCharacterPage: React.FC = () => {
     formData.append("characterPersona", characterPersona);
     formData.append("scenario", scenario);
     formData.append("initialMessage", initialMessage);
+    formData.append("exampleConversations", exampleConversations);
     formData.append("userId", user?.id || "");
     formData.append("tags", JSON.stringify(selectedOptions));
     formData.append("lorebooks", JSON.stringify(selectedLorebooks));
@@ -339,6 +341,27 @@ const CreateCharacterPage: React.FC = () => {
                       className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-48 resize-none scrollbar-hide font-medium leading-relaxed italic"
                       placeholder="The first greeting from the AI..."
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex justify-between items-end px-1">
+                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest">Example Conversations</label>
+                    <span className="text-[9px] font-black text-white/60 uppercase tracking-widest">{getTokenCount(exampleConversations)} Tokens</span>
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      value={exampleConversations}
+                      onChange={(e) => setExampleConversations(e.target.value)}
+                      className="w-full bg-white/1 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
+                      placeholder={`<START>\n{user}: Hello!\n{char}: Hey there, how's it going?\n<START>\n...`}
+                    />
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-3">
+                    <div className="text-white pt-0.5"><FiInfo size={14} /></div>
+                    <p className="text-[10px] text-white/40 leading-relaxed font-bold">
+                      Use <span className="text-white">{`<START>`}</span> to separate different conversation blocks. This helps the AI learn the specific speaking style.
+                    </p>
                   </div>
                 </div>
               </div>

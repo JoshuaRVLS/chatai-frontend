@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { rateLimit } from '@/app/utils/rateLimit';
 import { headers } from 'next/headers';
 
+export const dynamic = 'force-dynamic';
+
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 const userSchema = z.object({
