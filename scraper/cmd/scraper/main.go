@@ -33,7 +33,9 @@ func main() {
 	}
 
 	// Env
-	_ = godotenv.Load() // Try default .env
+	if err := godotenv.Load(); err != nil {
+		_ = godotenv.Load("../.env")
+	}
 	if os.Getenv("DATABASE_URL") == "" {
 		// Fallback resilient load logic omitted for brevity, standard godotenv usually enough
 		log.Fatal("❌ DATABASE_URL missing")
