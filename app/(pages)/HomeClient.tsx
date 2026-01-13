@@ -7,6 +7,7 @@ import BannerCarousel from "./components/Home/BannerCarousel";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { scaleInVariants, fadeUpVariants } from "./components/Animations/variants";
 
 const HomeClient = () => {
     const { data: session } = useSession();
@@ -32,9 +33,9 @@ const HomeClient = () => {
             <div className="w-full space-y-10">
                 {/* Banner Section */}
                 <motion.section
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8 }}
+                    variants={scaleInVariants}
+                    initial="hidden"
+                    animate="visible"
                     className="px-6 md:px-12"
                 >
                     <BannerCarousel />
@@ -42,9 +43,9 @@ const HomeClient = () => {
 
                 {session?.user && !searchQuery && (
                     <motion.section
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        variants={fadeUpVariants}
+                        initial="hidden"
+                        animate="visible"
                         className="px-6 md:px-12"
                     >
                         <History />
@@ -52,9 +53,9 @@ const HomeClient = () => {
                 )}
 
                 <motion.section
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
+                    variants={fadeUpVariants}
+                    initial="hidden"
+                    animate="visible"
                     className="px-6 md:px-12"
                 >
                     <Characters
