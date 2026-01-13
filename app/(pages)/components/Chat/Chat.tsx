@@ -153,7 +153,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const pinnedMessages = allMessages.filter(m => m.pinned);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#020617] text-white selection:bg-primary/30 scroll-smooth">
+    <div className="fixed inset-0 flex flex-col bg-zinc-950 text-white selection:bg-white/10 scroll-smooth">
       <ChatNavbar
         characterId={chat.character.id}
         characterName={chat.character.name}
@@ -172,9 +172,9 @@ const Chat = ({ chatId }: { chatId: string }) => {
         onScroll={handleScroll}
         className="flex-1 overflow-y-auto custom-scrollbar relative"
       >
-        <div className="max-w-5xl mx-auto px-4 sm:px-8 md:px-12 pt-6 sm:pt-10 space-y-6 sm:space-y-8 pb-32 sm:pb-48">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 md:px-12 pt-6 sm:pt-10 space-y-4 sm:space-y-6 pb-32 sm:pb-48">
           <div ref={loadMoreRef} className="h-4 w-full flex items-center justify-center">
-            {isFetchingNextPage && <div className="w-1.5 h-1.5 rounded-full bg-primary/20 animate-pulse" />}
+            {isFetchingNextPage && <div className="w-1.5 h-1.5 rounded-full bg-white/10 animate-pulse" />}
           </div>
 
           {allMessages.map((msg) => (
