@@ -24,7 +24,7 @@ const TrendingSection = () => {
             </div>
 
             {/* Horizontal Scroll Container */}
-            <div className="relative group">
+            <div className="relative">
                 {/* Fade Masks */}
                 <div className="absolute left-0 top-0 bottom-0 w-12 bg-linear-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-12 bg-linear-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
