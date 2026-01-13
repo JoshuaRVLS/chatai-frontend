@@ -43,7 +43,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
   const [selectedOptions, setSelectedOptions] = useState<
     { label: string; value: string }[]
   >([]);
-  const [selectedLorebooks, setSelectedLorebooks] = useState<{ label: string; value: string }[]>([]);
+  const [selectedLorebooks, setSelectedLorebooks] = useState<string[]>([]);
   const [isNsfw, setIsNsfw] = useState<boolean>(false);
   const [imageLoading, setImageLoading] = useState<boolean>(false);
 
@@ -68,7 +68,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
   const { data: userLorebooks } = useQuery<any[]>({
     queryKey: ["lorebooks"],
-    queryFn: () => fetch("/api/lorebooks").then(res => res.json().then(d => d.data)),
+    queryFn: () => fetch("/api/lorebooks?filter=library").then(res => res.json().then(d => d.data)),
     enabled: !!user?.id,
   });
 
@@ -86,9 +86,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
       setSelectedOptions(
         data.tags.map((tag) => ({ label: tag.name, value: tag.id }))
       );
-      setSelectedLorebooks(
-        data.lorebooks.map(lb => ({ label: lb.name || `Lorebook ${lb.id.slice(0, 8)}`, value: lb.id }))
-      );
+      setSelectedLorebooks(data.lorebooks.map(lb => lb.id));
       setIsNsfw(data.isNsfw);
     }
   }, [data]);
@@ -113,7 +111,7 @@ const CharacterEdit = ({ id }: { id: string }) => {
     formData.append("exampleConversations", exampleConversations);
     formData.append("userId", user?.id as string);
     formData.append("tags", JSON.stringify(selectedOptions));
-    formData.append("lorebooks", JSON.stringify(selectedLorebooks.map(lb => lb.value)));
+    formData.append("lorebooks", JSON.stringify(selectedLorebooks));
     formData.append("isNsfw", isNsfw.toString());
 
     try {
@@ -379,8 +377,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
               </p>
 
               <LorebookSelector
-                selectedLorebooks={selectedLorebooks}
-                setSelectedLorebooks={setSelectedLorebooks}
+                selectedIds={selectedLorebooks}
+                onChange={setSelectedLorebooks}
+                lorebooks={userLorebooks || []}
               />
             </section>
 
