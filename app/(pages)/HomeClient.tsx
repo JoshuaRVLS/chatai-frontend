@@ -5,6 +5,7 @@ import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
 import TrendingSection from "./TrendingSection";
+import PopularSection from "./PopularSection";
 import TrendingAuthors from "./TrendingAuthors";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
@@ -125,6 +126,7 @@ const HomeClient = () => {
                     )}
 
                     <TrendingSection />
+                    <PopularSection />
                     <TrendingAuthors />
                 </section>
 
