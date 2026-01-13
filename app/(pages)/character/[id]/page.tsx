@@ -27,7 +27,7 @@ export async function generateMetadata({
       url: `https://jchatai.space/character/${(await params).id}`,
       images: [
         {
-          url: char.avatar || "/og-image.png",
+          url: `https://jchatai.space/api/image/${(await params).id}`,
           width: 800,
           height: 800,
           alt: char.name,
@@ -36,10 +36,10 @@ export async function generateMetadata({
       type: "profile",
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: char.name,
       description: char.bio,
-      images: [char.avatar || "/og-image.png"],
+      images: [`https://jchatai.space/api/image/${(await params).id}`],
     },
     alternates: {
       canonical: `https://jchatai.space/character/${(await params).id}`,

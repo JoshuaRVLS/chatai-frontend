@@ -4,7 +4,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://jchatai.space'
 
     // Standard pages
-    const routes = ['', '/privacy', '/terms'].map((route) => ({
+    const routes = ['', '/explore', '/privacy', '/terms'].map((route) => ({
         url: `${baseUrl}${route}`,
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
