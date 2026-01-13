@@ -382,6 +382,7 @@ const Characters = ({
               rating={character.rating}
               ratingCount={character.ratingCount}
               chatCount={character.chatCount}
+              views={character.views}
             />
           </div>
         ))}

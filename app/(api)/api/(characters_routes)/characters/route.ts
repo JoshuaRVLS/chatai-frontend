@@ -205,7 +205,8 @@ export const GET = async (req: Request) => {
         ...char,
         rating: averageRating,
         ratingCount: char.ratings.length,
-        chatCount: char._count.chats
+        chatCount: char._count.chats,
+        views: char.views
       };
     });
 

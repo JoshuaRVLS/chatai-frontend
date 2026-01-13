@@ -34,6 +34,8 @@ const CharacterView = ({ id }: { id: string }) => {
       tags: CharacterTag[];
       lorebooks: { id: string; name: string; description: string }[];
       ratings: { value: number; userId: string; }[];
+      views: number;
+      _count: { chats: number };
     }
   >({
     queryKey: ["character", id],
@@ -85,6 +87,12 @@ const CharacterView = ({ id }: { id: string }) => {
       setIsStartingChat(false);
     }
   });
+
+  useEffect(() => {
+    if (id) {
+      fetch(`/api/characters/${id}/view`, { method: 'POST' }).catch(err => console.error("View tracking failed:", err));
+    }
+  }, [id]);
 
   if (isPending) {
     return (
@@ -167,9 +175,22 @@ const CharacterView = ({ id }: { id: string }) => {
               <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-b from-transparent to-zinc-950/90 z-10 pointer-events-none" />
 
               <div className="absolute bottom-4 left-4 right-4 z-20">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Active System</span>
+                <div className="flex items-center gap-3 mb-1">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-1 h-1 rounded-full bg-white animate-pulse" />
+                    <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Active System</span>
+                  </div>
+                  <div className="h-2 w-px bg-white/10" />
+                  <div className="flex items-center gap-2 text-[8px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1 text-white/40">
+                      <FiEye size={10} />
+                      <span>{data?.views || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-white/40">
+                      <FiMessageCircle size={10} />
+                      <span>{data?._count?.chats || 0}</span>
+                    </div>
+                  </div>
                 </div>
                 <h1 className="text-3xl font-black text-white tracking-tight uppercase italic leadning-none">{data?.name}</h1>
               </div>

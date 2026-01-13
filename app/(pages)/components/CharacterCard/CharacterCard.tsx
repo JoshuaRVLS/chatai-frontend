@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FiUser, FiMoreHorizontal, FiEye, FiEdit2, FiTrash2, FiPlay, FiStar } from "react-icons/fi";
+import { FiUser, FiMoreHorizontal, FiEye, FiEdit2, FiTrash2, FiPlay, FiStar, FiMessageCircle } from "react-icons/fi";
 import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,7 @@ interface CharacterCardProps {
   rating?: number;
   ratingCount?: number;
   chatCount?: number;
+  views?: number;
 }
 
 const CharacterCard = React.memo(function CharacterCard({
@@ -41,6 +42,7 @@ const CharacterCard = React.memo(function CharacterCard({
   rating = 0,
   ratingCount = 0,
   chatCount = 0,
+  views = 0,
 }: CharacterCardProps) {
   const router = useRouter();
   const { settings } = useSettings();
@@ -344,6 +346,10 @@ const CharacterCard = React.memo(function CharacterCard({
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 text-[9px] font-bold text-white/60 bg-black/60 px-1.5 py-0.5 rounded-full border border-white/5">
                     <FiEye size={8} />
+                    <span>{views}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-white/60 bg-black/60 px-1.5 py-0.5 rounded-full border border-white/5">
+                    <FiMessageCircle size={8} />
                     <span>{chatCount}</span>
                   </div>
                   {rating > 0 && (

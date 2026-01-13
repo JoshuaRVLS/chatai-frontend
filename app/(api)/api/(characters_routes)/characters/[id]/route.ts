@@ -35,6 +35,11 @@ export const GET =
               value: true,
               userId: true
             }
+          },
+          _count: {
+            select: {
+              chats: true
+            }
           }
         },
       });
