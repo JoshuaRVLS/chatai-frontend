@@ -5,6 +5,7 @@ import Characters from "./components/Home/Characters/Characters";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
 import TrendingSection from "./TrendingSection";
+import TrendingAuthors from "./TrendingAuthors";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -61,6 +62,7 @@ const HomeClient = () => {
                         className="px-6 md:px-12"
                     >
                         <TrendingSection />
+                        <TrendingAuthors />
                     </motion.section>
                 )}
 
