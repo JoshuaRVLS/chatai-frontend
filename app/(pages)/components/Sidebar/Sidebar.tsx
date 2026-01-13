@@ -164,6 +164,7 @@ const Sidebar = () => {
                     <div className="space-y-1">
                         {session && <p className="px-4 text-[9px] font-black text-zinc-700 uppercase tracking-widest mb-2">Platform</p>}
                         <NavItem href="/" icon={FiHome} label="Home" />
+                        <NavItem href="/explore" icon={FiGrid} label="Explore" />
                         <NavItem href="/lorebooks" icon={FiBookOpen} label="Library" />
                         {session && (
                             <>
