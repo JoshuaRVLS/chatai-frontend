@@ -96,6 +96,7 @@ export const useDraggableScroll = () => {
 
     return {
         ref,
+        isDragging,
         events: {
             onMouseDown,
             onMouseLeave,

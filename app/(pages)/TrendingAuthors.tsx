@@ -14,7 +14,7 @@ const TrendingAuthors = () => {
         queryFn: () => fetch('/api/users/trending').then(res => res.json().then(data => data.data)),
     });
 
-    const { ref, events, styles } = useDraggableScroll();
+    const { ref, events, styles, isDragging } = useDraggableScroll();
 
     if (isPending || !authors || authors.length === 0) return null;
 
@@ -39,7 +39,7 @@ const TrendingAuthors = () => {
                     ref={ref}
                     {...events}
                     style={styles}
-                    className="flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit"
+                    className={`flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit ${isDragging ? '[&>*]:pointer-events-none' : ''}`}
                 >
                     {authors.map((author: any, index: number) => (
                         <Link
