@@ -10,6 +10,7 @@ import {
   FiAward,
   FiStar,
   FiBook,
+  FiShare2,
 } from "react-icons/fi";
 import { Character, CharacterTag, User, CharacterRating } from "@/app/generated/prisma";
 import { useQuery } from "@tanstack/react-query";
@@ -25,6 +26,7 @@ import { FiEye } from "react-icons/fi";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { useAuthAction } from "@/app/hooks/useAuthAction";
+import ShareModal from "../Common/ShareModal";
 
 const CharacterView = ({ id }: { id: string }) => {
   const { isPending, error, data } = useQuery<
@@ -62,6 +64,7 @@ const CharacterView = ({ id }: { id: string }) => {
   });
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   const startChat = withAuth(async () => {
     if (isStartingChat) return;
@@ -211,6 +214,22 @@ const CharacterView = ({ id }: { id: string }) => {
               )}
               {isStartingChat ? 'Initializing...' : 'Protocol Start'}
             </motion.button>
+
+            <button
+              onClick={() => setIsShareOpen(true)}
+              className="w-full py-3 bg-white/5 text-zinc-400 font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-white/10 hover:text-white transition-colors flex items-center justify-center gap-2 border border-white/5"
+            >
+              <FiShare2 size={14} />
+              Share Access
+            </button>
+
+            <ShareModal
+              isOpen={isShareOpen}
+              onClose={() => setIsShareOpen(false)}
+              title={data?.name || "Character"}
+              text={`Chat with ${data?.name} on JChatAI`}
+              url={window.location.href}
+            />
 
             <div className="bg-white/1 p-4 rounded-xl border border-white/5 space-y-3">
               <h4 className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">Architect</h4>

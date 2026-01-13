@@ -6,7 +6,8 @@ import { FaUndo, FaCog, FaTimes } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useSettings } from "@/app/hooks/useSettings";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiShare2 } from "react-icons/fi";
+import ShareModal from "../Common/ShareModal";
 
 interface ChatNavbarProps {
     characterId: string;
@@ -36,6 +37,7 @@ const ChatNavbar = ({
     const router = useRouter();
     const { settings } = useSettings();
     const [tempUnblur, setTempUnblur] = React.useState(false);
+    const [isShareOpen, setIsShareOpen] = React.useState(false);
     const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
 
     const handleNavigateToProfile = () => {
@@ -107,6 +109,13 @@ const ChatNavbar = ({
                         </svg>
                     </motion.div>
                 </button>
+                <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-sky-400 hover:bg-sky-400/10 transition-all border border-white/5"
+                    title="Share Character"
+                >
+                    <FiShare2 size={12} />
+                </button>
                 {hasUndo && (
                     <button
                         onClick={onUndo}
@@ -144,6 +153,14 @@ const ChatNavbar = ({
                     <FaTimes size={12} />
                 </button>
             </div>
+
+            <ShareModal
+                isOpen={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+                title={characterName}
+                text={`Chat with ${characterName} on JChatAI`}
+                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/character/${characterId}`}
+            />
         </div>
     );
 };
