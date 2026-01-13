@@ -25,6 +25,7 @@ import {
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthAction } from "@/app/hooks/useAuthAction";
+import LorebookSelector from "../components/LorebookSelector/LorebookSelector";
 
 type TagOption = { label: string; value: string };
 
@@ -48,7 +49,7 @@ const CreateCharacterPage: React.FC = () => {
 
   const { data: lorebooks } = useQuery<any[]>({
     queryKey: ["lorebooks"],
-    queryFn: () => fetch("/api/lorebooks").then(res => res.json().then(d => d.data)),
+    queryFn: () => fetch("/api/lorebooks?filter=library").then(res => res.json().then(d => d.data)),
     enabled: !!user?.id,
   });
 
@@ -260,7 +261,7 @@ const CreateCharacterPage: React.FC = () => {
             </section>
 
             {/* Lorebooks Section */}
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6 relative z-50">
               <div className="flex items-center gap-3 mb-2">
                 <FiBook className="text-white/40" />
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
@@ -269,31 +270,11 @@ const CreateCharacterPage: React.FC = () => {
                 Link existing information modules to provide this entity with persistent world knowledge.
               </p>
 
-              <div className="flex flex-wrap gap-2">
-                {lorebooks && lorebooks.length > 0 ? (
-                  lorebooks.map(lb => (
-                    <button
-                      key={lb.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedLorebooks(prev =>
-                          prev.includes(lb.id) ? prev.filter(id => id !== lb.id) : [...prev, lb.id]
-                        );
-                      }}
-                      className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${selectedLorebooks.includes(lb.id)
-                        ? "bg-white text-zinc-950 border-white"
-                        : "bg-white/5 text-zinc-600 border-white/5 hover:border-white/20"
-                        }`}
-                    >
-                      {lb.name}
-                    </button>
-                  ))
-                ) : (
-                  <p className="text-[10px] text-white/10 uppercase tracking-widest font-black py-4 italic">
-                    No modules detected in your local archive.
-                  </p>
-                )}
-              </div>
+              <LorebookSelector
+                selectedIds={selectedLorebooks}
+                onChange={setSelectedLorebooks}
+                lorebooks={lorebooks || []}
+              />
             </section>
 
             {/* Intelligence Configuration */}

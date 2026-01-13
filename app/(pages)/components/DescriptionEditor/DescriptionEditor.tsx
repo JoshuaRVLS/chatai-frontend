@@ -166,7 +166,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                         formatOnPaste: true,
                         formatOnType: true,
                         padding: { top: 16, bottom: 16 },
-                        lineNumbers: "on",
+                        lineNumbers: "off",
                         renderLineHighlight: "none",
                         overviewRulerBorder: false,
                         hideCursorInOverviewRuler: true,

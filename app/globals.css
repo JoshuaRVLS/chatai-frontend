@@ -1,30 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  /* Monochrome Zinc Palette */
-  --background-hex: #09090b;
-  --background-gradient: radial-gradient(circle at 50% 0%, #18181b 0%, #09090b 100%);
+  /* True Black Palette */
+  --background-hex: #000000;
+  --background-gradient: radial-gradient(circle at 50% 0%, #111111 0%, #000000 60%);
   --foreground: #fafafa;
 
   /* Refined Monochrome Tokens */
-  --color-primary: #fafafa;
-  --color-primary-glow: rgba(255, 255, 255, 0.1);
-  --color-secondary: #a1a1aa;
-  --color-accent: #71717a;
+  --color-primary: #ededed;
+  --color-primary-glow: rgba(255, 255, 255, 0.08);
+  --color-secondary: #71717a;
+  --color-accent: #52525b;
 
-  /* Aurora Colors - Desaturated */
-  --aurora-1: rgba(255, 255, 255, 0.03);
-  --aurora-2: rgba(255, 255, 255, 0.02);
-  --aurora-3: rgba(255, 255, 255, 0.01);
-
-  /* Simplified Monochrome Surfaces */
-  --color-surface: rgba(24, 24, 27, 0.6);
-  --color-surface-hover: rgba(39, 39, 42, 0.8);
-  --color-border: rgba(255, 255, 255, 0.06);
-  --color-border-glow: rgba(255, 255, 255, 0.1);
+  /* Simplified Dark Surfaces */
+  --color-surface: #09090b;
+  --color-surface-hover: #18181b;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-glow: rgba(255, 255, 255, 0.15);
   --color-background-custom: var(--background-hex);
 
-  /* Status Tokens - Slightly muted */
+  /* Status Tokens */
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -34,44 +29,45 @@
 }
 
 @theme {
-  --color-primary: #fafafa;
-  --color-secondary: #a1a1aa;
-  --color-accent: #71717a;
-  --color-surface: rgba(24, 24, 27, 0.8);
+  --color-primary: #ededed;
+  --color-secondary: #71717a;
+  --color-accent: #52525b;
+  --color-surface: #09090b;
   --font-inter: "Inter", system-ui, -apple-system, sans-serif;
 }
 
 body {
-  @apply font-inter antialiased min-h-screen selection:bg-white/10;
-  background: var(--background-gradient);
+  @apply font-inter antialiased min-h-screen selection:bg-white/20;
+  background: var(--background-hex);
+  background-image: var(--background-gradient);
   background-attachment: fixed;
   margin: 0;
   overflow-x: hidden;
   color: var(--foreground);
 }
 
-/* Glassmorphism Utilities - More subtle */
+/* Dark Glass Utilities */
 .glass {
-  @apply backdrop-blur-md bg-white/[0.03] border border-white/10;
+  @apply backdrop-blur-xl bg-black/60 border border-white/10;
 }
 
 .glass-morphism {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Compact Component Utilities */
 .btn-primary {
-  @apply relative overflow-hidden px-5 py-2 rounded-lg font-bold transition-all duration-200 bg-white text-zinc-950 hover:bg-zinc-200 active:scale-[0.98] text-xs uppercase tracking-wider;
+  @apply relative overflow-hidden px-4 py-2 rounded-lg font-bold transition-all duration-200 bg-white text-black hover:bg-zinc-200 active:scale-[0.98] text-[10px] md:text-xs uppercase tracking-widest;
 }
 
 .btn-secondary {
-  @apply px-5 py-2 rounded-lg font-bold transition-all duration-200 border border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm text-xs uppercase tracking-wider;
+  @apply px-4 py-2 rounded-lg font-bold transition-all duration-200 border border-white/10 bg-black hover:bg-zinc-900 text-zinc-300 text-[10px] md:text-xs uppercase tracking-widest;
 }
 
 .input-modern {
-  @apply w-full px-3 py-2 rounded-lg bg-zinc-900/50 border border-white/5 focus:border-white/20 focus:ring-1 focus:ring-white/10 transition-all outline-none placeholder:text-zinc-600 text-sm;
+  @apply w-full px-3 py-2.5 rounded-lg bg-zinc-950/80 border border-white/10 focus:border-white/20 focus:ring-1 focus:ring-white/10 transition-all outline-none placeholder:text-zinc-700 text-sm text-zinc-200;
 }
 
 .input-modern.has-icon {
@@ -79,14 +75,13 @@ body {
 }
 
 .card-premium {
-  @apply rounded-2xl p-6 transition-all duration-300;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  @apply rounded-xl p-5 transition-all duration-300;
+  background: #09090b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .card-premium:hover {
-  @apply border-white/10;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  @apply border-white/15 bg-zinc-900;
 }
 
 .aurora-bg {
@@ -94,15 +89,15 @@ body {
   inset: 0;
   overflow: hidden;
   z-index: -1;
-  opacity: 0.3;
+  opacity: 0.15; /* Even more subtle */
 }
 
 .aurora-blob {
   position: absolute;
-  filter: blur(100px);
-  opacity: 0.2;
+  filter: blur(120px);
+  opacity: 0.15;
   border-radius: 50%;
-  animation: aurora-float 25s infinite alternate;
+  animation: aurora-float 30s infinite alternate;
 }
 
 @keyframes aurora-float {
@@ -111,23 +106,23 @@ body {
   }
 
   33% {
-    transform: translate(5%, 10%) scale(1.05);
+    transform: translate(3%, 8%) scale(1.02);
   }
 
   66% {
-    transform: translate(-3%, 5%) scale(0.95);
+    transform: translate(-2%, 4%) scale(0.98);
   }
 
   100% {
-    transform: translate(3%, -3%) scale(1.02);
+    transform: translate(2%, -2%) scale(1.01);
   }
 }
 
-/* Shimmer Effect - More subtle */
+/* Shimmer Effect - Stealthy */
 .shimmer {
   background: linear-gradient(90deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.03) 50%,
       rgba(255, 255, 255, 0) 100%);
   background-size: 200% 100%;
   animation: shimmer-anim 3s infinite linear;

@@ -80,7 +80,7 @@ const ChatNavbar = ({
                     onClick={handleNavigateToProfile}
                     className="cursor-pointer hover:opacity-80 transition-opacity"
                 >
-                    <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase leading-none">
+                    <h2 className="text-lg sm:text-xl font-black text-white italic tracking-tighter uppercase leading-none truncate max-w-[150px] sm:max-w-none">
                         {characterName}
                     </h2>
                     <div className="flex items-center gap-2 mt-1">

@@ -218,7 +218,7 @@ const CharacterCard = React.memo(function CharacterCard({
         animate={{ opacity: 1 }}
       >
         {/* Base Card (Visible by Default, Hidden on Hover) */}
-        <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-white/5 bg-zinc-900/40 opacity-100 group-hover:opacity-0 transition-opacity duration-200">
+        <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-white/5 bg-zinc-950 opacity-100 group-hover:opacity-0 transition-opacity duration-200">
           <div className="relative h-full w-full">
             {image ? (
               <Image
@@ -240,8 +240,8 @@ const CharacterCard = React.memo(function CharacterCard({
         </div>
 
         {/* Floating "Mini Profile" (Visible on Hover) */}
-        <div className="absolute -top-4 -left-4 -right-4 z-50 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
-          <div className="w-full h-auto min-h-[calc(100%+2rem)] bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
+        <div className="absolute -top-3 -left-3 -right-3 z-50 opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+          <div className="w-full h-auto min-h-[calc(100%+1.5rem)] bg-black border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col relative">
 
             {/* Full Background Image */}
             <div className="absolute inset-0 z-0">

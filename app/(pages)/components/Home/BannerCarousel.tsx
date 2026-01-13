@@ -34,9 +34,9 @@ const BannerCarousel = () => {
         if (!banners || banners.length <= 1) return;
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % banners.length);
-        }, 6000); // 6s rotation
+        }, 10000); // 10s rotation
         return () => clearInterval(interval);
-    }, [banners]);
+    }, [banners, currentIndex]);
 
     const nextSlide = () => {
         if (!banners) return;
@@ -50,7 +50,7 @@ const BannerCarousel = () => {
 
     if (isLoading) {
         return (
-            <div className="relative w-full aspect-21/9 md:aspect-3/1 rounded-3xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl animate-pulse flex items-center justify-center">
+            <div className="relative w-full aspect-16/10 md:aspect-3/1 rounded-3xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl animate-pulse flex items-center justify-center">
                 <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent" />
                 <div className="w-12 h-12 rounded-full border-2 border-white/10 border-t-white animate-spin" />
             </div>
@@ -60,7 +60,7 @@ const BannerCarousel = () => {
     if (!banners || banners.length === 0) return null;
 
     return (
-        <div className="relative w-full aspect-21/9 md:aspect-3/1 rounded-3xl overflow-hidden group border border-white/5 shadow-2xl">
+        <div className="relative w-full aspect-16/10 md:aspect-3/1 rounded-3xl overflow-hidden group border border-white/5 shadow-2xl">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -80,13 +80,13 @@ const BannerCarousel = () => {
 
                     {/* Content */}
                     {(banners[currentIndex].title || banners[currentIndex].link) && (
-                        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 flex flex-col items-start gap-3">
+                        <div className="absolute bottom-0 left-0 right-0 p-5 md:p-10 flex flex-col items-start gap-2 md:gap-3">
                             {banners[currentIndex].title && (
                                 <motion.h2
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: 0.3 }}
-                                    className="text-2xl md:text-5xl font-black text-white italic uppercase tracking-tighter drop-shadow-xl"
+                                    className="text-xl md:text-5xl font-black text-white italic uppercase tracking-tighter drop-shadow-xl"
                                 >
                                     {banners[currentIndex].title}
                                 </motion.h2>

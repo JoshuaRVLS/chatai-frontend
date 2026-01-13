@@ -13,8 +13,7 @@ import {
     FiCpu,
     FiBookOpen,
     FiSettings,
-    FiGrid,
-    FiCommand
+    FiGrid
 } from "react-icons/fi";
 import { Orbitron } from "next/font/google";
 import UserAvatar from "../Common/UserAvatar";
@@ -22,16 +21,37 @@ import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
 
 const orbitron = Orbitron({ subsets: ["latin"], weight: ["900"] });
 
-const CoolBurger = ({ isOpen, toggle }: { isOpen: boolean; toggle: () => void }) => {
+const MobileHeader = ({ isOpen, toggle, session }: { isOpen: boolean; toggle: () => void; session: any }) => {
+    // Only show on mobile, fixed at top
     return (
-        <button
-            onClick={toggle}
-            className="md:hidden fixed top-4 left-4 z-60 w-12 h-12 bg-zinc-900/50 backdrop-blur-md border border-white/10 rounded-full flex flex-col items-center justify-center gap-1.5 group hover:bg-white/10 transition-colors"
-        >
-            <span className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isOpen ? 'rotate-45 translate-y-2' : ''}`} />
-            <span className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isOpen ? 'opacity-0' : ''}`} />
-            <span className={`w-6 h-0.5 bg-white rounded-full transition-all duration-300 ${isOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-        </button>
+        <div className={`md:hidden fixed top-0 left-0 right-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between transition-transform duration-300 ${isOpen ? '-translate-y-full' : 'translate-y-0'}`}>
+            <div className="flex items-center gap-4">
+                <button
+                    onClick={toggle}
+                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
+                >
+                    <span className="w-5 h-0.5 bg-white rounded-full" />
+                    <span className="w-5 h-0.5 bg-white rounded-full" />
+                    <span className="w-5 h-0.5 bg-white rounded-full" />
+                </button>
+                <Link href="/" className="group">
+                    <span className={`${orbitron.className} text-xl font-black tracking-tighter text-white`}>
+                        JChatAI
+                    </span>
+                </Link>
+            </div>
+
+            {session?.user && (
+                <Link href="/settings" className="relative">
+                    <UserAvatar
+                        name={session.user?.name || session.user?.username}
+                        image={session.user?.image}
+                        size="sm"
+                    />
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-zinc-900 rounded-full" />
+                </Link>
+            )}
+        </div>
     );
 };
 
@@ -72,7 +92,6 @@ const Sidebar = () => {
     ];
 
     const systemLinks = [
-        ...(session?.user?.isAdmin ? [{ name: "Admin Panel", href: "/admin", icon: FiCommand }] : []),
         { name: "Settings", href: "/settings", icon: FiSettings },
     ];
 
@@ -97,8 +116,21 @@ const Sidebar = () => {
 
     return (
         <>
-            {/* Mobile Toggle Button */}
-            <CoolBurger isOpen={isOpen} toggle={() => setIsOpen(!isOpen)} />
+            {/* Mobile Header */}
+            {!isOpen && <MobileHeader isOpen={isOpen} toggle={() => setIsOpen(!isOpen)} session={session} />}
+
+            {/* Mobile Close Button (When Open) */}
+            {isOpen && (
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="md:hidden fixed top-4 right-4 z-60 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/10 flex items-center justify-center text-white"
+                >
+                    <span className="sr-only">Close Menu</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            )}
 
             {/* Backdrop for Mobile */}
             {isOpen && (

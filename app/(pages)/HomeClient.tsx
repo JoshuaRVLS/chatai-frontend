@@ -27,9 +27,9 @@ const HomeClient = () => {
     };
 
     return (
-        <div className="flex flex-col w-full gap-16 pt-32 pb-32">
+        <div className="flex flex-col w-full gap-8 pt-24 pb-20">
             <h1 className="sr-only">JChatAI - Premium AI Character Conversations and Roleplay</h1>
-            <div className="w-full space-y-16">
+            <div className="w-full space-y-10">
                 {/* Banner Section */}
                 <motion.section
                     initial={{ opacity: 0, scale: 0.95 }}

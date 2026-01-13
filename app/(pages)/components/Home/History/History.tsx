@@ -139,7 +139,7 @@ const History = () => {
 
   if (isPending) {
     return (
-      <div className="flex flex-col gap-10 px-6 md:px-12 py-8">
+      <div className="flex flex-col gap-6 px-6 md:px-12 py-4">
         <div className="h-6 w-40 bg-white/5 rounded-full shimmer" />
         <div className="flex gap-8 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
@@ -154,8 +154,8 @@ const History = () => {
   if (!data || data.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-10 relative group/history">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
+    <div className="flex flex-col gap-6 relative group/history">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/5 pb-6 relative">
         <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-primary/30 to-transparent" />
 
         <div className="space-y-2">
@@ -191,7 +191,7 @@ const History = () => {
 
       <div
         ref={scrollContainerRef}
-        className="flex gap-8 overflow-x-auto pb-8 scrollbar-hide -mx-6 md:-mx-12 px-6 md:px-12 snap-x"
+        className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-6 md:-mx-12 px-6 md:px-12 snap-x"
       >
         {data.map((chat, index) => (
           <Link
@@ -207,7 +207,7 @@ const History = () => {
             className="group shrink-0 w-[380px] snap-start"
           >
             <motion.div
-              className="relative overflow-hidden flex flex-col p-6 rounded-[2.5rem] border border-white/5 bg-zinc-900/40 backdrop-blur-xl hover:border-primary/40 transition-all duration-500 hover:shadow-[0_20px_80px_rgba(0,0,0,0.4)]"
+              className="relative overflow-hidden flex flex-col p-4 rounded-3xl border border-white/5 bg-zinc-950 hover:border-white/10 transition-all duration-300 hover:bg-zinc-900"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
