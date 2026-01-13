@@ -87,11 +87,20 @@ const CharacterCard = React.memo(function CharacterCard({
       }
     };
 
-    const handleScroll = () => {
+    const handleScroll = (e: Event) => {
       isScrollingRef.current = true;
       if (scrollEndTimeoutRef.current) clearTimeout(scrollEndTimeoutRef.current);
+
+      // Immediate check: if scrolling moved the card away from the cursor, start dismissal
+      if (isHovered && !isInsidePreview) {
+        const isStillOver = containerRef.current?.matches(':hover');
+        if (!isStillOver) handleMouseLeave();
+      }
+
       scrollEndTimeoutRef.current = setTimeout(() => {
         isScrollingRef.current = false;
+
+        // Final verification after scroll momentum stops
         setTimeout(() => {
           if (isHovered && !isInsidePreview) {
             const isStillOver = containerRef.current?.matches(':hover');
@@ -133,13 +142,22 @@ const CharacterCard = React.memo(function CharacterCard({
       mouseY.set(y);
     };
 
+    const handleMouseDown = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node) && !previewRef.current?.contains(e.target as Node)) {
+        setIsHovered(false);
+        setIsInsidePreview(false);
+      }
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+    window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("close-character-previews", handleCloseAllPreviews);
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("scroll", handleScroll, { capture: true });
+      window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("close-character-previews", handleCloseAllPreviews);
     };
   }, [isHovered, isInsidePreview, mouseX, mouseY, characterId]);
