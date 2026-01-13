@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import History from "./components/Home/History/History";
-import Characters from "./components/Home/Characters/Characters";
 import BannerCarousel from "./components/Home/BannerCarousel";
 import TrendingSection from "./TrendingSection";
 import RecentSection from "./RecentSection";
@@ -10,35 +9,27 @@ import PopularSection from "./PopularSection";
 import TrendingAuthors from "./TrendingAuthors";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { FiClock, FiStar, FiGrid, FiList } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { FiClock, FiStar, FiZap, FiActivity } from "react-icons/fi";
 
-type HomeTab = 'featured' | 'history' | 'all';
+type HomeTab = 'featured' | 'history' | 'recent' | 'popular';
 
 const HomeClient = () => {
     const { data: session } = useSession();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
     const [activeTab, setActiveTab] = useState<HomeTab>('featured');
 
     // Refs for sections
     const featuredRef = useRef<HTMLDivElement>(null);
     const historyRef = useRef<HTMLDivElement>(null);
-    const allRef = useRef<HTMLDivElement>(null);
-
-    const handleSearch = (q: string) => {
-        setSearchQuery(q);
-        // If searching, auto-scroll to All/Browse section
-        if (q) {
-            scrollToSection('all');
-        }
-    };
+    const recentRef = useRef<HTMLDivElement>(null);
+    const popularRef = useRef<HTMLDivElement>(null);
 
     const scrollToSection = (id: HomeTab) => {
         let ref = featuredRef;
         if (id === 'history') ref = historyRef;
-        if (id === 'all') ref = allRef;
+        if (id === 'recent') ref = recentRef;
+        if (id === 'popular') ref = popularRef;
 
         if (ref.current) {
             const yOffset = -128; // Matches scroll-mt-32
@@ -53,7 +44,7 @@ const HomeClient = () => {
         const options = {
             root: null,
             rootMargin: '-130px 0px -50% 0px',
-            threshold: 0
+            threshold: 0.1
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -66,7 +57,8 @@ const HomeClient = () => {
 
         if (featuredRef.current) observer.observe(featuredRef.current);
         if (historyRef.current) observer.observe(historyRef.current);
-        if (allRef.current) observer.observe(allRef.current);
+        if (recentRef.current) observer.observe(recentRef.current);
+        if (popularRef.current) observer.observe(popularRef.current);
 
         return () => observer.disconnect();
     }, [session?.user]);
@@ -74,7 +66,8 @@ const HomeClient = () => {
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
         { id: 'featured', label: 'Featured', icon: FiStar },
         ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
-        { id: 'all', label: 'All Models', icon: FiGrid },
+        { id: 'recent', label: 'New', icon: FiActivity },
+        { id: 'popular', label: 'Popular', icon: FiZap },
     ];
 
     return (
@@ -120,22 +113,32 @@ const HomeClient = () => {
                     )}
 
                     <TrendingSection />
-                    <RecentSection />
-                    <PopularSection />
-                    <TrendingAuthors />
                 </section>
 
-                {/* ALL / BROWSE SECTION */}
-                <section id="all" ref={allRef} className="pb-32 scroll-mt-32">
-                    <div className="flex flex-col items-center text-center gap-4 mb-12">
-                        <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter">All Models</h3>
-                        <p className="text-zinc-500 text-sm max-w-md mx-auto font-medium">Browse the complete collection of AI personas.</p>
-                    </div>
-                    <Characters
-                        searchQuery={searchQuery}
-                        onSearch={handleSearch}
-                    />
+                <section id="recent" ref={recentRef} className="scroll-mt-32">
+                    <RecentSection />
                 </section>
+
+                <section id="popular" ref={popularRef} className="scroll-mt-32">
+                    <PopularSection />
+                </section>
+
+                <TrendingAuthors />
+
+                {/* EXPLORE MORE CTA */}
+                <div className="pt-16 pb-32 flex flex-col items-center text-center gap-8 border-t border-white/5">
+                    <div className="space-y-3">
+                        <h3 className="text-4xl font-black text-white italic uppercase tracking-tighter">Endless Possibilities</h3>
+                        <p className="text-zinc-500 text-sm max-w-md mx-auto font-medium">Dive deeper into the archives. Thousands of unique personas and stories are waiting to be discovered.</p>
+                    </div>
+                    <button
+                        onClick={() => router.push('/explore')}
+                        className="group relative px-12 py-5 bg-white text-zinc-950 font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-zinc-200 transition-all shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] active:scale-95"
+                    >
+                        Explore More
+                        <div className="absolute inset-x-4 -bottom-1 h-px bg-zinc-950/20 group-hover:bg-zinc-950/40 transition-colors" />
+                    </button>
+                </div>
 
             </div>
         </div>
