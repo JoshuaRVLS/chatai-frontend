@@ -194,7 +194,7 @@ const Sidebar = () => {
                 </div>
 
                 {/* Profile / Footer Area */}
-                <div className="p-4 border-t border-white/5 bg-zinc-900">
+                <div className="p-4 border-t border-white/5 bg-black">
                     {session ? (
                         <div className="flex flex-col gap-2">
                             <Link href="/settings" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
