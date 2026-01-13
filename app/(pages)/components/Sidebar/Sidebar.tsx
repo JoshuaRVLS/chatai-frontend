@@ -81,6 +81,7 @@ const Sidebar = () => {
 
     const mainLinks = [
         { name: "Home", href: "/", icon: FiHome },
+        { name: "Explore", href: "/explore", icon: FiGrid },
         { name: "My Characters", href: "/my_characters", icon: FiUsers },
         { name: "My Personas", href: "/my_personas", icon: FiCpu },
         { name: "Lorebooks", href: "/lorebooks", icon: <FiBookOpen /> },

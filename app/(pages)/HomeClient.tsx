@@ -4,50 +4,26 @@ import React, { useState, useEffect, useRef } from "react";
 import History from "./components/Home/History/History";
 import BannerCarousel from "./components/Home/BannerCarousel";
 import TrendingSection from "./TrendingSection";
+import RecentSection from "./RecentSection";
 import PopularSection from "./PopularSection";
 import TrendingAuthors from "./TrendingAuthors";
 import { useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { scaleInVariants, fadeUpVariants } from "./components/Animations/variants";
-import { FiGrid, FiClock, FiStar } from "react-icons/fi";
+import { useRouter } from "next/navigation";
+import { FiClock, FiStar } from "react-icons/fi";
 
-type HomeTab = 'featured' | 'explore' | 'history';
+type HomeTab = 'featured' | 'history';
 
 const HomeClient = () => {
     const { data: session } = useSession();
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const pathname = usePathname();
-    const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
     const [activeTab, setActiveTab] = useState<HomeTab>('featured');
 
     // Refs for sections
     const featuredRef = useRef<HTMLDivElement>(null);
-    const browseRef = useRef<HTMLDivElement>(null);
     const historyRef = useRef<HTMLDivElement>(null);
 
-    const handleSearch = (q: string) => {
-        setSearchQuery(q);
-        const params = new URLSearchParams(searchParams.toString());
-        if (q) params.set("q", q);
-        else params.delete("q");
-
-        // Always reset page when search changes
-        params.set("p", "1");
-        router.replace(`${pathname}?${params.toString()}`, { scroll: false });
-
-        // Auto-scroll to browse on search
-        if (q) {
-            router.push(`/explore?q=${q}`);
-        }
-    };
-
     const scrollToSection = (id: HomeTab) => {
-        if (id === 'explore') {
-            router.push('/explore');
-            return;
-        }
         const ref = id === 'featured' ? featuredRef : historyRef;
         if (ref.current) {
             const yOffset = -128; // Matches scroll-mt-32
@@ -75,7 +51,6 @@ const HomeClient = () => {
 
         if (featuredRef.current) observer.observe(featuredRef.current);
         if (historyRef.current) observer.observe(historyRef.current);
-        if (browseRef.current) observer.observe(browseRef.current);
 
         return () => observer.disconnect();
     }, [session?.user]);
@@ -83,7 +58,6 @@ const HomeClient = () => {
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
         { id: 'featured', label: 'Featured', icon: FiStar },
         ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
-        { id: 'explore', label: 'Explore', icon: FiGrid },
     ];
 
     return (
@@ -117,11 +91,11 @@ const HomeClient = () => {
 
             <div className="w-full space-y-24 px-6 md:px-12">
 
-                {/* FEATURED & HISTORY FLOW */}
+                {/* FEATURED SECTION */}
                 <section id="featured" ref={featuredRef} className="space-y-16 scroll-mt-32">
                     <BannerCarousel />
 
-                    {/* HISTORY (Immediately after Banner) */}
+                    {/* HISTORY (Immediately after Banner if signed in) */}
                     {session?.user && (
                         <div id="history" ref={historyRef} className="scroll-mt-32">
                             <History />
@@ -129,6 +103,7 @@ const HomeClient = () => {
                     )}
 
                     <TrendingSection />
+                    <RecentSection />
                     <PopularSection />
                     <TrendingAuthors />
 
