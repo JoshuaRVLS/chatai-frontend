@@ -77,13 +77,13 @@ const HomeClient = () => {
     }, [session?.user]);
 
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
-        ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
         { id: 'featured', label: 'Featured', icon: FiStar },
+        ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
         { id: 'browse', label: 'Browse', icon: FiGrid },
     ];
 
     return (
-        <div className="flex flex-col w-full gap-8 pt-24 pb-20 min-h-screen">
+        <div className="flex flex-col w-full gap-8 pt-6 pb-20 min-h-screen">
             <h1 className="sr-only">JChatAI - Premium AI Character Conversations and Roleplay</h1>
 
             {/* Navigation Tabs (Sticky) */}
