@@ -3,7 +3,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
-import { Area } from 'react-easy-crop/types';
+import { Area } from 'react-easy-crop';
 
 interface ImageCropperProps {
     imageSrc: string;
