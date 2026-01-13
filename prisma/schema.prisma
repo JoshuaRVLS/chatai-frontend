@@ -20,6 +20,7 @@ model User {
   username                 String            @unique
   email                    String            @unique
   password                 String
+  bio                      String?
   profileImage             UserProfileImage?
   verificationToken        String?
   verificationTokenExpires DateTime?
@@ -39,6 +40,7 @@ model User {
   userSettings             UserSettings?
   lorebooks                Lorebook[]
   savedLorebooks           Lorebook[] @relation("SavedLorebooks")
+  givenRatings             CharacterRating[]
 }
 
 model UserSettings {
@@ -95,6 +97,19 @@ model Character {
   lorebooks            Lorebook[]
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
+  ratings              CharacterRating[]
+}
+
+model CharacterRating {
+  id          String    @id @default(cuid())
+  value       Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  characterId String
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, characterId])
 }
 
 model Lorebook {
@@ -153,6 +168,9 @@ model Comment {
   characterId String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  parentId    String?
+  parent      Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
 }
 
 model CharacterTag {
