@@ -60,7 +60,18 @@ const HomeClient = () => {
         if (recentRef.current) observer.observe(recentRef.current);
         if (popularRef.current) observer.observe(popularRef.current);
 
-        return () => observer.disconnect();
+        const handleScroll = () => {
+            if (window.scrollY < 100) {
+                setActiveTab('featured');
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('scroll', handleScroll);
+        };
     }, [session?.user]);
 
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
