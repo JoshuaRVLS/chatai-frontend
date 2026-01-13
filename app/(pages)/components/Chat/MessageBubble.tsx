@@ -77,7 +77,7 @@ export const MessageBubble = React.memo(
 
         return (
             <div
-                className={`group flex items-start gap-2.5 ${isUserMessage ? "flex-row-reverse" : "flex-row"
+                className={`group flex items-start gap-3 ${isUserMessage ? "flex-row-reverse" : "flex-row"
                     } ${isOptimistic ? "opacity-70" : ""}`}
                 onContextMenu={handleContextMenu}
             >
@@ -91,11 +91,11 @@ export const MessageBubble = React.memo(
                                 onProfileClick(e);
                             }
                         }}
-                        className="relative transition-all shrink-0 group/avatar w-8 h-8 sm:w-9 sm:h-9 cursor-pointer hover:scale-105"
+                        className="relative transition-all shrink-0 group/avatar w-7 h-7 sm:w-8 sm:h-8 cursor-pointer hover:scale-105"
                     >
                         {avatarLoading && (
                             <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center rounded-full z-10">
-                                <div className="w-3 h-3 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                                <div className="w-2 h-2 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
                             </div>
                         )}
                         <Image
@@ -103,7 +103,7 @@ export const MessageBubble = React.memo(
                             width={32}
                             height={32}
                             alt={altText}
-                            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full border border-white/10 object-cover transition-all duration-300 ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''} ${avatarLoading ? 'opacity-0' : 'opacity-100'}`}
+                            className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-white/10 object-cover transition-all duration-300 ${isNsfw && isBlurEnabled && !tempUnblur ? 'blur-[6px] grayscale-[0.5]' : ''} ${avatarLoading ? 'opacity-0' : 'opacity-100'}`}
                             onLoad={() => setAvatarLoading(false)}
                             onError={() => setAvatarLoading(false)}
                         />
@@ -115,7 +115,7 @@ export const MessageBubble = React.memo(
                                     exit={{ opacity: 0 }}
                                     className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 rounded-full"
                                 >
-                                    <FiEye className="text-white/60 text-[10px]" />
+                                    <FiEye className="text-white/60 text-[9px]" />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -125,28 +125,27 @@ export const MessageBubble = React.memo(
                         name={userName}
                         image={userImage}
                         size="sm"
-                        className="w-8 h-8 sm:w-9 sm:h-9 shrink-0"
+                        className="w-7 h-7 sm:w-8 sm:h-8 shrink-0"
                     />
                 )}
 
                 <div
-                    className={`flex-1 max-w-[80%] ${isUserMessage ? "text-right" : "text-left"}`}
+                    className={`flex-1 max-w-[85%] ${isUserMessage ? "text-right" : "text-left"}`}
                 >
                     {/* Message Content */}
                     <div
                         onClick={handleTap}
-                        className={`relative rounded-3xl sm:rounded-4xl px-5 py-3.5 sm:px-6 sm:py-4 transition-all duration-300 cursor-pointer text-base sm:text-lg leading-relaxed ${isUserMessage
-                            ? "bg-white/10 border border-white/20 text-white font-bold shadow-xl rounded-tr-sm"
-                            : "bg-white/5 border border-white/10 text-white/95 rounded-tl-sm backdrop-blur-md shadow-xl"
+                        className={`inline-block text-left rounded-2xl sm:rounded-3xl px-4 py-2.5 sm:px-5 sm:py-3 transition-all duration-300 cursor-pointer text-sm sm:text-[15px] leading-relaxed ${isUserMessage
+                            ? "bg-white text-zinc-950 font-bold shadow-lg"
+                            : "bg-zinc-900 border border-white/5 text-zinc-100 shadow-md"
                             }`}
                     >
-                        <div className={`absolute top-0 ${isUserMessage ? '-right-1' : '-left-1'} w-3 h-3 bg-inherit transform rotate-45`} />
                         {isEditing ? (
-                            <div className="space-y-3">
+                            <div className="space-y-3 min-w-[200px]">
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => onEditContentChange?.(e.target.value)}
-                                    className="w-full bg-slate-900 border border-white/10 rounded-xl p-3 text-white resize-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-sm resize-none focus:ring-1 focus:ring-white/20 outline-none"
                                     rows={4}
                                     autoFocus
                                     onClick={(e) => e.stopPropagation()}
@@ -154,13 +153,13 @@ export const MessageBubble = React.memo(
                                 <div className="flex gap-2 justify-end">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onCancelEdit?.(); }}
-                                        className="px-3 py-1 border border-white/10 rounded-lg hover:bg-white/5 transition-colors text-sm text-white/50"
+                                        className="px-3 py-1 border border-white/10 rounded-lg hover:bg-white/5 transition-colors text-[10px] uppercase font-black tracking-widest text-white/50"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onSaveEdit?.(message.id); }}
-                                        className="px-3 py-1 bg-primary text-slate-900 rounded-lg hover:opacity-80 transition-colors text-sm font-bold"
+                                        className="px-3 py-1 bg-white text-zinc-900 rounded-lg hover:bg-zinc-200 transition-colors text-[10px] uppercase font-black tracking-widest"
                                     >
                                         Save
                                     </button>
@@ -169,20 +168,19 @@ export const MessageBubble = React.memo(
                         ) : (
                             <>
                                 {!message.content && isOptimistic && message.id === "streaming" ? (
-                                    <div className="flex gap-1.5 py-2 px-1 items-center">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s]" />
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s] [animation-delay:0.15s]" />
-                                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 animate-bounce [animation-duration:0.8s] [animation-delay:0.3s]" />
-                                        <span className="ml-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 leading-none">Thinking</span>
+                                    <div className="flex gap-1.5 py-1 px-1 items-center">
+                                        <div className="w-1 h-1 rounded-full bg-white/20 animate-bounce [animation-duration:0.8s]" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20 animate-bounce [animation-duration:0.8s] [animation-delay:0.15s]" />
+                                        <div className="w-1 h-1 rounded-full bg-white/20 animate-bounce [animation-duration:0.8s] [animation-delay:0.3s]" />
                                     </div>
                                 ) : (
                                     <>
-                                        <MarkDown>{message.content}</MarkDown>
+                                        <MarkDown isLight={isUserMessage}>{message.content}</MarkDown>
                                         {isOptimistic && message.id === "streaming" && (
-                                            <div className="absolute bottom-1 right-3 flex gap-1">
-                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce" />
-                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce [animation-delay:0.2s]" />
-                                                <div className="w-1 h-1 rounded-full bg-white/40 animate-bounce [animation-delay:0.4s]" />
+                                            <div className="inline-flex gap-0.5 ml-1 align-baseline opacity-30">
+                                                <div className="w-0.5 h-0.5 rounded-full bg-current animate-pulse" />
+                                                <div className="w-0.5 h-0.5 rounded-full bg-current animate-pulse [animation-delay:0.2s]" />
+                                                <div className="w-0.5 h-0.5 rounded-full bg-current animate-pulse [animation-delay:0.4s]" />
                                             </div>
                                         )}
                                     </>
@@ -191,80 +189,80 @@ export const MessageBubble = React.memo(
                         )}
                     </div>
 
-                    {/* Message Actions - Show on hover (desktop) or tap (mobile) */}
+                    {/* Message Actions */}
                     {!isOptimistic && !isEditing && (
                         <div
-                            className={`flex gap-1 mt-2 sm:mt-2.5 transition-all duration-200 ${showActions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
+                            className={`flex gap-1 mt-1.5 transition-all duration-200 ${showActions ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
                                 } ${isUserMessage ? "justify-end" : "justify-start"}`}
                         >
                             <button
                                 onClick={() => onEdit(message.id, message.content)}
-                                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
                                 title="Edit"
                             >
-                                <FaEdit size={10} />
+                                <FaEdit size={8} />
                             </button>
 
                             <button
                                 onClick={() => onDelete(message.id)}
-                                className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
                                 title="Delete"
                             >
-                                <FaTrash size={10} />
+                                <FaTrash size={8} />
                             </button>
 
                             {!isUserMessage && (
                                 <button
                                     onClick={() => onRegenerate(message.id)}
-                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
+                                    className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
                                     title="Regenerate"
                                 >
-                                    <FaRedo size={10} />
+                                    <FaRedo size={8} />
                                 </button>
                             )}
 
                             {isUserMessage && (
                                 <button
                                     onClick={() => onUserRegenerate(message.id)}
-                                    className="w-7 h-7 flex items-center justify-center bg-white/5 border border-white/5 rounded-lg hover:bg-white/10 transition-all text-white/30 hover:text-white"
+                                    className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
                                     title="Edit and resend"
                                 >
-                                    <FaRedo size={10} />
+                                    <FaRedo size={8} />
                                 </button>
                             )}
 
                             <button
                                 onClick={() => onTogglePin(message.id, !!message.pinned)}
-                                className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.pinned
-                                    ? "bg-white/20 border-white/40 text-white"
-                                    : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
+                                className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.pinned
+                                    ? "bg-white text-zinc-950 border-white"
+                                    : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
                                     }`}
-                                title={message.pinned ? "Unpin message" : "Pin message"}
+                                title={message.pinned ? "Unpin" : "Pin"}
                             >
-                                <FaThumbtack size={10} className={message.pinned ? "" : "-rotate-45"} />
+                                <FaThumbtack size={8} className={message.pinned ? "" : "-rotate-45"} />
                             </button>
 
                             {!isUserMessage && (
                                 <>
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "LIKE" ? "NONE" : "LIKE")}
-                                        className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "LIKE"
-                                            ? "bg-white/20 border-white/40 text-white"
-                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
+                                        className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.feedback === "LIKE"
+                                            ? "bg-zinc-100 text-zinc-900 border-zinc-100"
+                                            : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
                                             }`}
-                                        title="Like response"
+                                        title="Like"
                                     >
-                                        <FaThumbsUp size={10} />
+                                        <FaThumbsUp size={8} />
                                     </button>
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "DISLIKE" ? "NONE" : "DISLIKE")}
-                                        className={`w-7 h-7 flex items-center justify-center border rounded-lg transition-all ${message.feedback === "DISLIKE"
-                                            ? "bg-white/20 border-white/40 text-white"
-                                            : "bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white"
+                                        className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.feedback === "DISLIKE"
+                                            ? "bg-zinc-100 text-zinc-900 border-zinc-100"
+                                            : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
                                             }`}
-                                        title="Dislike response"
+                                        title="Dislike"
                                     >
-                                        <FaThumbsDown size={10} />
+                                        <FaThumbsDown size={8} />
                                     </button>
                                 </>
                             )}
