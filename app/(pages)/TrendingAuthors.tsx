@@ -6,12 +6,15 @@ import { FiTrendingUp, FiUser, FiStar, FiBox, FiArrowRight } from 'react-icons/f
 import Image from 'next/image';
 import Link from 'next/link';
 import { bytesToBase64 } from '@/app/utils/image';
+import { useDraggableScroll } from '@/app/hooks/useDraggableScroll';
 
 const TrendingAuthors = () => {
     const { data: authors, isPending } = useQuery({
         queryKey: ['trendingAuthors'],
         queryFn: () => fetch('/api/users/trending').then(res => res.json().then(data => data.data)),
     });
+
+    const { ref, events, styles } = useDraggableScroll();
 
     if (isPending || !authors || authors.length === 0) return null;
 
@@ -32,7 +35,12 @@ const TrendingAuthors = () => {
                 <div className="absolute left-0 top-0 bottom-0 w-8 md:w-16 bg-linear-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
                 <div className="absolute right-0 top-0 bottom-0 w-8 md:w-16 bg-linear-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
 
-                <div className="flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit">
+                <div
+                    ref={ref}
+                    {...events}
+                    style={styles}
+                    className="flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit"
+                >
                     {authors.map((author: any, index: number) => (
                         <Link
                             key={author.id}
