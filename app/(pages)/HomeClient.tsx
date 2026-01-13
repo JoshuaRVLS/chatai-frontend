@@ -77,8 +77,8 @@ const HomeClient = () => {
     }, [session?.user]);
 
     const tabs: { id: HomeTab; label: string; icon: any }[] = [
-        { id: 'featured', label: 'Featured', icon: FiStar },
         ...(session?.user ? [{ id: 'history' as HomeTab, label: 'History', icon: FiClock }] : []),
+        { id: 'featured', label: 'Featured', icon: FiStar },
         { id: 'browse', label: 'Browse', icon: FiGrid },
     ];
 
@@ -113,19 +113,20 @@ const HomeClient = () => {
 
             <div className="w-full space-y-24 px-6 md:px-12">
 
-                {/* FEATURED SECTION */}
+                {/* FEATURED & HISTORY FLOW */}
                 <section id="featured" ref={featuredRef} className="space-y-16 scroll-mt-32">
                     <BannerCarousel />
+
+                    {/* HISTORY (Immediately after Banner) */}
+                    {session?.user && (
+                        <div id="history" ref={historyRef} className="scroll-mt-32">
+                            <History />
+                        </div>
+                    )}
+
                     <TrendingSection />
                     <TrendingAuthors />
                 </section>
-
-                {/* HISTORY SECTION (Conditional) */}
-                {session?.user && (
-                    <section id="history" ref={historyRef} className="scroll-mt-32">
-                        <History />
-                    </section>
-                )}
 
                 {/* BROWSE SECTION */}
                 <section id="browse" ref={browseRef} className="pb-32 scroll-mt-32">
