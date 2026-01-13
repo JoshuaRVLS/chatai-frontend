@@ -23,7 +23,7 @@ export const GET = async (
                     }
                 },
                 charCreated: {
-                    where: { isNsfw: false }, // Only show SFW characters publicly for now, or could filter by user settings
+                    // where: { isNsfw: false }, // Show all characters
                     orderBy: { createdAt: 'desc' },
                     include: {
                         tags: true,
