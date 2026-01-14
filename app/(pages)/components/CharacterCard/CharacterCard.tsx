@@ -61,6 +61,16 @@ const CharacterCard = React.memo(function CharacterCard({
   const containerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
 
+  // Mobile Check
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Mouse Tracking
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -214,7 +224,7 @@ const CharacterCard = React.memo(function CharacterCard({
   };
 
   const handleMouseEnter = (e: React.MouseEvent) => {
-    if (disableHover) return;
+    if (disableHover || isMobile) return;
 
     window.dispatchEvent(new CustomEvent("close-character-previews", { detail: { id: characterId } }));
 
@@ -366,7 +376,7 @@ const CharacterCard = React.memo(function CharacterCard({
         </div>
 
         <AnimatePresence>
-          {isHovered && !disableHover && (
+          {isHovered && !disableHover && !isMobile && (
             <motion.div
               ref={previewRef}
               onMouseEnter={() => {
