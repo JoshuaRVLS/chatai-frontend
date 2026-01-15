@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
-import { Image } from "@/@types/type";
+import { Image } from "@/types/type";
 import { User } from "@/app/generated/prisma";
 import { FiUser, FiMail, FiSave, FiLoader, FiCamera } from "react-icons/fi";
 import { toast } from '@/app/lib/toast';

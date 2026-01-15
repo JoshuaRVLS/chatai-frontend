@@ -10,7 +10,7 @@ import {
   FiShield,
   FiLock,
 } from "react-icons/fi";
-import { Image } from "@/@types/type";
+import { Image } from "@/types/type";
 import Security from "./Security";
 import Profile from "./Profile";
 import { toast } from '@/app/lib/toast';

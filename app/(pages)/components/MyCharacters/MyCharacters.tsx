@@ -10,7 +10,7 @@ import Link from "next/link";
 import { toast } from '@/app/lib/toast';
 import { motion, Variants } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
-import { CharactersData } from "@/@types/type"; // adjust the import path to your type definitions
+import { CharactersData } from "@/types/type"; // adjust the import path to your type definitions
 import { useSettings } from "@/app/hooks/useSettings";
 
 const MyCharacters: React.FC = () => {
