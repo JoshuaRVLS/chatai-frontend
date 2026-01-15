@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { fetchWithTimeout } from "@/app/utils/fetch";
 import type { Message } from "@/app/generated/prisma";
+import { safeLocalStorage } from "@/app/utils/localStorage";
 
 type UserWithId = { id: string } | null | undefined;
 
@@ -38,7 +39,7 @@ export const useChatStreaming = ({
             // Read preferences from localStorage
             let prefs = { activeEngine: "default", apiUrl: "", apiKey: "" };
             try {
-                const stored = localStorage.getItem("jchat_ai_prefs");
+                const stored = safeLocalStorage.getItem("jchat_ai_prefs");
                 if (stored) prefs = JSON.parse(stored);
             } catch (e) { console.error("Failed to parse AI prefs", e); }
 

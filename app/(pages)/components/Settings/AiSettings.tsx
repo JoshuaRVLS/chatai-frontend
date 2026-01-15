@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { FiCpu, FiGlobe, FiKey, FiSave, FiCheck, FiChevronDown, FiZap } from "react-icons/fi";
 import { toast } from '@/app/lib/toast';
+import { safeLocalStorage } from "@/app/utils/localStorage";
 
 const AiSettings = ({ data }: { data: any }) => {
   const [activeEngine, setActiveEngine] = useState<"default" | "external">("default");
@@ -23,7 +24,7 @@ const AiSettings = ({ data }: { data: any }) => {
 
   // Load preferences from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("jchat_ai_prefs");
+    const saved = safeLocalStorage.getItem("jchat_ai_prefs");
     if (saved) {
       const parsed = JSON.parse(saved);
       setActiveEngine(parsed.engine || "default");
@@ -43,7 +44,7 @@ const AiSettings = ({ data }: { data: any }) => {
     };
 
     setTimeout(() => {
-      localStorage.setItem("jchat_ai_prefs", JSON.stringify(settings));
+      safeLocalStorage.setItem("jchat_ai_prefs", JSON.stringify(settings));
       toast.success("AI Configuration synchronized");
       setIsSaving(false);
     }, 800);

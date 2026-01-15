@@ -1,5 +1,21 @@
 import type { NextConfig } from 'next';
 
+// Polyfill broken localStorage in Node environment (SSR)
+if (typeof global !== 'undefined') {
+  const g = global as any;
+  if (!g.localStorage || typeof g.localStorage.getItem !== 'function') {
+    console.warn('Patching broken global.localStorage');
+    g.localStorage = {
+      getItem: () => null,
+      setItem: () => { },
+      removeItem: () => { },
+      clear: () => { },
+      length: 0,
+      key: () => null,
+    };
+  }
+}
+
 const nextConfig: NextConfig = {
   /* config options here */
   transpilePackages: ['next-auth', 'bcryptjs'],

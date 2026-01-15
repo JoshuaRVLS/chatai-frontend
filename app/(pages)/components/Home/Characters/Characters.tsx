@@ -8,6 +8,7 @@ import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronD
 import SearchBar from "../SearchBar";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
+import { safeLocalStorage } from "@/app/utils/localStorage";
 
 const Characters = ({
   searchQuery,
@@ -31,16 +32,19 @@ const Characters = ({
   const gridRef = React.useRef<HTMLDivElement>(null);
   const sectionRef = React.useRef<HTMLDivElement>(null);
 
-  const [showAll, setShowAll] = React.useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("showAllCharacters") === "true";
-    }
-    return false;
-  });
+  const [showAll, setShowAll] = React.useState(false);
 
   React.useEffect(() => {
-    localStorage.setItem("showAllCharacters", showAll.toString());
-  }, [showAll]);
+    const stored = safeLocalStorage.getItem("showAllCharacters");
+    if (stored !== null) {
+      setShowAll(stored === "true");
+    }
+  }, []);
+
+  const handleToggleShowAll = (value: boolean) => {
+    setShowAll(value);
+    safeLocalStorage.setItem("showAllCharacters", value.toString());
+  };
 
   const [page, setPage] = React.useState(
     parseInt(searchParams.get("p") || "1", 10)
@@ -347,7 +351,7 @@ const Characters = ({
 
               {/* Show All (NSFW) Toggle */}
               <button
-                onClick={() => setShowAll(!showAll)}
+                onClick={() => handleToggleShowAll(!showAll)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300 ${showAll
                   ? "bg-orange-500/10 border-orange-500/20 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
                   : "bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20"
@@ -501,7 +505,7 @@ const Characters = ({
                 <span className="text-white font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety protocols.
               </p>
               <button
-                onClick={() => setShowAll(true)}
+                onClick={() => handleToggleShowAll(true)}
                 className="px-6 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 hover:bg-orange-500/20 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 mx-auto"
               >
                 Disable Safety Filters
