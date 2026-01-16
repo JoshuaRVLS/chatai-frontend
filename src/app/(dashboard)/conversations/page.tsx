@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import DataTable from '@/components/DataTable';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import SkeletonLoader, { TableSkeleton } from '@/components/SkeletonLoader';
 
 interface Conversation {
     id: string;
@@ -21,36 +23,23 @@ interface Stats {
 }
 
 export default function ConversationsPage() {
+    const queryClient = useQueryClient();
+
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [characters, setCharacters] = useState<{ id: string, name: string }[]>([]);
-    const [stats, setStats] = useState<Stats | null>(null);
-    const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
     const [charId, setCharId] = useState('all');
     const [date, setDate] = useState('');
 
     const fetchConversations = async () => {
-        setLoading(true);
-        try {
-            const query = new URLSearchParams({
-                page: page.toString(),
-                limit: '10',
-                characterId: charId,
-                date: date
-            });
-            const res = await fetch(`/api/conversations?${query}`);
-            const data = await res.json();
-            if (data.data) {
-                setConversations(data.data);
-                setStats(data.stats);
-                setTotal(data.total);
-            }
-        } catch (error) {
-            console.error("Failed to fetch conversations:", error);
-        } finally {
-            setLoading(false);
-        }
+        const query = new URLSearchParams({
+            page: page.toString(),
+            limit: '10',
+            characterId: charId,
+            date: date
+        });
+        const res = await fetch(`/api/conversations?${query}`);
+        return res.json();
     };
 
     const fetchCharacters = async () => {
@@ -69,9 +58,16 @@ export default function ConversationsPage() {
         fetchCharacters();
     }, []);
 
-    useEffect(() => {
-        fetchConversations();
-    }, [page, charId, date]);
+    const { data, isLoading, isPlaceholderData } = useQuery({
+        queryKey: ['conversations', page, charId, date],
+        queryFn: fetchConversations,
+        placeholderData: keepPreviousData,
+        refetchInterval: 10000,
+    });
+
+    const conversationsList = data?.data || [];
+    const stats = data?.stats || { today: 0, total: 0, avgMessages: 0, activeNow: 0 };
+    const total = data?.total || 0;
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this conversation and all its messages?')) return;
@@ -165,7 +161,11 @@ export default function ConversationsPage() {
                     ].map((s, i) => (
                         <div key={i} className="card-premium p-6 flex flex-col justify-between h-32">
                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{s.label}</p>
-                            <p className={`text-3xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val.toLocaleString()}</p>
+                            {isLoading && !data ? (
+                                <SkeletonLoader className="h-10 w-24" />
+                            ) : (
+                                <p className={`text-3xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val.toLocaleString()}</p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -189,21 +189,43 @@ export default function ConversationsPage() {
                             onChange={(e) => setDate(e.target.value)}
                             className="bg-white/5 border border-white/5 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 focus:outline-none focus:border-white/10 transition-all cursor-pointer"
                         />
+                        {/* Refetching indicator */}
+                        {data && (
+                            <button
+                                onClick={() => queryClient.invalidateQueries({ queryKey: ['conversations'] })}
+                                disabled={isLoading}
+                                className="bg-white/5 border border-white/5 rounded-2xl p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
+                                title="Refresh Data"
+                            >
+                                <svg
+                                    className={`w-5 h-5 ${isLoading && !isPlaceholderData ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Data Table */}
-                <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
-                    <DataTable
-                        columns={columns as any}
-                        data={conversations}
-                        pagination={{
-                            page,
-                            total,
-                            limit: 10,
-                            onPageChange: setPage
-                        }}
-                    />
+                <div className='transition-opacity'>
+                    {isLoading && !data ? (
+                        <TableSkeleton />
+                    ) : (
+                        <DataTable
+                            columns={columns as any}
+                            data={conversationsList}
+                            pagination={{
+                                page,
+                                total,
+                                limit: 10,
+                                onPageChange: setPage
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </div>

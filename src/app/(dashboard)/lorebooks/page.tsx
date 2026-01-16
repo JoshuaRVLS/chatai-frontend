@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import DataTable from '@/components/DataTable';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import SkeletonLoader, { TableSkeleton } from '@/components/SkeletonLoader';
 
 interface Lorebook {
     id: string;
@@ -23,46 +25,41 @@ interface Stats {
 }
 
 export default function LorebooksPage() {
+    const queryClient = useQueryClient();
+
     const [lorebooks, setLorebooks] = useState<Lorebook[]>([]);
-    const [stats, setStats] = useState<Stats | null>(null);
-    const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('newest');
 
     const fetchLorebooks = async () => {
-        setLoading(true);
-        try {
-            const query = new URLSearchParams({
-                page: page.toString(),
-                limit: '10',
-                search,
-                sort
-            });
-            const res = await fetch(`/api/lorebooks?${query}`);
-            const data = await res.json();
-            if (data.data) {
-                setLorebooks(data.data);
-                setStats(data.stats);
-                setTotal(data.total);
-            }
-        } catch (error) {
-            console.error("Failed to fetch lorebooks:", error);
-        } finally {
-            setLoading(false);
-        }
+        const query = new URLSearchParams({
+            page: page.toString(),
+            limit: '10',
+            search,
+            sort
+        });
+        const res = await fetch(`/api/lorebooks?${query}`);
+        return res.json();
     };
 
-    useEffect(() => {
-        fetchLorebooks();
-    }, [page, sort]);
+    const { data, isLoading, isPlaceholderData } = useQuery({
+        queryKey: ['lorebooks', page, search, sort],
+        queryFn: fetchLorebooks,
+        placeholderData: keepPreviousData,
+        refetchInterval: 10000,
+    });
+
+    const lorebooksList = data?.data || [];
+    const stats = data?.stats || { total: 0, entries: 0, public: 0, private: 0 };
+    const total = data?.total || 0;
 
     // Handle search with debounce in a real app, but for now just a trigger
     useEffect(() => {
         const timer = setTimeout(() => {
             if (page !== 1) setPage(1);
-            else fetchLorebooks();
+            // Invalidate query to trigger refetch
+            queryClient.invalidateQueries({ queryKey: ['lorebooks'] });
         }, 500);
         return () => clearTimeout(timer);
     }, [search]);
@@ -72,7 +69,7 @@ export default function LorebooksPage() {
         try {
             const res = await fetch(`/api/lorebooks/${id}`, { method: 'DELETE' });
             if (res.ok) {
-                fetchLorebooks();
+                queryClient.invalidateQueries({ queryKey: ['lorebooks'] });
             } else {
                 const data = await res.json();
                 alert(data.error || 'Failed to delete lorebook');
@@ -93,19 +90,16 @@ export default function LorebooksPage() {
         }
 
         try {
-            setLoading(true);
             const res = await fetch('/api/lorebooks', { method: 'DELETE' });
             if (res.ok) {
                 alert('All lorebooks have been successfully deleted.');
-                fetchLorebooks();
+                queryClient.invalidateQueries({ queryKey: ['lorebooks'] });
             } else {
                 const data = await res.json();
                 alert(data.error || 'Failed to delete all lorebooks');
             }
         } catch (error) {
             console.error("Delete all error:", error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -235,7 +229,11 @@ export default function LorebooksPage() {
                     ].map((s, i) => (
                         <div key={i} className="card-premium p-6 flex flex-col justify-between h-32">
                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{s.label}</p>
-                            <p className={`text-4xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val.toLocaleString()}</p>
+                            {isLoading && !data ? (
+                                <SkeletonLoader className="h-10 w-24" />
+                            ) : (
+                                <p className={`text-4xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val.toLocaleString()}</p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -265,6 +263,24 @@ export default function LorebooksPage() {
                             <option value="entries">Most Entries</option>
                             <option value="characters">Most Character Links</option>
                         </select>
+                        {/* Refetching indicator */}
+                        {data && (
+                            <button
+                                onClick={() => queryClient.invalidateQueries({ queryKey: ['lorebooks'] })}
+                                disabled={isLoading}
+                                className="bg-white/5 border border-white/5 rounded-2xl p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
+                                title="Refresh Data"
+                            >
+                                <svg
+                                    className={`w-5 h-5 ${isLoading && !isPlaceholderData ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
 
                     <button
@@ -279,17 +295,21 @@ export default function LorebooksPage() {
                 </div>
 
                 {/* Data Table */}
-                <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
-                    <DataTable
-                        columns={columns as any}
-                        data={lorebooks}
-                        pagination={{
-                            page,
-                            total,
-                            limit: 10,
-                            onPageChange: setPage
-                        }}
-                    />
+                <div className='transition-opacity'>
+                    {isLoading && !data ? (
+                        <TableSkeleton />
+                    ) : (
+                        <DataTable
+                            columns={columns as any}
+                            data={lorebooksList}
+                            pagination={{
+                                page,
+                                total,
+                                limit: 10,
+                                onPageChange: setPage
+                            }}
+                        />
+                    )}
                 </div>
             </div>
             {/* Details Modal */}

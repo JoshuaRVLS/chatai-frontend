@@ -2,6 +2,18 @@ import type { Metadata } from "next";
 import { Inter, Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+// Polyfill broken localStorage in Node environment
+if (typeof window === 'undefined' && typeof localStorage !== 'undefined' && typeof localStorage.getItem !== 'function') {
+  (global as any).localStorage = {
+    getItem: () => null,
+    setItem: () => { },
+    removeItem: () => { },
+    clear: () => { },
+    length: 0,
+    key: () => null,
+  };
+}
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],

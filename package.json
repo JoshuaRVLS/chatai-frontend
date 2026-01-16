@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "6.12.0",
+    "@tanstack/react-query": "^5.90.17",
     "bcryptjs": "^3.0.3",
     "next": "15.3.8",
     "next-auth": "4.24.11",

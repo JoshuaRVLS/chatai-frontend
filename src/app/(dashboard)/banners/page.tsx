@@ -5,6 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import ImageCropper from '@/components/ImageCropper';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import SkeletonLoader from '@/components/SkeletonLoader';
 
 interface Banner {
     id: string;
@@ -17,9 +19,8 @@ interface Banner {
 
 export default function BannersPage() {
     const { data: session } = useSession();
+    const queryClient = useQueryClient();
     const router = useRouter();
-    const [banners, setBanners] = useState<Banner[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
 
     // Upload & Crop State
@@ -29,22 +30,18 @@ export default function BannersPage() {
     const [isUploading, setIsUploading] = useState(false);
 
     const fetchBanners = async () => {
-        try {
-            const res = await fetch('/api/banners');
-            if (res.ok) {
-                const data = await res.json();
-                setBanners(data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch banners', error);
-        } finally {
-            setIsLoading(false);
+        const res = await fetch('/api/banners');
+        if (res.ok) {
+            return res.json();
         }
+        return [];
     };
 
-    useEffect(() => {
-        fetchBanners();
-    }, []);
+    const { data: banners = [], isLoading } = useQuery({
+        queryKey: ['banners'],
+        queryFn: fetchBanners,
+        refetchInterval: 10000,
+    });
 
     const handleCreate = async () => {
         try {
@@ -65,7 +62,7 @@ export default function BannersPage() {
             if (res.ok) {
                 setNewBanner({ imageUrl: '', title: '', link: '' });
                 setIsCreating(false);
-                fetchBanners();
+                queryClient.invalidateQueries({ queryKey: ['banners'] });
             }
         } catch (error) {
             console.error('Failed to create banner', error);
@@ -76,7 +73,7 @@ export default function BannersPage() {
         if (!confirm('Are you sure?')) return;
         try {
             const res = await fetch(`/api/banners/${id}`, { method: 'DELETE' });
-            if (res.ok) fetchBanners();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['banners'] });
         } catch (error) {
             console.error('Failed to delete', error);
         }
@@ -89,7 +86,7 @@ export default function BannersPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isActive }),
             });
-            if (res.ok) fetchBanners();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['banners'] });
         } catch (error) {
             console.error('Failed to update', error);
         }
@@ -128,7 +125,33 @@ export default function BannersPage() {
         return url; // External
     };
 
-    if (isLoading) return <div className="p-8 text-zinc-500 text-sm font-bold uppercase tracking-widest">Loading...</div>;
+    if (isLoading) {
+        return (
+            <div className="space-y-8 max-w-5xl mx-auto">
+                <header className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-black text-white italic tracking-tighter uppercase">Banners</h1>
+                        <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mt-1">Manage home carousel</p>
+                    </div>
+                </header>
+                <div className="grid gap-4">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="flex items-center gap-6 p-4 bg-zinc-900/30 rounded-2xl border border-white/5">
+                            <SkeletonLoader className="w-48 h-20 rounded-xl" />
+                            <div className="flex-1 space-y-2">
+                                <SkeletonLoader className="h-6 w-32" />
+                                <SkeletonLoader className="h-4 w-24" />
+                            </div>
+                            <div className="flex gap-2">
+                                <SkeletonLoader className="h-10 w-20 rounded-xl" />
+                                <SkeletonLoader className="h-10 w-10 rounded-xl" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8 max-w-5xl mx-auto">
@@ -242,7 +265,7 @@ export default function BannersPage() {
                         <p className="text-zinc-500 text-sm font-bold uppercase tracking-widest">No active banners</p>
                     </div>
                 )}
-                {banners.map((banner) => (
+                {banners.map((banner: Banner) => (
                     <div key={banner.id} className="flex items-center gap-6 p-4 bg-zinc-900/30 rounded-2xl border border-white/5 group hover:border-white/10 transition-all">
                         <div className="w-48 h-20 rounded-xl bg-zinc-950 overflow-hidden relative border border-white/5 shrink-0">
                             <ImageRenderer

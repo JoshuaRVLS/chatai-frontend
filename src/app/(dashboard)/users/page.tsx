@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import DataTable from '@/components/DataTable';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import SkeletonLoader, { TableSkeleton } from '@/components/SkeletonLoader';
 
 interface User {
     id: string;
@@ -28,51 +30,37 @@ interface Stats {
 }
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<User[]>([]);
-    const [stats, setStats] = useState<Stats>({ total: 0, admins: 0, users: 0, verified: 0 });
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
+
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('newest');
     const [role, setRole] = useState('all');
     const [verified, setVerified] = useState('all');
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
 
     const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const query = new URLSearchParams({
-                page: page.toString(),
-                search,
-                sort,
-                role,
-                verified,
-                limit: '10'
-            });
-            const res = await fetch(`/api/users?${query}`);
-            const data = await res.json();
-            if (data.data) {
-                setUsers(data.data);
-                setStats(data.stats);
-                setTotal(data.total);
-            }
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        } finally {
-            setLoading(false);
-        }
+        const query = new URLSearchParams({
+            page: page.toString(),
+            search,
+            sort,
+            role,
+            verified,
+            limit: '10'
+        });
+        const res = await fetch(`/api/users?${query}`);
+        return res.json();
     };
 
-    useEffect(() => {
-        fetchUsers();
-    }, [page, sort, role, verified]);
+    const { data, isLoading, isPlaceholderData } = useQuery({
+        queryKey: ['users', page, search, sort, role, verified],
+        queryFn: fetchUsers,
+        placeholderData: keepPreviousData,
+        refetchInterval: 10000,
+    });
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchUsers();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [search]);
+    const users = data?.data || [];
+    const stats = data?.stats || { total: 0, admins: 0, users: 0, verified: 0 };
+    const total = data?.total || 0;
 
     const handleToggleAdmin = async (id: string, current: boolean) => {
         try {
@@ -81,7 +69,7 @@ export default function UsersPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isAdmin: !current })
             });
-            if (res.ok) fetchUsers();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['users'] });
             else {
                 const data = await res.json();
                 alert(data.error || 'Update failed');
@@ -98,7 +86,7 @@ export default function UsersPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ verified: !current })
             });
-            if (res.ok) fetchUsers();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
             console.error("Update error:", error);
         }
@@ -111,7 +99,7 @@ export default function UsersPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isWhitelisted: !current })
             });
-            if (res.ok) fetchUsers();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
             console.error("Update error:", error);
         }
@@ -123,7 +111,7 @@ export default function UsersPage() {
         try {
             const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
             if (res.ok) {
-                fetchUsers();
+                queryClient.invalidateQueries({ queryKey: ['users'] });
             } else {
                 const data = await res.json();
                 alert(data.error || 'Failed to delete user');
@@ -152,7 +140,7 @@ export default function UsersPage() {
                 alert('Admin account created successfully');
                 setCreateAdminModal(false);
                 setNewAdmin({ username: '', email: '', password: '' });
-                fetchUsers();
+                queryClient.invalidateQueries({ queryKey: ['users'] });
             } else {
                 const data = await res.text();
                 alert(data || 'Failed to create admin');
@@ -215,7 +203,7 @@ export default function UsersPage() {
                 })
             });
             if (res.ok) {
-                fetchUsers();
+                queryClient.invalidateQueries({ queryKey: ['users'] });
                 closeSuspendModal();
             } else {
                 const data = await res.json();
@@ -233,7 +221,7 @@ export default function UsersPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ suspendedUntil: null, suspensionReason: null })
             });
-            if (res.ok) fetchUsers();
+            if (res.ok) queryClient.invalidateQueries({ queryKey: ['users'] });
         } catch (error) {
             console.error("Unsuspend error:", error);
         }
@@ -408,7 +396,11 @@ export default function UsersPage() {
                     ].map((s, i) => (
                         <div key={i} className="card-premium p-8 flex flex-col justify-between h-40">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-600">{s.label}</p>
-                            <p className={`text-5xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val}</p>
+                            {isLoading && !data ? (
+                                <SkeletonLoader className="h-10 w-24" />
+                            ) : (
+                                <p className={`text-5xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val}</p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -461,37 +453,43 @@ export default function UsersPage() {
                                 <option value="most_chats">Sort: Activity</option>
                             </select>
                         </div>
-
-                        <button
-                            onClick={() => fetchUsers()}
-                            disabled={loading}
-                            className="bg-white/5 border border-white/5 rounded-2xl p-3 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
-                            title="Refresh Data"
-                        >
-                            <svg
-                                className={`w-5 h-5 ${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                        {/* Refetching indicator */}
+                        {data && (
+                            <button
+                                onClick={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
+                                disabled={isLoading}
+                                className="bg-white/5 border border-white/5 rounded-2xl p-3 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
+                                title="Refresh Data"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                        </button>
+                                <svg
+                                    className={`w-5 h-5 ${isLoading && !isPlaceholderData ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
                 {/* Intelligence Feed */}
-                <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
-                    <DataTable
-                        columns={columns as any}
-                        data={users}
-                        pagination={{
-                            page,
-                            total,
-                            limit: 10,
-                            onPageChange: setPage
-                        }}
-                    />
+                <div className='transition-opacity'>
+                    {isLoading && !data ? (
+                        <TableSkeleton />
+                    ) : (
+                        <DataTable
+                            columns={columns as any}
+                            data={users}
+                            pagination={{
+                                page,
+                                total,
+                                limit: 10,
+                                onPageChange: setPage
+                            }}
+                        />
+                    )}
                 </div>
             </div>
 

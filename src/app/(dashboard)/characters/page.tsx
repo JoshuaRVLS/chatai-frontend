@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import DataTable from '@/components/DataTable';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import SkeletonLoader, { TableSkeleton } from '@/components/SkeletonLoader';
 
 interface Character {
     id: string;
@@ -38,50 +40,35 @@ interface Stats {
 }
 
 export default function CharactersPage() {
-    const [characters, setCharacters] = useState<Character[]>([]);
-    const [stats, setStats] = useState<Stats>({ total: 0, nsfw: 0, sfw: 0 });
-    const [loading, setLoading] = useState(true);
+    const queryClient = useQueryClient();
+
     const [search, setSearch] = useState('');
     const [sort, setSort] = useState('newest');
     const [filter, setFilter] = useState('all');
     const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
 
     const fetchCharacters = async () => {
-        setLoading(true);
-        try {
-            const query = new URLSearchParams({
-                page: page.toString(),
-                search,
-                sort,
-                filter,
-                limit: '10'
-            });
-            const res = await fetch(`/api/characters?${query}`);
-            const data = await res.json();
-            if (data.data) {
-                setCharacters(data.data);
-                setStats(data.stats);
-                setTotal(data.total);
-            }
-        } catch (error) {
-            console.error("Failed to fetch characters:", error);
-        } finally {
-            setLoading(false);
-        }
+        const query = new URLSearchParams({
+            page: page.toString(),
+            search,
+            sort,
+            filter,
+            limit: '10'
+        });
+        const res = await fetch(`/api/characters?${query}`);
+        return res.json();
     };
 
-    useEffect(() => {
-        fetchCharacters();
-    }, [page, sort, filter]);
+    const { data, isLoading, isPlaceholderData } = useQuery({
+        queryKey: ['characters', page, search, sort, filter],
+        queryFn: fetchCharacters,
+        placeholderData: keepPreviousData,
+        refetchInterval: 10000,
+    });
 
-    // Handle search with debounce alternative for now (simple trigger on enter or button if we had one, but let's just use effect)
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            fetchCharacters();
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [search]);
+    const characters = data?.data || [];
+    const stats = data?.stats || { total: 0, nsfw: 0, sfw: 0 };
+    const total = data?.total || 0;
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this character? This action cannot be undone.')) return;
@@ -89,7 +76,7 @@ export default function CharactersPage() {
         try {
             const res = await fetch(`/api/characters/${id}`, { method: 'DELETE' });
             if (res.ok) {
-                fetchCharacters();
+                queryClient.invalidateQueries({ queryKey: ['characters'] });
             } else {
                 alert('Failed to delete character');
             }
@@ -232,7 +219,11 @@ export default function CharactersPage() {
                     ].map((s, i) => (
                         <div key={i} className="card-premium p-6 flex flex-col justify-between h-32">
                             <p className="text-[10px] font-black uppercase tracking-widest text-zinc-600">{s.label}</p>
-                            <p className={`text-4xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val}</p>
+                            {isLoading && !data ? (
+                                <SkeletonLoader className="h-10 w-24" />
+                            ) : (
+                                <p className={`text-4xl font-black italic tracking-tighter uppercase leading-none text-${s.color}`}>{s.val}</p>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -270,6 +261,24 @@ export default function CharactersPage() {
                             <option value="oldest">Oldest First</option>
                             <option value="popular">Most Popular</option>
                         </select>
+                        {/* Refetching indicator */}
+                        {data && (
+                            <button
+                                onClick={() => queryClient.invalidateQueries({ queryKey: ['characters'] })}
+                                disabled={isLoading}
+                                className="bg-white/5 border border-white/5 rounded-2xl p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed group shadow-inner"
+                                title="Refresh Data"
+                            >
+                                <svg
+                                    className={`w-5 h-5 ${isLoading && !isPlaceholderData ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-700'}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -281,7 +290,7 @@ export default function CharactersPage() {
                                     const res = await fetch('/api/characters/clear', { method: 'POST' });
                                     if (res.ok) {
                                         alert('All characters cleared successfully.');
-                                        fetchCharacters();
+                                        queryClient.invalidateQueries({ queryKey: ['characters'] });
                                     } else {
                                         const err = await res.json();
                                         alert('Failed to clear characters: ' + (err.error || 'Unknown error'));
@@ -302,17 +311,21 @@ export default function CharactersPage() {
                 </div>
 
                 {/* Data Table */}
-                <div className={loading ? 'opacity-50 pointer-events-none transition-opacity' : 'transition-opacity'}>
-                    <DataTable
-                        columns={columns as any}
-                        data={characters}
-                        pagination={{
-                            page,
-                            total,
-                            limit: 10,
-                            onPageChange: setPage
-                        }}
-                    />
+                <div className='transition-opacity'>
+                    {isLoading && !data ? (
+                        <TableSkeleton />
+                    ) : (
+                        <DataTable
+                            columns={columns as any}
+                            data={characters}
+                            pagination={{
+                                page,
+                                total,
+                                limit: 10,
+                                onPageChange: setPage
+                            }}
+                        />
+                    )}
                 </div>
             </div>
 
