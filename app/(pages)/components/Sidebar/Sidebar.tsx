@@ -165,7 +165,7 @@ const Sidebar = () => {
                         {session && <p className="px-4 text-[9px] font-black text-zinc-700 uppercase tracking-widest mb-2">Platform</p>}
                         <NavItem href="/" icon={FiHome} label="Home" />
                         <NavItem href="/explore" icon={FiGrid} label="Explore" />
-                        <NavItem href="/lorebooks" icon={FiBookOpen} label="Library" />
+                        <NavItem href="/lorebooks" icon={FiBookOpen} label="Lorebooks" />
                         {session && (
                             <>
                                 <NavItem href="/my_characters" icon={FiUsers} label="My Characters" />

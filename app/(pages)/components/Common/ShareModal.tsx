@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FiX, FiLink, FiCheck, FiShare2 } from 'react-icons/fi';
-import { FaTwitter, FaReddit, FaFacebook } from 'react-icons/fa';
+import { FaTwitter, FaReddit, FaFacebook, FaWhatsapp } from 'react-icons/fa';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -44,6 +44,12 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
             icon: FaFacebook,
             color: 'hover:bg-[#1877F2]/20 hover:text-[#1877F2] border-[#1877F2]/30',
             onClick: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
+        },
+        {
+            name: 'WhatsApp',
+            icon: FaWhatsapp,
+            color: 'hover:bg-[#25D366]/20 hover:text-[#25D366] border-[#25D366]/30',
+            onClick: () => window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank')
         }
     ];
 
@@ -90,8 +96,8 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
                                 <button
                                     onClick={handleCopy}
                                     className={`p-2.5 rounded-lg border transition-all duration-300 flex items-center justify-center ${copied
-                                            ? 'bg-green-500/20 text-green-500 border-green-500/30'
-                                            : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-green-500/20 text-green-500 border-green-500/30'
+                                        : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
                                     {copied ? <FiCheck size={16} /> : <FiLink size={16} />}
@@ -101,7 +107,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
                             <div className="w-full h-px bg-white/5" />
 
                             {/* Social Grid */}
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-4 gap-3">
                                 {shareLinks.map((link) => (
                                     <button
                                         key={link.name}

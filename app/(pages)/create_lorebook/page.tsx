@@ -112,9 +112,9 @@ const CreateLorebookPage: React.FC = () => {
                                     New Lorebook
                                 </h1>
                             </div>
-                            <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
+                            {/* <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
                                 Semantic Archive • World State Protocol L-01
-                            </p>
+                            </p> */}
                         </div>
                     </div>
 

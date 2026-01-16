@@ -51,13 +51,59 @@ const Comments = ({ characterId }: { characterId: string }) => {
       if (!res.ok) throw new Error("Failed to post comment");
       return res.json();
     },
-    onSuccess: () => {
-      setCommentValue("");
-      queryClient.invalidateQueries({ queryKey: ["comments", characterId] });
-      toast.success("Transmission sent.");
+    onMutate: async ({ content, parentId }) => {
+      await queryClient.cancelQueries({ queryKey: ["comments", characterId] });
+      const previousComments = queryClient.getQueryData(["comments", characterId]);
+
+      const optimisticComment: CommentWithReplies = {
+        id: `temp-${Date.now()}`,
+        content,
+        characterId,
+
+        authorId: user?.id || "",
+        parentId: parentId || null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        author: {
+          ...user,
+          profileImage: null, // Basic fallback since user context might not have full image object compatible with Type
+          image: user?.image || null
+        } as any, // Cast as any to avoid strict type mismatch during optimistic render
+        replies: []
+      };
+
+      queryClient.setQueryData<CommentWithReplies[]>(["comments", characterId], (old) => {
+        if (!old) return [optimisticComment];
+
+        if (parentId) {
+          // Add to reply
+          return old.map(comment => {
+            if (comment.id === parentId) {
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), optimisticComment]
+              };
+            }
+            return comment;
+          });
+        }
+
+        // Add to top level
+        return [optimisticComment, ...old];
+      });
+
+      setCommentValue(""); // Clear input immediately
+      return { previousComments };
     },
-    onError: () => {
+    onError: (err, newComment, context) => {
+      queryClient.setQueryData(["comments", characterId], context?.previousComments);
       toast.error("Failed to post transmission.");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", characterId] });
+    },
+    onSuccess: () => {
+      toast.success("Transmission sent.");
     }
   });
 

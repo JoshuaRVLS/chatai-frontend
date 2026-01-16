@@ -336,7 +336,7 @@ const Persona: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <h4 className="text-xl font-black text-white italic tracking-tight uppercase leading-none">
-                    Identity Protocol
+                    Full Name
                   </h4>
                   <p className="text-zinc-600 text-[10px] leading-relaxed font-bold max-w-2xl uppercase tracking-tighter">
                     Persona profiles serve as the semantic foundation for all AI interactions. Each identity encapsulates specific behavioral logic and contextual memory, allowing the AI systems to adapt their response parameters.

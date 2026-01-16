@@ -9,6 +9,7 @@ import { useSettings } from "@/app/hooks/useSettings";
 interface SearchBarProps {
     onSearch: (query: string) => void;
     initialQuery?: string;
+    showAll?: boolean;
 }
 
 const SearchSuggestItem = ({
@@ -80,7 +81,7 @@ const SearchSuggestItem = ({
     );
 };
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "" }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", showAll = false }) => {
     const [query, setQuery] = useState(initialQuery);
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState(false);
@@ -117,7 +118,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "" }) =>
                 const params = new URLSearchParams({
                     search: query,
                     pageSize: "6",
-                    showAll: settings?.showNsfw ? "true" : "false"
+                    showAll: (showAll || settings?.showNsfw) ? "true" : "false"
                 });
                 const res = await fetch(`/api/characters?${params.toString()}`);
                 const data = await res.json();
@@ -153,7 +154,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "" }) =>
     };
 
     return (
-        <div ref={containerRef} className="relative w-full z-100">
+        <div ref={containerRef} className="relative w-full z-[999]">
             <form onSubmit={handleSearchSubmit} className="relative group">
                 <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2 transition-all focus-within:border-primary/50 focus-within:bg-white/10">
                     <FiSearch className={`mr-2 transition-colors ${loading ? 'text-primary animate-pulse' : 'text-white/40 group-focus-within:text-white'}`} />
@@ -186,28 +187,40 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "" }) =>
 
             {/* Suggestions Dropdown */}
             <AnimatePresence>
-                {isOpen && suggestions.length > 0 && (
+                {isOpen && query.trim().length > 0 && (
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a]/95 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-101"
+                        className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-[99999]"
                     >
                         <div className="p-2">
-                            <p className="px-3 py-2 text-[9px] uppercase tracking-[0.2em] font-black text-white/30 flex items-center gap-2">
-                                <FiTrendingUp size={10} /> Results
-                            </p>
-
-                            <div className="space-y-1">
-                                {suggestions.map((char) => (
-                                    <SearchSuggestItem
-                                        key={char.id}
-                                        char={char}
-                                        settings={settings}
-                                        onSelect={handleSelect}
-                                    />
-                                ))}
-                            </div>
+                            {loading ? (
+                                <div className="p-6 flex items-center justify-center text-white/40 gap-3">
+                                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Searching...</span>
+                                </div>
+                            ) : suggestions.length > 0 ? (
+                                <>
+                                    <p className="px-3 py-2 text-[9px] uppercase tracking-[0.2em] font-black text-white/30 flex items-center gap-2">
+                                        <FiTrendingUp size={10} /> Results
+                                    </p>
+                                    <div className="space-y-1">
+                                        {suggestions.map((char) => (
+                                            <SearchSuggestItem
+                                                key={char.id}
+                                                char={char}
+                                                settings={settings}
+                                                onSelect={handleSelect}
+                                            />
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="p-6 text-center text-white/30">
+                                    <p className="text-[10px] font-black uppercase tracking-widest">No results found</p>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}

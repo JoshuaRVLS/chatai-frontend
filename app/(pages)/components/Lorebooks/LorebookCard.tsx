@@ -36,8 +36,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
 
     const handleCardClick = (e: React.MouseEvent) => {
         if (!currentUserId && !lorebook.recursiveScanning) {
-            // Logic check: The user request is "open login modal when click on lorebooik when not logged in".
-            // currentUserId is passed from parent (Lorebooks.tsx) which gets it from AuthContext.
+            // Logic check
         }
 
         if (!currentUserId) {
@@ -53,7 +52,6 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
             openModal('login');
             return;
         }
-
 
         if (saving) return;
         setSaving(true);
@@ -80,8 +78,8 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
         setShowContextMenu(false);
         if (!(await confirm({
             title: "Archive Deletion",
-            message: `Are you sure you want to permanently delete "${lorebook.name}"? This will erase all world logic and semantic entries associated with this module.`,
-            confirmLabel: "Delete Module",
+            message: `Are you sure you want to permanently delete "${lorebook.name}"?`,
+            confirmLabel: "Delete",
             variant: "danger"
         }))) return;
 
@@ -149,131 +147,85 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
     return (
         <Link href={`/lorebooks/${lorebook.id}`} className="h-full block" onClick={handleCardClick}>
             <motion.div
-                whileHover={{ y: -5, scale: 1.02 }}
+                whileHover={{ y: -2 }}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
                 onTouchMove={handleTouchEnd}
-                className="group relative bg-white/3 border border-white/10 rounded-3xl overflow-hidden transition-all hover:bg-white/5 hover:border-white/20 hover:shadow-2xl h-full flex flex-col"
+                className="group relative bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden transition-all hover:border-white/10 h-full flex flex-col"
             >
-                {/* Avatar Image Background with Gradient Overlay */}
-                <div className="relative h-48 lg:h-56 overflow-hidden shrink-0">
+                {/* Image Section - Reduced Height */}
+                <div className="relative h-32 shrink-0 bg-black/50">
                     {imageLoading && (
                         <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
-                            <div className="w-8 h-8 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
                         </div>
                     )}
                     <Image
                         src={`/api/lorebook-image/${lorebook.id}`}
                         alt={lorebook.name}
                         fill
-                        className={`object-cover group-hover:scale-110 transition-all duration-500 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                        className={`object-cover ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                        style={{ transition: 'opacity 0.3s' }}
                         onLoad={() => setImageLoading(false)}
                         onError={() => setImageLoading(false)}
                     />
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-linear-to-t from-[#09090b] via-[#09090b]/60 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
 
-                    {/* Fallback Book Icon */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <FiBook className="text-white text-6xl" />
-                    </div>
-
-                    {/* Action Button - Top Right */}
-                    <div className="absolute top-3 right-3 z-10 flex gap-2">
+                    {/* Action Button - Top Right (Compact) */}
+                    <div className="absolute top-2 right-2 z-10">
                         {isOwner ? (
                             <button
                                 onClick={handleDelete}
-                                className="p-2.5 rounded-xl bg-black/60 backdrop-blur-md text-white/60 hover:bg-error/20 hover:text-error transition-all border border-white/10"
+                                className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-red-500/20 hover:text-red-500 transition-colors border border-white/5"
                             >
-                                <FaTrash size={12} />
+                                <FaTrash size={10} />
                             </button>
                         ) : (
                             <button
                                 onClick={handleToggleSave}
                                 disabled={saving}
-                                className={`p-2.5 rounded-xl backdrop-blur-md transition-all border border-white/10 ${isSaved
-                                    ? "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
-                                    : "bg-black/60 text-white/60 hover:bg-white/10 hover:text-white"
+                                className={`p-2 rounded-lg border transition-colors ${isSaved
+                                    ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                                    : "bg-black/60 text-white/50 border-white/5 hover:text-white"
                                     }`}
                             >
                                 {saving ? (
-                                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                                 ) : isSaved ? (
-                                    <FaCheck size={12} />
+                                    <FaCheck size={10} />
                                 ) : (
-                                    <FaPlus size={12} />
+                                    <FaPlus size={10} />
                                 )}
                             </button>
                         )}
                     </div>
                 </div>
 
-                {/* Content Section */}
-                <div className="p-6 flex flex-col flex-1 relative gap-4">
+                {/* Content Section - Compact */}
+                <div className="p-4 flex flex-col flex-1 relative gap-2">
                     {/* Title */}
-                    <h3 className="text-xl lg:text-2xl font-black text-white italic uppercase tracking-tight leading-tight group-hover:text-cyan-400 transition-colors line-clamp-2 min-h-14">
+                    <h3 className="text-sm font-bold text-white leading-tight line-clamp-1 group-hover:text-cyan-400 transition-colors">
                         {lorebook.name}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-white/30 text-[10px] lg:text-xs font-bold uppercase tracking-wider line-clamp-2 flex-1">
-                        {lorebook.description || "Experimental context module with custom world logic."}
+                    <p className="text-white/40 text-[10px] line-clamp-2 leading-relaxed flex-1">
+                        {lorebook.description || "Experimental context module."}
                     </p>
 
-                    <div className="mt-auto space-y-4">
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-3 gap-3 pt-3 lg:pt-5 border-t border-white/5">
-                            <div className="flex flex-col items-center">
-                                <span className="text-[9px] lg:text-[11px] font-black text-white/20 uppercase tracking-widest mb-1">Entries</span>
-                                <span className="text-lg lg:text-xl font-black text-white italic">{lorebook._count?.entries || 0}</span>
-                            </div>
-                            <div className="flex flex-col items-center border-x border-white/5">
-                                <span className="text-[9px] lg:text-[11px] font-black text-white/20 uppercase tracking-widest mb-1">Depth</span>
-                                <span className="text-lg lg:text-xl font-black text-cyan-400 italic">{lorebook.scanDepth || 4}</span>
-                            </div>
-                            <div className="flex flex-col items-center">
-                                <span className="text-[9px] lg:text-[11px] font-black text-white/20 uppercase tracking-widest mb-1">Budget</span>
-                                <span className="text-lg lg:text-xl font-black text-white italic">{lorebook.tokenBudget || 512}</span>
-                            </div>
+                    {/* Compact Footer Stats */}
+                    <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-[9px] font-medium text-white/30 uppercase tracking-wide">
+                        <div className="flex items-center gap-3">
+                            <span>{lorebook._count?.entries || 0} Entries</span>
+                            <span>{lorebook.tokenBudget || 0} Tokens</span>
                         </div>
-
-                        {/* Recursive Scanning Badge */}
                         {lorebook.recursiveScanning && (
-                            <div className="flex items-center justify-center pt-2">
-                                <div className="px-3 py-1 lg:px-4 lg:py-1.5 bg-cyan-500/10 border border-cyan-500/30 rounded-full">
-                                    <span className="text-[9px] lg:text-[11px] font-black text-cyan-400 uppercase tracking-widest">
-                                        ⚡ Recursive
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Tags */}
-                        {lorebook.tags && lorebook.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 pt-2">
-                                {lorebook.tags.slice(0, 3).map((tag: any) => (
-                                    <span
-                                        key={tag.id}
-                                        className="px-2 py-1 lg:px-3 lg:py-1.5 bg-white/5 border border-white/10 rounded-lg text-[9px] lg:text-[11px] font-black text-white/60 uppercase tracking-widest hover:bg-white/10 hover:text-cyan-400 transition-colors"
-                                    >
-                                        {tag.name}
-                                    </span>
-                                ))}
-                                {lorebook.tags.length > 3 && (
-                                    <span className="px-2 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white/30 uppercase">
-                                        +{lorebook.tags.length - 3}
-                                    </span>
-                                )}
-                            </div>
+                            <span className="text-cyan-500/60">Recursive</span>
                         )}
                     </div>
                 </div>
-
-                {/* Hover Glow Effect */}
-                <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl" />
-                </div>
             </motion.div>
+
             <AnimatePresence>
                 {showContextMenu && (
                     <motion.div
@@ -281,14 +233,14 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
-                        className="fixed z-100 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden min-w-[140px]"
+                        className="fixed z-[100] bg-zinc-950 border border-white/10 rounded-lg shadow-2xl p-1 min-w-[120px]"
                     >
                         <button
                             onClick={handleDelete}
-                            className="w-full px-4 py-3 text-left text-xs font-black uppercase tracking-widest text-red-400 hover:bg-red-400/10 flex items-center gap-3 transition-colors"
+                            className="w-full px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/10 rounded flex items-center gap-2"
                         >
-                            <FiTrash2 size={14} />
-                            Terminate
+                            <FiTrash2 size={12} />
+                            Delete
                         </button>
                     </motion.div>
                 )}

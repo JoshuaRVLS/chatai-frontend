@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
       const data = await response.json();
       if (!data.success) {
-        toast.error(data.message || "Protocol activation failed");
+        toast.error(data.message || "Account registration failed");
         setLoading(false);
         return;
       }

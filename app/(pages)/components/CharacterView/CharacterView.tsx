@@ -13,8 +13,10 @@ import {
   FiShare2,
   FiAlertTriangle,
 } from "react-icons/fi";
+
+
 import { Character, CharacterTag, User, CharacterRating } from "@/app/generated/prisma";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { bytesToBase64 } from "@/app/utils/image";
@@ -24,7 +26,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
 import Comments from "../Comments/Comments";
 import { useSettings } from "@/app/hooks/useSettings";
 import { FiEye } from "react-icons/fi";
-import { useQueryClient } from "@tanstack/react-query";
+
 import ReactMarkdown from "react-markdown";
 import { useAuthAction } from "@/app/hooks/useAuthAction";
 import ShareModal from "../Common/ShareModal";
@@ -215,7 +217,7 @@ const CharacterView = ({ id }: { id: string }) => {
               ) : (
                 <FiMessageCircle size={14} />
               )}
-              {isStartingChat ? 'Initializing...' : 'Protocol Start'}
+              {isStartingChat ? 'Initializing...' : 'Start Chat'}
             </motion.button>
 
             <button
@@ -320,7 +322,7 @@ const CharacterView = ({ id }: { id: string }) => {
               </CollapsibleSection>
 
               <CollapsibleSection
-                title="Greeting Protocol"
+                title="Greeting"
                 icon={<FiMessageCircle />}
                 isOpen={expandedSections.intro}
                 onToggle={() => setExpandedSections(prev => ({ ...prev, intro: !prev.intro }))}

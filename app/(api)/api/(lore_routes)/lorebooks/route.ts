@@ -11,9 +11,13 @@ export const GET = async (req: Request) => {
     const filter = searchParams.get("filter") || "library"; // library, discover, saved, created
     const query = searchParams.get("q");
 
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const skip = (page - 1) * limit;
+
     try {
         let where: any = {};
-
+        // ... (conditions)
         if (query) {
             where.OR = [
                 { name: { contains: query, mode: "insensitive" } },
@@ -22,18 +26,10 @@ export const GET = async (req: Request) => {
         }
 
         if (!session?.user?.id) {
-            // GUEST MODE: Force discovery/public logic
-            // If they ask for 'library', 'saved', 'created', we return nothing or just public?
-            // Cleanest is to just ignore their filter if it's personal, or return empty.
             if (filter !== 'discover') {
-                // For now, if guests try to access library/saved/created, return empty.
-                return NextResponse.json({ success: true, data: [] });
+                return NextResponse.json({ success: true, data: [], meta: { total: 0, page, limit, totalPages: 0 } });
             }
-            // If discover, just get public ones (no user ID filtering needed usually, unless specific visibility logic exists)
-            // Assuming all lorebooks are public for now or filtered by visibility field if it existed?
-            // Schema check: Lorebook doesn't seem to have visibility field, assuming all are public currently?
         } else {
-            // AUTHENTICATED LOGIC
             if (filter === "library") {
                 where.AND = [
                     ...(where.AND || []),
@@ -51,25 +47,27 @@ export const GET = async (req: Request) => {
             }
         }
 
-        // filter === 'discover' implies no user restrictions (public)
-
-        const lorebooks = await db.lorebook.findMany({
-            where,
-            include: {
-                _count: {
-                    select: { entries: true, characters: true }
+        const [lorebooks, total] = await db.$transaction([
+            db.lorebook.findMany({
+                where,
+                include: {
+                    _count: {
+                        select: { entries: true, characters: true }
+                    },
+                    tags: true,
+                    ...(session?.user?.id ? {
+                        savedByUsers: {
+                            where: { id: session.user.id },
+                            select: { id: true }
+                        }
+                    } : {})
                 },
-                tags: true,
-                ...(session?.user?.id ? {
-                    savedByUsers: {
-                        where: { id: session.user.id },
-                        select: { id: true }
-                    }
-                } : {})
-            },
-            orderBy: { updatedAt: "desc" },
-            take: 50
-        });
+                orderBy: { updatedAt: "desc" },
+                take: limit,
+                skip: skip
+            }),
+            db.lorebook.count({ where })
+        ]);
 
         // Map to include isSaved bool
         const mapped = lorebooks.map(lb => ({
@@ -78,7 +76,18 @@ export const GET = async (req: Request) => {
             savedByUsers: undefined // Remove from payload
         }));
 
-        return NextResponse.json({ success: true, data: mapped });
+        const totalPages = Math.ceil(total / limit);
+
+        return NextResponse.json({
+            success: true,
+            data: mapped,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages
+            }
+        });
     } catch (error) {
         console.error(error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

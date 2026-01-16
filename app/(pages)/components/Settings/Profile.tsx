@@ -6,51 +6,69 @@ import { Image } from "@/types/type";
 import { User } from "@/app/generated/prisma";
 import { FiUser, FiMail, FiSave, FiLoader, FiCamera } from "react-icons/fi";
 import { toast } from '@/app/lib/toast';
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import UserAvatar from "../Common/UserAvatar";
 
 const Profile = ({ data }: { data: User & { profileImage: Image } }) => {
   const [username, setUsername] = useState(data?.username || "");
   const [email, setEmail] = useState(data?.email || "");
-  const [isUpdating, setIsUpdating] = useState(false);
   const [profileImage, setProfileImage] = useState<{ data: string; mimetype: string } | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const { mutate: updateProfile, isPending: isUpdating } = useMutation({
+    mutationFn: async (payload: any) => {
+      const response = await fetch(`/api/users/${data.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+      return response.json();
+    },
+    onMutate: async (newProfile) => {
+      await queryClient.cancelQueries({ queryKey: ["settingsData", data.id] });
+      const previousProfile = queryClient.getQueryData(["settingsData", data.id]);
+
+      queryClient.setQueryData(["settingsData", data.id], (old: any) => ({
+        ...old,
+        username: newProfile.username,
+        email: newProfile.email,
+        // profileImage is complex to update optimistically in cache if it's base64 vs bytes, 
+        // but for settings view it might not matter if we don't display it directly from cache here
+      }));
+
+      // Optimistic success feedback
+      toast.success("Profile updated successfully");
+      setProfileImage(null);
+
+      return { previousProfile };
+    },
+    onError: (err, newProfile, context) => {
+      queryClient.setQueryData(["settingsData", data.id], context?.previousProfile);
+      toast.error(err.message || "Failed to update profile");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["settingsData", data.id] });
+    },
+  });
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !email) {
       toast.error("Please fill in all fields");
       return;
     }
 
-    setIsUpdating(true);
-    try {
-      const response = await fetch(`/api/users/${data.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          email,
-          ...(profileImage && { profileImage })
-        }),
-      });
-
-      if (response.ok) {
-        toast.success("Profile updated successfully");
-        queryClient.invalidateQueries({ queryKey: ["settingsData", data.id] });
-        setProfileImage(null);
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.message || "Failed to update profile");
-      }
-    } catch (err) {
-      console.error("Error updating profile:", err);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-      setIsUpdating(false);
-    }
+    updateProfile({
+      username,
+      email,
+      ...(profileImage && { profileImage })
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

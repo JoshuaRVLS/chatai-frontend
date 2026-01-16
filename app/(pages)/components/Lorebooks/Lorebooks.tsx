@@ -7,6 +7,8 @@ import { motion } from "motion/react";
 import { FaPlus } from "react-icons/fa";
 import LorebookCard from "./LorebookCard";
 import Link from "next/link";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { FiChevronsLeft, FiChevronLeft, FiChevronRight, FiChevronsRight } from "react-icons/fi";
 
 const Lorebooks: React.FC = () => {
     const { user } = useContext(AuthContext);
@@ -14,6 +16,24 @@ const Lorebooks: React.FC = () => {
     const [filter, setFilter] = React.useState<"library" | "discover">(user ? "library" : "discover");
     const [search, setSearch] = React.useState("");
     const [debouncedSearch, setDebouncedSearch] = React.useState("");
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+
+    const page = Number(searchParams.get("page")) || 1;
+
+    const createQueryString = React.useCallback(
+        (name: string, value: string) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set(name, value);
+            return params.toString();
+        },
+        [searchParams]
+    );
+
+    const handlePageChange = (newPage: number) => {
+        router.push(pathname + "?" + createQueryString("page", newPage.toString()));
+    };
 
     // Sync filter if user changes (e.g. login)
     React.useEffect(() => {
@@ -21,23 +41,34 @@ const Lorebooks: React.FC = () => {
     }, [user, filter]);
 
     React.useEffect(() => {
-        const timer = setTimeout(() => setDebouncedSearch(search), 500);
+        const timer = setTimeout(() => {
+            setDebouncedSearch(search);
+            // Reset to page 1 on search
+            if (search !== debouncedSearch && page !== 1) {
+                handlePageChange(1);
+            }
+        }, 500);
         return () => clearTimeout(timer);
     }, [search]);
 
-    const { isPending, data, error, refetch } = useQuery<any[]>({
-        queryKey: ["lorebooks", filter, debouncedSearch],
+    const { isPending, data: queryData, error, refetch } = useQuery<any>({
+        queryKey: ["lorebooks", filter, debouncedSearch, page],
         queryFn: async () => {
             const params = new URLSearchParams();
             params.set("filter", filter);
+            params.set("page", page.toString());
+            params.set("limit", "20");
             if (debouncedSearch) params.set("q", debouncedSearch);
 
             const res = await fetch(`/api/lorebooks?${params.toString()}`);
             const json = await res.json();
-            return json.data;
+            return json; // Return full response including meta
         },
         // Enable always
     });
+
+    const lorebooks = queryData?.data || [];
+    const meta = queryData?.meta || { totalPages: 0, page: 1 };
 
     const container = {
         hidden: { opacity: 0 },
@@ -73,7 +104,7 @@ const Lorebooks: React.FC = () => {
                                 {filter === 'library' ? 'My Library' : 'Discovery'}
                             </h1>
                             <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-1 leading-none">
-                                {filter === 'library' ? 'Managed Modules' : 'Public Database'} • {data?.length || 0} Found
+                                {filter === 'library' ? 'Managed Modules' : 'Public Database'} • {meta?.total || 0} Found
                             </p>
                         </div>
 
@@ -127,8 +158,8 @@ const Lorebooks: React.FC = () => {
                         Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="h-40 bg-white/5 rounded-2xl animate-pulse" />
                         ))
-                    ) : data && data.length > 0 ? (
-                        data.map((lb: any) => (
+                    ) : lorebooks && lorebooks.length > 0 ? (
+                        lorebooks.map((lb: any) => (
                             <motion.div key={lb.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="h-full">
                                 <LorebookCard lorebook={lb} onUpdate={refetch} currentUserId={user?.id} />
                             </motion.div>
@@ -152,7 +183,47 @@ const Lorebooks: React.FC = () => {
                             </motion.div>
                         </div>
                     )}
+
                 </motion.div>
+
+                {/* Pagination Controls */}
+                {!isPending && meta.totalPages > 1 && (
+                    <div className="flex justify-center mt-12 gap-2">
+                        <button
+                            disabled={page === 1}
+                            onClick={() => handlePageChange(1)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                        >
+                            <FiChevronsLeft />
+                        </button>
+                        <button
+                            disabled={page === 1}
+                            onClick={() => handlePageChange(Math.max(1, page - 1))}
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                        >
+                            <FiChevronLeft />
+                        </button>
+
+                        <span className="px-4 py-2 bg-black/40 border border-white/10 rounded-lg text-xs font-bold text-white flex items-center">
+                            Page {page} of {meta.totalPages}
+                        </span>
+
+                        <button
+                            disabled={page === meta.totalPages}
+                            onClick={() => handlePageChange(Math.min(meta.totalPages, page + 1))}
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                        >
+                            <FiChevronRight />
+                        </button>
+                        <button
+                            disabled={page === meta.totalPages}
+                            onClick={() => handlePageChange(meta.totalPages)}
+                            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+                        >
+                            <FiChevronsRight />
+                        </button>
+                    </div>
+                )}
             </motion.div>
         </div>
     );

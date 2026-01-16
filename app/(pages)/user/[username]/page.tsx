@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { fadeUpVariants, scaleInVariants } from '../../components/Animations/variants';
 import { bytesToBase64 } from '@/app/utils/image';
 import { useState } from 'react';
+import UserAvatar from '../../components/Common/UserAvatar';
 
 const UserProfilePage = () => {
     const { data: session } = useSession();
@@ -19,12 +20,20 @@ const UserProfilePage = () => {
     const router = useRouter();
     const username = params.username as string;
     const [activeTab, setActiveTab] = useState<'characters' | 'lorebooks'>('characters');
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 20;
 
     const { data: user, isPending, error } = useQuery({
         queryKey: ['userProfile', username],
         queryFn: () => fetch(`/api/users/profile/${username}`).then(res => res.json().then(data => data.data)),
         enabled: !!username
     });
+
+    // Reset page when tab changes
+    const handleTabChange = (tab: 'characters' | 'lorebooks') => {
+        setActiveTab(tab);
+        setCurrentPage(1);
+    };
 
     if (isPending) return (
         <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
@@ -38,6 +47,24 @@ const UserProfilePage = () => {
             <Link href="/" className="text-zinc-400 hover:text-white transition-colors uppercase tracking-widest text-xs font-bold">Return Home</Link>
         </div>
     );
+
+    const currentList = activeTab === 'characters' ? user.charCreated : (user.lorebooks || []);
+    const totalPages = Math.ceil(currentList.length / ITEMS_PER_PAGE);
+    const paginatedItems = currentList.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    const handleNext = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prev => prev + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    const handlePrev = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prev => prev - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     return (
         <div className="min-h-screen bg-zinc-950 pt-24 pb-20 px-6 sm:px-12 relative overflow-hidden">
@@ -67,18 +94,11 @@ const UserProfilePage = () => {
                 >
                     <div className="relative group">
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-zinc-900 bg-zinc-800 shadow-2xl relative z-10">
-                            {user.profileImage ? (
-                                <Image
-                                    src={bytesToBase64(user.profileImage)}
-                                    alt={user.username}
-                                    fill
-                                    className="object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-zinc-900 text-white/20">
-                                    <FiUser size={48} />
-                                </div>
-                            )}
+                            <UserAvatar
+                                name={user.username}
+                                image={user.profileImage ? bytesToBase64(user.profileImage) : null}
+                                className="w-full h-full rounded-full border-none shadow-none text-4xl"
+                            />
                         </div>
                         {/* Decorative Ring */}
                         <div className="absolute inset-[-4px] rounded-full bg-linear-to-tr from-purple-500/20 to-blue-500/20 blur-md z-0 group-hover:from-purple-500/40 group-hover:to-blue-500/40 transition-colors duration-500" />
@@ -113,7 +133,7 @@ const UserProfilePage = () => {
                 {/* Tabs */}
                 <div className="flex items-center gap-8 border-b border-white/5">
                     <button
-                        onClick={() => setActiveTab('characters')}
+                        onClick={() => handleTabChange('characters')}
                         className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'characters' ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
                     >
                         Characters
@@ -122,7 +142,7 @@ const UserProfilePage = () => {
                         )}
                     </button>
                     <button
-                        onClick={() => setActiveTab('lorebooks')}
+                        onClick={() => handleTabChange('lorebooks')}
                         className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'lorebooks' ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
                     >
                         Lorebooks
@@ -149,28 +169,30 @@ const UserProfilePage = () => {
                                 </div>
 
                                 {user.charCreated.length > 0 ? (
-                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                        {user.charCreated.map((char: any, index: number) => (
-                                            <motion.div
-                                                key={char.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: index * 0.05 }}
-                                            >
-                                                <CharacterCard
-                                                    authorName={user.username}
-                                                    characterName={char.name}
-                                                    image={char.photo ? `/api/image/${char.id}` : null}
-                                                    characterBio={char.bio}
-                                                    tags={char.tags}
-                                                    characterId={char.id}
-                                                    rating={char.rating}
-                                                    ratingCount={char.ratingCount}
-                                                    chatCount={char.chatCount}
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                            {paginatedItems.map((char: any, index: number) => (
+                                                <motion.div
+                                                    key={char.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: index * 0.05 }}
+                                                >
+                                                    <CharacterCard
+                                                        authorName={user.username}
+                                                        characterName={char.name}
+                                                        image={char.photo ? `/api/image/${char.id}` : null}
+                                                        characterBio={char.bio}
+                                                        tags={char.tags}
+                                                        characterId={char.id}
+                                                        rating={char.rating}
+                                                        ratingCount={char.ratingCount}
+                                                        chatCount={char.chatCount}
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </>
                                 ) : (
                                     <EmptyState icon={<FiBox size={24} />} title="No Characters" description="This user hasn't published any characters." />
                                 )}
@@ -189,28 +211,53 @@ const UserProfilePage = () => {
                                 </div>
 
                                 {user.lorebooks && user.lorebooks.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                        {user.lorebooks.map((lorebook: any, index: number) => (
-                                            <motion.div
-                                                key={lorebook.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: index * 0.05 }}
-                                            >
-                                                <LorebookCard
-                                                    lorebook={lorebook}
-                                                    onUpdate={() => { }}
-                                                    currentUserId={session?.user?.id}
-                                                />
-                                            </motion.div>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                            {paginatedItems.map((lorebook: any, index: number) => (
+                                                <motion.div
+                                                    key={lorebook.id}
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: index * 0.05 }}
+                                                >
+                                                    <LorebookCard
+                                                        lorebook={lorebook}
+                                                        onUpdate={() => { }}
+                                                        currentUserId={session?.user?.id}
+                                                    />
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    </>
                                 ) : (
                                     <EmptyState icon={<FiBook size={24} />} title="No Lorebooks" description="This user hasn't created any lorebooks." />
                                 )}
                             </motion.div>
                         )}
                     </AnimatePresence>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-4 mt-12">
+                            <button
+                                onClick={handlePrev}
+                                disabled={currentPage === 1}
+                                className="px-6 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-white transition-colors"
+                            >
+                                Previous
+                            </button>
+                            <span className="text-xs font-bold text-zinc-500">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={handleNext}
+                                disabled={currentPage === totalPages}
+                                className="px-6 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-white transition-colors"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

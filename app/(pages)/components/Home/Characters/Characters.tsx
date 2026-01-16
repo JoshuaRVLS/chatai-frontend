@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import CharacterCard from "../../CharacterCard/CharacterCard";
 import { motion, AnimatePresence } from "motion/react";
 import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown, FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
@@ -140,7 +140,7 @@ const Characters = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const { isPending, error, data: apiData, refetch } = useQuery<any>({
+  const { isPending, error, data: apiData, refetch, isPlaceholderData } = useQuery<any>({
     queryKey: ["characters", page, searchQuery, selectedTags, showAll],
     queryFn: () => {
       const params = new URLSearchParams({
@@ -152,6 +152,8 @@ const Characters = ({
       });
       return fetch(`/api/characters?${params.toString()}`).then((res) => res.json());
     },
+    placeholderData: keepPreviousData,
+    staleTime: 60000,
   });
 
   const data = apiData?.data;
@@ -228,7 +230,7 @@ const Characters = ({
 
   return (
     <div ref={sectionRef} className="flex flex-col gap-10 w-full">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/5 pb-10 relative">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/5 pb-10 relative z-50">
         <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-white/20 to-transparent" />
 
         <div className="space-y-8 flex-1 min-w-0">
@@ -267,15 +269,15 @@ const Characters = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-4 pt-2 relative">
+          <div className="flex items-center gap-4 pt-2 relative z-50">
 
 
             {/* Multi-Select Tags Filter & Search */}
-            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-3" ref={dropdownRef}>
+            <div className="flex-1 min-w-0 flex flex-wrap items-center gap-3 overflow-visible" ref={dropdownRef}>
 
               {/* Integrated Search Bar */}
               <div className="w-full sm:w-64 lg:w-80">
-                <SearchBar onSearch={onSearch} initialQuery={searchQuery} />
+                <SearchBar onSearch={onSearch} initialQuery={searchQuery} showAll={showAll} />
               </div>
 
               <div className="w-px h-8 bg-white/10 hidden sm:block mx-1" />
@@ -369,7 +371,7 @@ const Characters = ({
 
       </div>
 
-      <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8 min-h-[500px]">
+      <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8 min-h-[500px] transition-opacity duration-300 ${isPlaceholderData ? "opacity-50 grayscale" : "opacity-100"}`}>
         {paginatedData?.map((character: any) => (
           <div
             key={character.id}
@@ -393,130 +395,134 @@ const Characters = ({
       </div>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-6">
-          <button
-            disabled={page === 1}
-            onClick={() => {
-              setPage(1);
-              handleUpdateParams({ p: "1" });
-              setTimeout(scrollToSection, 100);
-            }}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
-            title="First Cycle"
-          >
-            &lt;&lt;
-          </button>
+      {
+        totalPages > 1 && (
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-2 md:gap-6">
+            <button
+              disabled={page === 1}
+              onClick={() => {
+                setPage(1);
+                handleUpdateParams({ p: "1" });
+                setTimeout(scrollToSection, 100);
+              }}
+              className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
+              title="First Cycle"
+            >
+              &lt;&lt;
+            </button>
 
-          <button
-            disabled={page === 1}
-            onClick={() => {
-              const newPage = Math.max(1, page - 1);
-              setPage(newPage);
-              handleUpdateParams({ p: newPage.toString() });
-              setTimeout(scrollToSection, 100);
-            }}
-            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
-          >
-            &lt;
-          </button>
+            <button
+              disabled={page === 1}
+              onClick={() => {
+                const newPage = Math.max(1, page - 1);
+                setPage(newPage);
+                handleUpdateParams({ p: newPage.toString() });
+                setTimeout(scrollToSection, 100);
+              }}
+              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            >
+              &lt;
+            </button>
 
-          <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
-            <span className="hidden sm:inline">Module</span>
-            {isEditingPage ? (
-              <input
-                type="text"
-                autoFocus
-                value={inputPage}
-                onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
-                onBlur={() => {
-                  setIsEditingPage(false);
-                  setInputPage(page.toString());
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    const newPage = parseInt(inputPage, 10);
-                    if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
-                      setPage(newPage);
-                      handleUpdateParams({ p: newPage.toString() });
-                      setIsEditingPage(false);
-                      setTimeout(scrollToSection, 100);
-                    } else {
-                      setInputPage(page.toString());
-                      setIsEditingPage(false);
-                    }
-                  } else if (e.key === "Escape") {
+            <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+              <span className="hidden sm:inline">Module</span>
+              {isEditingPage ? (
+                <input
+                  type="text"
+                  autoFocus
+                  value={inputPage}
+                  onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
+                  onBlur={() => {
                     setIsEditingPage(false);
                     setInputPage(page.toString());
-                  }
-                }}
-                className="w-10 bg-primary/20 border border-primary/30 rounded-lg px-1 py-0.5 text-primary text-center focus:outline-none focus:border-primary transition-all"
-              />
-            ) : (
-              <button
-                onClick={() => {
-                  setIsEditingPage(true);
-                  setInputPage(page.toString());
-                }}
-                className="text-primary hover:scale-110 transition-transform cursor-pointer italic px-1"
-              >
-                {page}
-              </button>
-            )}
-            <span>/ {totalPages}</span>
-          </div>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => {
-              const newPage = Math.min(totalPages, page + 1);
-              setPage(newPage);
-              handleUpdateParams({ p: newPage.toString() });
-              setTimeout(scrollToSection, 100);
-            }}
-            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
-          >
-            &gt;
-          </button>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => {
-              setPage(totalPages);
-              handleUpdateParams({ p: totalPages.toString() });
-              setTimeout(scrollToSection, 100);
-            }}
-            className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
-            title="Last Cycle"
-          >
-            &gt;&gt;
-          </button>
-        </div>
-      )}
-
-      {filteredData?.length === 0 && (
-        <div className="py-20 text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-white/20">
-            <FiAlertTriangle size={32} />
-          </div>
-          {meta?.totalMatchesIgnoringNsfw > 0 && !showAll ? (
-            <div className="space-y-4 max-w-md mx-auto px-4">
-              <p className="text-white/50 font-medium text-sm">
-                <span className="text-white font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety protocols.
-              </p>
-              <button
-                onClick={() => handleToggleShowAll(true)}
-                className="px-6 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 hover:bg-orange-500/20 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 mx-auto"
-              >
-                Disable Safety Filters
-              </button>
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const newPage = parseInt(inputPage, 10);
+                      if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                        setPage(newPage);
+                        handleUpdateParams({ p: newPage.toString() });
+                        setIsEditingPage(false);
+                        setTimeout(scrollToSection, 100);
+                      } else {
+                        setInputPage(page.toString());
+                        setIsEditingPage(false);
+                      }
+                    } else if (e.key === "Escape") {
+                      setIsEditingPage(false);
+                      setInputPage(page.toString());
+                    }
+                  }}
+                  className="w-10 bg-primary/20 border border-primary/30 rounded-lg px-1 py-0.5 text-primary text-center focus:outline-none focus:border-primary transition-all"
+                />
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsEditingPage(true);
+                    setInputPage(page.toString());
+                  }}
+                  className="text-primary hover:scale-110 transition-transform cursor-pointer italic px-1"
+                >
+                  {page}
+                </button>
+              )}
+              <span>/ {totalPages}</span>
             </div>
-          ) : (
-            <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
-          )}
-        </div>
-      )}
-    </div>
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => {
+                const newPage = Math.min(totalPages, page + 1);
+                setPage(newPage);
+                handleUpdateParams({ p: newPage.toString() });
+                setTimeout(scrollToSection, 100);
+              }}
+              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+            >
+              &gt;
+            </button>
+
+            <button
+              disabled={page === totalPages}
+              onClick={() => {
+                setPage(totalPages);
+                handleUpdateParams({ p: totalPages.toString() });
+                setTimeout(scrollToSection, 100);
+              }}
+              className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
+              title="Last Cycle"
+            >
+              &gt;&gt;
+            </button>
+          </div>
+        )
+      }
+
+      {
+        filteredData?.length === 0 && (
+          <div className="py-20 text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-white/20">
+              <FiAlertTriangle size={32} />
+            </div>
+            {meta?.totalMatchesIgnoringNsfw > 0 && !showAll ? (
+              <div className="space-y-4 max-w-md mx-auto px-4">
+                <p className="text-white/50 font-medium text-sm">
+                  <span className="text-white font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety filter.
+                </p>
+                <button
+                  onClick={() => handleToggleShowAll(true)}
+                  className="px-6 py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 hover:bg-orange-500/20 transition-all text-xs font-black uppercase tracking-widest flex items-center gap-2 mx-auto"
+                >
+                  Disable Safety Filters
+                </button>
+              </div>
+            ) : (
+              <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
+            )}
+          </div>
+        )
+      }
+    </div >
   );
 };
 

@@ -3,45 +3,49 @@ import { NextResponse } from 'next/server';
 
 export const GET =
   async (req: Request, { params }: { params: Promise<{ userId: string }> }) => {
-    const userId = (await params).userId;
-    const user = await db.user.findUnique(
-      {
-        where: { id: userId },
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          verified: true,
-          userSettings: true,
-          profileImage: {
-            select: {
-              id: true,
-              mimetype: true,
-              userId: true
+    try {
+      const userId = (await params).userId;
+      const user = await db.user.findUnique(
+        {
+          where: { id: userId },
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            verified: true,
+            userSettings: true,
+            profileImage: {
+              select: {
+                id: true,
+                mimetype: true,
+                userId: true
+              }
             }
           }
-        }
-      });
-    if (!user) {
+        });
+
+      if (!user) {
+        return NextResponse.json(
+          { success: false, message: 'User not found' }, { status: 404 });
+      }
+
+      // Create a mutable copy and provide defaults
+      const responseData = {
+        ...user,
+        userSettings: user.userSettings || {
+          showNsfw: false,
+          blurNsfw: true,
+        },
+        // Generic image field for components expecting it
+        image: user.profileImage ? `/api/users/picture/${user.id}` : null
+      };
+
+      return NextResponse.json({ success: true, data: responseData }, { status: 200 });
+    } catch (error) {
+      console.error("GET /api/users/[userId] error:", error);
       return NextResponse.json(
-        { success: false, message: 'User not found' }, { status: 404 });
+        { success: false, message: "Internal Server Error" }, { status: 500 });
     }
-
-    // Provide default settings if missing
-    if (!user.userSettings) {
-      user.userSettings = {
-        showNsfw: false,
-        blurNsfw: true,
-      } as any;
-    }
-
-    const responseData = {
-      ...user,
-      // Generic image field for components expecting it
-      image: user.profileImage ? `/api/users/picture/${user.id}` : null
-    };
-
-    return NextResponse.json({ success: true, data: responseData }, { status: 200 });
   };
 
 export const DELETE =

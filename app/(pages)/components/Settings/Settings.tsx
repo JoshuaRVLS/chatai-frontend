@@ -81,12 +81,12 @@ const Settings = () => {
         <div className="p-8 rounded-3xl bg-error/10 border border-error/20 text-center space-y-4 max-w-md">
           <FiShield className="text-4xl text-error mx-auto" />
           <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">System Access Interrupted</h2>
-          <p className="text-zinc-500 text-sm">We encountered a protocol error while retrieving your credentials.</p>
+          <p className="text-zinc-500 text-sm">We encountered error while retrieving your credentials.</p>
           <button
             onClick={() => refetch()}
             className="px-6 py-2 bg-white text-black font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-zinc-200 transition-colors"
           >
-            Retry Protocol
+            Retry
           </button>
         </div>
       </div>

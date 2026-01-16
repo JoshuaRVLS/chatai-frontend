@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { FiUser, FiMoreHorizontal, FiEye, FiEdit2, FiTrash2, FiPlay, FiStar, FiMessageCircle } from "react-icons/fi";
-import { motion, AnimatePresence, useMotionValue, useSpring } from "motion/react";
+import { FiUser, FiEdit2, FiTrash2, FiStar, FiMessageCircle, FiEye } from "react-icons/fi";
+import { motion, AnimatePresence } from "motion/react";
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
@@ -54,12 +54,7 @@ const CharacterCard = React.memo(function CharacterCard({
   const [showContextMenu, setShowContextMenu] = useState(false);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const dismissalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isScrollingRef = useRef(false);
-  const scrollEndTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
 
   // Mobile Check
   const [isMobile, setIsMobile] = useState(false);
@@ -70,109 +65,6 @@ const CharacterCard = React.memo(function CharacterCard({
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Mouse Tracking
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  // Smooth Springs
-  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
-  const floatX = useSpring(mouseX, springConfig);
-  const floatY = useSpring(mouseY, springConfig);
-
-  const [isHovered, setIsHovered] = useState(false);
-  const [isInsidePreview, setIsInsidePreview] = useState(false);
-
-  useEffect(() => {
-    const handleCloseAllPreviews = (e: any) => {
-      if (e.detail?.id !== characterId) {
-        setIsHovered(false);
-        setIsInsidePreview(false);
-        if (dismissalTimeoutRef.current) {
-          clearTimeout(dismissalTimeoutRef.current);
-          dismissalTimeoutRef.current = null;
-        }
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-      }
-    };
-
-    const handleScroll = (e: Event) => {
-      isScrollingRef.current = true;
-      if (scrollEndTimeoutRef.current) clearTimeout(scrollEndTimeoutRef.current);
-
-      // Immediate check: if scrolling moved the card away from the cursor, start dismissal
-      if (isHovered && !isInsidePreview) {
-        const isStillOver = containerRef.current?.matches(':hover');
-        if (!isStillOver) handleMouseLeave();
-      }
-
-      scrollEndTimeoutRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-
-        // Final verification after scroll momentum stops
-        setTimeout(() => {
-          if (isHovered && !isInsidePreview) {
-            const isStillOver = containerRef.current?.matches(':hover');
-            if (!isStillOver) handleMouseLeave();
-          }
-        }, 50);
-      }, 150);
-    };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isInsidePreview) return;
-
-      const isOverContainer = containerRef.current?.contains(e.target as Node);
-      const isOverPreview = previewRef.current?.contains(e.target as Node);
-
-      if (!isOverContainer && !isOverPreview && !isHovered) return;
-
-      if (isOverContainer || isOverPreview) {
-        if (dismissalTimeoutRef.current) {
-          clearTimeout(dismissalTimeoutRef.current);
-          dismissalTimeoutRef.current = null;
-          setIsHovered(true);
-        }
-      }
-
-      let x = e.clientX + 20;
-      let y = e.clientY - 230;
-
-      const vWidth = window.innerWidth;
-      const vHeight = window.innerHeight;
-
-      if (x + 320 > vWidth - 20) {
-        x = e.clientX - 340;
-      }
-      if (y < 20) y = 20;
-      if (y + 460 > vHeight - 20) y = vHeight - 480;
-
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node) && !previewRef.current?.contains(e.target as Node)) {
-        setIsHovered(false);
-        setIsInsidePreview(false);
-      }
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
-    window.addEventListener("mousedown", handleMouseDown);
-    window.addEventListener("close-character-previews", handleCloseAllPreviews);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll, { capture: true });
-      window.removeEventListener("mousedown", handleMouseDown);
-      window.removeEventListener("close-character-previews", handleCloseAllPreviews);
-    };
-  }, [isHovered, isInsidePreview, mouseX, mouseY, characterId]);
 
   const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
   const isOwner = user?.id === authorId;
@@ -221,53 +113,6 @@ const CharacterCard = React.memo(function CharacterCard({
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
-  };
-
-  const handleMouseEnter = (e: React.MouseEvent) => {
-    if (disableHover || isMobile) return;
-
-    window.dispatchEvent(new CustomEvent("close-character-previews", { detail: { id: characterId } }));
-
-    if (dismissalTimeoutRef.current) {
-      clearTimeout(dismissalTimeoutRef.current);
-      dismissalTimeoutRef.current = null;
-      setIsHovered(true);
-      return;
-    }
-
-    let x = e.clientX + 20;
-    let y = e.clientY - 230;
-    const vWidth = window.innerWidth;
-    const vHeight = window.innerHeight;
-    if (x + 320 > vWidth - 20) x = e.clientX - 340;
-    if (y < 20) y = 20;
-    if (y + 460 > vHeight - 20) y = vHeight - 480;
-
-    mouseX.set(x);
-    mouseY.set(y);
-
-    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsHovered(true);
-    }, 500);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-
-    if (isInsidePreview) return;
-
-    const graceTime = isScrollingRef.current ? 300 : 150;
-
-    if (dismissalTimeoutRef.current) clearTimeout(dismissalTimeoutRef.current);
-    dismissalTimeoutRef.current = setTimeout(() => {
-      setIsHovered(false);
-      setIsInsidePreview(false);
-      dismissalTimeoutRef.current = null;
-    }, graceTime);
   };
 
   const handleEdit = () => {
@@ -332,9 +177,8 @@ const CharacterCard = React.memo(function CharacterCard({
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className="relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 group"
+        draggable={false}
+        className="relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 group select-none"
       >
         <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-white/5 bg-zinc-950">
           <div className="relative h-full w-full">
@@ -345,6 +189,7 @@ const CharacterCard = React.memo(function CharacterCard({
                 className={`object-cover object-top ${shouldBlur ? 'blur-xl grayscale-[0.5]' : ''}`}
                 alt={characterName}
                 sizes="(max-width: 768px) 50vw, 20vw"
+                draggable={false}
               />
             ) : (
               <div className="flex items-center justify-center h-full bg-white/5"><FiUser className="text-white/10 w-12 h-12" /></div>
@@ -374,69 +219,6 @@ const CharacterCard = React.memo(function CharacterCard({
             </div>
           </div>
         </div>
-
-        <AnimatePresence>
-          {isHovered && !disableHover && !isMobile && (
-            <motion.div
-              ref={previewRef}
-              onMouseEnter={() => {
-                setIsInsidePreview(true);
-                if (dismissalTimeoutRef.current) {
-                  clearTimeout(dismissalTimeoutRef.current);
-                  dismissalTimeoutRef.current = null;
-                }
-              }}
-              onMouseLeave={() => {
-                setIsInsidePreview(false);
-                handleMouseLeave();
-              }}
-              style={{ position: 'fixed', left: floatX, top: floatY, width: 320, zIndex: 1000 }}
-              initial={{ opacity: 0, scale: 0.9, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 10 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="w-full h-[460px] bg-zinc-950 border border-white/10 rounded-4xl shadow-[0_32px_128px_-12px_rgba(0,0,0,1)] overflow-hidden flex flex-col relative">
-                <div className="absolute inset-0 z-0">
-                  {image ? <Image src={image} fill className={`object-cover ${shouldBlur ? 'blur-2xl' : 'opacity-40'}`} alt={characterName} /> : <div className="w-full h-full bg-zinc-900" />}
-                  <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/90 to-zinc-950/50" />
-                </div>
-                <div className="p-5 flex flex-col gap-3 relative z-10 h-full">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-black text-white uppercase tracking-tight leading-none drop-shadow-lg">{characterName}</h3>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className="text-[10px] font-bold text-zinc-400">{authorName}</span>
-                        {rating > 0 && (
-                          <div className="flex items-center gap-1 text-[11px] font-black text-yellow-400">
-                            <FiStar size={8} className="fill-yellow-400" />
-                            <span>{rating.toFixed(1)}</span>
-                            <span className="text-zinc-600">({ratingCount})</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-1 min-h-0 overflow-y-auto pr-2 custom-scrollbar">
-                    <div className="text-[11px] text-zinc-300 font-medium leading-relaxed" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {tags?.slice(0, 4).map((tag) => (
-                      <span key={tag.id} className="px-2 py-1 text-[9px] font-black rounded-md border border-white/10 bg-black/60 text-zinc-400 uppercase tracking-wider">{tag.name}</span>
-                    ))}
-                  </div>
-                  <div className="pt-4 mt-auto border-t border-white/10 flex gap-3 items-center">
-                    <button onClick={(e) => { e.stopPropagation(); handleNavigate(e); }} className="flex-1 py-3 bg-white text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2">
-                      <FiPlay size={12} className="fill-current" />
-                      Chat Now
-                    </button>
-                    {isOwner && <button onClick={(e) => { e.stopPropagation(); handleEdit(); }} className="p-3 bg-white/5 text-white/40 rounded-xl hover:text-white hover:bg-white/10 transition-colors border border-white/5"><FiEdit2 size={14} /></button>}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       <AnimatePresence>

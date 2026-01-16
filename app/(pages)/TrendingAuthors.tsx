@@ -6,15 +6,13 @@ import { FiTrendingUp, FiUser, FiStar, FiBox, FiArrowRight } from 'react-icons/f
 import Image from 'next/image';
 import Link from 'next/link';
 import { bytesToBase64 } from '@/app/utils/image';
-import { useDraggableScroll } from '@/app/hooks/useDraggableScroll';
+import UserAvatar from './components/Common/UserAvatar';
 
 const TrendingAuthors = () => {
     const { data: authors, isPending } = useQuery({
         queryKey: ['trendingAuthors'],
         queryFn: () => fetch('/api/users/trending').then(res => res.json().then(data => data.data)),
     });
-
-    const { ref, events, styles, isDragging } = useDraggableScroll();
 
     if (isPending || !authors || authors.length === 0) return null;
 
@@ -36,10 +34,7 @@ const TrendingAuthors = () => {
                 <div className="absolute right-0 top-0 bottom-0 w-8 md:w-16 bg-linear-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
 
                 <div
-                    ref={ref}
-                    {...events}
-                    style={styles}
-                    className={`flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit ${isDragging ? '[&>*]:pointer-events-none' : ''}`}
+                    className="flex gap-4 overflow-x-auto pb-10 pt-2 px-6 md:px-12 snap-x snap-mandatory scroll-pl-6 md:scroll-pl-12 no-scrollbar scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20 h-fit"
                 >
                     {authors.map((author: any, index: number) => (
                         <Link
@@ -54,18 +49,11 @@ const TrendingAuthors = () => {
                                 </div>
 
                                 <div className="relative w-20 h-20 rounded-full border-2 border-white/10 p-1 group-hover/card:scale-110 transition-transform duration-300">
-                                    <div className="rounded-full overflow-hidden w-full h-full relative bg-zinc-900">
-                                        {author.profileImage ? (
-                                            <Image
-                                                src={bytesToBase64(author.profileImage)}
-                                                alt={author.username}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-white/20"><FiUser size={24} /></div>
-                                        )}
-                                    </div>
+                                    <UserAvatar
+                                        name={author.username}
+                                        image={author.profileImage ? bytesToBase64(author.profileImage) : null}
+                                        className="w-full h-full rounded-full border-none shadow-none text-2xl"
+                                    />
                                 </div>
 
                                 <div className="space-y-1">

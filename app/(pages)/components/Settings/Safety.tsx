@@ -115,7 +115,7 @@ const Safety: React.FC<SafetySettingsProps> = ({ data }) => {
             <div className="pt-6 border-t border-white/5">
                 <div className="flex items-center gap-3 text-white/20 select-none">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <p className="text-[9px] font-black uppercase tracking-[0.4em]">Safety Protocol Version 1.4.2</p>
+                    {/* <p className="text-[9px] font-black uppercase tracking-[0.4em]">Safety Version 1.4.2</p> */}
                 </div>
             </div>
         </div>

@@ -7,6 +7,7 @@ import CharacterCard from "../CharacterCard/CharacterCard";
 import { FiAlertTriangle, FiRefreshCw, FiHash, FiGrid, FiSearch, FiX, FiChevronDown, FiChevronsLeft, FiChevronsRight } from "react-icons/fi";
 import { FaPencilAlt, FaTrash, FaPlus, FaUser, FaRobot } from "react-icons/fa";
 import Link from "next/link";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from '@/app/lib/toast';
 import { motion, Variants } from "motion/react";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
@@ -19,8 +20,26 @@ const MyCharacters: React.FC = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isManageMode, setIsManageMode] = useState(false);
-  const [page, setPage] = useState(1);
-  const [inputPage, setInputPage] = useState("1");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const page = Number(searchParams.get("page")) || 1;
+  const [inputPage, setInputPage] = useState(page.toString());
+
+  const createQueryString = React.useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set(name, value);
+      return params.toString();
+    },
+    [searchParams]
+  );
+
+  const handlePageChange = (newPage: number) => {
+    router.push(pathname + "?" + createQueryString("page", newPage.toString()), { scroll: false });
+    setTimeout(scrollToSection, 100);
+  };
   const pageSize = 10;
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -61,13 +80,7 @@ const MyCharacters: React.FC = () => {
 
     const matchesSearch = name.includes(query) || tagsMatch;
 
-    // NSFW Filtering
-    // If settings.showNsfw is explicitly true, show everything.
-    // Otherwise hide if char.isNsfw is true.
-    const isNsfw = char.isNsfw === true;
-    const showNsfw = settings?.showNsfw === true;
 
-    if (isNsfw && !showNsfw) return false;
 
     return matchesSearch;
   });
@@ -83,9 +96,16 @@ const MyCharacters: React.FC = () => {
   );
 
   useEffect(() => {
-    setPage(1);
-    setInputPage("1");
+    // When search query changes, reset to page 1
+    if (page !== 1) {
+      router.push(pathname + "?" + createQueryString("page", "1"), { scroll: false });
+    }
   }, [searchQuery]);
+
+
+  useEffect(() => {
+    setInputPage(page.toString());
+  }, [page]);
 
   const deleteChar = async (characterId: string, characterName: string) => {
     if (
@@ -206,12 +226,12 @@ const MyCharacters: React.FC = () => {
             >
               <div className="w-1.5 h-8 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
               <h1 className="text-4xl sm:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">
-                My Archives
+                My Characters
               </h1>
             </motion.div>
             <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] ml-5 leading-none flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500/50 animate-pulse" />
-              Database Online • {data?.length || 0} Entities
+              {data?.length || 0} Characters
             </p>
           </div>
 
@@ -253,11 +273,7 @@ const MyCharacters: React.FC = () => {
         {/* Content Area */}
         {filteredCharacters && filteredCharacters.length > 0 ? (
           <>
-            <motion.div
-              layout
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
+            <div
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-16"
             >
               {paginatedCharacters?.map((character) => (
@@ -305,7 +321,7 @@ const MyCharacters: React.FC = () => {
                   </div>
                 </motion.div>
               ))}
-            </motion.div>
+            </div>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
@@ -313,7 +329,7 @@ const MyCharacters: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     disabled={page === 1}
-                    onClick={() => { setPage(1); setTimeout(scrollToSection, 100); }}
+                    onClick={() => handlePageChange(1)}
                     className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-500 transition-all text-lg"
                     title="First Page"
                   >
@@ -321,7 +337,7 @@ const MyCharacters: React.FC = () => {
                   </button>
                   <button
                     disabled={page === 1}
-                    onClick={() => { setPage(p => Math.max(1, p - 1)); setTimeout(scrollToSection, 100); }}
+                    onClick={() => handlePageChange(Math.max(1, page - 1))}
                     className="px-6 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-400 transition-all"
                   >
                     <FiChevronsLeft className="text-sm" />
@@ -340,7 +356,7 @@ const MyCharacters: React.FC = () => {
                           if (e.key === "Enter") {
                             const newPage = parseInt(inputPage, 10);
                             if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
-                              setPage(newPage); setTimeout(scrollToSection, 100);
+                              handlePageChange(newPage);
                             } else { setInputPage(page.toString()); }
                           }
                         }}
@@ -353,7 +369,7 @@ const MyCharacters: React.FC = () => {
 
                   <button
                     disabled={page === totalPages}
-                    onClick={() => { setPage(p => Math.min(totalPages, p + 1)); setTimeout(scrollToSection, 100); }}
+                    onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
                     className="px-6 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-400 transition-all"
                   >
                     <span>Next</span>
@@ -361,7 +377,7 @@ const MyCharacters: React.FC = () => {
                   </button>
                   <button
                     disabled={page === totalPages}
-                    onClick={() => { setPage(totalPages); setTimeout(scrollToSection, 100); }}
+                    onClick={() => handlePageChange(totalPages)}
                     className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-500 transition-all text-lg"
                     title="Last Page"
                   >

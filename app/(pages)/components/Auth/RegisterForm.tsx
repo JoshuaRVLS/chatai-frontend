@@ -67,7 +67,7 @@ export const RegisterForm = () => {
 
             const data = await response.json();
             if (!data.success) {
-                toast.error(data.message || "Protocol activation failed");
+                toast.error(data.message || "Account Registration failed");
                 setLoading(false);
                 return;
             }
