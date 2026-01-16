@@ -28,6 +28,7 @@ import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 import { LoadingScreen } from "./LoadingScreen";
 import TutorialModal from "../Modal/TutorialModal";
+import { ReportModal } from "../report/ReportModal";
 
 const Chat = ({ chatId }: { chatId: string }) => {
   const { user } = useAuth();
@@ -43,6 +44,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   // Modal states
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [modalPosition, setModalPosition] = useState({ x: 0, y: 0 });
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showBrainPanel, setShowBrainPanel] = useState(false);
@@ -325,6 +327,12 @@ const Chat = ({ chatId }: { chatId: string }) => {
                     <p className="text-sm font-medium text-white/50 leading-relaxed italic line-clamp-4">
                       "{chat.character.bio}"
                     </p>
+                    <button
+                      onClick={() => setIsReportOpen(true)}
+                      className="mt-4 text-[10px] font-bold text-red-500/60 hover:text-red-400 uppercase tracking-widest flex items-center gap-2 transition-colors"
+                    >
+                      Report Character
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -366,8 +374,14 @@ const Chat = ({ chatId }: { chatId: string }) => {
             />
           )}
         </AnimatePresence>
+
+        <ReportModal
+          isOpen={isReportOpen}
+          onClose={() => setIsReportOpen(false)}
+          targetCharacterId={chat.character.id}
+        />
       </div>
-    </div>
+    </div >
   );
 };
 

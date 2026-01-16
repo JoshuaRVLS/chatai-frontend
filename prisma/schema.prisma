@@ -39,8 +39,10 @@ model User {
   personas                 UserPersona[]
   userSettings             UserSettings?
   lorebooks                Lorebook[]
-  savedLorebooks           Lorebook[] @relation("SavedLorebooks")
+  savedLorebooks           Lorebook[]        @relation("SavedLorebooks")
   givenRatings             CharacterRating[]
+  reportsMade              Report[]          @relation("ReportedBy")
+  reportsReceived          Report[]          @relation("ReportedUser")
 }
 
 model UserSettings {
@@ -79,26 +81,27 @@ model UserProfileImage {
 }
 
 model Character {
-  id                   String           @id @default(cuid())
+  id                   String            @id @default(cuid())
   name                 String
-  chubId               String?          @unique
+  chubId               String?           @unique
   persona              String
   bio                  String
   scenario             String
   introMessage         String
   exampleConversations String?
-  isNsfw               Boolean          @default(false)
-  author               User             @relation(fields: [authorId], references: [id])
+  isNsfw               Boolean           @default(false)
+  author               User              @relation(fields: [authorId], references: [id])
   authorId             String
   chats                Chat[]
   photo                CharacterImage?
   tags                 CharacterTag[]
   comments             Comment[]
   lorebooks            Lorebook[]
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
-  views                Int              @default(0)
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  views                Int               @default(0)
   ratings              CharacterRating[]
+  reports              Report[]
 }
 
 model CharacterRating {
@@ -114,22 +117,22 @@ model CharacterRating {
 }
 
 model Lorebook {
-  id                 String          @id @default(cuid())
-  name               String
-  description        String?
-  chubId             String?         @unique // ChubAI lorebook ID for duplicate prevention
-  scanDepth          Int             @default(4) // How deep to scan context
-  tokenBudget        Int             @default(512) // Max tokens for lorebook
-  recursiveScanning  Boolean         @default(false) // Enable recursive scanning
-  userId             String
-  user               User            @relation(fields: [userId], references: [id])
-  entries            LoreEntry[]
-  characters         Character[]
-  tags               LorebookTag[]
-  image              LorebookImage?
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  savedByUsers       User[]          @relation("SavedLorebooks")
+  id                String         @id @default(cuid())
+  name              String
+  description       String?
+  chubId            String?        @unique // ChubAI lorebook ID for duplicate prevention
+  scanDepth         Int            @default(4) // How deep to scan context
+  tokenBudget       Int            @default(512) // Max tokens for lorebook
+  recursiveScanning Boolean        @default(false) // Enable recursive scanning
+  userId            String
+  user              User           @relation(fields: [userId], references: [id])
+  entries           LoreEntry[]
+  characters        Character[]
+  tags              LorebookTag[]
+  image             LorebookImage?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  savedByUsers      User[]         @relation("SavedLorebooks")
 }
 
 model LorebookImage {
@@ -190,18 +193,18 @@ model CharacterImage {
 }
 
 model Chat {
-  id           String      @id @default(cuid())
-  character    Character   @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  character    Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
   characterId  String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String
   messages     Message[]
   summary      String?
   memory       String?
   personaId    String?
   chatSettings Json?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Message {
@@ -235,17 +238,39 @@ model WhitelistedEmail {
 }
 
 model Banner {
-  id          String   @id @default(cuid())
-  title       String?
-  link        String?
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  
+  id       String  @id @default(cuid())
+  title    String?
+  link     String?
+  isActive Boolean @default(true)
+  order    Int     @default(0)
+
   // Image Storage
-  imageType   String?  // MIME type (e.g. image/png)
-  imageData   Bytes?   // Binary data
-  imageUrl    String?  // Fallback for external URLs
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  imageType String? // MIME type (e.g. image/png)
+  imageData Bytes? // Binary data
+  imageUrl  String? // Fallback for external URLs
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Report {
+  id                String       @id @default(cuid())
+  reason            String
+  details           String?      @db.Text
+  status            ReportStatus @default(PENDING)
+  reporter          User         @relation("ReportedBy", fields: [reporterId], references: [id])
+  reporterId        String
+  targetUser        User?        @relation("ReportedUser", fields: [targetUserId], references: [id])
+  targetUserId      String?
+  targetCharacter   Character?   @relation(fields: [targetCharacterId], references: [id])
+  targetCharacterId String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+enum ReportStatus {
+  PENDING
+  RESOLVED
+  DISMISSED
 }

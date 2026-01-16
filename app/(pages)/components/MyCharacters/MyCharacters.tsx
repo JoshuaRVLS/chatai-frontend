@@ -20,9 +20,8 @@ const MyCharacters: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isManageMode, setIsManageMode] = useState(false);
   const [page, setPage] = useState(1);
-  const [isEditingPage, setIsEditingPage] = useState(false);
   const [inputPage, setInputPage] = useState("1");
-  const pageSize = 32;
+  const pageSize = 10;
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const gridRef = React.useRef<HTMLDivElement>(null);
@@ -51,11 +50,24 @@ const MyCharacters: React.FC = () => {
   });
 
   const filteredCharacters = data?.filter((char) => {
-    const matchesSearch = char.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      char.tags.some(tag => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (!char) return false;
+
+    const query = searchQuery.toLowerCase().trim();
+    const name = char.name?.toLowerCase() || "";
+
+    const tagsMatch = Array.isArray(char.tags)
+      ? char.tags.some(tag => (tag.name?.toLowerCase() || "").includes(query))
+      : false;
+
+    const matchesSearch = name.includes(query) || tagsMatch;
 
     // NSFW Filtering
-    if (!settings?.showNsfw && char.isNsfw) return false;
+    // If settings.showNsfw is explicitly true, show everything.
+    // Otherwise hide if char.isNsfw is true.
+    const isNsfw = char.isNsfw === true;
+    const showNsfw = settings?.showNsfw === true;
+
+    if (isNsfw && !showNsfw) return false;
 
     return matchesSearch;
   });
@@ -72,6 +84,7 @@ const MyCharacters: React.FC = () => {
 
   useEffect(() => {
     setPage(1);
+    setInputPage("1");
   }, [searchQuery]);
 
   const deleteChar = async (characterId: string, characterName: string) => {
@@ -136,6 +149,7 @@ const MyCharacters: React.FC = () => {
       opacity: 1,
       transition: { staggerChildren: 0.1 },
     },
+    exit: { opacity: 0 }
   };
 
   const cardVariants: Variants = {
@@ -145,12 +159,12 @@ const MyCharacters: React.FC = () => {
 
   if (isPending)
     return (
-      <div className="min-h-screen bg-[#09090b] pt-24 px-6">
-        <div className="w-full space-y-6 animate-pulse">
+      <div className="min-h-screen bg-surface pt-24 px-6">
+        <div className="w-full max-w-7xl mx-auto space-y-6 animate-pulse">
           <div className="h-10 bg-white/5 rounded-xl w-48" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="h-[240px] bg-white/5 rounded-xl" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <div key={i} className="h-[280px] bg-white/5 rounded-2xl" />
             ))}
           </div>
         </div>
@@ -159,13 +173,16 @@ const MyCharacters: React.FC = () => {
 
   if (error)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#09090b] pt-20 px-6">
-        <p className="text-zinc-500 text-sm font-black uppercase tracking-widest">Error syncing archival data</p>
+      <div className="min-h-screen flex items-center justify-center bg-surface pt-20 px-6">
+        <div className="text-center space-y-4">
+          <FiAlertTriangle className="mx-auto text-3xl text-red-500/50" />
+          <p className="text-zinc-500 text-sm font-black uppercase tracking-widest">Error syncing archival data</p>
+        </div>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-[#09090b] pt-24 pb-16 px-6 md:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-surface pt-24 pb-24 px-6 md:px-8 relative overflow-hidden">
       {/* Subtle Monochrome Grain/Blur */}
       <div className="fixed inset-0 pointer-events-none opacity-20">
         <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-white/2 blur-[100px]" />
@@ -175,219 +192,223 @@ const MyCharacters: React.FC = () => {
         key="characters-page"
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10"
+        className="relative z-10 max-w-7xl mx-auto"
         ref={gridRef}
       >
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-5 bg-white/10 rounded-full" />
-              <h1 className="text-3xl sm:text-5xl font-black text-white italic tracking-tight uppercase leading-none">
-                Archives
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/5 pb-8">
+          <div className="space-y-3">
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center gap-3"
+            >
+              <div className="w-1.5 h-8 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+              <h1 className="text-4xl sm:text-5xl font-black text-white italic tracking-tighter uppercase leading-none">
+                My Archives
               </h1>
-            </div>
-            <p className="text-zinc-600 text-[10px] font-black uppercase tracking-widest ml-3 leading-none">
-              Control Center • {data?.length || 0} Entities Indexed
+            </motion.div>
+            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] ml-5 leading-none flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500/50 animate-pulse" />
+              Database Online • {data?.length || 0} Entities
             </p>
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="relative group">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-white transition-colors" />
+              <input
+                type="text"
+                placeholder="SEARCH DATABASE..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-bold text-white placeholder:text-zinc-600 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all uppercase tracking-wider w-48 sm:w-64"
+              />
+            </div>
+
             <button
               onClick={() => setIsManageMode(!isManageMode)}
-              className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${isManageMode
-                ? "bg-white text-zinc-950 border-white shadow-xl"
-                : "bg-white/5 text-zinc-500 border-white/5 hover:border-white/10 hover:text-white"
+              className={`px-4 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all border flex items-center gap-2 ${isManageMode
+                ? "bg-white text-zinc-950 border-white shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                : "bg-white/5 text-zinc-400 border-white/5 hover:border-white/20 hover:text-white hover:bg-white/10"
                 }`}
             >
               <FaPencilAlt size={10} />
-              {isManageMode ? "Finish Editing" : "Manage"}
+              {isManageMode ? "Done" : "Edit"}
             </button>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/create_character"
-                className="px-5 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-xl hover:bg-zinc-200"
+                className="px-6 py-2.5 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[10px] flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:bg-zinc-100 transition-all transform"
               >
                 <FaPlus />
-                <span>Deploy New</span>
+                <span>Create</span>
               </Link>
             </motion.div>
           </div>
         </div>
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
-          {/* Stats & Search Column */}
-          <div className="lg:col-span-3 space-y-4">
-            <div className="bg-white/1 border border-white/5 rounded-2xl p-6">
-              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Search Database</p>
-              <div className="relative group">
-                <input
-                  type="text"
-                  placeholder="Enter name..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input-modern"
-                />
-              </div>
-            </div>
-
-            <div className="bg-white/1 border border-white/5 rounded-2xl p-6">
-              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-4">Archive Stats</p>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black text-zinc-500 uppercase">Entities</span>
-                  <span className="text-xl font-black text-white italic tracking-tight">{data?.length || 0}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* List Column */}
-          <div className="lg:col-span-9">
-            {filteredCharacters && filteredCharacters.length > 0 ? (
-              <motion.div
-                key={`page-${page}`}
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4"
-              >
-                {paginatedCharacters?.map((character) => (
-                  <motion.div
-                    key={character.id}
-                    variants={cardVariants}
-                    className="group relative"
-                  >
-                    <div className="relative z-10">
-                      <CharacterCard
-                        characterName={character.name}
-                        image={
-                          character.photo?.id
-                            ? `/api/image/${character.id}`
-                            : null
-                        }
-                        characterId={character.id}
-                        characterBio={character.bio}
-                        authorName={character.author.username}
-                        isNsfw={character.isNsfw}
-                        tags={character.tags}
-                      />
-                    </div>
-
-                    {/* Quick Controls overlay */}
-                    <div className="absolute inset-0 bg-white/1 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
-                    <div className={`absolute top-4 right-4 z-20 flex gap-2 transition-all ${isManageMode
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
-                      }`}>
-                      <Link
-                        href={`/edit_character/${character.id}`}
-                        className="w-8 h-8 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg flex items-center justify-center text-white/60 hover:text-white hover:border-white/40 transition-all shadow-xl"
-                        title="Modify"
-                      >
-                        <FaPencilAlt size={14} />
-                      </Link>
-                      <button
-                        onClick={() => deleteChar(character.id, character.name)}
-                        className="w-8 h-8 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg flex items-center justify-center text-white/60 hover:text-red-400 hover:border-red-400/40 transition-all shadow-xl"
-                        title="Terminate"
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="h-full flex items-center justify-center bg-white/1 border border-dashed border-white/5 rounded-2xl p-8 text-center"
-              >
-                <div className="max-w-xs space-y-4">
-                  <div className="w-12 h-12 mx-auto bg-white/5 border border-white/10 rounded-xl flex items-center justify-center">
-                    <FaRobot className="text-zinc-800 text-xl" />
+        {/* Content Area */}
+        {filteredCharacters && filteredCharacters.length > 0 ? (
+          <>
+            <motion.div
+              layout
+              variants={containerVariants}
+              initial="hidden"
+              animate="show"
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-16"
+            >
+              {paginatedCharacters?.map((character) => (
+                <motion.div
+                  key={character.id}
+                  variants={cardVariants}
+                  layoutId={character.id}
+                  className="group relative"
+                >
+                  <div className="relative z-10 transition-transform duration-300 group-hover:scale-[1.02]">
+                    <CharacterCard
+                      characterName={character.name}
+                      image={
+                        character.photo?.id
+                          ? `/api/image/${character.id}`
+                          : null
+                      }
+                      characterId={character.id}
+                      characterBio={character.bio}
+                      authorName={character.author.username}
+                      isNsfw={character.isNsfw}
+                      tags={character.tags}
+                    />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-black text-white italic tracking-tight uppercase mb-1">
-                      Archive Null
-                    </h3>
-                    <p className="text-zinc-700 text-[8px] font-black uppercase tracking-widest leading-relaxed">
-                      No matching entities within the current sector parameters.
-                    </p>
+
+                  {/* Quick Controls overlay */}
+                  <div className={`absolute -right-2 -top-2 z-30 flex flex-col gap-2 transition-all duration-200 ${isManageMode
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 translate-x-4 pointer-events-none"
+                    }`}>
+                    <Link
+                      href={`/edit_character/${character.id}`}
+                      className="w-9 h-9 bg-zinc-900 border border-white/20 rounded-full flex items-center justify-center text-white hover:bg-white hover:text-black hover:border-white transition-all shadow-lg"
+                      title="Modify"
+                    >
+                      <FaPencilAlt size={12} />
+                    </Link>
+                    <button
+                      onClick={() => deleteChar(character.id, character.name)}
+                      className="w-9 h-9 bg-zinc-900 border border-red-500/30 rounded-full flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all shadow-lg"
+                      title="Terminate"
+                    >
+                      <FaTrash size={12} />
+                    </button>
                   </div>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              ))}
+            </motion.div>
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-                <button
-                  disabled={page === 1}
-                  onClick={() => { setPage(1); setTimeout(scrollToSection, 100); }}
-                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
-                >
-                  &lt;&lt;
-                </button>
-                <button
-                  disabled={page === 1}
-                  onClick={() => { setPage(p => Math.max(1, p - 1)); setTimeout(scrollToSection, 100); }}
-                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
-                >
-                  &lt;
-                </button>
+              <div className="flex flex-col items-center justify-center gap-4 py-8 border-t border-white/5">
+                <div className="flex items-center gap-2">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => { setPage(1); setTimeout(scrollToSection, 100); }}
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-500 transition-all text-lg"
+                    title="First Page"
+                  >
+                    <FiChevronsLeft />
+                  </button>
+                  <button
+                    disabled={page === 1}
+                    onClick={() => { setPage(p => Math.max(1, p - 1)); setTimeout(scrollToSection, 100); }}
+                    className="px-6 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-400 transition-all"
+                  >
+                    <FiChevronsLeft className="text-sm" />
+                    <span>Previous</span>
+                  </button>
 
-                <div className="flex items-center gap-2 text-[9px] font-black text-zinc-500 uppercase tracking-widest bg-white/5 px-4 py-1.5 rounded-lg border border-white/5">
-                  <span>Page</span>
-                  {isEditingPage ? (
-                    <input
-                      type="text"
-                      autoFocus
-                      value={inputPage}
-                      onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
-                      onBlur={() => { setIsEditingPage(false); setInputPage(page.toString()); }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          const newPage = parseInt(inputPage, 10);
-                          if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
-                            setPage(newPage); setIsEditingPage(false); setTimeout(scrollToSection, 100);
-                          } else { setInputPage(page.toString()); setIsEditingPage(false); }
-                        } else if (e.key === "Escape") { setIsEditingPage(false); setInputPage(page.toString()); }
-                      }}
-                      className="bg-white/2 border border-white/5 rounded-xl px-4 py-2 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 w-48 transition-colors"
-                    />
-                  ) : (
-                    <button
-                      onClick={() => { setIsEditingPage(true); setInputPage(page.toString()); }}
-                      className="text-white hover:scale-110 transition-transform cursor-pointer italic px-1 font-black"
-                    >
-                      {page}
-                    </button>
-                  )}
-                  <span>of {totalPages}</span>
+                  <div className="h-10 px-6 rounded-xl bg-black/40 border border-white/10 flex items-center gap-3">
+                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Page</span>
+                    <div className="flex items-baseline gap-1">
+                      <input
+                        type="text"
+                        value={inputPage}
+                        onChange={(e) => setInputPage(e.target.value.replace(/\D/g, ""))}
+                        onBlur={() => { if (!inputPage) setInputPage(page.toString()); }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const newPage = parseInt(inputPage, 10);
+                            if (!isNaN(newPage) && newPage >= 1 && newPage <= totalPages) {
+                              setPage(newPage); setTimeout(scrollToSection, 100);
+                            } else { setInputPage(page.toString()); }
+                          }
+                        }}
+                        className="w-8 bg-transparent text-center text-white font-bold focus:outline-none border-b border-transparent focus:border-white/50 transition-colors"
+                      />
+                      <span className="text-zinc-600 font-bold">/</span>
+                      <span className="text-zinc-400 font-bold">{totalPages}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => { setPage(p => Math.min(totalPages, p + 1)); setTimeout(scrollToSection, 100); }}
+                    className="px-6 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-400 transition-all"
+                  >
+                    <span>Next</span>
+                    <FiChevronsRight className="text-sm" />
+                  </button>
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => { setPage(totalPages); setTimeout(scrollToSection, 100); }}
+                    className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/20 disabled:opacity-20 disabled:hover:bg-white/5 disabled:hover:text-zinc-500 transition-all text-lg"
+                    title="Last Page"
+                  >
+                    <FiChevronsRight />
+                  </button>
                 </div>
-
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); setTimeout(scrollToSection, 100); }}
-                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
-                >
-                  &gt;
-                </button>
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => { setPage(totalPages); setTimeout(scrollToSection, 100); }}
-                  className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest text-zinc-500 hover:text-white disabled:opacity-20 transition-all"
-                >
-                  &gt;&gt;
-                </button>
+                <p className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
+                  Showing {((page - 1) * pageSize) + 1} - {Math.min(page * pageSize, filteredCharacters?.length || 0)} of {filteredCharacters?.length}
+                </p>
               </div>
             )}
-          </div>
-        </div>
+          </>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="min-h-[400px] flex items-center justify-center bg-white/1 border border-dashed border-white/5 rounded-3xl p-12 text-center"
+          >
+            <div className="max-w-md space-y-6">
+              <div className="w-20 h-20 mx-auto bg-linear-to-b from-white/10 to-transparent border border-white/10 rounded-2xl flex items-center justify-center shadow-2xl">
+                <FaRobot className="text-zinc-700 text-4xl" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">
+                  {data && data.length > 0 ? "No Matches Found" : "Archive Null"}
+                </h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest leading-relaxed">
+                  {data && data.length > 0
+                    ? "Your search or NSFW filter settings are hiding these entities."
+                    : "No entities have been created in this sector yet."}
+                </p>
+              </div>
+              {(searchQuery || (data && data.length > 0 && data.length !== filteredCharacters?.length)) && (
+                <div className="flex flex-col gap-2">
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="text-xs font-black text-white border-b border-white/20 hover:border-white pb-0.5 transition-all uppercase tracking-widest"
+                    >
+                      Clear Search Query
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </motion.div>
     </div>
   );

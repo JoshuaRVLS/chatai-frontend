@@ -11,6 +11,7 @@ import {
   FiStar,
   FiBook,
   FiShare2,
+  FiAlertTriangle,
 } from "react-icons/fi";
 import { Character, CharacterTag, User, CharacterRating } from "@/app/generated/prisma";
 import { useQuery } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { useAuthAction } from "@/app/hooks/useAuthAction";
 import ShareModal from "../Common/ShareModal";
+import { ReportModal } from "../report/ReportModal";
 
 const CharacterView = ({ id }: { id: string }) => {
   const { isPending, error, data } = useQuery<
@@ -65,6 +67,7 @@ const CharacterView = ({ id }: { id: string }) => {
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const startChat = withAuth(async () => {
     if (isStartingChat) return;
@@ -229,6 +232,20 @@ const CharacterView = ({ id }: { id: string }) => {
               title={data?.name || "Character"}
               text={`Chat with ${data?.name} on JChatAI`}
               url={window.location.href}
+            />
+
+            <button
+              onClick={() => setIsReportOpen(true)}
+              className="w-full py-3 bg-red-500/5 text-red-500/60 font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center justify-center gap-2 border border-red-500/5"
+            >
+              <FiAlertTriangle size={14} />
+              Report Issue
+            </button>
+
+            <ReportModal
+              isOpen={isReportOpen}
+              onClose={() => setIsReportOpen(false)}
+              targetCharacterId={id}
             />
 
             <div className="bg-white/1 p-4 rounded-xl border border-white/5 space-y-3">
