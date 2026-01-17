@@ -63,14 +63,14 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                 {selectedLorebooks.length > 0 && selectedLorebooks.map(lb => (
                     <div
                         key={lb.id}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white text-zinc-950 border border-white text-[10px] font-black uppercase tracking-widest animate-in fade-in zoom-in duration-200"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-text-primary text-bg-page border border-border-default text-[10px] font-black uppercase tracking-widest animate-in fade-in zoom-in duration-200 shadow-sm"
                     >
                         <FiBookOpen size={10} />
                         <span>{lb.name}</span>
                         <button
                             type="button"
                             onClick={() => toggleSelection(lb.id)}
-                            className="ml-1 p-0.5 hover:bg-zinc-200 rounded-full transition-colors"
+                            className="ml-1 p-0.5 hover:bg-bg-page/20 rounded-full transition-colors"
                         >
                             <FiX size={12} />
                         </button>
@@ -84,7 +84,7 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                     className="relative group cursor-text"
                     onClick={() => setIsOpen(true)}
                 >
-                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" />
+                    <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-text-primary transition-colors" />
                     <input
                         type="text"
                         placeholder={selectedLorebooks.length > 0 ? "Add another module..." : "Search available modules..."}
@@ -94,9 +94,9 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                             setIsOpen(true);
                         }}
                         onFocus={() => setIsOpen(true)}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/20 focus:bg-white/10 transition-all font-bold"
+                        className="w-full bg-input border border-border-input rounded-2xl py-4 pl-12 pr-12 text-sm text-text-primary placeholder:text-text-muted/50 focus:outline-none focus:border-border-hover focus:bg-surface-hover transition-all font-bold"
                     />
-                    <FiChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-white/30 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+                    <FiChevronDown className={`absolute right-4 top-1/2 -translate-y-1/2 text-text-muted transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
                 </div>
 
                 {/* Dropdown Menu */}
@@ -107,9 +107,9 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                             initial="hidden"
                             animate="visible"
                             exit="exit"
-                            className="absolute top-full left-0 right-0 mt-2 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[240px]"
+                            className="absolute top-full left-0 right-0 mt-2 bg-surface/90 backdrop-blur-xl border border-border-default rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[240px]"
                         >
-                            <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent min-h-0">
+                            <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-border-default scrollbar-track-transparent min-h-0">
                                 {filteredLorebooks.length > 0 ? (
                                     filteredLorebooks.map(lb => {
                                         const isSelected = selectedIds.includes(lb.id);
@@ -119,11 +119,11 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                                                 type="button"
                                                 onClick={() => toggleSelection(lb.id)}
                                                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all mb-1 last:mb-0 ${isSelected
-                                                    ? "bg-white text-zinc-950"
-                                                    : "text-white/70 hover:bg-white/10 hover:text-white"
+                                                    ? "bg-text-primary text-bg-page"
+                                                    : "text-text-muted hover:bg-surface-hover hover:text-text-primary"
                                                     }`}
                                             >
-                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isSelected ? "border-zinc-950 text-zinc-950" : "border-white/20"
+                                                <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors shrink-0 ${isSelected ? "border-bg-page text-bg-page" : "border-border-default"
                                                     }`}>
                                                     {isSelected && <FiCheck size={10} strokeWidth={4} />}
                                                 </div>
@@ -132,7 +132,7 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                                                         {lb.name}
                                                     </h4>
                                                     {lb.description && (
-                                                        <p className={`text-[9px] truncate mt-0.5 font-medium ${isSelected ? "text-zinc-600" : "text-white/40"}`}>
+                                                        <p className={`text-[9px] truncate mt-0.5 font-medium ${isSelected ? "text-bg-page/70" : "text-text-muted"}`}>
                                                             {lb.description}
                                                         </p>
                                                     )}
@@ -142,11 +142,11 @@ const LorebookSelector = ({ selectedIds, onChange, lorebooks }: LorebookSelector
                                     })
                                 ) : (
                                     <div className="py-8 text-center">
-                                        <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest">No modules found.</p>
+                                        <p className="text-text-muted text-[10px] font-bold uppercase tracking-widest">No modules found.</p>
                                     </div>
                                 )}
                             </div>
-                            <div className="px-3 py-2 border-t border-white/5 bg-zinc-900/50 flex justify-between items-center text-[9px] font-black text-white/20 uppercase tracking-widest">
+                            <div className="px-3 py-2 border-t border-border-default bg-surface/50 flex justify-between items-center text-[9px] font-black text-text-muted uppercase tracking-widest">
                                 <span>{filteredLorebooks.length} Available</span>
                                 <span>{selectedIds.length} Selected</span>
                             </div>

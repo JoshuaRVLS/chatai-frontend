@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import {
     FiBold,
     FiItalic,
@@ -30,11 +31,15 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
 }) => {
     const editorRef = useRef<any>(null);
 
+    const { theme } = useTheme();
+    const [editorTheme, setEditorTheme] = useState("vs-dark");
+
+    useEffect(() => {
+        setEditorTheme(theme === "light" ? "light" : "vs-dark");
+    }, [theme]);
+
     const handleEditorDidMount: OnMount = (editor, monaco) => {
         editorRef.current = editor;
-
-        // Custom theme adjustment if needed, but 'vs-dark' is usually good
-        // We can define a theme to match the app better if requested later
     };
 
     const insertText = (before: string, after: string = "") => {
@@ -79,16 +84,16 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
             type="button"
             onClick={onClick}
             title={tooltip}
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-text-muted hover:text-text-primary hover:bg-surface-hover rounded-lg transition-colors"
         >
             <Icon size={14} />
         </button>
     );
 
     return (
-        <div className={`flex flex-col border border-white/10 rounded-2xl overflow-hidden bg-[#1e1e1e] focus-within:border-white/20 transition-colors ${className}`}>
+        <div className={`flex flex-col border border-border-default rounded-2xl overflow-hidden bg-input focus-within:border-border-hover transition-colors ${className}`}>
             {/* Toolbar */}
-            <div className="flex items-center gap-1 p-2 border-b border-white/10 bg-black/20 overflow-x-auto scrollbar-hide shrink-0 z-10">
+            <div className="flex items-center gap-1 p-2 border-b border-border-default bg-surface/50 overflow-x-auto scrollbar-hide shrink-0 z-10">
                 <ToolbarButton
                     icon={FiBold}
                     onClick={() => insertText("<b>", "</b>")}
@@ -149,7 +154,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                 <Editor
                     height="100%"
                     defaultLanguage="html"
-                    theme="vs-dark"
+                    theme={editorTheme}
                     value={value}
                     onChange={(value) => onChange(value || "")}
                     onMount={handleEditorDidMount}
@@ -174,7 +179,7 @@ const DescriptionEditor: React.FC<DescriptionEditorProps> = ({
                 />
             </div>
 
-            <div className="px-4 py-2 text-[10px] text-zinc-500 font-mono border-t border-white/5 flex justify-between shrink-0 bg-black/20">
+            <div className="px-4 py-2 text-[10px] text-text-muted font-mono border-t border-border-default flex justify-between shrink-0 bg-surface/30">
                 <span>VS Code Engine Active</span>
                 <span>Auto-Close & Rename Enabled</span>
             </div>

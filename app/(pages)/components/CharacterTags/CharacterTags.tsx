@@ -38,14 +38,14 @@ const CharacterTags = ({
       styles={{
         control: (styles, { isFocused }) => ({
           ...styles,
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          border: isFocused ? "1px solid rgba(255, 255, 255, 0.2)" : "1px solid rgba(255, 255, 255, 0.1)",
+          backgroundColor: "var(--bg-input)",
+          border: isFocused ? "1px solid var(--border-hover)" : "1px solid var(--border-input)",
           borderRadius: "16px",
           padding: "8px",
-          boxShadow: isFocused ? "0 0 0 4px rgba(255, 255, 255, 0.05)" : "none",
+          boxShadow: isFocused ? "0 0 0 4px var(--bg-surface-hover)" : "none",
           transition: "all 0.3s ease",
           "&:hover": {
-            borderColor: "rgba(255, 255, 255, 0.2)",
+            borderColor: "var(--border-hover)",
           }
         }),
         valueContainer: (styles) => ({
@@ -54,24 +54,24 @@ const CharacterTags = ({
         }),
         input: (styles) => ({
           ...styles,
-          color: "white",
+          color: "var(--text-primary)",
         }),
         placeholder: (styles) => ({
           ...styles,
-          color: "rgba(255, 255, 255, 0.2)",
+          color: "var(--text-muted)",
           fontSize: "13px",
           fontWeight: "600",
         }),
         multiValue: (styles) => ({
           ...styles,
-          backgroundColor: "rgba(255, 255, 255, 0.1)",
+          backgroundColor: "var(--bg-surface-hover)",
           borderRadius: "10px",
           padding: "2px 8px",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          border: "1px solid var(--border-default)",
         }),
         multiValueLabel: (styles) => ({
           ...styles,
-          color: "white",
+          color: "var(--text-primary)",
           fontSize: "11px",
           fontWeight: "800",
           textTransform: "uppercase",
@@ -79,36 +79,36 @@ const CharacterTags = ({
         }),
         multiValueRemove: (styles) => ({
           ...styles,
-          color: "rgba(255, 255, 255, 0.4)",
+          color: "var(--text-muted)",
           ":hover": {
-            backgroundColor: "rgba(255, 255, 255, 1)",
-            color: "black",
+            backgroundColor: "var(--text-primary)",
+            color: "var(--bg-page)",
             borderRadius: "8px",
           },
         }),
         menu: (styles) => ({
           ...styles,
-          backgroundColor: "#000000",
+          backgroundColor: "var(--bg-surface)",
           backdropFilter: "blur(40px)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          border: "1px solid var(--border-default)",
           borderRadius: "20px",
           overflow: "hidden",
           marginTop: "12px",
-          boxShadow: "0 25px 80px rgba(0,0,0,0.8)",
+          boxShadow: "var(--shadow-lg)",
           zIndex: 9999,
         }),
         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
         option: (styles, { isFocused, isSelected }) => ({
           ...styles,
-          backgroundColor: isSelected ? "white" : isFocused ? "rgba(255, 255, 255, 0.08)" : "transparent",
-          color: isSelected ? "black" : "white",
+          backgroundColor: isSelected ? "var(--text-primary)" : isFocused ? "var(--bg-surface-hover)" : "transparent",
+          color: isSelected ? "var(--bg-page)" : "var(--text-primary)",
           fontSize: "13px",
           fontWeight: isSelected ? "800" : "600",
           cursor: "pointer",
           padding: "14px 20px",
           transition: "all 0.2s ease",
           active: {
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backgroundColor: "var(--bg-surface-hover)", // Fallback if needed
           }
         }),
       }}
