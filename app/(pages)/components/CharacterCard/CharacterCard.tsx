@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { FiUser, FiEdit2, FiTrash2, FiStar, FiMessageCircle, FiEye } from "react-icons/fi";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
@@ -51,9 +51,6 @@ const CharacterCard = React.memo(function CharacterCard({
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const [tempUnblur, setTempUnblur] = useState(false);
-  const [showContextMenu, setShowContextMenu] = useState(false);
-  const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Mobile Check
@@ -84,44 +81,15 @@ const CharacterCard = React.memo(function CharacterCard({
     }
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    if (!isOwner) return;
-    e.preventDefault();
+
+
+  const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.dispatchEvent(new CustomEvent("close-context-menus", { detail: { id: characterId } }));
-    setContextMenuPos({ x: e.clientX, y: e.clientY });
-    setShowContextMenu(true);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isOwner) return;
-    if (longPressTimer.current) clearTimeout(longPressTimer.current);
-    const touch = e.touches[0];
-    const x = touch.clientX;
-    const y = touch.clientY;
-    longPressTimer.current = setTimeout(() => {
-      window.dispatchEvent(new CustomEvent("close-context-menus", { detail: { id: characterId } }));
-      setContextMenuPos({ x, y });
-      setShowContextMenu(true);
-      if ("vibrate" in navigator) navigator.vibrate(40);
-      longPressTimer.current = null;
-    }, 450);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
-
-  const handleEdit = () => {
-    setShowContextMenu(false);
     router.push(`/edit_character/${characterId}`);
   };
 
-  const handleDelete = async () => {
-    setShowContextMenu(false);
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!(await confirm({
       title: "Deconstruct Identity",
       message: `Are you sure you want to permanently delete "${characterName}"? This process is irreversible.`,
@@ -151,32 +119,13 @@ const CharacterCard = React.memo(function CharacterCard({
     }
   };
 
-  useEffect(() => {
-    const handleCloseAll = (e: any) => {
-      if (e.detail?.id !== characterId) setShowContextMenu(false);
-    };
-    const handleClick = () => setShowContextMenu(false);
-    const handleScroll = () => setShowContextMenu(false);
-    window.addEventListener("close-context-menus", handleCloseAll);
-    if (showContextMenu) {
-      document.addEventListener("click", handleClick);
-      window.addEventListener("scroll", handleScroll, { passive: true });
-    }
-    return () => {
-      window.removeEventListener("close-context-menus", handleCloseAll);
-      document.removeEventListener("click", handleClick);
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [showContextMenu, characterId]);
+
 
   return (
     <>
       <div
         ref={containerRef}
         onClick={handleNavigate}
-        onContextMenu={handleContextMenu}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
         draggable={false}
         className="relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 group select-none"
       >
@@ -194,6 +143,27 @@ const CharacterCard = React.memo(function CharacterCard({
             ) : (
               <div className="flex items-center justify-center h-full bg-white/5"><FiUser className="text-white/10 w-12 h-12" /></div>
             )}
+
+            {/* Edit/Delete Buttons for Owner */}
+            {isOwner && (
+              <div className="absolute top-2 right-2 z-20 flex gap-2">
+                <button
+                  onClick={handleEdit}
+                  className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-white/20 hover:text-white transition-colors border border-white/5"
+                  title="Edit Character"
+                >
+                  <FiEdit2 size={12} />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-red-500/20 hover:text-red-500 transition-colors border border-white/5"
+                  title="Delete Character"
+                >
+                  <FiTrash2 size={12} />
+                </button>
+              </div>
+            )}
+
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-zinc-950 via-zinc-950/90 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 inset-x-0 p-4">
               <div className="flex justify-between items-end mb-1">
@@ -221,14 +191,7 @@ const CharacterCard = React.memo(function CharacterCard({
         </div>
       </div>
 
-      <AnimatePresence>
-        {showContextMenu && isOwner && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ left: contextMenuPos.x, top: contextMenuPos.y }} className="fixed z-100 bg-zinc-900 border border-white/10 rounded-lg shadow-2xl overflow-hidden min-w-[120px]">
-            <button onClick={handleEdit} className="w-full px-4 py-2.5 text-left text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors flex items-center gap-2"><FiEdit2 size={14} /> Edit</button>
-            <button onClick={handleDelete} className="w-full px-4 py-2.5 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors flex items-center gap-2"><FiTrash2 size={14} /> Delete</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
     </>
   );
 });

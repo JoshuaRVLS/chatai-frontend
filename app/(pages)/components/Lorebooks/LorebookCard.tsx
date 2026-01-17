@@ -8,9 +8,7 @@ import Link from "next/link";
 import { toast } from '@/app/lib/toast';
 import { useQueryClient } from "@tanstack/react-query";
 import { useConfirm } from "@/app/(pages)/providers/ConfirmationProvider";
-import { useState, useRef, useEffect } from "react";
-import { AnimatePresence } from "motion/react";
-import { FiTrash2 } from "react-icons/fi";
+import { useState } from "react";
 import Image from "next/image";
 
 import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
@@ -25,11 +23,8 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
     const queryClient = useQueryClient();
     const confirm = useConfirm();
     const openModal = useAuthModalStore((state) => state.openModal);
-    const [showContextMenu, setShowContextMenu] = useState(false);
-    const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
     const [imageLoading, setImageLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const longPressTimer = useRef<NodeJS.Timeout | null>(null);
 
     const isOwner = currentUserId && lorebook.userId === currentUserId;
     const isSaved = lorebook.isSaved;
@@ -75,7 +70,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
     const handleDelete = async (e: React.MouseEvent | React.Touch | any) => {
         if (e.preventDefault) e.preventDefault();
         if (e.stopPropagation) e.stopPropagation();
-        setShowContextMenu(false);
+        if (e.stopPropagation) e.stopPropagation();
         if (!(await confirm({
             title: "Archive Deletion",
             message: `Are you sure you want to permanently delete "${lorebook.name}"?`,
@@ -108,49 +103,12 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
         }
     };
 
-    const handleTouchStart = (e: React.TouchEvent) => {
-        if (longPressTimer.current) clearTimeout(longPressTimer.current);
 
-        const touch = e.touches[0];
-        const x = touch.clientX;
-        const y = touch.clientY;
-
-        longPressTimer.current = setTimeout(() => {
-            setContextMenuPos({ x, y });
-            setShowContextMenu(true);
-            if ("vibrate" in navigator) navigator.vibrate(40);
-            longPressTimer.current = null;
-        }, 450);
-    };
-
-    const handleTouchEnd = () => {
-        if (longPressTimer.current) {
-            clearTimeout(longPressTimer.current);
-            longPressTimer.current = null;
-        }
-    };
-
-    useEffect(() => {
-        const handleClose = () => setShowContextMenu(false);
-        if (showContextMenu) {
-            window.addEventListener("scroll", handleClose, { passive: true });
-            window.addEventListener("click", handleClose);
-            window.addEventListener("contextmenu", handleClose);
-        }
-        return () => {
-            window.removeEventListener("scroll", handleClose);
-            window.removeEventListener("click", handleClose);
-            window.removeEventListener("contextmenu", handleClose);
-        };
-    }, [showContextMenu]);
 
     return (
         <Link href={`/lorebooks/${lorebook.id}`} className="h-full block" onClick={handleCardClick}>
             <motion.div
                 whileHover={{ y: -2 }}
-                onTouchStart={handleTouchStart}
-                onTouchEnd={handleTouchEnd}
-                onTouchMove={handleTouchEnd}
                 className="group relative bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden transition-all hover:border-white/10 h-full flex flex-col"
             >
                 {/* Image Section - Reduced Height */}
@@ -226,25 +184,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                 </div>
             </motion.div>
 
-            <AnimatePresence>
-                {showContextMenu && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        style={{ left: contextMenuPos.x, top: contextMenuPos.y }}
-                        className="fixed z-[100] bg-zinc-950 border border-white/10 rounded-lg shadow-2xl p-1 min-w-[120px]"
-                    >
-                        <button
-                            onClick={handleDelete}
-                            className="w-full px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider text-red-500 hover:bg-red-500/10 rounded flex items-center gap-2"
-                        >
-                            <FiTrash2 size={12} />
-                            Delete
-                        </button>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
         </Link>
     );
 };
