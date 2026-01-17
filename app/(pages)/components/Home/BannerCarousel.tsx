@@ -50,9 +50,9 @@ const BannerCarousel = () => {
 
     if (isLoading) {
         return (
-            <div className="relative w-full aspect-16/10 md:aspect-3/1 rounded-3xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl animate-pulse flex items-center justify-center">
-                <div className="absolute inset-0 bg-linear-to-br from-white/5 to-transparent" />
-                <div className="w-12 h-12 rounded-full border-2 border-white/10 border-t-white animate-spin" />
+            <div className="relative w-full aspect-16/10 md:aspect-3/1 rounded-3xl overflow-hidden bg-surface-hover border border-border-default shadow-2xl animate-pulse flex items-center justify-center">
+                <div className="absolute inset-0 bg-linear-to-br from-surface/5 to-transparent" />
+                <div className="w-12 h-12 rounded-full border-2 border-border-default border-t-text-primary animate-spin" />
             </div>
         );
     }
@@ -60,7 +60,7 @@ const BannerCarousel = () => {
     if (!banners || banners.length === 0) return null;
 
     return (
-        <div className="relative w-full aspect-16/10 md:aspect-3/1 rounded-3xl overflow-hidden group border border-white/5 shadow-2xl">
+        <div className="relative w-full h-[55vh] md:h-[65vh] overflow-hidden rounded-[2.5rem] group border border-border-default shadow-2xl">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentIndex}
@@ -68,7 +68,7 @@ const BannerCarousel = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.7 }}
-                    className="absolute inset-0 bg-zinc-950"
+                    className="absolute inset-0 bg-bg-surface"
                 >
                     <ImageRenderer
                         src={banners[currentIndex].imageUrl}
@@ -107,13 +107,13 @@ const BannerCarousel = () => {
                 <>
                     <button
                         onClick={(e) => { e.preventDefault(); prevSlide(); }}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/50"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-surface/80 backdrop-blur-md border border-border-default text-text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface"
                     >
                         <FiChevronLeft size={24} />
                     </button>
                     <button
                         onClick={(e) => { e.preventDefault(); nextSlide(); }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/50"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-surface/80 backdrop-blur-md border border-border-default text-text-primary opacity-0 group-hover:opacity-100 transition-opacity hover:bg-surface"
                     >
                         <FiChevronRight size={24} />
                     </button>
@@ -138,10 +138,10 @@ const ImageRenderer = ({ src, alt }: { src: string; alt: string }) => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     return (
-        <div className="relative w-full h-full overflow-hidden bg-zinc-950">
+        <div className="relative w-full h-full overflow-hidden bg-bg-surface">
             {!isLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-zinc-900 animate-pulse">
-                    <div className="w-8 h-8 rounded-full border-2 border-white/5 border-t-white/20 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center bg-surface-hover animate-pulse">
+                    <div className="w-8 h-8 rounded-full border-2 border-border-default border-t-text-primary animate-spin" />
                 </div>
             )}
             {/* eslint-disable-next-line @next/next/no-img-element */}

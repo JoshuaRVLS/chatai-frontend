@@ -230,21 +230,21 @@ const Characters = ({
 
   return (
     <div ref={sectionRef} className="flex flex-col gap-10 w-full">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-white/5 pb-10 relative z-50">
-        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-white/20 to-transparent" />
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-border-default pb-10 relative z-50">
+        <div className="absolute -bottom-px left-0 w-1/4 h-px bg-linear-to-r from-text-primary/20 to-transparent" />
 
         <div className="space-y-8 flex-1 min-w-0">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.4em]">CHARACTER HUB</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-text-primary/20" />
+              <span className="text-[10px] font-black text-text-muted uppercase tracking-[0.4em]">CHARACTER HUB</span>
             </div>
             <div className="flex items-baseline gap-4">
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic leading-none">
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-text-primary italic leading-none">
                 {searchQuery ? "Search Results" : "CHARACTER FEED"}
               </h2>
               {!isPending && meta && (
-                <span className="text-xl font-black text-white/30 tracking-wider mb-1">
+                <span className="text-xl font-black text-text-muted/50 tracking-wider mb-1">
                   {meta.totalCount} {meta.totalCount === 1 ? "Character" : "Characters"}
                 </span>
               )}
@@ -261,7 +261,7 @@ const Characters = ({
                 onClick={() => handleCategoryToggle(cat.name)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border transition-all duration-300 whitespace-nowrap ${selectedTags.includes(cat.name)
                   ? "bg-primary/20 border-primary/40 text-primary shadow-[0_0_20px_rgba(34,211,238,0.2)]"
-                  : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:border-white/20 hover:text-white"
+                  : "bg-surface border-border-default text-text-muted hover:bg-surface-hover hover:border-border-hover hover:text-text-primary"
                   }`}
               >
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">{cat.name}</span>
@@ -285,7 +285,7 @@ const Characters = ({
               {/* Tag Search Input */}
               <div className="relative">
                 <div className="flex items-center gap-2">
-                  <FiHash className="text-white/20" />
+                  <FiHash className="text-text-muted/50" />
                   <input
                     type="text"
                     value={tagSearchQuery}
@@ -295,11 +295,11 @@ const Characters = ({
                     }}
                     onFocus={() => setShowTagDropdown(true)}
                     placeholder={selectedTags.length > 0 ? "Add more tags..." : "Filter tags..."}
-                    className="bg-transparent border-none outline-none text-sm text-white placeholder:text-white/30 w-32 focus:w-48 transition-all"
+                    className="bg-transparent border-none outline-none text-sm text-text-primary placeholder:text-text-muted/50 w-32 focus:w-48 transition-all"
                   />
                   <button
                     onClick={() => setShowTagDropdown(!showTagDropdown)}
-                    className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:border-white/20 transition-colors"
+                    className="p-2 rounded-xl bg-surface border border-border-default text-text-muted hover:text-text-primary hover:border-border-hover transition-colors"
                     aria-label="Toggle tag dropdown"
                   >
                     <FiChevronDown size={16} className={`transition-transform ${showTagDropdown ? 'rotate-180' : ''}`} />
@@ -313,7 +313,7 @@ const Characters = ({
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="absolute top-full left-0 mt-2 w-64 max-h-64 overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl z-50"
+                      className="absolute top-full left-0 mt-2 w-64 max-h-64 overflow-y-auto bg-surface/95 backdrop-blur-xl border border-border-default rounded-2xl shadow-xl z-50 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border-default"
                     >
                       {filteredTags.length > 0 ? (
                         filteredTags.slice(0, 20).map((tag: string) => (
@@ -323,13 +323,13 @@ const Characters = ({
                               handleAddTag(tag);
                               setShowTagDropdown(false);
                             }}
-                            className="w-full px-4 py-2.5 text-left text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors first:rounded-t-2xl last:rounded-b-2xl"
+                            className="w-full px-4 py-2.5 text-left text-sm text-text-secondary hover:bg-surface-hover hover:text-text-primary transition-colors first:rounded-t-2xl last:rounded-b-2xl"
                           >
                             {tag}
                           </button>
                         ))
                       ) : (
-                        <div className="px-4 py-3 text-sm text-white/30 text-center">
+                        <div className="px-4 py-3 text-sm text-text-muted text-center">
                           {tagSearchQuery ? "No matching tags" : "All tags selected"}
                         </div>
                       )}
@@ -345,7 +345,7 @@ const Characters = ({
                     setSelectedTags([]);
                     handleUpdateParams({ tags: null, p: "1" });
                   }}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase tracking-widest hover:text-white hover:border-white/20 transition-colors"
+                  className="px-3 py-1.5 rounded-xl bg-surface border border-border-default text-[10px] font-black text-text-muted uppercase tracking-widest hover:text-text-primary hover:border-border-hover transition-colors"
                 >
                   Clear All
                 </button>
@@ -356,10 +356,10 @@ const Characters = ({
                 onClick={() => handleToggleShowAll(!showAll)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-300 ${showAll
                   ? "bg-orange-500/10 border-orange-500/20 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
-                  : "bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20"
+                  : "bg-surface border-border-default text-text-muted hover:text-text-primary hover:border-border-hover"
                   }`}
               >
-                <div className={`w-1.5 h-1.5 rounded-full ${showAll ? "bg-orange-500 animate-pulse" : "bg-white/20"}`} />
+                <div className={`w-1.5 h-1.5 rounded-full ${showAll ? "bg-orange-500 animate-pulse" : "bg-text-muted/50"}`} />
                 <span className="text-[10px] font-black uppercase tracking-widest">
                   {showAll ? "Showing All" : "Show All"}
                 </span>
@@ -405,7 +405,7 @@ const Characters = ({
                 handleUpdateParams({ p: "1" });
                 setTimeout(scrollToSection, 100);
               }}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
+              className="p-2 rounded-lg bg-surface border border-border-default text-text-muted disabled:opacity-20 hover:bg-surface-hover hover:text-text-primary transition-all font-bold text-xs"
               title="First Cycle"
             >
               &lt;&lt;
@@ -419,12 +419,12 @@ const Characters = ({
                 handleUpdateParams({ p: newPage.toString() });
                 setTimeout(scrollToSection, 100);
               }}
-              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+              className="px-4 py-2 rounded-lg bg-surface border border-border-default text-[10px] font-black uppercase tracking-wider text-text-muted disabled:opacity-20 hover:bg-surface-hover hover:text-text-primary transition-all"
             >
               &lt;
             </button>
 
-            <div className="flex items-center gap-2 text-[11px] font-black text-white/40 uppercase tracking-widest bg-white/5 px-4 py-2 rounded-xl border border-white/5">
+            <div className="flex items-center gap-2 text-[11px] font-black text-text-muted uppercase tracking-widest bg-surface px-4 py-2 rounded-xl border border-border-default">
               <span className="hidden sm:inline">Module</span>
               {isEditingPage ? (
                 <input
@@ -477,7 +477,7 @@ const Characters = ({
                 handleUpdateParams({ p: newPage.toString() });
                 setTimeout(scrollToSection, 100);
               }}
-              className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-wider text-white disabled:opacity-20 hover:bg-white/10 transition-all"
+              className="px-4 py-2 rounded-lg bg-surface border border-border-default text-[10px] font-black uppercase tracking-wider text-text-muted disabled:opacity-20 hover:bg-surface-hover hover:text-text-primary transition-all"
             >
               &gt;
             </button>
@@ -489,7 +489,7 @@ const Characters = ({
                 handleUpdateParams({ p: totalPages.toString() });
                 setTimeout(scrollToSection, 100);
               }}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-white disabled:opacity-20 hover:bg-white/10 transition-all font-bold text-xs"
+              className="p-2 rounded-lg bg-surface border border-border-default text-text-muted disabled:opacity-20 hover:bg-surface-hover hover:text-text-primary transition-all font-bold text-xs"
               title="Last Cycle"
             >
               &gt;&gt;
@@ -501,13 +501,13 @@ const Characters = ({
       {
         filteredData?.length === 0 && (
           <div className="py-20 text-center space-y-4">
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto text-white/20">
+            <div className="w-16 h-16 rounded-full bg-surface-hover flex items-center justify-center mx-auto text-text-muted">
               <FiAlertTriangle size={32} />
             </div>
             {meta?.totalMatchesIgnoringNsfw > 0 && !showAll ? (
               <div className="space-y-4 max-w-md mx-auto px-4">
-                <p className="text-white/50 font-medium text-sm">
-                  <span className="text-white font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety filter.
+                <p className="text-text-muted font-medium text-sm">
+                  <span className="text-text-primary font-bold">{meta.totalMatchesIgnoringNsfw} potential matches</span> hidden by safety filter.
                 </p>
                 <button
                   onClick={() => handleToggleShowAll(true)}
@@ -517,7 +517,7 @@ const Characters = ({
                 </button>
               </div>
             ) : (
-              <p className="text-white/30 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
+              <p className="text-text-muted/50 font-black uppercase tracking-widest text-[10px]">No matches found in this sector.</p>
             )}
           </div>
         )

@@ -170,7 +170,7 @@ const History = () => {
             className="group shrink-0 w-[380px] snap-start"
           >
             <motion.div
-              className="relative overflow-hidden flex flex-col p-4 rounded-3xl border border-white/5 bg-zinc-950 hover:border-white/10 transition-all duration-300 hover:bg-zinc-900"
+              className="relative overflow-hidden flex flex-col p-4 rounded-3xl border border-border-default bg-surface hover:border-border-hover transition-all duration-300 hover:bg-surface-hover"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
@@ -205,7 +205,7 @@ const History = () => {
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
                               exit={{ opacity: 0 }}
-                              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md transition-colors group-hover:bg-black/80"
+                              className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-overlay/80 backdrop-blur-md transition-colors group-hover:bg-overlay"
                             >
                               <FiEye className="text-white text-xl mb-1 hover:scale-110 transition-transform" />
                             </motion.div>
@@ -235,15 +235,15 @@ const History = () => {
                 </div>
               </div>
 
-              <div className="mt-6 p-4 rounded-2xl bg-white/[0.03] border border-white/5 relative group/msg">
-                <p className="text-[11px] text-white/50 line-clamp-2 leading-relaxed font-medium transition-colors group-hover/msg:text-white/80">
+              <div className="mt-6 p-4 rounded-2xl bg-surface-hover border border-border-default relative group/msg">
+                <p className="text-[11px] text-text-muted line-clamp-2 leading-relaxed font-medium transition-colors group-hover/msg:text-text-primary">
                   {chat.messages[0]?.content || "No transmission received."}
                 </p>
               </div>
 
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-[8px] font-black text-white/10 uppercase tracking-[0.3em]">Access Code: #{chat.id.slice(-4).toUpperCase()}</span>
+                  <span className="text-[8px] font-black text-text-muted/50 uppercase tracking-[0.3em]">Access Code: #{chat.id.slice(-4).toUpperCase()}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <button

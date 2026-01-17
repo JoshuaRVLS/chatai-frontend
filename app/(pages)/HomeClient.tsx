@@ -86,15 +86,15 @@ const HomeClient = () => {
             <h1 className="sr-only">JChatAI - Premium AI Character Conversations and Roleplay</h1>
 
             {/* Navigation Tabs (Sticky) */}
-            <div className="sticky top-[64px] md:top-0 z-30 px-6 md:px-12 py-4 bg-zinc-950/95 backdrop-blur-md border-b border-white/5">
+            <div className="sticky top-[64px] md:top-0 z-30 px-6 md:px-12 py-4 bg-page/95 backdrop-blur-md border-b border-border-default">
                 <div className="flex items-center gap-6 overflow-x-auto no-scrollbar w-full">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => scrollToSection(tab.id)}
                             className={`flex items-center gap-2 pb-3 text-sm font-black uppercase tracking-wider transition-all relative shrink-0 ${activeTab === tab.id
-                                ? 'text-white'
-                                : 'text-white/40 hover:text-white/70'
+                                ? 'text-text-primary'
+                                : 'text-text-muted hover:text-text-primary/70'
                                 }`}
                         >
                             <tab.icon size={16} />
@@ -102,7 +102,7 @@ const HomeClient = () => {
                             {activeTab === tab.id && (
                                 <motion.div
                                     layoutId="homeActiveTab"
-                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-white shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+                                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary shadow-sm"
                                 />
                             )}
                         </button>
@@ -137,17 +137,17 @@ const HomeClient = () => {
                 <TrendingAuthors />
 
                 {/* EXPLORE MORE CTA */}
-                <div className="pt-16 pb-32 flex flex-col items-center text-center gap-8 border-t border-white/5">
+                <div className="pt-16 pb-32 flex flex-col items-center text-center gap-8 border-t border-border-default">
                     <div className="space-y-3">
-                        <h3 className="text-4xl font-black text-white italic uppercase tracking-tighter">Endless Possibilities</h3>
-                        <p className="text-zinc-500 text-sm max-w-md mx-auto font-medium">Dive deeper into the archives. Thousands of unique personas and stories are waiting to be discovered.</p>
+                        <h3 className="text-4xl font-black text-text-primary italic uppercase tracking-tighter">Endless Possibilities</h3>
+                        <p className="text-text-muted text-sm max-w-md mx-auto font-medium">Dive deeper into the archives. Thousands of unique personas and stories are waiting to be discovered.</p>
                     </div>
                     <button
                         onClick={() => router.push('/explore')}
-                        className="group relative px-12 py-5 bg-white text-zinc-950 font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-zinc-200 transition-all shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] active:scale-95"
+                        className="group relative px-12 py-5 bg-text-primary text-white dark:text-black font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-text-primary/90 transition-all shadow-lg active:scale-95"
                     >
                         Explore More
-                        <div className="absolute inset-x-4 -bottom-1 h-px bg-zinc-950/20 group-hover:bg-zinc-950/40 transition-colors" />
+                        <div className="absolute inset-x-4 -bottom-1 h-px bg-bg-page/20 group-hover:bg-bg-page/40 transition-colors" />
                     </button>
                 </div>
 
