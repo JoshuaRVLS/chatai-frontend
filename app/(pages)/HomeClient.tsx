@@ -144,7 +144,7 @@ const HomeClient = () => {
                     </div>
                     <button
                         onClick={() => router.push('/explore')}
-                        className="group relative px-12 py-5 bg-text-primary text-white dark:text-black font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-text-primary/90 transition-all shadow-lg active:scale-95"
+                        className="group relative px-12 py-5 bg-text-primary text-page font-black uppercase text-sm tracking-[0.2em] rounded-2xl hover:bg-text-primary/90 transition-all shadow-lg active:scale-95"
                     >
                         Explore More
                         <div className="absolute inset-x-4 -bottom-1 h-px bg-bg-page/20 group-hover:bg-bg-page/40 transition-colors" />
