@@ -172,10 +172,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
   const totalTokens = getTokenCount(characterPersona) + getTokenCount(scenario) + getTokenCount(initialMessage) + getTokenCount(exampleConversations);
 
   if (isPending) return (
-    <div className="min-h-screen bg-black flex items-center justify-center">
+    <div className="min-h-screen bg-page flex items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-white/5 border-t-white rounded-full animate-spin" />
-        <p className="text-white/20 font-black uppercase tracking-[0.3em] text-[10px]">Loading Character Data...</p>
+        <div className="w-12 h-12 border-4 border-border-default border-t-text-primary rounded-full animate-spin" />
+        <p className="text-text-muted font-black uppercase tracking-[0.3em] text-[10px]">Loading Character Data...</p>
       </div>
     </div>
   );
@@ -187,10 +187,9 @@ const CharacterEdit = ({ id }: { id: string }) => {
   );
 
   return (
-    <div className="min-h-screen bg-black pt-28 pb-20 px-6 sm:px-12 relative">
+    <div className="min-h-screen bg-page pt-28 pb-20 px-6 sm:px-12 relative">
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/1 blur-[100px] rounded-full" />
+
       </div>
 
       <div className="w-full relative z-10">
@@ -198,27 +197,27 @@ const CharacterEdit = ({ id }: { id: string }) => {
           <div className="space-y-2">
             <Link
               href="/my_characters"
-              className="flex items-center gap-2 text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group"
+              className="flex items-center gap-2 text-text-muted hover:text-text-primary transition-colors text-[10px] font-black uppercase tracking-widest mb-4 group"
             >
               <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" /> Back to My Characters
             </Link>
             <div className="flex items-center gap-4">
-              <div className="w-1.5 h-10 bg-white rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
-              <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+              <div className="w-1.5 h-10 bg-text-primary rounded-full shadow-[0_0_15px_rgba(255,255,255,0.2)]" />
+              <h1 className="text-4xl sm:text-6xl font-black text-text-primary italic tracking-tighter uppercase leading-none">
                 Edit Character
               </h1>
             </div>
-            <p className="text-white/20 text-[10px] font-black uppercase tracking-[0.4em] ml-6">
+            <p className="text-text-muted text-[10px] font-black uppercase tracking-[0.4em] ml-6">
               Character • ID: {id.slice(0, 8)}... • Modifying Configuration
             </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="bg-zinc-900/30 border border-white/10 rounded-2xl px-6 py-3 backdrop-blur-xl">
-              <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest mb-1">Estimated Density</p>
+            <div className="bg-surface/30 border border-border-default rounded-2xl px-6 py-3 backdrop-blur-xl">
+              <p className="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-1">Estimated Density</p>
               <div className="flex items-center gap-2">
-                <FiZap className="text-white/40" />
-                <span className="text-lg font-black text-white italic">{totalTokens} <span className="text-xs text-zinc-600 not-italic">Tokens</span></span>
+                <FiZap className="text-text-muted" />
+                <span className="text-lg font-black text-text-primary italic">{totalTokens} <span className="text-xs text-text-secondary not-italic">Tokens</span></span>
               </div>
             </div>
           </div>
@@ -226,15 +225,15 @@ const CharacterEdit = ({ id }: { id: string }) => {
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           <div className="lg:col-span-8 space-y-10">
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiInfo className="text-white/40" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Core Identity</h3>
+                <FiInfo className="text-text-muted" />
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Core Identity</h3>
               </div>
 
               <div className="flex flex-col md:flex-row gap-10">
                 <div className="w-full md:w-1/3 space-y-4">
-                  <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/5 bg-white/5 group">
+                  <div className="relative aspect-square rounded-4xl overflow-hidden border border-border-default bg-surface-hover group">
                     {imagePreview ? (
                       <>
                         {(imageLoading || isGeneratingImage) && (
@@ -283,52 +282,52 @@ const CharacterEdit = ({ id }: { id: string }) => {
                     type="button"
                     onClick={handleGenerateImage}
                     disabled={isGeneratingImage || !characterName}
-                    className="w-full py-3 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-white hover:bg-white/10 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-surface-hover border border-border-default rounded-2xl flex items-center justify-center gap-3 text-text-primary hover:bg-surface transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isGeneratingImage ? (
-                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-border-default border-t-text-primary rounded-full animate-spin" />
                     ) : (
-                      <FiZap className="group-hover:scale-110 transition-transform text-white/40" />
+                      <FiZap className="group-hover:scale-110 transition-transform text-text-muted" />
                     )}
-                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Magic Generate</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-text-primary">Magic Generate</span>
                   </button>
 
-                  <p className="text-[9px] text-white/20 uppercase tracking-wider text-center px-4 font-bold leading-relaxed">
+                  <p className="text-[9px] text-text-muted uppercase tracking-wider text-center px-4 font-bold leading-relaxed">
                     Identity visuals support JPG, PNG. Resolution is auto-optimized for the archive.
                   </p>
                 </div>
 
                 <div className="flex-1 space-y-6">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-1">Character Name</label>
+                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1">Character Name</label>
                     <div className="relative group">
-                      <FiType className="absolute left-4 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-white transition-colors" />
+                      <FiType className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted group-focus-within:text-text-primary transition-colors" />
                       <input
                         required
                         value={characterName}
                         onChange={(e) => setCharacterName(e.target.value)}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-12 py-4 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/10 transition-all font-bold"
+                        className="w-full bg-input border border-border-input rounded-2xl px-12 py-4 text-text-primary placeholder:text-text-muted outline-none focus:border-border-hover focus:bg-surface-hover transition-all font-bold"
                         placeholder="Identity label..."
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 group transition-all hover:border-orange-500/20">
+                  <div className="flex items-center justify-between p-4 bg-surface border border-border-default rounded-2xl group transition-all hover:border-orange-500/20">
                     <div className="flex items-center gap-3">
-                      <FiAlertTriangle className={`transition-colors ${isNsfw ? "text-orange-500" : "text-white/20"}`} />
+                      <FiAlertTriangle className={`transition-colors ${isNsfw ? "text-orange-500" : "text-text-muted"}`} />
                       <div>
-                        <p className="text-[10px] font-black text-white uppercase tracking-widest leading-none">Mature Content</p>
-                        <p className="text-[9px] text-white/20 font-bold uppercase tracking-tighter mt-1">Mark character as NSFW</p>
+                        <p className="text-[10px] font-black text-text-primary uppercase tracking-widest leading-none">Mature Content</p>
+                        <p className="text-[9px] text-text-muted font-bold uppercase tracking-tighter mt-1">Mark character as NSFW</p>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setIsNsfw(!isNsfw)}
-                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-white" : "bg-white/5 border border-white/5"}`}
+                      className={`relative w-12 h-6 rounded-full transition-all duration-300 ${isNsfw ? "bg-text-primary" : "bg-input border border-border-input"}`}
                     >
                       <motion.div
                         animate={{ x: isNsfw ? 26 : 2 }}
-                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-zinc-950" : "bg-white/20"}`}
+                        className={`absolute top-1 w-4 h-4 rounded-full shadow-lg ${isNsfw ? "bg-bg-page" : "bg-text-muted/50"}`}
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     </button>
@@ -337,10 +336,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
               </div>
             </section>
 
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiAlignLeft className="text-white/40" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Public Biography</h3>
+                <FiAlignLeft className="text-text-muted" />
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Description</h3>
               </div>
               <DescriptionEditor
                 value={characterBio}
@@ -350,10 +349,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
               />
             </section>
 
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
+            <section className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <FiHash className="text-white/40" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Tags</h3>
+                <FiHash className="text-text-muted" />
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Tags</h3>
               </div>
               <CharacterTags
                 selectedOptions={selectedOptions}
@@ -361,12 +360,12 @@ const CharacterEdit = ({ id }: { id: string }) => {
               />
             </section>
 
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6 relative z-50">
+            <section className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-6 relative z-50">
               <div className="flex items-center gap-3 mb-2">
-                <FiBook className="text-white/40" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Lorebooks</h3>
+                <FiBook className="text-text-muted" />
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Lorebooks</h3>
               </div>
-              <p className="text-[10px] text-white/30 uppercase tracking-widest font-black leading-relaxed">
+              <p className="text-[10px] text-text-muted uppercase tracking-widest font-black leading-relaxed">
                 Link existing information modules to provide this entity with persistent world knowledge.
               </p>
 
@@ -377,23 +376,23 @@ const CharacterEdit = ({ id }: { id: string }) => {
               />
             </section>
 
-            <section className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
+            <section className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 sm:p-10 backdrop-blur-3xl space-y-8">
               <div className="flex items-center gap-3 mb-2">
-                <FiCpu className="text-white/40" />
-                <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">AI Configuration</h3>
+                <FiCpu className="text-text-muted" />
+                <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">AI Configuration</h3>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-end px-1">
-                    <label className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Character Persona</label>
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
+                    <label className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Character Persona</label>
+                    <span className="text-[9px] font-black text-text-muted uppercase tracking-widest">{getTokenCount(characterPersona)} Tokens</span>
                   </div>
                   <textarea
                     required
                     value={characterPersona}
                     onChange={(e) => setCharacterPersona(e.target.value)}
-                    className="w-full bg-white/1 shadow-inner border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/5 outline-none focus:border-white/20 focus:bg-white/5 transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
+                    className="w-full bg-input shadow-inner border border-border-input rounded-3xl px-6 py-6 text-text-primary placeholder:text-text-muted outline-none focus:border-border-hover focus:bg-surface-hover transition-all text-sm h-64 resize-none scrollbar-hide font-medium leading-relaxed"
                     placeholder="Describe traits, personality, speech patterns..."
                   />
                   <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-3">
@@ -450,10 +449,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
                       placeholder={`<START>\n{user}: Hello!\n{char}: Hey there, how's it going?\n<START>\n...`}
                     />
                   </div>
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 flex gap-3">
-                    <div className="text-white pt-0.5"><FiInfo size={14} /></div>
-                    <p className="text-[10px] text-white/40 leading-relaxed font-bold">
-                      Use <span className="text-white">{`<START>`}</span> to separate different conversation blocks. This helps the AI learn the specific speaking style.
+                  <div className="bg-surface-hover border border-border-default rounded-xl p-4 flex gap-3">
+                    <div className="text-text-primary pt-0.5"><FiInfo size={14} /></div>
+                    <p className="text-[10px] text-text-muted leading-relaxed font-bold">
+                      Use <span className="text-text-primary">{`<START>`}</span> to separate different conversation blocks. This helps the AI learn the specific speaking style.
                     </p>
                   </div>
                 </div>
@@ -464,10 +463,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-5 rounded-3xl bg-white text-zinc-950 flex items-center justify-center gap-3 group transition-all font-black uppercase tracking-widest text-[10px]"
+                className="w-full py-5 rounded-3xl bg-text-primary text-page flex items-center justify-center gap-3 group transition-all font-black uppercase tracking-widest text-[10px]"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-page/20 border-t-page rounded-full animate-spin" />
                 ) : (
                   <>
                     <FiSave className="group-hover:scale-110 transition-transform" />
@@ -497,10 +496,10 @@ const CharacterEdit = ({ id }: { id: string }) => {
               </div>
             </div>
 
-            <div className="bg-zinc-900/20 border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
+            <div className="bg-surface/20 border border-border-default rounded-[2.5rem] p-8 backdrop-blur-3xl space-y-6">
               <div className="flex items-center gap-3">
-                <FiZap className="text-white/40" />
-                <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Deployment Stats</h3>
+                <FiZap className="text-text-muted" />
+                <h3 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em]">Deployment Stats</h3>
               </div>
 
               <div className="space-y-4">

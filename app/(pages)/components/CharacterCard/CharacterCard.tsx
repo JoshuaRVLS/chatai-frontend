@@ -129,7 +129,7 @@ const CharacterCard = React.memo(function CharacterCard({
         draggable={false}
         className="relative h-[240px] lg:h-[320px] flex flex-col cursor-pointer rounded-xl lg:rounded-2xl transition-all duration-300 group select-none"
       >
-        <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-white/5 bg-zinc-950">
+        <div className="absolute inset-0 rounded-xl lg:rounded-2xl overflow-hidden border border-border-default bg-surface">
           <div className="relative h-full w-full">
             {image ? (
               <Image
@@ -141,7 +141,7 @@ const CharacterCard = React.memo(function CharacterCard({
                 draggable={false}
               />
             ) : (
-              <div className="flex items-center justify-center h-full bg-white/5"><FiUser className="text-white/10 w-12 h-12" /></div>
+              <div className="flex items-center justify-center h-full bg-surface-hover"><FiUser className="text-text-muted w-12 h-12" /></div>
             )}
 
             {/* Edit/Delete Buttons for Owner */}
@@ -149,14 +149,14 @@ const CharacterCard = React.memo(function CharacterCard({
               <div className="absolute top-2 right-2 z-20 flex gap-2">
                 <button
                   onClick={handleEdit}
-                  className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-white/20 hover:text-white transition-colors border border-white/5"
+                  className="p-2 rounded-lg bg-overlay text-text-muted hover:bg-surface hover:text-text-primary transition-colors border border-border-default"
                   title="Edit Character"
                 >
                   <FiEdit2 size={12} />
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-red-500/20 hover:text-red-500 transition-colors border border-white/5"
+                  className="p-2 rounded-lg bg-overlay text-text-muted hover:bg-red-500/20 hover:text-red-500 transition-colors border border-border-default"
                   title="Delete Character"
                 >
                   <FiTrash2 size={12} />
@@ -164,28 +164,28 @@ const CharacterCard = React.memo(function CharacterCard({
               </div>
             )}
 
-            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-zinc-950 via-zinc-950/90 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-page via-page/90 to-transparent pointer-events-none" />
             <div className="absolute bottom-0 inset-x-0 p-4">
               <div className="flex justify-between items-end mb-1">
-                <h3 className="text-xs lg:text-sm font-black text-white leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md flex-1 pr-2">{characterName}</h3>
+                <h3 className="text-xs lg:text-sm font-black text-text-primary leading-tight line-clamp-1 uppercase shadow-black drop-shadow-md flex-1 pr-2">{characterName}</h3>
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-white/60 bg-black/60 px-1.5 py-0.5 rounded-full border border-white/5">
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-text-muted bg-overlay px-1.5 py-0.5 rounded-full border border-border-default">
                     <FiEye size={8} />
                     <span>{views}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[9px] font-bold text-white/60 bg-black/60 px-1.5 py-0.5 rounded-full border border-white/5">
+                  <div className="flex items-center gap-1 text-[9px] font-bold text-text-muted bg-overlay px-1.5 py-0.5 rounded-full border border-border-default">
                     <FiMessageCircle size={8} />
                     <span>{chatCount}</span>
                   </div>
                   {rating > 0 && (
-                    <div className="flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-black/60 px-1.5 py-0.5 rounded-full border border-white/5">
+                    <div className="flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-overlay px-1.5 py-0.5 rounded-full border border-border-default">
                       <FiStar size={8} className="fill-yellow-400" />
                       <span>{rating.toFixed(1)}</span>
                     </div>
                   )}
                 </div>
               </div>
-              <div className="text-[9px] text-zinc-500 line-clamp-1 font-medium mt-1" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
+              <div className="text-[9px] text-text-secondary line-clamp-1 font-medium mt-1" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
             </div>
           </div>
         </div>

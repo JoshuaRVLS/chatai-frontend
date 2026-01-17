@@ -204,7 +204,7 @@ const Lorebooks: React.FC = () => {
                             <FiChevronLeft />
                         </button>
 
-                        <span className="px-4 py-2 bg-black/40 border border-white/10 rounded-lg text-xs font-bold text-white flex items-center">
+                        <span className="px-4 py-2 bg-surface hover:bg-surface-hover border border-border-default rounded-lg text-xs font-bold text-text-primary flex items-center">
                             Page {page} of {meta.totalPages}
                         </span>
 

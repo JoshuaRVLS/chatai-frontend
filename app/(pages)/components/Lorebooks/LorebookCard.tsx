@@ -109,10 +109,10 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
         <Link href={`/lorebooks/${lorebook.id}`} className="h-full block" onClick={handleCardClick}>
             <motion.div
                 whileHover={{ y: -2 }}
-                className="group relative bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden transition-all hover:border-white/10 h-full flex flex-col"
+                className="group relative bg-surface border border-border-default rounded-2xl overflow-hidden transition-all hover:border-border-hover h-full flex flex-col"
             >
                 {/* Image Section - Reduced Height */}
-                <div className="relative h-32 shrink-0 bg-black/50">
+                <div className="relative h-32 shrink-0 bg-surface-hover">
                     {imageLoading && (
                         <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
                             <div className="w-6 h-6 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
@@ -134,7 +134,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                         {isOwner ? (
                             <button
                                 onClick={handleDelete}
-                                className="p-2 rounded-lg bg-black/60 text-white/50 hover:bg-red-500/20 hover:text-red-500 transition-colors border border-white/5"
+                                className="p-2 rounded-lg bg-surface-hover text-text-muted hover:bg-red-500/20 hover:text-red-500 transition-colors border border-border-default"
                             >
                                 <FaTrash size={10} />
                             </button>
@@ -144,7 +144,7 @@ const LorebookCard: React.FC<LorebookCardProps> = ({ lorebook, onUpdate, current
                                 disabled={saving}
                                 className={`p-2 rounded-lg border transition-colors ${isSaved
                                     ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-                                    : "bg-black/60 text-white/50 border-white/5 hover:text-white"
+                                    : "bg-surface-hover text-text-muted border-border-default hover:text-text-primary"
                                     }`}
                             >
                                 {saving ? (

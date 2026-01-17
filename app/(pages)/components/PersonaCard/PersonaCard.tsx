@@ -132,13 +132,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
 
   return (
     <motion.div
-      className={`relative rounded-3xl overflow-hidden border transition-all duration-500 ${isActive ? 'bg-white/5 border-white/20 shadow-2xl' : 'bg-white/1 border-white/5 hover:border-white/10'}`}
+      className={`relative rounded-3xl overflow-hidden border transition-all duration-500 ${isActive ? 'bg-surface border-border-hover shadow-xl' : 'bg-surface border-border-default hover:border-border-hover'}`}
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
     >
       {/* Subtle Background Glow for Active Card */}
       {isActive && (
-        <div className="absolute inset-0 bg-white/1 pointer-events-none" />
+        <div className="absolute inset-0 bg-text-primary/5 pointer-events-none" />
       )}
 
       {/* Header Button */}
@@ -149,12 +149,12 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
       >
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 overflow-hidden relative ${isActive ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-zinc-500 group-hover:bg-white/10'}`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500 overflow-hidden relative ${isActive ? 'bg-text-primary text-white dark:text-black shadow-lg' : 'bg-surface-hover text-text-muted group-hover:bg-text-primary/10'}`}>
               {initialPersona.image ? (
                 <>
                   {imageLoading && (
-                    <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
-                      <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                    <div className="absolute inset-0 bg-surface animate-pulse flex items-center justify-center">
+                      <div className="w-4 h-4 border border-border-default border-t-text-primary rounded-full animate-spin" />
                     </div>
                   )}
                   <img
@@ -170,24 +170,24 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
             </div>
             {isActive && (
               <motion.div
-                className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-[#09090b]"
+                className="absolute -top-1 -right-1 w-3 h-3 bg-text-primary rounded-full border-2 border-bg-page"
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
               />
             )}
           </div>
           <div className="space-y-0.5">
-            <h3 className="text-lg font-black text-white italic tracking-tight uppercase leading-none group-hover:text-zinc-300 transition-colors">
+            <h3 className="text-lg font-black text-text-primary italic tracking-tight uppercase leading-none group-hover:text-text-primary/70 transition-colors">
               {personaName}
             </h3>
-            <p className="text-zinc-600 text-[9px] font-black uppercase tracking-widest leading-none">
+            <p className="text-text-muted text-[9px] font-black uppercase tracking-widest leading-none">
               {isActive ? "Primary Identity" : "Secondary Identity"}
             </p>
           </div>
         </div>
         <motion.div
           animate={{ rotate: isExpanded ? 45 : 0 }}
-          className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${isExpanded ? 'bg-white/10 border-white/20 text-white' : 'bg-transparent border-white/5 text-zinc-800 group-hover:border-white/10 group-hover:text-zinc-500'}`}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${isExpanded ? 'bg-text-primary/10 border-text-primary/20 text-text-primary' : 'bg-transparent border-border-default text-text-muted group-hover:border-border-hover group-hover:text-text-primary'}`}
         >
           <FaPlus size={10} />
         </motion.div>
@@ -200,13 +200,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden border-t border-white/5"
+            className="overflow-hidden border-t border-border-default"
           >
             <div className="p-6 space-y-6">
               {isEditing ? (
                 <div className="grid grid-cols-1 gap-5">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Signature</label>
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-widest ml-1">Identity Signature</label>
                     <input
                       value={personaName}
                       onChange={(e) => setPersonaName(e.target.value)}
@@ -214,7 +214,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Behavioral Logic Matrix</label>
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-widest ml-1">Behavioral Logic Matrix</label>
                     <textarea
                       value={persona}
                       onChange={(e) => setPersona(e.target.value)}
@@ -223,13 +223,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1">Identity Visual</label>
+                    <label className="text-[9px] font-black text-text-muted uppercase tracking-widest ml-1">Identity Visual</label>
                     <div className="flex items-center gap-4">
                       {imagePreview ? (
-                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-border-default bg-surface">
                           {previewLoading && (
-                            <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
-                              <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                            <div className="absolute inset-0 bg-surface animate-pulse flex items-center justify-center">
+                              <div className="w-4 h-4 border border-border-default border-t-text-primary rounded-full animate-spin" />
                             </div>
                           )}
                           <img
@@ -241,13 +241,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                           />
                           <button
                             onClick={() => { setImageFile(null); setImagePreview(null); }}
-                            className="absolute top-1 right-1 w-4 h-4 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-all font-bold z-10"
+                            className="absolute top-1 right-1 w-4 h-4 bg-overlay text-text-primary rounded-full flex items-center justify-center hover:bg-black/70 transition-all font-bold z-10"
                           >
                             <span className="text-[8px]">×</span>
                           </button>
                         </div>
                       ) : (
-                        <label className="w-16 h-16 rounded-xl border border-dashed border-white/10 flex flex-col items-center justify-center text-zinc-600 hover:text-white hover:border-white/20 transition-all cursor-pointer">
+                        <label className="w-16 h-16 rounded-xl border border-dashed border-border-default flex flex-col items-center justify-center text-text-muted hover:text-text-primary hover:border-border-hover transition-all cursor-pointer">
                           <FaPlus size={10} />
                           <span className="text-[7px] font-black uppercase mt-1">Upload</span>
                           <input
@@ -265,7 +265,7 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                           />
                         </label>
                       )}
-                      <p className="text-zinc-600 text-[8px] font-bold uppercase tracking-widest max-w-[150px]">
+                      <p className="text-text-muted text-[8px] font-bold uppercase tracking-widest max-w-[150px]">
                         Recommended: Square. Max 5MB.
                       </p>
                     </div>
@@ -273,13 +273,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                   <div className="flex justify-end gap-2 pt-2">
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 border border-white/5 text-zinc-600 rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-white/5 transition-all"
+                      className="px-4 py-2 border border-border-default text-text-muted rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-surface-hover transition-all"
                     >
                       Abort
                     </button>
                     <button
                       onClick={save}
-                      className="px-6 py-2 bg-white text-zinc-950 rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center gap-2 shadow-lg"
+                      className="px-6 py-2 bg-text-primary text-white dark:text-black rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center gap-2 shadow-lg"
                     >
                       <FaCheck size={10} /> Confirm Edit
                     </button>
@@ -288,10 +288,10 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
               ) : (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest ml-1 flex items-center gap-2 leading-none">
-                      <FaInfo size={8} className="text-zinc-500" /> Behavioral Manifest
+                    <h4 className="text-[9px] font-black text-text-muted uppercase tracking-widest ml-1 flex items-center gap-2 leading-none">
+                      <FaInfo size={8} className="text-text-muted" /> Behavioral Manifest
                     </h4>
-                    <div className="bg-white/1 border border-white/5 rounded-2xl p-5 text-zinc-500 text-xs leading-relaxed italic font-medium">
+                    <div className="bg-surface border border-border-default rounded-2xl p-5 text-text-secondary text-xs leading-relaxed italic font-medium">
                       "{persona}"
                     </div>
                   </div>
@@ -300,13 +300,13 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                     <div className="flex gap-2 flex-1">
                       <button
                         onClick={() => setIsEditing(true)}
-                        className="flex-1 h-10 bg-white/5 border border-white/5 rounded-lg text-zinc-500 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all"
+                        className="flex-1 h-10 bg-surface-hover border border-border-default rounded-lg text-text-muted font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-surface hover:text-text-primary transition-all"
                       >
                         <FaEdit size={10} /> Edit
                       </button>
                       <button
                         onClick={deletePersona}
-                        className="flex-1 h-10 bg-white/5 border border-white/5 rounded-lg text-zinc-800 font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-zinc-900/50 hover:text-zinc-600 transition-all"
+                        className="flex-1 h-10 bg-surface-hover border border-border-default rounded-lg text-text-muted font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 hover:bg-surface hover:text-text-primary transition-all"
                       >
                         <FaTrash size={10} /> Purge
                       </button>
@@ -314,11 +314,11 @@ const PersonaCard = ({ initialPersona }: { initialPersona: any }) => {
                     <button
                       onClick={usePersona}
                       disabled={isActive}
-                      className={`px-6 h-10 rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all shadow-xl ${isActive ? 'bg-white text-zinc-950 cursor-default px-8' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                      className={`px-6 h-10 rounded-lg font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-2 transition-all shadow-xl ${isActive ? 'bg-text-primary text-white dark:text-black cursor-default px-8' : 'bg-surface-hover text-text-primary hover:bg-surface'}`}
                     >
                       {isActive ? (
                         <>
-                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-950 animate-pulse" /> Linked
+                          <div className="w-1.5 h-1.5 rounded-full bg-bg-page animate-pulse" /> Linked
                         </>
                       ) : (
                         <>Use Identity</>

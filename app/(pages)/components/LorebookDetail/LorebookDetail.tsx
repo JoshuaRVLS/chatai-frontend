@@ -269,25 +269,25 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
 
     if (isPending)
         return (
-            <div className="min-h-screen bg-zinc-950 pt-32 px-6 flex flex-col items-center justify-center space-y-4">
-                <div className="w-12 h-12 border-4 border-white/5 border-t-white rounded-full animate-spin" />
-                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em]">Loading Semantic Module...</p>
+            <div className="min-h-screen bg-page pt-32 px-6 flex flex-col items-center justify-center space-y-4">
+                <div className="w-12 h-12 border-4 border-border-default border-t-text-primary rounded-full animate-spin" />
+                <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.5em]">Loading Semantic Module...</p>
             </div>
         );
 
     return (
-        <div className="min-h-screen bg-zinc-950 pt-24 pb-20 px-4 sm:px-8 relative overflow-hidden">
+        <div className="min-h-screen bg-page pt-24 pb-20 px-4 sm:px-8 relative overflow-hidden">
             {/* Background Blobs */}
             <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-white/2 blur-[120px] rounded-full" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-white/1 blur-[100px] rounded-full" />
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-surface-hover/30 blur-[120px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-surface-hover/20 blur-[100px] rounded-full" />
             </div>
 
             <div className="max-w-6xl mx-auto relative z-10">
                 {/* Navigation */}
                 <Link
                     href="/lorebooks"
-                    className="inline-flex items-center gap-2 text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-10 group"
+                    className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary transition-colors text-[10px] font-black uppercase tracking-widest mb-10 group"
                 >
                     <FaChevronLeft className="group-hover:-translate-x-1 transition-transform" /> Access Local Archive
                 </Link>
@@ -296,10 +296,10 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                     <div className="lg:col-span-8 space-y-10">
                         {/* Header & Stats Card */}
-                        <section className="bg-white/3 border border-white/10 rounded-4xl p-8 sm:p-10 backdrop-blur-3xl">
+                        <section className="bg-surface border border-border-default rounded-4xl p-8 sm:p-10 backdrop-blur-3xl">
                             <div className="flex flex-col md:flex-row gap-8">
                                 <div className="w-full md:w-1/4">
-                                    <div className="aspect-square relative rounded-3xl overflow-hidden border border-white/10 bg-white/5 shadow-2xl">
+                                    <div className="aspect-square relative rounded-3xl overflow-hidden border border-border-default bg-surface-hover shadow-lg">
                                         <Image
                                             src={metaImagePreview || `/api/lorebook-image/${lorebookId}`}
                                             fill
@@ -311,18 +311,18 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                 <div className="flex-1 space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-1 h-8 bg-white/20 rounded-full" />
-                                            <h1 className="text-4xl sm:text-6xl font-black text-white italic tracking-tighter uppercase leading-none">
+                                            <div className="w-1 h-8 bg-text-primary/20 rounded-full" />
+                                            <h1 className="text-4xl sm:text-6xl font-black text-text-primary italic tracking-tighter uppercase leading-none">
                                                 {lorebook?.name}
                                             </h1>
                                         </div>
                                     </div>
-                                    <p className="text-white/40 text-sm font-medium leading-relaxed">
+                                    <p className="text-text-muted text-sm font-medium leading-relaxed">
                                         {lorebook?.description || "Structural information module for character memory and world consistency."}
                                     </p>
                                     <div className="flex flex-wrap gap-2 pt-2">
                                         {lorebook?.tags?.map((tag: any) => (
-                                            <span key={tag.id} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-white/60 uppercase tracking-widest">
+                                            <span key={tag.id} className="px-3 py-1 bg-surface-hover border border-border-default rounded-lg text-[9px] font-black text-text-muted uppercase tracking-widest">
                                                 {tag.name}
                                             </span>
                                         ))}
@@ -330,22 +330,22 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-10 border-t border-white/5">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-10 border-t border-border-default">
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Scan Depth</p>
-                                    <p className="text-xl font-black text-white italic">{lorebook?.scanDepth}</p>
+                                    <p className="text-[8px] font-black text-text-muted uppercase tracking-widest">Scan Depth</p>
+                                    <p className="text-xl font-black text-text-primary italic">{lorebook?.scanDepth}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Token Budget</p>
-                                    <p className="text-xl font-black text-white italic">{lorebook?.tokenBudget}</p>
+                                    <p className="text-[8px] font-black text-text-muted uppercase tracking-widest">Token Budget</p>
+                                    <p className="text-xl font-black text-text-primary italic">{lorebook?.tokenBudget}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Recursive</p>
-                                    <p className="text-xl font-black text-white italic">{lorebook?.recursiveScanning ? "ON" : "OFF"}</p>
+                                    <p className="text-[8px] font-black text-text-muted uppercase tracking-widest">Recursive</p>
+                                    <p className="text-xl font-black text-text-primary italic">{lorebook?.recursiveScanning ? "ON" : "OFF"}</p>
                                 </div>
                                 <div className="space-y-1">
-                                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">Total Entries</p>
-                                    <p className="text-xl font-black text-white italic">{lorebook?.entries?.length || 0}</p>
+                                    <p className="text-[8px] font-black text-text-muted uppercase tracking-widest">Total Entries</p>
+                                    <p className="text-xl font-black text-text-primary italic">{lorebook?.entries?.length || 0}</p>
                                 </div>
                             </div>
                         </section>
@@ -354,13 +354,13 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                         <div className="space-y-6">
                             <div className="flex items-center justify-between px-2">
                                 <div className="flex items-center gap-3">
-                                    <FiBookOpen className="text-white/40" />
-                                    <h3 className="text-xs font-black text-white uppercase tracking-[0.3em]">Knowledge Entries</h3>
+                                    <FiBookOpen className="text-text-muted" />
+                                    <h3 className="text-xs font-black text-text-primary uppercase tracking-[0.3em]">Knowledge Entries</h3>
                                 </div>
                                 {isOwner && (
                                     <button
                                         onClick={() => setIsAddingEntry(true)}
-                                        className="px-4 py-2 bg-white text-zinc-950 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2 hover:scale-105 transition-all shadow-xl"
+                                        className="px-4 py-2 bg-text-primary text-bg-page rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center gap-2 hover:scale-105 transition-all shadow-xl"
                                     >
                                         <FaPlus size={10} /> Add Entry
                                     </button>
@@ -373,45 +373,45 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: 20 }}
-                                        className="bg-white/5 border border-white/10 rounded-4xl p-8 backdrop-blur-3xl shadow-2xl"
+                                        className="bg-surface border border-border-default rounded-4xl p-8 backdrop-blur-3xl shadow-2xl"
                                     >
                                         <div className="flex justify-between items-center mb-8">
-                                            <h3 className="text-xl font-black text-white italic tracking-tight uppercase">Inject World Info</h3>
-                                            <button onClick={resetForm} className="text-white/20 hover:text-white"><FaTimes size={18} /></button>
+                                            <h3 className="text-xl font-black text-text-primary italic tracking-tight uppercase">Inject World Info</h3>
+                                            <button onClick={resetForm} className="text-text-muted hover:text-text-primary"><FaTimes size={18} /></button>
                                         </div>
 
                                         <div className="space-y-6">
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-2">Keywords (comma separated)</label>
+                                                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-2">Keywords (comma separated)</label>
                                                 <input
                                                     value={keywords}
                                                     onChange={(e) => setKeywords(e.target.value)}
                                                     placeholder="e.g. Aethelgard, Capital, King"
-                                                    className="w-full bg-zinc-900 border border-white/10 rounded-2xl px-6 py-4 text-white placeholder:text-white/10 outline-none focus:border-white/20 transition-all font-bold"
+                                                    className="w-full bg-input border border-border-input rounded-2xl px-6 py-4 text-text-primary placeholder:text-text-muted outline-none focus:border-border-hover transition-all font-bold"
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <label className="text-[10px] font-black text-white/30 uppercase tracking-widest ml-2">Lore Content</label>
+                                                <label className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-2">Lore Content</label>
                                                 <textarea
                                                     value={content}
                                                     onChange={(e) => setContent(e.target.value)}
                                                     rows={6}
                                                     placeholder="The detailed information about these keywords..."
-                                                    className="w-full bg-zinc-900 border border-white/10 rounded-3xl px-6 py-6 text-white placeholder:text-white/10 outline-none focus:border-white/20 resize-none h-48 font-medium leading-relaxed"
+                                                    className="w-full bg-input border border-border-input rounded-3xl px-6 py-6 text-text-primary placeholder:text-text-muted outline-none focus:border-border-hover resize-none h-48 font-medium leading-relaxed"
                                                 />
                                             </div>
-                                            <div className="flex justify-between items-center bg-white/5 rounded-2xl px-6 py-4">
+                                            <div className="flex justify-between items-center bg-surface-hover rounded-2xl px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <FiActivity className="text-white/40" />
-                                                    <span className="text-[10px] font-black text-white uppercase tracking-widest">Active Status</span>
+                                                    <FiActivity className="text-text-muted" />
+                                                    <span className="text-[10px] font-black text-text-primary uppercase tracking-widest">Active Status</span>
                                                 </div>
                                                 <button onClick={() => setEnabled(!enabled)}>
-                                                    {enabled ? <FaToggleOn size={28} className="text-white" /> : <FaToggleOff size={28} className="text-white/10" />}
+                                                    {enabled ? <FaToggleOn size={28} className="text-text-primary" /> : <FaToggleOff size={28} className="text-text-muted" />}
                                                 </button>
                                             </div>
                                             <button
                                                 onClick={handleAddEntry}
-                                                className="w-full py-5 bg-white text-zinc-950 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-lg hover:bg-zinc-200 transition-all"
+                                                className="w-full py-5 bg-text-primary text-bg-page rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-lg hover:opacity-90 transition-all"
                                             >
                                                 Archive Entry
                                             </button>
@@ -427,9 +427,9 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                 animate="visible"
                             >
                                 {lorebook?.entries?.length === 0 && !isAddingEntry && (
-                                    <div className="py-20 text-center space-y-4 bg-white/2 border border-dashed border-white/5 rounded-4xl">
-                                        <FiBookOpen size={48} className="mx-auto text-white/5" />
-                                        <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">Empty Semantic Archive</p>
+                                    <div className="py-20 text-center space-y-4 bg-surface border border-dashed border-border-default rounded-4xl">
+                                        <FiBookOpen size={48} className="mx-auto text-text-muted/20" />
+                                        <p className="text-text-muted/40 text-[10px] font-black uppercase tracking-widest">Empty Semantic Archive</p>
                                     </div>
                                 )}
 
@@ -437,24 +437,24 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                     <motion.div
                                         key={entry.id}
                                         variants={item}
-                                        className="group relative bg-white/3 border border-white/10 rounded-4xl p-6 backdrop-blur-3xl hover:bg-white/5 transition-all shadow-lg"
+                                        className="group relative bg-surface border border-border-default rounded-4xl p-6 backdrop-blur-3xl hover:bg-surface-hover transition-all shadow-sm hover:shadow-md"
                                     >
                                         {editingEntryId === entry.id ? (
                                             <div className="space-y-6">
                                                 <input
                                                     value={keywords}
                                                     onChange={(e) => setKeywords(e.target.value)}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-white/20 font-bold"
+                                                    className="w-full bg-input border border-border-input rounded-xl px-4 py-3 text-text-primary outline-none focus:border-border-hover font-bold"
                                                 />
                                                 <textarea
                                                     value={content}
                                                     onChange={(e) => setContent(e.target.value)}
-                                                    className="w-full bg-zinc-950 border border-white/10 rounded-2xl px-4 py-4 text-white outline-none focus:border-white/20 resize-none font-medium text-sm leading-relaxed"
+                                                    className="w-full bg-input border border-border-input rounded-2xl px-4 py-4 text-text-primary outline-none focus:border-border-hover resize-none font-medium text-sm leading-relaxed"
                                                     rows={4}
                                                 />
                                                 <div className="flex justify-end gap-3">
-                                                    <button onClick={resetForm} className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors">Cancel</button>
-                                                    <button onClick={() => handleUpdateEntry(entry.id)} className="px-6 py-2.5 bg-white text-zinc-950 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-200 transition-all shadow-lg">Store Archive</button>
+                                                    <button onClick={resetForm} className="px-6 py-2.5 bg-surface-hover text-text-muted rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-text-primary transition-colors">Cancel</button>
+                                                    <button onClick={() => handleUpdateEntry(entry.id)} className="px-6 py-2.5 bg-text-primary text-bg-page rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-text-primary/90 transition-all shadow-lg">Store Archive</button>
                                                 </div>
                                             </div>
                                         ) : (
@@ -462,26 +462,26 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                                 <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                                                     <div className="flex flex-wrap gap-2">
                                                         {entry.keywords.map((kw: string, i: number) => (
-                                                            <span key={i} className="px-3 py-1 bg-white/5 border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 group-hover:text-white transition-colors">
+                                                            <span key={i} className="px-3 py-1 bg-surface-hover border border-border-default text-text-muted text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 group-hover:text-text-primary transition-colors">
                                                                 <FaTag size={8} /> {kw}
                                                             </span>
                                                         ))}
                                                     </div>
                                                     {isOwner && (
                                                         <div className="flex items-center gap-1 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={() => toggleEntry(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
+                                                            <button onClick={() => toggleEntry(entry)} className="p-2 text-text-muted hover:text-text-primary transition-colors">
                                                                 {entry.enabled ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
                                                             </button>
-                                                            <button onClick={() => startEdit(entry)} className="p-2 text-white/20 hover:text-white transition-colors">
+                                                            <button onClick={() => startEdit(entry)} className="p-2 text-text-muted hover:text-text-primary transition-colors">
                                                                 <FaEdit size={14} />
                                                             </button>
-                                                            <button onClick={() => handleDeleteEntry(entry.id)} className="p-2 text-white/20 hover:text-red-500 transition-colors">
+                                                            <button onClick={() => handleDeleteEntry(entry.id)} className="p-2 text-text-muted hover:text-red-500 transition-colors">
                                                                 <FaTrash size={14} />
                                                             </button>
                                                         </div>
                                                     )}
                                                 </div>
-                                                <p className={`text-white/60 text-sm leading-relaxed font-medium ${!entry.enabled && 'opacity-20 italic'}`}>
+                                                <p className={`text-text-secondary text-sm leading-relaxed font-medium ${!entry.enabled && 'opacity-40 italic'}`}>
                                                     {entry.content}
                                                 </p>
                                             </>
@@ -494,16 +494,16 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
 
                     {/* Right Column: Settings */}
                     <div className="lg:col-span-4 space-y-8">
-                        <section className="bg-white/3 border border-white/10 rounded-4xl p-8 backdrop-blur-3xl space-y-8 lg:sticky lg:top-32">
+                        <section className="bg-surface border border-border-default rounded-4xl p-8 backdrop-blur-3xl space-y-8 lg:sticky lg:top-32">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
-                                    <FiSettings className="text-white/40" />
-                                    <h3 className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Module Config</h3>
+                                    <FiSettings className="text-text-muted" />
+                                    <h3 className="text-[10px] font-black text-text-primary uppercase tracking-[0.2em]">Module Config</h3>
                                 </div>
                                 {isOwner && (
                                     <button
                                         onClick={() => setIsEditingMetadata(!isEditingMetadata)}
-                                        className={`p-2 rounded-xl transition-all ${isEditingMetadata ? 'bg-white text-zinc-950 shadow-xl' : 'bg-white/5 text-white/20 hover:text-white'}`}
+                                        className={`p-2 rounded-xl transition-all ${isEditingMetadata ? 'bg-text-primary text-bg-page shadow-xl' : 'bg-surface-hover text-text-muted hover:text-text-primary'}`}
                                     >
                                         <FaEdit size={14} />
                                     </button>
@@ -514,44 +514,44 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                 <div className="space-y-6">
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-tight">
-                                            <span className="text-zinc-600">Scan Intensity</span>
-                                            <span className="text-white">{lorebook?.scanDepth}/10</span>
+                                            <span className="text-text-muted">Scan Intensity</span>
+                                            <span className="text-text-primary">{lorebook?.scanDepth}/10</span>
                                         </div>
-                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-white transition-all shadow-xl" style={{ width: `${(lorebook?.scanDepth / 10) * 100}%` }} />
+                                        <div className="w-full h-1.5 bg-surface-hover rounded-full overflow-hidden">
+                                            <div className="h-full bg-text-primary transition-all shadow-sm" style={{ width: `${(lorebook?.scanDepth / 10) * 100}%` }} />
                                         </div>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-tight">
-                                            <span className="text-zinc-600">Memory Budget</span>
-                                            <span className="text-white">{lorebook?.tokenBudget} TKN</span>
+                                            <span className="text-text-muted">Memory Budget</span>
+                                            <span className="text-text-primary">{lorebook?.tokenBudget} TKN</span>
                                         </div>
-                                        <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                            <div className="h-full bg-white transition-all shadow-xl" style={{ width: `${(lorebook?.tokenBudget / 2048) * 100}%` }} />
+                                        <div className="w-full h-1.5 bg-surface-hover rounded-full overflow-hidden">
+                                            <div className="h-full bg-text-primary transition-all shadow-sm" style={{ width: `${(lorebook?.tokenBudget / 2048) * 100}%` }} />
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between py-4 border-t border-white/5">
-                                        <p className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Recursive</p>
-                                        <span className={`text-[10px] font-black uppercase tracking-widest ${lorebook?.recursiveScanning ? 'text-white' : 'text-zinc-800'}`}>
+                                    <div className="flex items-center justify-between py-4 border-t border-border-default">
+                                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Recursive</p>
+                                        <span className={`text-[10px] font-black uppercase tracking-widest ${lorebook?.recursiveScanning ? 'text-text-primary' : 'text-text-muted'}`}>
                                             {lorebook?.recursiveScanning ? 'Active' : 'Disabled'}
                                         </span>
                                     </div>
 
-                                    <div className="bg-white/2 border border-white/5 rounded-2xl p-6">
+                                    <div className="bg-surface-hover border border-border-default rounded-2xl p-6">
                                         <div className="flex items-center gap-2 mb-3">
-                                            <FiInfo className="text-white/20" size={12} />
-                                            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">Archive Usage</p>
+                                            <FiInfo className="text-text-muted" size={12} />
+                                            <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">Archive Usage</p>
                                         </div>
-                                        <p className="text-[10px] text-zinc-600 font-bold leading-relaxed uppercase tracking-tighter">
+                                        <p className="text-[10px] text-text-secondary font-bold leading-relaxed uppercase tracking-tighter">
                                             This module is globally available for integration into character intelligence matrices.
                                         </p>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
-                                    <div className="relative aspect-square rounded-4xl overflow-hidden border border-white/10 bg-white/5 group mb-6 mx-auto w-3/4">
+                                    <div className="relative aspect-square rounded-4xl overflow-hidden border border-border-default bg-surface-hover group mb-6 mx-auto w-3/4">
                                         <Image src={metaImagePreview || `/api/lorebook-image/${lorebookId}`} fill className="object-cover" alt="Preview" />
                                         <input
                                             type="file"
@@ -566,32 +566,32 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                             }}
                                             className="hidden"
                                         />
-                                        <label htmlFor="meta-image-upload" className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm">
-                                            <FaImage className="text-white text-2xl mb-2" />
-                                            <span className="text-[8px] font-black text-white uppercase tracking-widest">Update Visual</span>
+                                        <label htmlFor="meta-image-upload" className="absolute inset-0 bg-overlay/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer backdrop-blur-sm">
+                                            <FaImage className="text-text-primary text-2xl mb-2" />
+                                            <span className="text-[8px] font-black text-text-primary uppercase tracking-widest">Update Visual</span>
                                         </label>
                                     </div>
 
                                     <div className="space-y-4">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Name</label>
+                                            <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Name</label>
                                             <input
                                                 value={metaName}
                                                 onChange={(e) => setMetaName(e.target.value)}
-                                                className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-2 text-white text-xs outline-none focus:border-white/20 font-bold"
+                                                className="w-full bg-input border border-border-input rounded-xl px-4 py-2 text-text-primary text-xs outline-none focus:border-border-hover font-bold"
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Description</label>
+                                            <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Description</label>
                                             <textarea
                                                 value={metaDescription}
                                                 onChange={(e) => setMetaDescription(e.target.value)}
-                                                className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-2 text-white text-xs outline-none focus:border-white/20 font-medium h-24 resize-none"
+                                                className="w-full bg-input border border-border-input rounded-xl px-4 py-2 text-text-primary text-xs outline-none focus:border-border-hover font-medium h-24 resize-none"
                                             />
                                         </div>
 
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Tags</label>
+                                            <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Tags</label>
                                             <Select
                                                 placeholder="Tags"
                                                 isMulti
@@ -602,46 +602,47 @@ const LorebookDetail: React.FC<LorebookDetailProps> = ({ lorebookId }) => {
                                                 styles={{
                                                     control: (styles) => ({
                                                         ...styles,
-                                                        backgroundColor: "rgba(0,0,0,0.2)",
-                                                        border: "1px solid rgba(255,255,255,0.1)",
+                                                        backgroundColor: "var(--bg-input)",
+                                                        border: "1px solid var(--border-input)",
                                                         borderRadius: "12px",
                                                         fontSize: "12px",
+                                                        color: "var(--text-primary)",
                                                     }),
-                                                    menu: (styles) => ({ ...styles, backgroundColor: "#09090b", border: "1px solid rgba(255,255,255,0.1)", zIndex: 9999 }),
-                                                    option: (styles, { isFocused }) => ({ ...styles, backgroundColor: isFocused ? "rgba(255,255,255,0.05)" : "transparent", fontSize: "12px" }),
-                                                    multiValue: (styles) => ({ ...styles, backgroundColor: "rgba(255,255,255,0.05)" }),
-                                                    multiValueLabel: (styles) => ({ ...styles, color: "white", fontSize: "10px", fontWeight: "bold" }),
+                                                    menu: (styles) => ({ ...styles, backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-default)", zIndex: 9999 }),
+                                                    option: (styles, { isFocused }) => ({ ...styles, backgroundColor: isFocused ? "var(--bg-surface-hover)" : "transparent", fontSize: "12px", color: "var(--text-primary)" }),
+                                                    multiValue: (styles) => ({ ...styles, backgroundColor: "var(--bg-surface-hover)" }),
+                                                    multiValueLabel: (styles) => ({ ...styles, color: "var(--text-primary)", fontSize: "10px", fontWeight: "bold" }),
                                                 }}
                                             />
                                         </div>
 
                                         <div className="space-y-4 pt-4">
                                             <div className="flex justify-between">
-                                                <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Scan Depth</label>
-                                                <span className="text-xs font-black text-white italic">{metaScanDepth}</span>
+                                                <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Scan Depth</label>
+                                                <span className="text-xs font-black text-text-primary italic">{metaScanDepth}</span>
                                             </div>
-                                            <input type="range" min="1" max="10" value={metaScanDepth} onChange={(e) => setMetaScanDepth(parseInt(e.target.value))} className="w-full accent-white h-1 bg-white/5 rounded-full appearance-none cursor-pointer" />
+                                            <input type="range" min="1" max="10" value={metaScanDepth} onChange={(e) => setMetaScanDepth(parseInt(e.target.value))} className="w-full accent-text-primary h-1 bg-surface-hover rounded-full appearance-none cursor-pointer" />
                                         </div>
 
                                         <div className="space-y-4 pt-4">
                                             <div className="flex justify-between">
-                                                <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Memory Budget</label>
-                                                <span className="text-xs font-black text-white italic">{metaTokenBudget}</span>
+                                                <label className="text-[9px] font-black text-text-muted uppercase tracking-widest">Memory Budget</label>
+                                                <span className="text-xs font-black text-text-primary italic">{metaTokenBudget}</span>
                                             </div>
-                                            <input type="range" min="128" max="2048" step="128" value={metaTokenBudget} onChange={(e) => setMetaTokenBudget(parseInt(e.target.value))} className="w-full accent-white h-1 bg-white/5 rounded-full appearance-none cursor-pointer" />
+                                            <input type="range" min="128" max="2048" step="128" value={metaTokenBudget} onChange={(e) => setMetaTokenBudget(parseInt(e.target.value))} className="w-full accent-text-primary h-1 bg-surface-hover rounded-full appearance-none cursor-pointer" />
                                         </div>
 
                                         <div className="flex items-center justify-between pt-4">
-                                            <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Recursive</p>
-                                            <button onClick={() => setMetaRecursiveScanning(!metaRecursiveScanning)} className={`relative w-10 h-5 rounded-full transition-all ${metaRecursiveScanning ? 'bg-white' : 'bg-white/10'}`}>
-                                                <motion.div animate={{ x: metaRecursiveScanning ? 22 : 2 }} className={`absolute top-1 w-3 h-3 rounded-full ${metaRecursiveScanning ? 'bg-zinc-950' : 'bg-white/20'}`} />
+                                            <p className="text-[9px] font-black text-text-muted uppercase tracking-widest">Recursive</p>
+                                            <button onClick={() => setMetaRecursiveScanning(!metaRecursiveScanning)} className={`relative w-10 h-5 rounded-full transition-all ${metaRecursiveScanning ? 'bg-text-primary' : 'bg-surface-hover'}`}>
+                                                <motion.div animate={{ x: metaRecursiveScanning ? 22 : 2 }} className={`absolute top-1 w-3 h-3 rounded-full ${metaRecursiveScanning ? 'bg-bg-page' : 'bg-text-muted'}`} />
                                             </button>
                                         </div>
                                     </div>
 
                                     <div className="flex gap-4 pt-6">
-                                        <button onClick={() => setIsEditingMetadata(false)} className="flex-1 py-3 bg-white/5 text-white/20 rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors">Discard</button>
-                                        <button onClick={handleUpdateMetadata} className="flex-1 py-3 bg-white text-zinc-950 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-zinc-200 shadow-xl transition-all">Save Config</button>
+                                        <button onClick={() => setIsEditingMetadata(false)} className="flex-1 py-3 bg-surface-hover text-text-muted rounded-xl text-[9px] font-black uppercase tracking-widest hover:text-text-primary transition-colors">Discard</button>
+                                        <button onClick={handleUpdateMetadata} className="flex-1 py-3 bg-text-primary text-bg-page rounded-xl text-[9px] font-black uppercase tracking-widest hover:opacity-90 shadow-xl transition-all">Save Config</button>
                                     </div>
                                 </div>
                             )}
