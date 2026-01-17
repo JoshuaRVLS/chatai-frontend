@@ -136,8 +136,8 @@ export const MessageBubble = React.memo(
                     <div
                         onClick={handleTap}
                         className={`inline-block text-left rounded-2xl sm:rounded-3xl px-4 py-2.5 sm:px-5 sm:py-3 transition-all duration-300 cursor-pointer text-sm sm:text-[15px] leading-relaxed ${isUserMessage
-                            ? "bg-white text-zinc-950 font-bold shadow-lg"
-                            : "bg-zinc-900 border border-white/5 text-zinc-100 shadow-md"
+                            ? "bg-text-primary text-page font-bold shadow-lg"
+                            : "bg-surface border border-border-default text-text-primary shadow-md"
                             }`}
                     >
                         {isEditing ? (
@@ -145,7 +145,7 @@ export const MessageBubble = React.memo(
                                 <textarea
                                     value={editContent}
                                     onChange={(e) => onEditContentChange?.(e.target.value)}
-                                    className="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-sm resize-none focus:ring-1 focus:ring-white/20 outline-none"
+                                    className="w-full bg-input border border-border-input rounded-xl p-3 text-text-primary text-sm resize-none focus:ring-1 focus:ring-border-hover outline-none"
                                     rows={4}
                                     autoFocus
                                     onClick={(e) => e.stopPropagation()}
@@ -153,13 +153,13 @@ export const MessageBubble = React.memo(
                                 <div className="flex gap-2 justify-end">
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onCancelEdit?.(); }}
-                                        className="px-3 py-1 border border-white/10 rounded-lg hover:bg-white/5 transition-colors text-[10px] uppercase font-black tracking-widest text-white/50"
+                                        className="px-3 py-1 border border-border-default rounded-lg hover:bg-surface-hover transition-colors text-[10px] uppercase font-black tracking-widest text-text-muted"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={(e) => { e.stopPropagation(); onSaveEdit?.(message.id); }}
-                                        className="px-3 py-1 bg-white text-zinc-900 rounded-lg hover:bg-zinc-200 transition-colors text-[10px] uppercase font-black tracking-widest"
+                                        className="px-3 py-1 bg-text-primary text-page rounded-lg hover:opacity-90 transition-colors text-[10px] uppercase font-black tracking-widest"
                                     >
                                         Save
                                     </button>
@@ -197,7 +197,7 @@ export const MessageBubble = React.memo(
                         >
                             <button
                                 onClick={() => onEdit(message.id, message.content)}
-                                className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center bg-surface border border-border-default rounded-md hover:bg-surface-hover transition-all text-text-muted hover:text-text-primary"
                                 title="Edit"
                             >
                                 <FaEdit size={8} />
@@ -205,7 +205,7 @@ export const MessageBubble = React.memo(
 
                             <button
                                 onClick={() => onDelete(message.id)}
-                                className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
+                                className="w-6 h-6 flex items-center justify-center bg-surface border border-border-default rounded-md hover:bg-surface-hover transition-all text-text-muted hover:text-text-primary"
                                 title="Delete"
                             >
                                 <FaTrash size={8} />
@@ -214,7 +214,7 @@ export const MessageBubble = React.memo(
                             {!isUserMessage && (
                                 <button
                                     onClick={() => onRegenerate(message.id)}
-                                    className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
+                                    className="w-6 h-6 flex items-center justify-center bg-surface border border-border-default rounded-md hover:bg-surface-hover transition-all text-text-muted hover:text-text-primary"
                                     title="Regenerate"
                                 >
                                     <FaRedo size={8} />
@@ -224,7 +224,7 @@ export const MessageBubble = React.memo(
                             {isUserMessage && (
                                 <button
                                     onClick={() => onUserRegenerate(message.id)}
-                                    className="w-6 h-6 flex items-center justify-center bg-zinc-900 border border-white/5 rounded-md hover:bg-zinc-800 transition-all text-zinc-600 hover:text-white"
+                                    className="w-6 h-6 flex items-center justify-center bg-surface border border-border-default rounded-md hover:bg-surface-hover transition-all text-text-muted hover:text-text-primary"
                                     title="Edit and resend"
                                 >
                                     <FaRedo size={8} />
@@ -234,8 +234,8 @@ export const MessageBubble = React.memo(
                             <button
                                 onClick={() => onTogglePin(message.id, !!message.pinned)}
                                 className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.pinned
-                                    ? "bg-white text-zinc-950 border-white"
-                                    : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
+                                    ? "bg-text-primary text-page border-text-primary"
+                                    : "bg-surface border-border-default text-text-muted hover:bg-surface-hover hover:text-text-primary"
                                     }`}
                                 title={message.pinned ? "Unpin" : "Pin"}
                             >
@@ -247,8 +247,8 @@ export const MessageBubble = React.memo(
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "LIKE" ? "NONE" : "LIKE")}
                                         className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.feedback === "LIKE"
-                                            ? "bg-zinc-100 text-zinc-900 border-zinc-100"
-                                            : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
+                                            ? "bg-surface-hover text-text-primary border-border-hover"
+                                            : "bg-surface border-border-default text-text-muted hover:bg-surface-hover hover:text-text-primary"
                                             }`}
                                         title="Like"
                                     >
@@ -257,8 +257,8 @@ export const MessageBubble = React.memo(
                                     <button
                                         onClick={() => onFeedback(message.id, message.feedback === "DISLIKE" ? "NONE" : "DISLIKE")}
                                         className={`w-6 h-6 flex items-center justify-center border rounded-md transition-all ${message.feedback === "DISLIKE"
-                                            ? "bg-zinc-100 text-zinc-900 border-zinc-100"
-                                            : "bg-zinc-900 border-white/5 text-zinc-600 hover:bg-zinc-800 hover:text-white"
+                                            ? "bg-surface-hover text-text-primary border-border-hover"
+                                            : "bg-surface border-border-default text-text-muted hover:bg-surface-hover hover:text-text-primary"
                                             }`}
                                         title="Dislike"
                                     >

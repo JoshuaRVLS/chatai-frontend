@@ -45,7 +45,7 @@ const ChatNavbar = ({
     };
 
     return (
-        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl z-20">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 border-b border-border-default bg-surface/80 backdrop-blur-xl z-20">
             <div className="flex items-center gap-3 sm:gap-4">
                 <button
                     onClick={(e) => {
@@ -62,7 +62,7 @@ const ChatNavbar = ({
                         width={40}
                         height={40}
                         alt={characterName}
-                        className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-white/10 object-cover transition-all ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
+                        className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-border-default object-cover transition-all ${shouldBlur ? 'blur-md grayscale-[0.5]' : ''}`}
                     />
                     <AnimatePresence>
                         {shouldBlur && (
@@ -81,7 +81,7 @@ const ChatNavbar = ({
                     onClick={handleNavigateToProfile}
                     className="cursor-pointer hover:opacity-80 transition-opacity"
                 >
-                    <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-tight leading-none truncate max-w-[120px] sm:max-w-none">
+                    <h2 className="text-base sm:text-lg font-black text-text-primary uppercase tracking-tight leading-none truncate max-w-[120px] sm:max-w-none">
                         {characterName}
                     </h2>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -94,7 +94,7 @@ const ChatNavbar = ({
             <div className="flex items-center gap-1 sm:gap-1.5">
                 <button
                     onClick={onShowBrain}
-                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all border border-white/5"
+                    className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-all border border-border-default"
                     title="Intelligence Engine"
                 >
                     <motion.div
@@ -111,7 +111,7 @@ const ChatNavbar = ({
                 </button>
                 <button
                     onClick={() => setIsShareOpen(true)}
-                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-sky-400 hover:bg-sky-400/10 transition-all border border-white/5"
+                    className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-sky-400 hover:bg-sky-400/10 transition-all border border-border-default"
                     title="Share Character"
                 >
                     <FiShare2 size={12} />
@@ -119,7 +119,7 @@ const ChatNavbar = ({
                 {hasUndo && (
                     <button
                         onClick={onUndo}
-                        className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all border border-white/5"
+                        className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-all border border-border-default"
                         title="Undo"
                     >
                         <FaUndo size={10} />
@@ -127,7 +127,7 @@ const ChatNavbar = ({
                 )}
                 <button
                     onClick={onClearHistory}
-                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-red-400 hover:bg-red-400/10 transition-all border border-white/5"
+                    className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-red-400/10 transition-all border border-border-default"
                     title="Purge Logs"
                 >
                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
@@ -141,14 +141,14 @@ const ChatNavbar = ({
                 </button>
                 <button
                     onClick={onShowSettings}
-                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all border border-white/5"
+                    className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-all border border-border-default"
                     title="Parameters"
                 >
                     <FaCog size={10} />
                 </button>
                 <button
                     onClick={() => router.push("/")}
-                    className="w-8 h-8 rounded-xl bg-zinc-900 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all border border-white/5"
+                    className="w-8 h-8 rounded-xl bg-surface flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface-hover transition-all border border-border-default"
                 >
                     <FaTimes size={12} />
                 </button>

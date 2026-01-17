@@ -10,7 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { FaTimes } from "react-icons/fa";
 import ChatNavbar from "./ChatNavbar";
 import { useSettings } from "@/app/hooks/useSettings";
-import { FiEye } from "react-icons/fi";
+import { FiEye, FiArrowLeft } from "react-icons/fi";
 import dynamic from "next/dynamic";
 const ChatSettingsModal = dynamic(() => import("./ChatSettingsModal"), { ssr: false });
 const BrainPanel = dynamic(() => import("./BrainPanel"), { ssr: false });
@@ -134,8 +134,8 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
 
   if (isChatLoading || isMessagesLoading) return <LoadingScreen />;
-  if (chatError) return <div className="fixed inset-0 flex items-center justify-center bg-black text-red-400">Error: {(chatError as any).message}</div>;
-  if (!chat) return <div className="fixed inset-0 flex items-center justify-center bg-black text-gray-400">No chat data found.</div>;
+  if (chatError) return <div className="fixed inset-0 flex items-center justify-center bg-page text-red-500">Error: {(chatError as any).message}</div>;
+  if (!chat) return <div className="fixed inset-0 flex items-center justify-center bg-page text-text-muted">No chat data found.</div>;
 
   const characterImage = chat.character?.photo ? `/api/image/${chat.character.id}` : null;
   const characterThumbnail = chat.character?.photo ? `/api/image/${chat.character.id}?width=100` : null;
@@ -155,7 +155,7 @@ const Chat = ({ chatId }: { chatId: string }) => {
   const pinnedMessages = allMessages.filter(m => m.pinned);
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-zinc-950 text-white selection:bg-white/10 scroll-smooth">
+    <div className="fixed inset-0 flex flex-col bg-page text-text-primary selection:bg-text-primary/10 scroll-smooth">
       <ChatNavbar
         characterId={chat.character.id}
         characterName={chat.character.name}
@@ -275,11 +275,11 @@ const Chat = ({ chatId }: { chatId: string }) => {
                   top: modalPosition.y,
                 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="absolute w-full max-w-sm bg-slate-900/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl pointer-events-auto select-none touch-none"
+                className="absolute w-full max-w-sm bg-surface/90 border border-border-default rounded-[2.5rem] overflow-hidden shadow-2xl backdrop-blur-2xl pointer-events-auto select-none touch-none"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div
-                  className="relative h-64 w-full bg-slate-800 cursor-grab active:cursor-grabbing group"
+                  className="relative h-64 w-full bg-surface-hover cursor-grab active:cursor-grabbing group"
                 >
                   {profileModalImageLoading && (
                     <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
@@ -293,20 +293,21 @@ const Chat = ({ chatId }: { chatId: string }) => {
                     className={`object-cover transition-all duration-500 ${chat.character.isNsfw && settings.blurNsfw && !tempUnblurModal ? 'blur-2xl grayscale scale-110' : ''} ${profileModalImageLoading ? 'opacity-0' : 'opacity-100'}`}
                     onLoad={() => setProfileModalImageLoading(false)}
                   />
-                  <div className="absolute inset-0 bg-linear-to-t from-slate-900 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-linear-to-t from-surface via-transparent to-transparent opacity-60" />
                   <button
-                    onClick={() => setShowProfileModal(false)}
-                    className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-black/40 hover:bg-black/60 text-white rounded-full backdrop-blur-sm transition-all z-20"
+                    onClick={() => {
+                      window.history.back();
+                    }}
+                    className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center bg-surface hover:bg-surface-hover text-text-primary rounded-full backdrop-blur-sm transition-all z-20 border border-border-default shadow-lg"
                   >
-                    <FaTimes />
+                    <FiArrowLeft size={20} />
                   </button>
-
                   {chat.character.isNsfw && settings.blurNsfw && !tempUnblurModal && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
-                      <FiEye className="text-white/40 text-4xl mb-4" />
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-overlay/50 backdrop-blur-md rounded-t-3xl transition-all duration-500">
+                      <FiEye className="text-text-muted text-4xl mb-4" />
                       <button
                         onClick={() => setTempUnblurModal(true)}
-                        className="px-6 py-2.5 bg-white text-slate-900 rounded-full font-black uppercase text-[10px] tracking-widest hover:bg-primary transition-colors"
+                        className="px-6 py-2.5 bg-text-primary text-bg-page rounded-full font-black uppercase text-[10px] tracking-widest hover:opacity-80 transition-opacity shadow-lg"
                       >
                         Reveal Identity
                       </button>
@@ -316,15 +317,15 @@ const Chat = ({ chatId }: { chatId: string }) => {
 
                 <div className="p-8 space-y-6">
                   <div>
-                    <h2 className="text-2xl font-black italic text-white uppercase tracking-tighter mb-1">{chat.character.name}</h2>
-                    <p className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.3em]">AI Persona • Neural Network</p>
+                    <h2 className="text-2xl font-black italic text-text-primary uppercase tracking-tighter mb-1">{chat.character.name}</h2>
+                    <p className="text-[10px] font-black text-text-muted uppercase tracking-[0.3em]">AI Persona • Neural Network</p>
                   </div>
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-1 rounded-full bg-primary" />
-                      <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Core Narrative</span>
+                      <span className="text-[10px] font-black text-text-muted uppercase tracking-widest">Core Narrative</span>
                     </div>
-                    <p className="text-sm font-medium text-white/50 leading-relaxed italic line-clamp-4">
+                    <p className="text-sm font-medium text-text-secondary leading-relaxed italic line-clamp-4">
                       "{chat.character.bio}"
                     </p>
                     <button

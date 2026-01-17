@@ -104,7 +104,7 @@ const ChatInput = React.memo(({
     };
 
     return (
-        <div className="px-3 pt-2 pb-6 sm:p-4 bg-zinc-950/80 backdrop-blur-3xl border-t border-white/5">
+        <div className="px-3 pt-2 pb-6 sm:p-4 bg-surface/90 backdrop-blur-3xl border-t border-border-default">
             <div className="max-w-4xl mx-auto">
                 <AnimatePresence>
                     {suggestions.length > 0 && (
