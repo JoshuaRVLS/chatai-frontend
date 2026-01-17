@@ -26,14 +26,14 @@ const SettingsSidebar = ({ tabs, activeTab, setActiveTab, onDeleteClick }: Setti
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-300 text-left group w-full ${activeTab === tab.id
-                            ? "bg-white text-zinc-950 shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-                            : "bg-transparent text-zinc-500 hover:text-white hover:bg-white/5"
+                            ? "bg-text-primary text-white dark:text-black shadow-sm"
+                            : "bg-transparent text-text-muted hover:text-text-primary hover:bg-surface-hover"
                             }`}
                     >
                         <div
                             className={`text-xl transition-transform duration-300 p-2 rounded-lg ${activeTab === tab.id
-                                ? "bg-zinc-950 text-white scale-100"
-                                : "bg-transparent group-hover:bg-white/10 group-hover:scale-110"
+                                ? "bg-bg-page text-text-primary scale-100"
+                                : "bg-transparent group-hover:bg-surface group-hover:scale-110"
                                 }`}
                         >
                             {tab.icon}
@@ -47,22 +47,22 @@ const SettingsSidebar = ({ tabs, activeTab, setActiveTab, onDeleteClick }: Setti
                             </p>
                         </div>
                         {activeTab === tab.id ? (
-                            <FiChevronRight className="text-zinc-950 animate-pulse" />
+                            <FiChevronRight className="text-bg-page animate-pulse" />
                         ) : (
-                            <FiChevronRight className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 text-white/30" />
+                            <FiChevronRight className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300 text-text-primary/30" />
                         )}
                     </button>
                 ))}
             </nav>
 
-            <div className="h-px bg-white/5 mx-4 my-2" />
+            <div className="h-px bg-border-default mx-4 my-2" />
 
             <div className="mt-auto">
                 <button
                     onClick={onDeleteClick}
-                    className="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left group w-full hover:bg-error/10 border border-transparent hover:border-error/20 text-white/30 hover:text-error"
+                    className="flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 text-left group w-full hover:bg-error/10 border border-transparent hover:border-error/20 text-text-muted hover:text-error"
                 >
-                    <div className="text-xl group-hover:scale-110 transition-transform p-2 rounded-xl bg-white/5 group-hover:bg-error/20">
+                    <div className="text-xl group-hover:scale-110 transition-transform p-2 rounded-xl bg-surface group-hover:bg-error/20">
                         <FiTrash2 />
                     </div>
                     <div className="flex-1">

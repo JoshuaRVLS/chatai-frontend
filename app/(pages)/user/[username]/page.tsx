@@ -36,15 +36,17 @@ const UserProfilePage = () => {
     };
 
     if (isPending) return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-            <div className="w-12 h-12 border-4 border-white/5 border-t-white rounded-full animate-spin" />
+        <div className="min-h-screen bg-page flex items-center justify-center">
+            <div className="w-12 h-12 border-4 border-text-primary/10 border-t-text-primary rounded-full animate-spin" />
         </div>
     );
 
     if (error || !user) return (
-        <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center space-y-4">
-            <h2 className="text-2xl font-black text-white uppercase tracking-wider">User Not Found</h2>
-            <Link href="/" className="text-zinc-400 hover:text-white transition-colors uppercase tracking-widest text-xs font-bold">Return Home</Link>
+        <div className="min-h-screen bg-page flex items-center justify-center">
+            <div className="text-center space-y-4">
+                <h2 className="text-2xl font-black text-text-primary uppercase tracking-wider">User Not Found</h2>
+                <Link href="/" className="text-text-muted hover:text-text-primary transition-colors uppercase tracking-widest text-xs font-bold">Return Home</Link>
+            </div>
         </div>
     );
 
@@ -67,7 +69,7 @@ const UserProfilePage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-zinc-950 pt-24 pb-20 px-6 sm:px-12 relative overflow-hidden">
+        <div className="min-h-screen bg-page pt-24 pb-20 px-6 sm:px-12 relative overflow-hidden">
             {/* Background Effects */}
             <div className="fixed inset-0 pointer-events-none">
                 <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/5 blur-[150px] rounded-full" />
@@ -79,7 +81,7 @@ const UserProfilePage = () => {
                 <motion.div variants={fadeUpVariants} initial="hidden" animate="visible">
                     <Link
                         href="/"
-                        className="inline-flex items-center gap-2 text-white/30 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest mb-8 group"
+                        className="inline-flex items-center gap-2 text-text-muted hover:text-text-primary transition-colors text-[10px] font-black uppercase tracking-widest mb-8 group"
                     >
                         <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" /> Back to Home
                     </Link>
@@ -90,10 +92,10 @@ const UserProfilePage = () => {
                     initial="hidden"
                     animate="visible"
                     variants={scaleInVariants}
-                    className="flex flex-col md:flex-row items-start md:items-end gap-8 border-b border-white/5 pb-12"
+                    className="flex flex-col md:flex-row items-start md:items-end gap-8 border-b border-border-default pb-12"
                 >
                     <div className="relative group">
-                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-zinc-900 bg-zinc-800 shadow-2xl relative z-10">
+                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-surface bg-surface shadow-2xl relative z-10">
                             <UserAvatar
                                 name={user.username}
                                 image={user.profileImage ? bytesToBase64(user.profileImage) : null}
@@ -106,10 +108,10 @@ const UserProfilePage = () => {
 
                     <div className="flex-1 space-y-4">
                         <div>
-                            <h1 className="text-4xl md:text-6xl font-black text-white italic tracking-tighter uppercase mb-2">
+                            <h1 className="text-4xl md:text-6xl font-black text-text-primary italic tracking-tighter uppercase mb-2">
                                 {user.username}
                             </h1>
-                            <div className="flex flex-wrap items-center gap-6 text-xs font-bold text-white/40 uppercase tracking-wider">
+                            <div className="flex flex-wrap items-center gap-6 text-xs font-bold text-text-muted uppercase tracking-wider">
                                 <span className="flex items-center gap-2">
                                     <FiCalendar /> Joined {new Date(user.createdAt).toLocaleDateString()}
                                 </span>
@@ -123,7 +125,7 @@ const UserProfilePage = () => {
                         </div>
 
                         {user.bio && (
-                            <p className="max-w-2xl text-white/80 leading-relaxed font-medium">
+                            <p className="max-w-2xl text-text-secondary leading-relaxed font-medium">
                                 {user.bio}
                             </p>
                         )}
@@ -131,23 +133,23 @@ const UserProfilePage = () => {
                 </motion.div>
 
                 {/* Tabs */}
-                <div className="flex items-center gap-8 border-b border-white/5">
+                <div className="flex items-center gap-8 border-b border-border-default">
                     <button
                         onClick={() => handleTabChange('characters')}
-                        className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'characters' ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
+                        className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'characters' ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'}`}
                     >
                         Characters
                         {activeTab === 'characters' && (
-                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary" />
                         )}
                     </button>
                     <button
                         onClick={() => handleTabChange('lorebooks')}
-                        className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'lorebooks' ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
+                        className={`pb-4 text-sm font-black uppercase tracking-wider transition-colors relative ${activeTab === 'lorebooks' ? 'text-text-primary' : 'text-text-muted hover:text-text-primary'}`}
                     >
                         Lorebooks
                         {activeTab === 'lorebooks' && (
-                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-white" />
+                            <motion.div layoutId="activeTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary" />
                         )}
                     </button>
                 </div>
@@ -164,8 +166,8 @@ const UserProfilePage = () => {
                                 transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-1.5 h-8 bg-white rounded-full" />
-                                    <h2 className="text-2xl font-black text-white uppercase tracking-wide">Masterpieces</h2>
+                                    <div className="w-1.5 h-8 bg-accent-primary rounded-full" />
+                                    <h2 className="text-2xl font-black text-text-primary uppercase tracking-wide">Masterpieces</h2>
                                 </div>
 
                                 {user.charCreated.length > 0 ? (
@@ -206,8 +208,8 @@ const UserProfilePage = () => {
                                 transition={{ duration: 0.2 }}
                             >
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-1.5 h-8 bg-purple-400 rounded-full" />
-                                    <h2 className="text-2xl font-black text-white uppercase tracking-wide">World Knowledge</h2>
+                                    <div className="w-1.5 h-8 bg-accent-secondary rounded-full" />
+                                    <h2 className="text-2xl font-black text-text-primary uppercase tracking-wide">World Knowledge</h2>
                                 </div>
 
                                 {user.lorebooks && user.lorebooks.length > 0 ? (
@@ -242,17 +244,17 @@ const UserProfilePage = () => {
                             <button
                                 onClick={handlePrev}
                                 disabled={currentPage === 1}
-                                className="px-6 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-white transition-colors"
+                                className="px-6 py-2 bg-surface hover:bg-surface-hover border border-border-default disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-text-primary transition-colors"
                             >
                                 Previous
                             </button>
-                            <span className="text-xs font-bold text-zinc-500">
+                            <span className="text-xs font-black text-text-muted uppercase tracking-wider">
                                 Page {currentPage} of {totalPages}
                             </span>
                             <button
                                 onClick={handleNext}
                                 disabled={currentPage === totalPages}
-                                className="px-6 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-white transition-colors"
+                                className="px-6 py-2 bg-surface hover:bg-surface-hover border border-border-default disabled:opacity-50 disabled:cursor-not-allowed rounded-full text-xs font-black uppercase tracking-wider text-text-primary transition-colors"
                             >
                                 Next
                             </button>
@@ -265,13 +267,13 @@ const UserProfilePage = () => {
 };
 
 const EmptyState = ({ icon, title, description }: { icon: any, title: string, description: string }) => (
-    <div className="w-full py-20 border border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center text-center gap-4">
-        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/20">
+    <div className="w-full py-20 border border-dashed border-border-default rounded-3xl flex flex-col items-center justify-center text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-surface-hover flex items-center justify-center text-text-muted">
             {icon}
         </div>
         <div>
-            <h3 className="text-lg font-black text-white uppercase tracking-wider">{title}</h3>
-            <p className="text-white/40 text-sm">{description}</p>
+            <h3 className="text-lg font-black text-text-primary uppercase tracking-wider">{title}</h3>
+            <p className="text-text-secondary text-sm">{description}</p>
         </div>
     </div>
 );

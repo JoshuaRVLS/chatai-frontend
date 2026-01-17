@@ -25,7 +25,16 @@ const ExplorePage = () => {
     }, [searchParams]);
 
     return (
-        <div className="flex flex-col w-full gap-8 pt-24 pb-20 min-h-screen px-6 md:px-12 bg-zinc-950">
+        <div className="flex flex-col w-full gap-8 pt-24 pb-20 min-h-screen px-6 md:px-12 bg-page">
+            {/* Header */}
+            <div>
+                <h1 className="text-6xl md:text-8xl font-black text-text-primary italic uppercase tracking-tighter mb-4">
+                    Explore
+                </h1>
+                <p className="text-text-muted font-bold uppercase tracking-widest text-xs md:text-sm">
+                    Discover new characters and adventures
+                </p>
+            </div>
             <div className="max-w-[1600px] mx-auto w-full">
                 <Characters
                     searchQuery={searchQuery}

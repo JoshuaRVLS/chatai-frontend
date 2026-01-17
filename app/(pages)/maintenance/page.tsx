@@ -1,52 +1,97 @@
 'use client';
 
 import React from 'react';
+import { FiCpu } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 export default function MaintenancePage() {
-    return (
-        <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4 relative overflow-hidden">
-            {/* Background Effects */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-zinc-800/20 rounded-full blur-[120px] pointer-events-none"></div>
+    const router = useRouter();
+    const { data: session } = useSession();
+    // Simplified checks to avoid hydration mismatch
+    const isAdmin = session?.user?.email === 'admin@jchatai.com'; // Replace with real check
 
-            <div className="relative z-10 max-w-lg w-full text-center space-y-8 animate-fade-in">
-                <div className="flex justify-center">
-                    <div className="w-20 h-20 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl backdrop-blur-xl group">
-                        <svg className="w-10 h-10 text-zinc-400 group-hover:text-white transition-colors animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+    return (
+        <div className="min-h-screen bg-page flex flex-col items-center justify-center relative overflow-hidden selection:bg-text-primary selection:text-bg-page">
+            {/* Background Grid Pattern */}
+            <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                <div className="absolute inset-0 bg-size-[100%_2px,3px_100%] bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_50%,var(--bg-page),transparent)]" />
+            </div>
+
+            {/* Floating Orbs */}
+            <div className="absolute top-20 left-20 w-72 h-72 bg-surface-hover/50 rounded-full blur-[100px] animate-pulse pointer-events-none" />
+            <div className="absolute bottom-20 right-20 w-96 h-96 bg-surface-hover/30 rounded-full blur-[120px] animate-pulse delay-700 pointer-events-none" />
+
+            <div className="z-10 text-center space-y-8 max-w-2xl px-6">
+                {/* Icon Container */}
+                <div className="relative inline-block group">
+                    <div className="absolute inset-0 bg-text-primary/20 blur-xl rounded-full group-hover:bg-text-primary/30 transition-all duration-500" />
+                    <div className="relative w-24 h-24 bg-surface/50 backdrop-blur-md rounded-3xl border border-border-default flex items-center justify-center shadow-2xl transform group-hover:scale-105 transition-transform duration-500">
+                        <FiCpu className="text-5xl text-text-primary animate-spin-slow" />
+                    </div>
+                    {/* Status Dot */}
+                    <div className="absolute -top-1 -right-1">
+                        <span className="relative flex h-4 w-4">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-4 w-4 bg-orange-500"></span>
+                        </span>
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                    <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none text-white">
-                        Under Maintenance
+                    <h1 className="text-5xl md:text-7xl font-black text-text-primary italic tracking-tighter uppercase leading-none">
+                        System<br />
+                        <span className="text-transparent bg-clip-text bg-linear-to-r from-text-secondary to-text-muted">Upgrade</span>
                     </h1>
-                    <p className="text-sm font-bold text-zinc-500 uppercase tracking-[0.2em]">
-                        Evolution in progress
+
+                    <div className="h-1 w-24 mx-auto bg-linear-to-r from-transparent via-border-default to-transparent" />
+
+                    <p className="text-text-muted text-lg md:text-xl font-medium max-w-lg mx-auto leading-relaxed">
+                        Our digital architects are enhancing the neural pathways.
+                        <span className="block mt-2 text-sm uppercase tracking-widest opacity-60">Estimated restoration: Shortly</span>
                     </p>
                 </div>
 
-                <div className="p-1 w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                {/* Progress Indicator */}
+                <div className="w-full max-w-sm mx-auto space-y-2">
+                    <div className="flex justify-between text-[10px] font-black uppercase text-text-muted mb-1 tracking-widest">
+                        <span>System Status</span>
+                        <span>Optimizing...</span>
+                    </div>
+                    <div className="h-1 bg-surface-hover w-full rounded-full overflow-hidden">
+                        <div className="h-full bg-text-primary w-2/3 rounded-full animate-progress-indeterminate will-change-transform" />
+                    </div>
+                </div>
 
-                <p className="text-xs font-black uppercase tracking-widest text-zinc-600 leading-loose mx-auto max-w-sm">
-                    We're currently performing scheduled system upgrades to bring you a faster, more intelligent experience. We'll be back shortly.
-                </p>
+                {/* Admin Override - Hidden in production usually, or protected */}
+                {isAdmin && (
+                    <div className="pt-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+                        <button
+                            onClick={() => router.push('/')}
+                            className="group relative px-8 py-3 bg-surface/50 hover:bg-surface border border-border-default rounded-xl overflow-hidden transition-all duration-300"
+                        >
+                            <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-text-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                            <span className="relative text-xs font-black uppercase tracking-widest text-text-muted group-hover:text-text-primary transition-colors flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                Override Access
+                            </span>
+                        </button>
+                    </div>
+                )}
 
-                <div className="pt-8">
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-white transition-all underline underline-offset-8 decoration-zinc-800"
-                    >
-                        Try connecting again
-                    </button>
+                <div className="pt-12 flex justify-center gap-6 opacity-40 hover:opacity-100 transition-opacity">
+                    <a href="#" className="text-text-muted hover:text-text-primary hover:underline decoration-border-default underline-offset-8 text-xs uppercase font-bold tracking-widest transition-all hover:decoration-text-primary">Status Page</a>
+                    <a href="#" className="text-text-muted hover:text-text-primary hover:underline decoration-border-default underline-offset-8 text-xs uppercase font-bold tracking-widest transition-all hover:decoration-text-primary">Support</a>
+                    <a href="#" className="text-text-muted hover:text-text-primary hover:underline decoration-border-default underline-offset-8 text-xs uppercase font-bold tracking-widest transition-all hover:decoration-text-primary">Discord</a>
                 </div>
             </div>
 
-            {/* Bottom Branding */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-800">Powered by</span>
-                <span className="text-[10px] font-black uppercase tracking-widest text-white tracking-widest">JChatAI v2.0</span>
+            {/* Footer */}
+            <div className="absolute bottom-6 left-0 right-0 text-center">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-text-muted/30">
+                    JChatAI &copy; 2024
+                </p>
             </div>
         </div>
     );

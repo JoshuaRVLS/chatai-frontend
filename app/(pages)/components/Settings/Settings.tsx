@@ -19,6 +19,7 @@ import DeleteConfirmation from "./DeleteConfirmation";
 import AiSettings from "./AiSettings";
 import Safety from "./Safety";
 import SettingsLayout from "./SettingsLayout";
+import ThemeToggle from "./ThemeToggle";
 
 const Settings = () => {
   const { user, status: authStatus } = useContext(AuthContext);
@@ -95,6 +96,9 @@ const Settings = () => {
 
   return (
     <>
+      <div className="fixed top-24 right-6 z-50 mobile-hide">
+        <ThemeToggle />
+      </div>
       <SettingsLayout
         tabs={tabs}
         activeTab={activeTab}

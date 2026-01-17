@@ -53,14 +53,14 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ name, image, size = "md", class
     };
 
     const [imageLoading, setImageLoading] = React.useState(true);
-    const containerClasses = `relative rounded-2xl flex items-center justify-center overflow-hidden border border-white/10 shadow-2xl transition-all ${sizeClasses[size]} ${className}`;
+    const containerClasses = `relative rounded-2xl flex items-center justify-center overflow-hidden border border-border-default shadow-2xl transition-all ${sizeClasses[size]} ${className}`;
 
     if (image && !imageError) {
         return (
             <div className={containerClasses}>
                 {imageLoading && (
-                    <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center">
-                        <div className="w-4 h-4 border border-white/10 border-t-white/40 rounded-full animate-spin" />
+                    <div className="absolute inset-0 bg-surface-hover animate-pulse flex items-center justify-center">
+                        <div className="w-4 h-4 border border-border-default border-t-text-muted rounded-full animate-spin" />
                     </div>
                 )}
                 <img

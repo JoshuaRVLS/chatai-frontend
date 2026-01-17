@@ -63,7 +63,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+                        className="fixed inset-0 bg-overlay backdrop-blur-sm z-[100]"
                     />
 
                     {/* Modal */}
@@ -71,16 +71,16 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm bg-zinc-900 border border-white/10 rounded-2xl p-6 shadow-2xl z-[101]"
+                        className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm bg-surface border border-border-default rounded-2xl p-6 shadow-2xl z-[101]"
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
-                                <FiShare2 className="text-zinc-500" />
+                            <h3 className="text-lg font-black text-text-primary uppercase tracking-tight flex items-center gap-2">
+                                <FiShare2 className="text-text-muted" />
                                 Share Character
                             </h3>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-zinc-400 hover:text-white"
+                                className="p-2 rounded-lg hover:bg-surface-hover transition-colors text-text-muted hover:text-text-primary"
                             >
                                 <FiX size={18} />
                             </button>
@@ -88,23 +88,23 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
 
                         <div className="space-y-4">
                             {/* Copy Link Section */}
-                            <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex items-center gap-3">
+                            <div className="p-3 rounded-xl bg-input border border-border-input flex items-center gap-3">
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] text-zinc-500 uppercase font-bold mb-1">Character Link</p>
-                                    <p className="text-xs text-white truncate font-mono">{url}</p>
+                                    <p className="text-[10px] text-text-muted uppercase font-bold mb-1">Character Link</p>
+                                    <p className="text-xs text-text-primary truncate font-mono">{url}</p>
                                 </div>
                                 <button
                                     onClick={handleCopy}
                                     className={`p-2.5 rounded-lg border transition-all duration-300 flex items-center justify-center ${copied
                                         ? 'bg-green-500/20 text-green-500 border-green-500/30'
-                                        : 'bg-white/5 text-zinc-400 border-white/10 hover:bg-white/10 hover:text-white'
+                                        : 'bg-surface-hover text-text-muted border-border-default hover:bg-surface-hover/80 hover:text-text-primary'
                                         }`}
                                 >
                                     {copied ? <FiCheck size={16} /> : <FiLink size={16} />}
                                 </button>
                             </div>
 
-                            <div className="w-full h-px bg-white/5" />
+                            <div className="w-full h-px bg-border-default" />
 
                             {/* Social Grid */}
                             <div className="grid grid-cols-4 gap-3">
@@ -112,10 +112,10 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, title, text, u
                                     <button
                                         key={link.name}
                                         onClick={link.onClick}
-                                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-white/5 bg-white/2 transition-all duration-300 group ${link.color}`}
+                                        className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border border-border-default bg-surface transition-all duration-300 group ${link.color}`}
                                     >
                                         <link.icon size={24} className="transition-transform group-hover:scale-110" />
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 group-hover:text-inherit">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-text-muted group-hover:text-inherit">
                                             {link.name}
                                         </span>
                                     </button>
