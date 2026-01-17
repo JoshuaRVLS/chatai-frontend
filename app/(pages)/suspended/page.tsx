@@ -41,8 +41,7 @@ export default function SuspendedPage() {
 
     const handleRefresh = async () => {
         await update(); // Refreshes the token via DB fetch
-        router.push('/');
-        router.refresh(); // Ensure middleware re-runs
+        window.location.href = '/'; // Force hard reload to ensure middleware receives fresh cookie
     };
 
     const formatDate = (dateStr: string | null): string => {
