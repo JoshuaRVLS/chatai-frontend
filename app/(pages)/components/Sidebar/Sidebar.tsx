@@ -15,6 +15,7 @@ import {
     FiSettings,
     FiGrid
 } from "react-icons/fi";
+import ThemeToggle from "../Settings/ThemeToggle";
 import { Orbitron } from "next/font/google";
 import UserAvatar from "../Common/UserAvatar";
 import { useAuthModalStore } from "@/app/hooks/useAuthModalStore";
@@ -24,18 +25,18 @@ const orbitron = Orbitron({ subsets: ["latin"], weight: ["900"] });
 const MobileHeader = ({ isOpen, toggle, session }: { isOpen: boolean; toggle: () => void; session: any }) => {
     // Only show on mobile, fixed at top
     return (
-        <div className={`md:hidden fixed top-0 left-0 right-0 z-40 bg-zinc-950 border-b border-white/5 px-4 py-3 flex items-center justify-between transition-transform duration-300 ${isOpen ? '-translate-y-full' : 'translate-y-0'}`}>
+        <div className={`md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-border-default px-4 py-3 flex items-center justify-between transition-transform duration-300 ${isOpen ? '-translate-y-full' : 'translate-y-0'}`}>
             <div className="flex items-center gap-4">
                 <button
                     onClick={toggle}
-                    className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
+                    className="w-10 h-10 rounded-full bg-surface-hover border border-border-default flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all"
                 >
-                    <span className="w-5 h-0.5 bg-white rounded-full" />
-                    <span className="w-5 h-0.5 bg-white rounded-full" />
-                    <span className="w-5 h-0.5 bg-white rounded-full" />
+                    <span className="w-5 h-0.5 bg-text-primary rounded-full" />
+                    <span className="w-5 h-0.5 bg-text-primary rounded-full" />
+                    <span className="w-5 h-0.5 bg-text-primary rounded-full" />
                 </button>
                 <Link href="/" className="group">
-                    <span className={`${orbitron.className} text-xl font-black tracking-tighter text-white`}>
+                    <span className={`${orbitron.className} text-xl font-black tracking-tighter text-text-primary`}>
                         JChatAI
                     </span>
                 </Link>
@@ -48,7 +49,7 @@ const MobileHeader = ({ isOpen, toggle, session }: { isOpen: boolean; toggle: ()
                         image={session.user?.image}
                         size="sm"
                     />
-                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-zinc-900 rounded-full" />
+                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-bg-surface rounded-full" />
                 </Link>
             )}
         </div>
@@ -102,13 +103,13 @@ const Sidebar = () => {
             <Link
                 href={href}
                 className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all group ${isActive
-                    ? "bg-white text-zinc-950 shadow-lg shadow-white/5"
-                    : "text-zinc-500 hover:text-white hover:bg-white/5"
+                    ? "bg-text-primary text-page shadow-lg"
+                    : "text-text-muted hover:text-text-primary hover:bg-surface-hover"
                     }`}
             >
                 {/* Handle both component and element icon types roughly */}
-                {React.isValidElement(Icon) ? Icon : <Icon size={20} className={isActive ? "text-zinc-950" : "text-zinc-500 group-hover:text-white"} />}
-                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${isActive ? "text-zinc-950" : ""}`}>
+                {React.isValidElement(Icon) ? Icon : <Icon size={20} className={isActive ? "text-page" : "text-text-muted group-hover:text-text-primary"} />}
+                <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${isActive ? "text-page" : ""}`}>
                     {label}
                 </span>
             </Link>
@@ -142,7 +143,7 @@ const Sidebar = () => {
             )}
 
             <aside className={`
-                fixed top-0 left-0 h-screen w-64 bg-black border-r border-white/5 z-50 flex flex-col
+                fixed top-0 left-0 h-screen w-64 bg-surface border-r border-border-default z-50 flex flex-col
                 transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0
@@ -150,10 +151,10 @@ const Sidebar = () => {
                 {/* Logo Area */}
                 <div className="px-8 pb-4 pt-24 md:p-8 md:pb-4">
                     <Link href="/" className="group block">
-                        <span className={`${orbitron.className} text-2xl font-black tracking-tighter text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-zinc-200 group-hover:to-zinc-500 transition-all`}>
+                        <span className={`${orbitron.className} text-2xl font-black tracking-tighter text-text-primary group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-linear-to-r group-hover:from-text-muted group-hover:to-text-primary transition-all`}>
                             JChatAI
                         </span>
-                        <div className="h-1 w-8 bg-white/20 mt-2 rounded-full group-hover:w-full transition-all duration-500" />
+                        <div className="h-1 w-8 bg-border-hover mt-2 rounded-full group-hover:w-full transition-all duration-500" />
                     </Link>
                 </div>
 
@@ -196,27 +197,30 @@ const Sidebar = () => {
                 </div>
 
                 {/* Profile / Footer Area */}
-                <div className="p-4 border-t border-white/5 bg-black">
+                <div className="p-4 border-t border-border-default bg-surface">
+                    <div className="mb-4 flex justify-center">
+                        <ThemeToggle />
+                    </div>
                     {session ? (
                         <div className="flex flex-col gap-2">
-                            <Link href="/settings" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-colors group">
+                            <Link href="/settings" className="flex items-center gap-3 p-3 rounded-xl hover:bg-surface-hover transition-colors group">
                                 <UserAvatar
                                     name={session.user?.name || (session.user as any)?.username}
                                     image={session.user?.image}
                                     size="sm"
                                 />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-[10px] font-black text-white uppercase tracking-wider truncate">
+                                    <p className="text-[10px] font-black text-text-primary uppercase tracking-wider truncate">
                                         {session.user?.name || (session.user as any)?.username}
                                     </p>
-                                    <p className="text-[8px] font-bold text-zinc-600 uppercase">
+                                    <p className="text-[8px] font-bold text-text-muted uppercase">
                                         {(session.user as any)?.isAdmin ? 'Administrator' : 'Verified User'}
                                     </p>
                                 </div>
                             </Link>
                             <button
                                 onClick={() => signOut()}
-                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-white/5 text-zinc-500 hover:text-white hover:bg-white/5 hover:border-white/10 transition-all"
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-border-default text-text-muted hover:text-text-primary hover:bg-surface-hover hover:border-border-hover transition-all"
                             >
                                 <FiLogOut size={14} />
                                 <span className="text-[9px] font-black uppercase tracking-widest">Sign Out</span>
@@ -225,7 +229,7 @@ const Sidebar = () => {
                     ) : (
                         <button
                             onClick={() => openModal('login')}
-                            className="w-full py-3 rounded-xl bg-white text-zinc-950 font-black uppercase tracking-widest text-[9px] hover:bg-zinc-200 transition-colors"
+                            className="w-full py-3 rounded-xl bg-text-primary text-page font-black uppercase tracking-widest text-[9px] hover:opacity-90 transition-colors"
                         >
                             Sign In / Register
                         </button>
