@@ -402,7 +402,7 @@ const MyCharacters: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-black text-white italic tracking-tighter uppercase">
-                  {data && data.length > 0 ? "No Matches Found" : "Archive Null"}
+                  {data && data.length > 0 ? "No Matches Found" : "No Characters Created"}
                 </h3>
                 <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest leading-relaxed">
                   {data && data.length > 0

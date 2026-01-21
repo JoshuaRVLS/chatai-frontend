@@ -304,10 +304,10 @@ const Persona: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-black text-white italic tracking-tight uppercase leading-none">
-                    No Core Detected
+                    No Persona Yet...
                   </h3>
                   <p className="text-zinc-700 text-[10px] font-black uppercase tracking-widest leading-relaxed">
-                    Your digital existence is currently amorphous. Initialize a persona core for identity synchronization.
+                    No persona yet. Create your first persona!
                   </p>
                 </div>
                 <motion.button
@@ -316,36 +316,14 @@ const Persona: React.FC = () => {
                   whileTap={{ scale: 0.95 }}
                   className="px-8 py-3 bg-white text-zinc-950 font-black uppercase tracking-widest text-[10px] rounded-lg shadow-xl"
                 >
-                  <FaPlus className="inline mr-2" size={10} /> Initialize System
+                  <FaPlus className="inline mr-2" size={10} /> Add Persona
                 </motion.button>
               </div>
             </motion.div>
           )}
         </motion.div>
 
-        {/* Info Module */}
-        {data && data.length > 0 && (
-          <motion.div
-            className="mt-16"
-            variants={item}
-          >
-            <div className="relative bg-white/1 border border-white/5 rounded-2xl p-8 overflow-hidden">
-              <div className="flex flex-col sm:flex-row items-start gap-6 relative z-10">
-                <div className="w-12 h-12 bg-white/5 rounded-lg flex items-center justify-center text-zinc-400 border border-white/10 shadow-xl shrink-0">
-                  <FaInfo className="text-lg" />
-                </div>
-                <div className="space-y-2">
-                  <h4 className="text-xl font-black text-white italic tracking-tight uppercase leading-none">
-                    Full Name
-                  </h4>
-                  <p className="text-zinc-600 text-[10px] leading-relaxed font-bold max-w-2xl uppercase tracking-tighter">
-                    Persona profiles serve as the semantic foundation for all AI interactions. Each identity encapsulates specific behavioral logic and contextual memory, allowing the AI systems to adapt their response parameters.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+
       </motion.div>
     </div>
   );

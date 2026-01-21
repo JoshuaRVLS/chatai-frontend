@@ -19,7 +19,7 @@ const TrendingAuthors = () => {
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-8 bg-linear-to-b from-purple-400 to-pink-500 rounded-full" />
                     <h2 className="text-2xl font-black text-text-primary uppercase tracking-wide flex items-center gap-3 italic">
-                        Top Architects <FiUser className="text-purple-400" />
+                        Top Authors <FiUser className="text-purple-400" />
                     </h2>
                 </div>
             </div>

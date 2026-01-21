@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { FiUser, FiCalendar, FiBox, FiMessageSquare, FiChevronLeft, FiBook } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiBox, FiMessageSquare, FiChevronLeft, FiBook, FiAlertTriangle } from 'react-icons/fi';
 import CharacterCard from '../../components/CharacterCard/CharacterCard';
 import LorebookCard from '../../components/Lorebooks/LorebookCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -13,6 +13,7 @@ import { fadeUpVariants, scaleInVariants } from '../../components/Animations/var
 import { bytesToBase64 } from '@/app/utils/image';
 import { useState } from 'react';
 import UserAvatar from '../../components/Common/UserAvatar';
+import { ReportModal } from '../../components/report/ReportModal';
 
 const UserProfilePage = () => {
     const { data: session } = useSession();
@@ -21,6 +22,7 @@ const UserProfilePage = () => {
     const username = params.username as string;
     const [activeTab, setActiveTab] = useState<'characters' | 'lorebooks'>('characters');
     const [currentPage, setCurrentPage] = useState(1);
+    const [isReportOpen, setIsReportOpen] = useState(false);
     const ITEMS_PER_PAGE = 20;
 
     const { data: user, isPending, error } = useQuery({
@@ -108,9 +110,18 @@ const UserProfilePage = () => {
 
                     <div className="flex-1 space-y-4">
                         <div>
-                            <h1 className="text-4xl md:text-6xl font-black text-text-primary italic tracking-tighter uppercase mb-2">
-                                {user.username}
-                            </h1>
+                            <div className="flex items-center justify-between gap-4">
+                                <h1 className="text-4xl md:text-6xl font-black text-text-primary italic tracking-tighter uppercase mb-2">
+                                    {user.username}
+                                </h1>
+                                <button
+                                    onClick={() => setIsReportOpen(true)}
+                                    className="px-4 py-2 bg-red-500/5 text-red-500/60 font-bold text-[10px] uppercase tracking-widest rounded-lg hover:bg-red-500/10 hover:text-red-400 transition-colors flex items-center gap-2 border border-red-500/5"
+                                >
+                                    <FiAlertTriangle size={12} />
+                                    <span>Report User</span>
+                                </button>
+                            </div>
                             <div className="flex flex-wrap items-center gap-6 text-xs font-bold text-text-muted uppercase tracking-wider">
                                 <span className="flex items-center gap-2">
                                     <FiCalendar /> Joined {new Date(user.createdAt).toLocaleDateString()}
@@ -131,6 +142,12 @@ const UserProfilePage = () => {
                         )}
                     </div>
                 </motion.div>
+
+                <ReportModal
+                    isOpen={isReportOpen}
+                    onClose={() => setIsReportOpen(false)}
+                    targetUserId={user.id}
+                />
 
                 {/* Tabs */}
                 <div className="flex items-center gap-8 border-b border-border-default">

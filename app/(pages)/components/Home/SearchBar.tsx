@@ -37,9 +37,9 @@ const SearchSuggestItem = ({
     return (
         <button
             onClick={handleClick}
-            className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-white/5 rounded-2xl sm:rounded-[1.75rem] transition-all group"
+            className="w-full flex items-center gap-3 sm:gap-5 p-3 sm:p-4 hover:bg-surface-hover rounded-2xl sm:rounded-[1.75rem] transition-all group"
         >
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/5 overflow-hidden border border-white/5 group-hover:border-primary/30 shadow-lg">
+            <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-surface-hover overflow-hidden border border-border-default group-hover:border-primary/30 shadow-lg">
                 <img
                     src={`/api/image/${char.id}`}
                     alt={char.name}
@@ -59,14 +59,14 @@ const SearchSuggestItem = ({
                 </AnimatePresence>
             </div>
             <div className="flex-1 text-left">
-                <p className="text-xs sm:text-sm font-black text-white group-hover:text-primary transition-colors tracking-tight uppercase italic flex items-center gap-2">
+                <p className="text-xs sm:text-sm font-black text-text-primary group-hover:text-primary transition-colors tracking-tight uppercase italic flex items-center gap-2">
                     {char.name}
                     {char.isNsfw && (
                         <span className="px-1.5 py-0.5 rounded text-[8px] bg-orange-500/10 text-orange-500 border border-orange-500/20">NSFW</span>
                     )}
                 </p>
                 <div className="flex items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
-                    <span className="text-[8px] sm:text-[10px] text-white/30 font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author?.username}</span>
+                    <span className="text-[8px] sm:text-[10px] text-text-muted font-bold uppercase tracking-widest truncate max-w-[80px] sm:max-w-none">{char.author?.username}</span>
                     <div className="hidden xs:flex gap-1.5">
                         {char.tags?.slice(0, 1).map((tag: any) => (
                             <span key={tag.id} className="text-[8px] sm:text-[9px] text-primary/40 font-black uppercase tracking-tighter">#{tag.name}</span>
@@ -74,7 +74,7 @@ const SearchSuggestItem = ({
                     </div>
                 </div>
             </div>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-white/5 flex items-center justify-center text-white/5 group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-border-default flex items-center justify-center text-text-muted group-hover:text-primary/40 group-hover:border-primary/20 transition-all">
                 <FiSearch className="w-3 h-3 sm:w-[14px] sm:h-[14px]" />
             </div>
         </button>
@@ -156,8 +156,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", show
     return (
         <div ref={containerRef} className="relative w-full z-[999]">
             <form onSubmit={handleSearchSubmit} className="relative group">
-                <div className="relative flex items-center bg-white/5 border border-white/10 rounded-xl px-3 py-2 transition-all focus-within:border-primary/50 focus-within:bg-white/10">
-                    <FiSearch className={`mr-2 transition-colors ${loading ? 'text-primary animate-pulse' : 'text-white/40 group-focus-within:text-white'}`} />
+                <div className="relative flex items-center bg-surface border border-border-default rounded-xl px-3 py-2 transition-all focus-within:border-primary/50 focus-within:bg-surface-hover">
+                    <FiSearch className={`mr-2 transition-colors ${loading ? 'text-primary animate-pulse' : 'text-text-muted group-focus-within:text-text-primary'}`} />
 
                     <input
                         type="text"
@@ -165,7 +165,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", show
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => query.length > 0 && setIsOpen(true)}
                         placeholder="Search characters..."
-                        className="flex-1 bg-transparent border-none outline-none text-white placeholder:text-white/30 text-sm font-medium w-full min-w-0"
+                        className="flex-1 bg-transparent border-none outline-none text-text-primary placeholder:text-text-muted text-sm font-medium w-full min-w-0"
                     />
 
                     <AnimatePresence>
@@ -176,7 +176,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", show
                                 exit={{ opacity: 0, scale: 0.8 }}
                                 type="button"
                                 onClick={() => { setQuery(""); onSearch(""); }}
-                                className="p-1 hover:bg-white/10 rounded-full text-white/20 hover:text-white transition-all ml-2"
+                                className="p-1 hover:bg-surface-hover rounded-full text-text-muted hover:text-text-primary transition-all ml-2"
                             >
                                 <FiX size={14} />
                             </motion.button>
@@ -192,17 +192,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", show
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-[99999]"
+                        className="absolute top-full left-0 right-0 mt-2 bg-surface border border-border-default rounded-2xl overflow-hidden shadow-2xl z-[99999]"
                     >
                         <div className="p-2">
                             {loading ? (
                                 <div className="p-6 flex items-center justify-center text-white/40 gap-3">
                                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest">Searching...</span>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-text-muted">Searching...</span>
                                 </div>
                             ) : suggestions.length > 0 ? (
                                 <>
-                                    <p className="px-3 py-2 text-[9px] uppercase tracking-[0.2em] font-black text-white/30 flex items-center gap-2">
+                                    <p className="px-3 py-2 text-[9px] uppercase tracking-[0.2em] font-black text-text-muted flex items-center gap-2">
                                         <FiTrendingUp size={10} /> Results
                                     </p>
                                     <div className="space-y-1">
@@ -217,7 +217,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = "", show
                                     </div>
                                 </>
                             ) : (
-                                <div className="p-6 text-center text-white/30">
+                                <div className="p-6 text-center text-text-muted">
                                     <p className="text-[10px] font-black uppercase tracking-widest">No results found</p>
                                 </div>
                             )}

@@ -25,7 +25,7 @@ const orbitron = Orbitron({ subsets: ["latin"], weight: ["900"] });
 const MobileHeader = ({ isOpen, toggle, session }: { isOpen: boolean; toggle: () => void; session: any }) => {
     // Only show on mobile, fixed at top
     return (
-        <div className={`md:hidden fixed top-0 left-0 right-0 z-40 bg-surface border-b border-border-default px-4 py-3 flex items-center justify-between transition-transform duration-300 ${isOpen ? '-translate-y-full' : 'translate-y-0'}`}>
+        <div className={`md:hidden fixed top-0 left-0 right-0 z-[100] bg-surface border-b border-border-default px-4 py-3 flex items-center justify-between transition-transform duration-300 ${isOpen ? '-translate-y-full' : 'translate-y-0'}`}>
             <div className="flex items-center gap-4">
                 <button
                     onClick={toggle}
@@ -143,7 +143,7 @@ const Sidebar = () => {
             )}
 
             <aside className={`
-                fixed top-0 left-0 h-screen w-64 bg-surface border-r border-border-default z-50 flex flex-col
+                fixed top-0 left-0 h-screen w-64 bg-surface border-r border-border-default z-[100] flex flex-col
                 transition-transform duration-300 ease-in-out
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0

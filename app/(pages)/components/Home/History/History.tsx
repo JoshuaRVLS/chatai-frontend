@@ -118,7 +118,7 @@ const History = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.4em]">Chronological Archives</span>
+            <span className="text-[10px] font-black text-primary/40 uppercase tracking-[0.4em]">Continue your last chat</span>
           </div>
           <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-white italic flex items-baseline gap-4">
             YOUR HISTORY

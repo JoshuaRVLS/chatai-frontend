@@ -244,7 +244,7 @@ const Characters = ({
                 {searchQuery ? "Search Results" : "CHARACTER FEED"}
               </h2>
               {!isPending && meta && (
-                <span className="text-xl font-black text-text-muted/50 tracking-wider mb-1">
+                <span className="hidden md:inline text-xl font-black text-text-muted/50 tracking-wider mb-1">
                   {meta.totalCount} {meta.totalCount === 1 ? "Character" : "Characters"}
                 </span>
               )}
