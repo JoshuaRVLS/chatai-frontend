@@ -61,7 +61,7 @@ const HomeClient = () => {
         if (popularRef.current) observer.observe(popularRef.current);
 
         const handleScroll = () => {
-            if (window.scrollY < 100) {
+            if (window.scrollY < 100 && activeTab !== 'featured') {
                 setActiveTab('featured');
             }
         };

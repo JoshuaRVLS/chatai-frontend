@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { FiUser, FiEdit2, FiTrash2, FiStar, FiMessageCircle, FiEye } from "react-icons/fi";
 import { motion } from "motion/react";
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useSettings } from "@/app/hooks/useSettings";
 import { AuthContext } from "../../providers/AuthProvider";
@@ -65,6 +65,8 @@ const CharacterCard = React.memo(function CharacterCard({
 
   const shouldBlur = isNsfw && settings?.blurNsfw && !tempUnblur;
   const isOwner = user?.id === authorId;
+
+  const cleanBio = useMemo(() => cleanHtml(characterBio), [characterBio]);
 
   const handleUnblur = withAuth(() => {
     setTempUnblur(true);
@@ -185,7 +187,7 @@ const CharacterCard = React.memo(function CharacterCard({
                   )}
                 </div>
               </div>
-              <div className="text-[9px] text-text-secondary line-clamp-1 font-medium mt-1" dangerouslySetInnerHTML={{ __html: cleanHtml(characterBio) }} />
+              <div className="text-[9px] text-text-secondary line-clamp-1 font-medium mt-1" dangerouslySetInnerHTML={{ __html: cleanBio }} />
             </div>
           </div>
         </div>
